@@ -458,7 +458,7 @@ export default function Messages(): ReactElement {
                                     <>
                                         {conversations.length ? (
                                             conversations.map(
-                                                (conversation, i) => {
+                                                (conversation) => {
                                                     return (
                                                         <MessagesListItem
                                                             key={conversation._id}
