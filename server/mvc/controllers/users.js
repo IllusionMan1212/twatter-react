@@ -271,7 +271,7 @@ const initialSetup = (req, res) => {
                 user.birthday = new Date(`${req.body.birthday_year}-${req.body.birthday_month}-${req.body.birthday_day}`);
             }
             if (req.files?.profileImage) {
-                fs.mkdirSync(`../cdn/profile_images/${req.body.userId}`, {
+                fs.mkdirSync(`cdn/profile_images/${req.body.userId}`, {
                     recursive: true
                 });
                 if (
@@ -322,7 +322,7 @@ const initialSetup = (req, res) => {
 
                 const fileExtension = req.files.profileImage.name.substring(req.files.profileImage.name.lastIndexOf("."));
                 fs.writeFileSync(
-                    `../cdn/profile_images/${req.body.userId}/profile${fileExtension}`,
+                    `cdn/profile_images/${req.body.userId}/profile${fileExtension}`,
                     imageData
                 );
                 user.profile_image = `${process.env.DOMAIN_URL}/cdn/profile_images/${req.body.userId}/profile${fileExtension}`;
