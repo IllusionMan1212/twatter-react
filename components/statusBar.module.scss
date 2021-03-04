@@ -1,0 +1,83 @@
+.statusBar {
+    height: 83px;
+}
+
+.title {
+    min-width: fit-content;
+    min-width: -moz-fit-content;
+    font-size: 3.5em;
+
+    @media (max-width: 800px) {
+        font-size: 1.3em;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 1.2em;
+    }
+}
+
+.user {
+    grid-gap: 10px;
+    margin-left: auto;
+    min-width: fit-content;
+    min-width: -moz-fit-content;
+    position: relative;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+
+    &:hover {
+        color: inherit;
+        cursor: pointer;
+    }
+}
+
+.search {
+    display: block;
+    flex-shrink: 1;
+    @media (max-width: 800px) {
+        display: none;
+    }
+}
+
+.links {
+    color: inherit;
+
+    &:hover {
+        color: inherit;
+    }
+}
+
+.username {
+    @media (max-width: 800px) {
+        display: none;
+    }
+}
+
+.messagesButtonMobile {
+    display: none;
+    position: relative;
+
+    @media (max-width: 800px) {
+        display: inline;
+    }
+}
+
+.unreadBubble {
+    background-color: #6067fe;
+    color: #ddd;
+    font-weight: bold;
+    font-size: 0.8em;
+    width: fit-content;
+    width: -moz-fit-content;
+    padding: 0 6px;
+    height: 20px;
+    border-radius: 55px;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

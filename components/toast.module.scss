@@ -1,0 +1,34 @@
+.toast {
+    width: fit-content;
+    width: -moz-fit-content;
+    padding: 20px 25px;
+    background-color: #111;
+    transition: all 1s;
+    animation: slide-from-bottom 0.6s both;
+
+    @media (max-width: 580px) {
+        width: 100%;
+        max-width: 100%;
+        animation: slide-from-bottom-wide 0.6s both;
+    }
+}
+
+@keyframes slide-from-bottom {
+    0% {
+        transform: translateY(30px);
+    }
+
+    100% {
+        transform: translateY(-30px);
+    }
+}
+
+@keyframes slide-from-bottom-wide {
+    0% {
+        transform: translateY(50px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}

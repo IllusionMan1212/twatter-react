@@ -1,0 +1,138 @@
+.description {
+    margin: 0 25%;
+
+    @media (max-width: 1200px) {
+        margin: 0;
+    }
+}
+
+.buttonsContainer {
+    display: flex;
+    justify-content: center;
+    grid-gap: 40px;
+    margin: 20px 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+    @media (max-width: 400px) {
+        grid-gap: 15px;
+    }
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    width: 10em;
+    height: 100%;
+}
+
+.filledButton {
+    background-color: #6067fe;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #4851fe;
+    }
+
+    &:focus {
+        background-color: #4851fe;
+    }
+}
+
+.outlineButton {
+    border: 3px solid #5d65fe;
+    color: #5d65fe;
+    cursor: pointer;
+    background-color: transparent;
+
+    &:hover {
+        border: 3px solid #4851fe;
+        color: #4851fe;
+    }
+
+    &:focus {
+        background-color: #4851fe;
+        color: #4851fe;
+    }
+}
+
+.lighterBlack {
+    background-color: #1f1f1f;
+}
+
+.darkerBlack {
+    background-color: #111111;
+}
+
+.privacy {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (max-width: 960px) {
+        justify-content: center;
+    }
+}
+
+.noMoney {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (max-width: 960px) {
+        flex-direction: column-reverse;
+        justify-content: center;
+    }
+}
+
+.feature {
+    flex-basis: 50%;
+
+    @media (max-width: 960px) {
+        flex-basis: unset;
+    }
+}
+
+.icon {
+    svg {
+        width: 20em;
+        height: 20em;
+    }
+
+    @media (max-width: 768px) {
+        svg {
+            width: 15em;
+            height: 15em;
+        }
+    }
+
+    @media (max-width: 560px) {
+        svg {
+            width: 10em;
+            height: 10em;
+        }
+    }
+}
+
+.footer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+
+    @media (max-width: 500px) {
+        justify-content: start;
+    }
+}
+
+.footerItem {
+    max-width: 305px;
+    width: 100%;
+    border-top: 4px solid #62929e;
+}

@@ -1,0 +1,33 @@
+.input {
+    background-color: transparent;
+    border-radius: 8px;
+    color: white;
+    display: block;
+    border: 3px solid #373737;
+    padding: 15px 20px;
+}
+
+.input::placeholder {
+    color: #575757;
+    background-color: transparent;
+}
+
+.input:focus {
+    background-color: transparent;
+    border: 3px solid #252525;
+}
+
+.button {
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.icon {
+    color: #373737;
+    position: absolute;
+    right: 15px;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    cursor: pointer;
+}

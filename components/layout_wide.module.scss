@@ -1,0 +1,7 @@
+.container {
+    margin: 0 5%;
+
+    @media (max-width: 360px) {
+        margin: 1em;
+    }
+}

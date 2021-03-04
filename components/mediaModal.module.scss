@@ -1,0 +1,146 @@
+.withMediaModal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    min-height: 100vh;
+    max-height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+
+    @media (max-width: 1024px) {
+        left: 0 !important;
+    }
+}
+
+.modalPost {
+    width: 28.5%;
+    background-color: #303030;
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 1024px) {
+        display: none;
+    }
+}
+
+.modalPostContent {
+    padding: 15px;
+    display: flex;
+    grid-gap: 10px;
+    flex-direction: column;
+    position: relative;
+}
+
+.modalPostUser {
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+}
+
+.username {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.date {
+    color: #999;
+    font-size: 0.8em;
+    white-space: nowrap;
+    align-self: flex-end;
+}
+
+.modalPostComments {
+    background-color: #1a1a1a;
+    padding: 15px;
+    flex-grow: 1;
+    overflow-y: scroll;
+}
+
+.modalImageContainer {
+    width: 71.5%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+
+    @media (max-width: 1024px) {
+        width: 100%;
+    }
+}
+
+.modalImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.icon {
+    width: 35px;
+    height: 35px;
+    background-color: #1f1f1f;
+    border-radius: 55px;
+    border: 2px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.imageNavigation {
+    position: absolute;
+    top: 50%;
+    bottom: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 2;
+}
+
+.imageNavigationPrev {
+    left: 1em;
+}
+
+.imageNavigationNext {
+    right: 1em;
+}
+
+.closeModal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.previewImagesContainer {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    grid-gap: 10px;
+    padding: 15px 0;
+}
+
+.previewImage {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 8px;
+    position: relative;
+}
+
+.charLimit {
+    background-color: #6067fe;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 7px;
+    max-width: 100%;
+    z-index: 1;
+}
+
+.charLimitReached {
+    background-color: #ec4646;
+}

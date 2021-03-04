@@ -1,0 +1,532 @@
+@font-face {
+    font-family: "Sora";
+    src: url("/Sora-VariableFont_wght.ttf") format("truetype");
+    font-weight: 200 400 700;
+    font-style: normal;
+}
+
+/* General */
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #151515;
+    font-family: "Sora", sans-serif;
+
+    @media (min-width: 801px) {
+        overflow: unset;
+    }
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-unset {
+    overflow: unset;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+        color: #62929e;
+        cursor: pointer;
+    }
+}
+
+p {
+    word-break: break-word;
+}
+
+* {
+    box-sizing: border-box;
+    scrollbar-color: #6067fe #151515;
+
+    &::selection {
+        background-color: khaki;
+    }
+
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #6067fe;
+    }
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    border: none;
+    font-family: inherit;
+    color: inherit;
+    background: transparent;
+}
+
+/* General */
+
+/* ---------------------------*/
+
+/* Text */
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+}
+
+.text-white {
+    color: white;
+}
+
+.text-small {
+    font-size: 0.8em;
+
+    @media (max-width: 800px) {
+        font-size: 0.7em;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 0.7em;
+    }
+}
+
+.text-normal {
+    font-size: 1em;
+
+    @media (max-width: 800px) {
+        font-size: 0.9em;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 0.8em;
+    }
+}
+
+.text-medium {
+    font-size: 1.5em;
+
+    @media (max-width: 800px) {
+        font-size: 1.3em;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 1.2em;
+    }
+}
+
+.text-large {
+    font-size: 2em;
+
+    @media (max-width: 800px) {
+        font-size: 1.7em;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 1.5em;
+    }
+}
+
+.text-extra-large {
+    font-size: 3.5em;
+
+    @media (max-width: 800px) {
+        font-size: 3em;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 2.5em;
+    }
+}
+
+.text-thin {
+    font-weight: lighter;
+}
+
+.text-regular {
+    font-weight: 400;
+}
+
+.text-bold {
+    font-weight: 700;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Text */
+
+/* ----------------------------*/
+
+/* Layout, Width, Height */
+
+.vh-100 {
+    height: 100vh;
+}
+
+.max-w-100 {
+    max-width: 100%;
+}
+
+@for $i from 0 through 10 {
+    .my-#{$i} {
+        margin-top: #{$i}em !important;
+        margin-bottom: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .mx-#{$i} {
+        margin-left: #{$i}em !important;
+        margin-right: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .mt-#{$i} {
+        margin-top: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .mb-#{$i} {
+        margin-bottom: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .mr-#{$i} {
+        margin-right: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .ml-#{$i} {
+        margin-left: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .m-#{$i} {
+        margin: #{$i}em !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .my-#{$i}Percent {
+        margin-top: #{$i}#{"%"} !important;
+        margin-bottom: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .mx-#{$i}Percent {
+        margin-left: #{$i}#{"%"} !important;
+        margin-right: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .mt-#{$i}Percent {
+        margin-top: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .mb-#{$i}Percent {
+        margin-bottom: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .mr-#{$i}Percent {
+        margin-right: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .ml-#{$i}Percent {
+        margin-left: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .m-#{$i}Percent {
+        margin: #{$i}#{"%"} !important;
+    }
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ml-auto {
+    margin-left: auto;
+}
+
+.mr-auto {
+    margin-right: auto;
+}
+
+.my-auto {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.m-auto {
+    margin: auto;
+}
+
+@for $i from 0 through 10 {
+    .py-#{$i} {
+        padding-top: #{$i}em !important;
+        padding-bottom: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .px-#{$i} {
+        padding-left: #{$i}em !important;
+        padding-right: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .pt-#{$i} {
+        padding-top: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .pb-#{$i} {
+        padding-bottom: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .pr-#{$i} {
+        padding-right: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .pl-#{$i} {
+        padding-left: #{$i}em !important;
+    }
+}
+
+@for $i from 0 through 10 {
+    .p-#{$i} {
+        padding: #{$i}em !important;
+    }
+}
+
+.px-auto {
+    padding-left: auto;
+    padding-right: auto;
+}
+
+.py-auto {
+    padding-top: auto;
+    padding-bottom: auto;
+}
+
+.p-auto {
+    padding: auto;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+.flex-shrink-1 {
+    flex-shrink: 1;
+}
+
+@for $i from 0 through 5 {
+    .gap-#{$i} {
+        grid-gap: #{$i}em;
+    }
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-template-column-auto {
+    grid-template-columns: auto auto auto;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.justify-content-space-between {
+    justify-content: space-between;
+}
+
+.justify-self-center {
+    justify-self: center;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.align-items-end {
+    align-items: end;
+    align-items: flex-end;
+}
+
+/* Layout, Width, Height */
+
+/* ---------------------------- */
+
+/* Custom Misc Stuff */
+
+/* TODO: dont forget to either use this class or remove it */
+
+.placeholder-glow {
+    position: absolute;
+    top: -200%;
+    bottom: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.001) 23%,
+        rgba(255, 255, 255, 0.14) 77%,
+        rgba(255, 255, 255, 0.5) 77%,
+        rgba(255, 255, 255, 0) 23%
+    );
+    width: 200%;
+    height: 600%;
+    transform: rotate(30deg);
+    animation: glow-slide 1.5s both infinite;
+}
+
+.outsideClickOverlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 4;
+    cursor: initial;
+}
+
+.feed {
+    margin-left: 116px;
+
+    @media (max-width: 800px) {
+        margin-left: 0;
+    }
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.round {
+    border-radius: 2000px;
+}
+
+.profileImage {
+    border-radius: 200px;
+    object-fit: cover;
+}
+
+.usernameGrey {
+    color: #666;
+}
+
+.toasts {
+    display: flex;
+    height: fit-content;
+    height: -moz-fit-content;
+    width: fit-content;
+    width: -moz-fit-content;
+    position: fixed;
+    bottom: 30px;
+    z-index: 1000;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    max-width: 90%;
+    grid-gap: 10px;
+    flex-direction: column;
+    align-items: center;
+
+    @media (max-width: 580px) {
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+.swiper-container {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.swiper-button-disabled {
+    opacity: 0;
+    cursor: auto;
+    pointer-events: none;
+}
+
+/* Custom Misc Stuff */
+
+/* ---------------------------- */
+
+/* Animations */
+
+@keyframes glow-slide {
+    0% {
+        left: -200%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+/* Animations */
+
+/* ---------------------------- */

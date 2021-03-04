@@ -1,0 +1,14 @@
+.optionsButton {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+
+    &:hover:not(:focus) {
+        background-color: #EEE2;
+        border-radius: 55px;
+    }
+}

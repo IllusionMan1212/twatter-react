@@ -1,0 +1,37 @@
+.menu {
+    background-color: #252525;
+    width: 200px;
+    position: absolute;
+    top: 80px;
+    right: 10px;
+    z-index: 5;
+    border-radius: 16px;
+
+    div {
+        padding: 15px;
+        border-radius: 16px;
+        animation: menuItem 0.5s forwards;
+
+        &:hover {
+            background-color: #333;
+        }
+    }
+
+    hr {
+        margin: 1% auto;
+        color: #6067fe;
+        background: #6067fe;
+        width: 90%;
+        border: none;
+        height: 1px;
+    }
+}
+
+@keyframes menuItem {
+    0% {
+        transform: rotateX(-90deg);
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
+}

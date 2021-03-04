@@ -1,0 +1,62 @@
+.likeButton {
+    font-size: 0.8em;
+    justify-content: flex-end;
+    justify-self: flex-end;
+    align-items: center;
+    align-self: flex-end;
+    grid-gap: 5px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.likeContainer {
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.likeContainerChild {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: rgba(212, 78, 89, 0.11);
+            border-radius: 55px;
+        }
+    }
+
+    &:active {
+        background-color: rgba(212, 78, 89, 0.11);
+        border-radius: 55px;
+    }
+}
+
+.like {
+    height: 60px;
+    width: 60px;
+    background-image: url("/like_animation.png");
+    background-position: left;
+    background-repeat: no-repeat;
+    background-size: 1800%;
+}
+
+.isAnimating {
+    animation: likeAnimation 0.8s steps(17) 1;
+}
+
+@keyframes likeAnimation {
+    from {
+        background-position: left;
+    }
+    to {
+        background-position: right;
+    }
+}

@@ -1,0 +1,171 @@
+.container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-gap: 20px;
+    position: relative;
+    height: calc(100vh - 84px - 2em);
+    max-height: calc(100vh - 84px - 2em);
+    margin: 2em 2em 0 2em;
+
+    @media (max-width: 1200px) {
+        display: block;
+        height: 100%;
+        margin: 1em 1em 5em 1em;
+        max-height: 100%;
+    }
+}
+
+.scrollableArea {
+    overflow: auto;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    grid-gap: 30px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    @media (max-width: 1200px) {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        height: calc(100% - 65px);
+        max-height: calc(100% - 65px);
+    }
+}
+
+.user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (max-width: 1200px) {
+        flex-direction: column;
+        justify-content: center;
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-gap: 20px;
+    }
+}
+
+.display_name {
+    font-size: 2.5em;
+
+    @media (max-width: 800px) {
+        font-size: 2em;
+    }
+}
+
+.username {
+    font-size: 1.5em;
+
+    @media (max-width: 800px) {
+        font-size: 1em;
+    }
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    grid-gap: 30px;
+}
+
+.userImage {
+    width: 200px;
+    height: 200px;
+    min-width: 200px;
+    min-height: 200px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    @media (max-width: 1200px) {
+        width: 150px;
+        height: 150px;
+        min-width: 150px;
+        min-height: 150px;    
+    }
+}
+
+.userImageNotFound {
+    background-color: #373737;
+}
+
+.userStats {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    flex-direction: column;
+    margin-top: auto;
+    grid-gap: 20px;
+
+    @media (max-width: 1200px) {
+        align-items: center;
+    }
+}
+
+.userButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 15px;
+}
+
+.statsContainer {
+    display: flex;
+    grid-gap: 20px;
+}
+
+.followButton {
+    background-color: #6067fe;
+    padding: 13px 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.userExtraInfo {
+    background-color: #1f1f1f;
+    padding: 20px;
+    position: absolute;
+    right: 1em;
+    top: 0;
+    width: 30%;
+    height: calc(100vh - 84px - 3em);
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    
+    @media (max-width: 1200px) {
+        position: initial;
+        width: initial;
+        height: initial;
+        margin: 1em 0;
+    }
+}
+
+.userExtraInfoNotFound {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bioBirthdayTitle {
+    font-size: 2em;
+
+    @media (max-width: 1200px) {
+        font-size: 2.5em;
+    }
+}
+
+.userPosts {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 2;
+
+    @media (max-width: 1200px) {
+        grid-column-end: 3;
+    }
+}
