@@ -396,7 +396,7 @@ const forgotPassword = (req, res) => {
             const mailOptions = {
                 from: `Twatter <${process.env.EMAIL}>`,
                 html: `<p>The password reset link you requested is ready. Please click on the link below to reset your password</p>\
-                <a href="http://${req.headers.host}/reset-password/${user.reset_password_token}">http://${req.headers.host}/reset-password/${user.reset_password_token}</a>\
+                <a href="https://${req.headers.host}/reset-password/${user.reset_password_token}">https://${req.headers.host}/reset-password/${user.reset_password_token}</a>\
                 <p><b>Note: This link expires in 1 hour</b></p>\
                 <p>If you did not request this link, ignore this email and your password will remain unchanged</p>`,
                 sender: "Twatter",
