@@ -98,9 +98,23 @@ const getConversations = (_req, res) => {
         {
             $lookup: {
                 as: "members",
-                foreignField: "_id",
                 from: User.collection.name,
-                localField: "members"
+                let: { members: "$members" },
+                pipeline: [
+                    {
+                        $match: { $expr: { $in: [
+                            "$_id",
+                            "$$members"
+                        ] } }
+                    },
+                    {
+                        $project: {
+                            display_name: 1,
+                            profile_image: 1,
+                            username: 1,
+                        }
+                    },
+                ]
             }
         },
         {

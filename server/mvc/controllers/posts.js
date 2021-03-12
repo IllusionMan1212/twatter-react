@@ -16,6 +16,13 @@ const getPosts = (req, res) => {
                     pipeline: [
                         {
                             $match: { _id: userId }
+                        },
+                        {
+                            $project: {
+                                display_name: 1,
+                                username: 1,
+                                profile_image: 1
+                            }
                         }
                     ]
                 }
@@ -40,9 +47,25 @@ const getPosts = (req, res) => {
                         {
                             $lookup: {
                                 as: "author",
-                                foreignField: "_id",
                                 from: User.collection.name,
-                                localField: "author"
+                                let: { author: { $toObjectId: "$author" } },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: { $eq: [
+                                                "$_id",
+                                                "$$author"
+                                            ] }
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            display_name: 1,
+                                            username: 1,
+                                            profile_image: 1
+                                        }
+                                    }
+                                ]
                             }
                         },
                         {
@@ -80,9 +103,23 @@ const getPosts = (req, res) => {
             {
                 $lookup: {
                     as: "author",
-                    foreignField: "_id",
                     from: User.collection.name,
-                    localField: "author"
+                    let: { author: { $toObjectId: "$author" } },
+                    pipeline: [
+                        {
+                            $match: { $expr: { $eq: [
+                                "$_id",
+                                "$$author"
+                            ] } }
+                        },
+                        {
+                            $project: {
+                                display_name: 1,
+                                username: 1,
+                                profile_image: 1
+                            }
+                        }
+                    ]
                 }
             },
             {
@@ -105,9 +142,25 @@ const getPosts = (req, res) => {
                         {
                             $lookup: {
                                 as: "author",
-                                foreignField: "_id",
                                 from: User.collection.name,
-                                localField: "author"
+                                let: { author: { $toObjectId: "$author" } },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: { $eq: [
+                                                "$_id",
+                                                "$$author"
+                                            ] }
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            display_name: 1,
+                                            username: 1,
+                                            profile_image: 1
+                                        }
+                                    }
+                                ]
                             }
                         },
                         {
@@ -292,9 +345,23 @@ const getPost = (req, res) => {
         {
             $lookup: {
                 as: "author",
-                foreignField: "_id",
                 from: User.collection.name,
-                localField: "author",
+                let: { author: { $toObjectId: "$author" } },
+                pipeline: [
+                    {
+                        $match: { $expr: { $eq: [
+                            "$_id",
+                            "$$author"
+                        ] } }
+                    },
+                    {
+                        $project: {
+                            display_name: 1,
+                            username: 1,
+                            profile_image: 1
+                        }
+                    }
+                ]
             }
         },
         {
@@ -312,9 +379,25 @@ const getPost = (req, res) => {
                     {
                         $lookup: {
                             as: "author",
-                            foreignField: "_id",
                             from: User.collection.name,
-                            localField: "author",
+                            let: { author: { $toObjectId: "$author" } },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: { $eq: [
+                                            "$_id",
+                                            "$$author"
+                                        ] }
+                                    }
+                                },
+                                {
+                                    $project: {
+                                        display_name: 1,
+                                        username: 1,
+                                        profile_image: 1
+                                    }
+                                }
+                            ]
                         }
                     },
                     {
@@ -341,16 +424,14 @@ const getPost = (req, res) => {
                 message: "Successfully retrieved post",
                 post: posts[0],
                 status: 200,
-                success: true,
+                success: true
             });
-
         } else {
             res.status(404).json({
                 message: "Post not found",
                 status: 404,
                 success: false
             });
-
         }
     });
 };
@@ -369,9 +450,23 @@ const getComments = (req, res) => {
         {
             $lookup: {
                 as: "author",
-                foreignField: "_id",
                 from: User.collection.name,
-                localField: "author",
+                let: { author: { $toObjectId: "$author" } },
+                pipeline: [
+                    {
+                        $match: { $expr: { $eq: [
+                            "$_id",
+                            "$$author"
+                        ] } }
+                    },
+                    {
+                        $project: {
+                            display_name: 1,
+                            username: 1,
+                            profile_image: 1
+                        }
+                    }
+                ]
             }
         },
         {
@@ -392,16 +487,14 @@ const getComments = (req, res) => {
                 comments,
                 message: "Fetched comments successfully",
                 status: 200,
-                success: true,
+                success: true
             });
-
         } else {
             res.status(404).json({
                 message: "Not found",
                 status: 404,
                 success: false
             });
-
         }
     });
 };

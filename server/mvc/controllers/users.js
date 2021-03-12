@@ -204,7 +204,7 @@ const getUserData = (req, res) => {
         return;
     }
     User.findOne({ username: req.query.username.toString() })
-        .select("-__v")
+        .select("-__v -password -hash -email -finished_setup")
         .exec((err, user) => {
             if (err) {
                 console.error(err);

@@ -231,7 +231,6 @@ export default function Messages(): ReactElement {
         const messageContent = messageInputRef.current.innerText
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
-        // TODO: images
         setNowSending(true);
         const payload = {
             conversationId: activeConversation._id,
