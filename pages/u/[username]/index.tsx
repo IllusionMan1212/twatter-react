@@ -201,7 +201,7 @@ export default function Profile(): ReactElement {
                                                 </div>
                                             </div>
                                             <div className={styles.userStats}>
-                                                {currentUser._id !=
+                                                {currentUser?._id !=
                                                     user._id && (
                                                     <div
                                                         className={
