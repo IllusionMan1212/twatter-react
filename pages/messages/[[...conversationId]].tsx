@@ -7,7 +7,14 @@ import Head from "next/head";
 import styles from "../../styles/messages.module.scss";
 import MessagesListItem from "../../components/messagesListItem";
 import { ArrowLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
-import { FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import {
+    FormEvent,
+    ReactElement,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import Message from "../../components/message";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axiosInstance from "../../src/axios";
@@ -17,7 +24,11 @@ import { connectSocket, socket } from "../../src/socket";
 import Link from "next/link";
 import MessageMediaModal from "../../components/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
-import { fileSizeLimit, messageCharLimit, supportedFileTypes } from "src/utils/variables";
+import {
+    fileSizeLimit,
+    messageCharLimit,
+    supportedFileTypes,
+} from "src/utils/variables";
 
 export default function Messages(): ReactElement {
     const toast = useToastContext();
@@ -35,7 +46,8 @@ export default function Messages(): ReactElement {
     const [previewImage, setPreviewImage] = useState(null);
     const [conversations, setConversations] = useState([]); // TODO: explicitly type this
     const [messagesListLoading, setMessagesListLoading] = useState(true);
-    const [activeConversation, setActiveConversation] = useState({ // TODO: turn this into a type
+    const [activeConversation, setActiveConversation] = useState({
+        // TODO: turn this into a type
         _id: "",
         receiverId: "",
         display_name: "",
@@ -51,7 +63,10 @@ export default function Messages(): ReactElement {
     const [atBottom, setAtBottom] = useState(false);
 
     const scrollToBottom = () => {
-        virtuosoRef.current.scrollToIndex({ index: messages.length - 1, behavior: "smooth"});
+        virtuosoRef.current.scrollToIndex({
+            index: messages.length - 1,
+            behavior: "smooth",
+        });
     };
 
     const handleClickBack = () => {
@@ -63,21 +78,20 @@ export default function Messages(): ReactElement {
     };
 
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
-        if ((e.target as HTMLElement).textContent.trim().length > messageCharLimit) {
+        if (e.currentTarget.textContent.trim().length > messageCharLimit) {
             setSendingAllowed(false);
         } else if (
-            (e.target as HTMLElement).textContent.trim().length != 0 ||
-        attachment
+            e.currentTarget.textContent.trim().length != 0 ||
+            attachment
         ) {
             setSendingAllowed(true);
         } else {
             setSendingAllowed(false);
         }
         setCharsLeft(
-            messageCharLimit - (e.target as HTMLElement).textContent.trim().length
+            messageCharLimit - e.currentTarget.textContent.trim().length
         );
     };
-
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
         if (e.key == "Enter") {
@@ -90,7 +104,13 @@ export default function Messages(): ReactElement {
                 return;
 
             if (window.innerWidth > 800) {
-                !e.shiftKey && handleClickSend(e as unknown as React.MouseEvent<HTMLElement, MouseEvent>);
+                !e.shiftKey &&
+                    handleClickSend(
+                        (e as unknown) as React.MouseEvent<
+                            HTMLElement,
+                            MouseEvent
+                        >
+                    );
                 e.shiftKey && document.execCommand("insertLineBreak");
             } else if (window.innerWidth <= 800) {
                 document.execCommand("insertLineBreak");
@@ -103,26 +123,22 @@ export default function Messages(): ReactElement {
         // handle pasting strings as plain text
         if (e.clipboardData.items?.[0].kind == "string") {
             const text = e.clipboardData.getData("text/plain");
-            (e.target as HTMLElement).textContent += text;
+            e.currentTarget.textContent += text;
 
-            if ((e.target as HTMLElement).textContent.length > messageCharLimit) {
+            if (
+                e.currentTarget.textContent.length > messageCharLimit
+            ) {
                 setSendingAllowed(false);
-            } else if ((e.target as HTMLElement).textContent.length) {
+            } else if (e.currentTarget.textContent.length) {
                 setSendingAllowed(true);
             }
             setCharsLeft(
-                messageCharLimit - (e.target as HTMLElement).textContent.length
+                messageCharLimit - e.currentTarget.textContent.length
             );
             // handle pasting images
         } else if (e.clipboardData.items?.[0].kind == "file") {
             const file = e.clipboardData.items[0].getAsFile();
-            if (
-                file.type != "image/jpeg" &&
-                file.type != "image/jpg" &&
-                file.type != "image/png" &&
-                file.type != "image/gif" &&
-                file.type != "image/webp"
-            ) {
+            if (supportedFileTypes.includes(file.type)) {
                 return;
             }
             if (file.size > fileSizeLimit) {
@@ -218,7 +234,9 @@ export default function Messages(): ReactElement {
             e.preventDefault();
             return;
         }
-        if (messageInputRef.current.textContent.trim().length > messageCharLimit) {
+        if (
+            messageInputRef.current.textContent.trim().length > messageCharLimit
+        ) {
             e.preventDefault();
             return;
         }
@@ -455,7 +473,9 @@ export default function Messages(): ReactElement {
                                                 (conversation) => {
                                                     return (
                                                         <MessagesListItem
-                                                            key={conversation._id}
+                                                            key={
+                                                                conversation._id
+                                                            }
                                                             receivers={
                                                                 conversation.receivers
                                                             }
@@ -546,10 +566,12 @@ export default function Messages(): ReactElement {
                                             ref={virtuosoRef}
                                             className={styles.messagesArea}
                                             totalCount={messages.length}
-                                            initialTopMostItemIndex={messages.length - 1}
+                                            initialTopMostItemIndex={
+                                                messages.length - 1
+                                            }
                                             alignToBottom
                                             followOutput
-                                            atBottomStateChange={bottom => {
+                                            atBottomStateChange={(bottom) => {
                                                 if (bottom) {
                                                     setAtBottom(bottom);
                                                 } else {
@@ -561,24 +583,42 @@ export default function Messages(): ReactElement {
                                                 return (
                                                     <>
                                                         {messagesLoading && (
-                                                            <Loading height="50" width="50"></Loading>
+                                                            <Loading
+                                                                height="50"
+                                                                width="50"
+                                                            ></Loading>
                                                         )}
                                                     </>
                                                 );
-                                            }}}
-                                            itemContent={(index) =>
+                                            },
+                                            }}
+                                            itemContent={(index) => (
                                                 <Message
                                                     key={index}
-                                                    sender={user._id == messages[index].ownerId}
-                                                    sentTime={messages[index].sentTime}
-                                                    attachment={messages[index].attachment}
-                                                    conversationId={activeConversation?._id}
-                                                    setImageModal={setImageModal}
-                                                    setModalAttachment={setModalAttachment}
+                                                    sender={
+                                                        user._id ==
+                                                        messages[index].ownerId
+                                                    }
+                                                    sentTime={
+                                                        messages[index].sentTime
+                                                    }
+                                                    attachment={
+                                                        messages[index]
+                                                            .attachment
+                                                    }
+                                                    conversationId={
+                                                        activeConversation?._id
+                                                    }
+                                                    setImageModal={
+                                                        setImageModal
+                                                    }
+                                                    setModalAttachment={
+                                                        setModalAttachment
+                                                    }
                                                 >
                                                     {messages[index].content}
                                                 </Message>
-                                            }
+                                            )}
                                         ></Virtuoso>
                                         {newMessagesAlert && (
                                             <div
@@ -597,14 +637,17 @@ export default function Messages(): ReactElement {
                                         className={styles.messageInputContainer}
                                     >
                                         <div
-                                            className={`${styles.messageCharLimit} ${
+                                            className={`${
+                                                styles.messageCharLimit
+                                            } ${
                                                 charsLeft < 0
                                                     ? styles.charLimitReached
                                                     : ""
                                             }`}
                                             style={{
                                                 width: `${
-                                                    ((messageCharLimit - charsLeft) *
+                                                    ((messageCharLimit -
+                                                        charsLeft) *
                                                         100) /
                                                     messageCharLimit
                                                 }%`,

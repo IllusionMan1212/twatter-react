@@ -14,7 +14,7 @@ import {
     X,
 } from "phosphor-react";
 import Post from "../components/post";
-import axios from "../src/axios";
+import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal";
 import Router from "next/router";
@@ -29,6 +29,7 @@ import {
     handleTextInput,
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
+import axios from "axios";
 
 export default function Home(): ReactElement {
     const user = useUser("/login", null);
@@ -180,14 +181,23 @@ export default function Home(): ReactElement {
     }, [socket, handlePost, handleDeletePost, handleComment]);
 
     useEffect(() => {
-        axios
-            .get("posts/getPosts")
+        const cancelToken = axios.CancelToken;
+        const tokenSource = cancelToken.source();
+        axiosInstance
+            .get("posts/getPosts", { cancelToken: tokenSource.token })
             .then((res) => {
                 setPosts(res.data.posts);
             })
             .catch((err) => {
-                console.error(err);
+                if (axios.isCancel(err)) {
+                    console.log("Request canceled");
+                } else {
+                    console.error(err);
+                }
             });
+        return () => {
+            tokenSource.cancel();
+        };
     }, []);
 
     useEffect(() => {

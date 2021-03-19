@@ -9,6 +9,7 @@ import { StatusBarProps } from "../src/types/props";
 import { socket } from "../src/socket";
 import { useToastContext } from "../src/contexts/toastContext";
 import axiosInstance from "../src/axios";
+import axios from "axios";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
     const [userMenu, setUserMenu] = useState(false);
@@ -17,31 +18,46 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
 
     const [unreadMessages, setUnreadMessages] = useState(0);
 
-    const handleMessageFromServer = useCallback((msg) => {
-        if (props.user._id != msg.sender) {
-            setUnreadMessages(unreadMessages + 1);
-        }
-    }, [unreadMessages]);
+    const handleMessageFromServer = useCallback(
+        (msg) => {
+            if (props.user._id != msg.sender) {
+                setUnreadMessages(unreadMessages + 1);
+            }
+        },
+        [unreadMessages]
+    );
 
-    const handleMarkedMessagesAsRead = useCallback((payload) => {
-        setUnreadMessages(unreadMessages - payload.messagesRead);
-    }, [unreadMessages]);
+    const handleMarkedMessagesAsRead = useCallback(
+        (payload) => {
+            setUnreadMessages(unreadMessages - payload.messagesRead);
+        },
+        [unreadMessages]
+    );
 
     useEffect(() => {
+        const cancelToken = axios.CancelToken;
+        const tokenSource = cancelToken.source();
         // only make a request if we're on mobile
         if (window.innerWidth <= 800) {
             axiosInstance
-                .get("/messaging/getUnreadMessages")
+                .get("/messaging/getUnreadMessages", {
+                    cancelToken: tokenSource.token,
+                })
                 .then((res) => {
                     setUnreadMessages(res.data.unreadMessages);
                 })
                 .catch((err) => {
-                    err?.response?.data?.status != 404 && toast(
-                        err?.response?.data?.message ?? "An error has occurred while fetching unread messages",
-                        4000
-                    );
+                    err?.response?.data?.status != 404 &&
+                        toast(
+                            err?.response?.data?.message ??
+                                "An error has occurred while fetching unread messages",
+                            4000
+                        );
                 });
         }
+        return () => {
+            tokenSource.cancel();
+        };
     }, []);
 
     useEffect(() => {
@@ -78,7 +94,9 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                         }}
                     ></ChatsTeardrop>
                     {unreadMessages != 0 && (
-                        <div className={styles.unreadBubble}>{unreadMessages > 99 ? "99+" : unreadMessages}</div>
+                        <div className={styles.unreadBubble}>
+                            {unreadMessages > 99 ? "99+" : unreadMessages}
+                        </div>
                     )}
                 </div>
                 <div
@@ -89,7 +107,11 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                 >
                     <img
                         className="profileImage"
-                        src={`${props.user.profile_image == "default_profile.svg" ? "/" : ""}${props.user.profile_image}`}
+                        src={`${
+                            props.user.profile_image == "default_profile.svg"
+                                ? "/"
+                                : ""
+                        }${props.user.profile_image}`}
                         width="50"
                         height="50"
                         alt="User profile picture"

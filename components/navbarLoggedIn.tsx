@@ -13,6 +13,7 @@ import { ReactElement, useCallback, useEffect, useState } from "react";
 import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { socket } from "../src/socket";
+import axios from "axios";
 
 export default function NavbarLoggedIn(
     props: NavbarLoggedInProps
@@ -38,22 +39,34 @@ export default function NavbarLoggedIn(
     );
 
     useEffect(() => {
+        const cancelToken = axios.CancelToken;
+        const tokenSource = cancelToken.source();
         // only make a request if we're on desktop
         if (window.innerWidth > 800) {
             axiosInstance
-                .get("/messaging/getUnreadMessages")
+                .get("/messaging/getUnreadMessages", {
+                    cancelToken: tokenSource.token,
+                })
                 .then((res) => {
                     setUnreadMessages(res.data.unreadMessages);
                 })
                 .catch((err) => {
-                    err?.response?.data?.status != 404 &&
-                        toast(
-                            err?.response?.data?.message ??
-                                "An error has occurred while fetching unread messages",
-                            4000
-                        );
+                    if (axios.isCancel(err)) {
+                        console.log("request canceled");
+                    } else {
+                        err?.response?.data?.status != 404 &&
+                            toast(
+                                err?.response?.data?.message ??
+                                    "An error has occurred while fetching unread messages",
+                                4000
+                            );
+                    }
                 });
         }
+
+        return () => {
+            tokenSource.cancel();
+        };
     }, []);
 
     useEffect(() => {
