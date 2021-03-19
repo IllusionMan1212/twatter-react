@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import axios from "axios";
-import axiosInstance from "../../../src/utils/axios";
+import axiosInstance from "../../../src/axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useState } from "react";
@@ -15,7 +15,7 @@ import { formatBigNumbers, formatBirthday, formatJoinDate } from "../../../src/u
 import MediaModal from "../../../components/mediaModal";
 import { ChatTeardropText } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
-import { socket } from "../../../src/contexts/socket";
+import { socket } from "../../../src/socket";
 import { User } from "../../../src/types/general";
 
 export default function Profile(): ReactElement {

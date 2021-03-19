@@ -2,7 +2,7 @@
 import styles from "./likeButton.module.scss";
 import { ReactElement, useRef, useState } from "react";
 import { useToastContext } from "../src/contexts/toastContext";
-import axios from "../src/utils/axios";
+import axios from "../src/axios";
 import { LikeButtonProps } from "../src/types/props";
 import { formatBigNumbers } from "../src/utils/functions";
 

@@ -10,17 +10,16 @@ import { ArrowLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import { FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Message from "../../components/message";
 import { useToastContext } from "../../src/contexts/toastContext";
-import axiosInstance from "../../src/utils/axios";
+import axiosInstance from "../../src/axios";
 import { useRouter } from "next/router";
-import { Conversation } from "../../src/types/general";
-import { connectSocket, socket } from "../../src/contexts/socket";
+import { Attachment, Conversation } from "../../src/types/general";
+import { connectSocket, socket } from "../../src/socket";
 import Link from "next/link";
 import MessageMediaModal from "../../components/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
+import { fileSizeLimit, messageCharLimit, supportedFileTypes } from "src/utils/variables";
 
 export default function Messages(): ReactElement {
-    const charLimit = 1000;
-
     const toast = useToastContext();
 
     const user = useUser("/login", null);
@@ -30,24 +29,20 @@ export default function Messages(): ReactElement {
 
     const router = useRouter();
 
-    const [charsLeft, setCharsLeft] = useState(charLimit);
+    const [charsLeft, setCharsLeft] = useState(messageCharLimit);
     const [sendingAllowed, setSendingAllowed] = useState(false);
-    const [attachment, setAttachment] = useState({
-        mimetype: "",
-        data: null,
-        name: "",
-    });
+    const [attachment, setAttachment] = useState<Attachment>(null);
     const [previewImage, setPreviewImage] = useState(null);
-    const [conversations, setConversations] = useState([]);
+    const [conversations, setConversations] = useState([]); // TODO: explicitly type this
     const [messagesListLoading, setMessagesListLoading] = useState(true);
-    const [activeConversation, setActiveConversation] = useState({
+    const [activeConversation, setActiveConversation] = useState({ // TODO: turn this into a type
         _id: "",
         receiverId: "",
         display_name: "",
         username: "",
     });
     const [isConversationActive, setIsConversationActive] = useState(false);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([]); // TODO: explicitly type this
     const [messagesLoading, setMessagesLoading] = useState(false);
     const [nowSending, setNowSending] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
@@ -68,15 +63,21 @@ export default function Messages(): ReactElement {
     };
 
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
-        if ((e.target as HTMLElement).textContent.trim().length > charLimit) {
+        if ((e.target as HTMLElement).textContent.trim().length > messageCharLimit) {
             setSendingAllowed(false);
-        } else if ((e.target as HTMLElement).textContent.trim().length != 0 || attachment) {
+        } else if (
+            (e.target as HTMLElement).textContent.trim().length != 0 ||
+        attachment
+        ) {
             setSendingAllowed(true);
         } else {
             setSendingAllowed(false);
         }
-        setCharsLeft(charLimit - (e.target as HTMLElement).textContent.trim().length);
+        setCharsLeft(
+            messageCharLimit - (e.target as HTMLElement).textContent.trim().length
+        );
     };
+
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
         if (e.key == "Enter") {
@@ -100,20 +101,20 @@ export default function Messages(): ReactElement {
     const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
         e.preventDefault();
         // handle pasting strings as plain text
-        if (e.clipboardData.items[0].kind == "string") {
+        if (e.clipboardData.items?.[0].kind == "string") {
             const text = e.clipboardData.getData("text/plain");
             (e.target as HTMLElement).textContent += text;
 
-            if ((e.target as HTMLElement).textContent.length > charLimit) {
+            if ((e.target as HTMLElement).textContent.length > messageCharLimit) {
                 setSendingAllowed(false);
             } else if ((e.target as HTMLElement).textContent.length) {
                 setSendingAllowed(true);
             }
             setCharsLeft(
-                charLimit - (e.target as HTMLElement).textContent.length
+                messageCharLimit - (e.target as HTMLElement).textContent.length
             );
             // handle pasting images
-        } else if (e.clipboardData.items[0].kind == "file") {
+        } else if (e.clipboardData.items?.[0].kind == "file") {
             const file = e.clipboardData.items[0].getAsFile();
             if (
                 file.type != "image/jpeg" &&
@@ -124,7 +125,7 @@ export default function Messages(): ReactElement {
             ) {
                 return;
             }
-            if (file.size > 8 * 1024 * 1024) {
+            if (file.size > fileSizeLimit) {
                 toast("File size is limited to 8MB", 4000);
                 return;
             }
@@ -217,7 +218,7 @@ export default function Messages(): ReactElement {
             e.preventDefault();
             return;
         }
-        if (messageInputRef.current.textContent.trim().length > charLimit) {
+        if (messageInputRef.current.textContent.trim().length > messageCharLimit) {
             e.preventDefault();
             return;
         }
@@ -243,7 +244,7 @@ export default function Messages(): ReactElement {
         setAttachment(null);
         setPreviewImage(null);
         setSendingAllowed(false);
-        setCharsLeft(charLimit);
+        setCharsLeft(messageCharLimit);
         if (socket) {
             socket?.emit("messageToServer", payload);
         } else {
@@ -256,17 +257,11 @@ export default function Messages(): ReactElement {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file: File = e.target?.files[0];
 
-        if (
-            file.type != "image/jpeg" &&
-            file.type != "image/jpg" &&
-            file.type != "image/png" &&
-            file.type != "image/gif" &&
-            file.type != "image/webp"
-        ) {
+        if (supportedFileTypes.includes(file.type)) {
             toast("This file format is not supported", 4000);
             return;
         }
-        if (file.size > 8 * 1024 * 1024) {
+        if (file.size > fileSizeLimit) {
             toast("File size is limited to 8MB", 4000);
             return;
         }
@@ -310,7 +305,7 @@ export default function Messages(): ReactElement {
         if (messageInputRef && messageInputRef.current) {
             messageInputRef.current.innerHTML = "";
             setSendingAllowed(false);
-            setCharsLeft(charLimit);
+            setCharsLeft(messageCharLimit);
             setAttachment(null);
             setPreviewImage(null);
         }
@@ -602,16 +597,16 @@ export default function Messages(): ReactElement {
                                         className={styles.messageInputContainer}
                                     >
                                         <div
-                                            className={`${styles.charLimit} ${
+                                            className={`${styles.messageCharLimit} ${
                                                 charsLeft < 0
                                                     ? styles.charLimitReached
                                                     : ""
                                             }`}
                                             style={{
                                                 width: `${
-                                                    ((charLimit - charsLeft) *
+                                                    ((messageCharLimit - charsLeft) *
                                                         100) /
-                                                    charLimit
+                                                    messageCharLimit
                                                 }%`,
                                             }}
                                         ></div>

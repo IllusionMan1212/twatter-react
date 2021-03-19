@@ -6,7 +6,6 @@ import "../styles/globals.scss";
 
 import "swiper/swiper.scss";
 import "swiper/components/navigation/navigation.scss";
-import "swiper/components/zoom/zoom.scss";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     return (
@@ -26,8 +25,8 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                 />
                 <meta name="copyright" content="Twatter" />
                 <meta property="og:locale" content="en_US" />
-                {/* <meta property="og:image" content="https://illusionman1212.me/assets/img/icons/favicons/android-chrome-192x192.png" /> */}
-                {/* <meta property="og:url" content="https://illusionman1212.me" /> */}
+                <meta property="og:image" content="https://twatter.illusionman1212.me/assets/img/icons/favicons/android-chrome-192x192.png" />
+                <meta property="og:url" content="https://twatter.illusionman1212.me" />
                 <meta property="og:type" content="website" />
 
                 <link

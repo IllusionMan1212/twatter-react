@@ -47,7 +47,7 @@
 }
 
 .date {
-    color: #999;
+    color: variables.$date-color;
     font-size: 0.8em;
     white-space: nowrap;
     align-self: flex-end;

@@ -1,3 +1,5 @@
+@use "../styles/variables";
+
 .expandedPostContainer {
     display: flex;
     flex-direction: column;
@@ -87,7 +89,7 @@
 }
 
 .commentDate {
-    color: #999;
+    color: variables.$date-color;
     align-items: center;
 }
 

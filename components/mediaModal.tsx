@@ -8,7 +8,7 @@ import {
 } from "phosphor-react";
 import styles from "./mediaModal.module.scss";
 import messagesStyles from "../styles/messages.module.scss";
-import { FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { formatDate } from "../src/utils/functions";
 import LikeButton from "./likeButton";
 import { MediaModalProps } from "../src/types/props";
@@ -19,14 +19,21 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "./loading";
 import axios from "axios";
 import postStyles from "./post.module.scss";
-import { connectSocket, socket } from "../src/contexts/socket";
+import { connectSocket, socket } from "../src/socket";
+import { Attachment } from "src/types/general";
+import {
+    handleChange,
+    handleInput,
+    handleKeyDown,
+    handlePaste,
+    handlePreviewImageClose,
+    handleTextInput,
+} from "src/utils/eventHandlers";
+import { postCharLimit } from "src/utils/variables";
 
 SwiperCore.use([Navigation]);
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
-    const charLimit = 128;
-    const maxAttachments = 4;
-
     const toast = useToastContext();
 
     const commentBoxRef = useRef<HTMLSpanElement>(null);
@@ -34,84 +41,19 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const nextRef = useRef<HTMLDivElement>(null);
 
     const [commentingAllowed, setCommentingAllowed] = useState(false);
-    const [charsLeft, setCharsLeft] = useState(charLimit);
-    const [attachments, setAttachments] = useState([]);
-    const [previewImages, setPreviewImages] = useState([]);
+    const [charsLeft, setCharsLeft] = useState(postCharLimit);
+    const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+    const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [comments, setComments] = useState([]);
     const [nowCommenting, setNowCommenting] = useState(false);
-
-    const handleInput = (e: FormEvent<HTMLSpanElement>) => {
-        if ((e.target as HTMLElement).textContent.trim().length > charLimit) {
-            setCommentingAllowed(false);
-        } else if (
-            (e.target as HTMLElement).textContent.trim().length != 0 ||
-            attachments.length
-        ) {
-            setCommentingAllowed(true);
-        } else {
-            setCommentingAllowed(false);
-        }
-        setCharsLeft(charLimit - (e.target as HTMLElement).textContent.trim().length);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
-        if (e.key == "Enter") {
-            e.preventDefault();
-
-            if (!commentBoxRef.current.textContent.length) return;
-
-            document.execCommand("insertLineBreak");
-
-            e.ctrlKey && handleClick(e as unknown as React.MouseEvent<HTMLElement, MouseEvent>);
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent) => {
-        e.preventDefault();
-        // handle pasting strings as plain text
-        if (e.clipboardData.items.length && e.clipboardData.items[0].kind == "string") {
-            const text = e.clipboardData.getData("text/plain");
-            (e.target as HTMLElement).textContent += text;
-    
-            if ((e.target as HTMLElement).textContent.length > charLimit) {
-                setCommentingAllowed(false);
-            } else if ((e.target as HTMLElement).textContent.length) {
-                setCommentingAllowed(true);
-            }
-            setCharsLeft(charLimit - (e.target as HTMLElement).textContent.length);
-        // handle pasting images
-        } else if (e.clipboardData.items.length && e.clipboardData.items[0].kind == "file") {
-            const file = e.clipboardData.items[0].getAsFile();
-            console.log(file);
-            if (
-                file.type != "image/jpeg" &&
-                file.type != "image/jpg" &&
-                file.type != "image/png" &&
-                file.type != "image/gif" &&
-                file.type != "image/webp"
-            ) {
-                return;
-            }
-            if (file.size > 8 * 1024 * 1024) {
-                toast("File size is limited to 8MB", 4000);
-                return;
-            }
-
-            setPreviewImages(previewImages.concat(URL.createObjectURL(file)));
-            setAttachments(attachments.concat({data: file, name: file.name, mimetype: file.type}));
-            if (charsLeft >= 0) {
-                setCommentingAllowed(true);
-            }
-        }
-    };
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!commentingAllowed) {
             e.preventDefault();
             return;
         }
-        if (commentBoxRef.current.textContent.trim().length > charLimit) {
+        if (commentBoxRef.current.textContent.trim().length > postCharLimit) {
             e.preventDefault();
             return;
         }
@@ -124,8 +66,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         }
         // TODO: progress bar thingy
         setNowCommenting(true);
-        console.log(nowCommenting);
-        const content = commentBoxRef.current.innerText.replace(/(\n){2,}/g, "\n\n").trim();
+        const content = commentBoxRef.current.innerText
+            .replace(/(\n){2,}/g, "\n\n")
+            .trim();
         const payload = {
             content: content,
             author: props.modalData.currentUser,
@@ -136,7 +79,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setAttachments([]);
         setPreviewImages([]);
         setCommentingAllowed(false);
-        setCharsLeft(charLimit);
+        setCharsLeft(postCharLimit);
         if (socket) {
             socket?.emit("commentToServer", payload);
         } else {
@@ -147,77 +90,16 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setNowCommenting(false);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files: File[] = Array.from(e.target?.files as ArrayLike<File>);
-        const validFiles = [...attachments];
-        const validPreviewImages = [...previewImages];
-
-        if (files.length > maxAttachments) {
-            toast("You can only upload up to 4 images", 4000);
-            return;
-        }
-        for (let i = 0; i < files.length; i++) {
-            if (
-                files[i].type != "image/jpeg" &&
-                files[i].type != "image/jpg" &&
-                files[i].type != "image/png" &&
-                files[i].type != "image/gif" &&
-                files[i].type != "image/webp"
-            ) {
-                toast("This file format is not supported", 4000);
-                continue;
-            }
-            if (files[i].size > 8 * 1024 * 1024) {
-                toast("File size is limited to 8MB", 4000);
-                continue;
-            }
-            if (attachments.length < maxAttachments && previewImages.length < maxAttachments) {
-                validFiles.push({data: files[i], name: files[i].name, mimetype: files[i].type});
-                validPreviewImages.push(URL.createObjectURL(files[i]));
-            }
-        }
-        if (validPreviewImages.length) {
-            setCommentingAllowed(true);
-            setPreviewImages(validPreviewImages);
-            setAttachments(validFiles);
-        }
-        // TODO: videos
-    };
-
-    const handlePreviewImageClose = (_e: React.MouseEvent<HTMLElement, MouseEvent>, i: number) => {
-        const tempPreviewImages = [...previewImages];
-        tempPreviewImages.splice(i, 1);
-        setPreviewImages(tempPreviewImages);
-        const tempAttachments = [...attachments];
-        tempAttachments.splice(i, 1);
-        setAttachments(tempAttachments);
-        // if there're no attachments AND no text, disable the posting button
-        if (
-            !tempAttachments.length &&
-            !commentBoxRef.current.textContent.trim().length
-        ) {
-            setCommentingAllowed(false);
-        }
-    };
-
-    const handleTextInput = (e: InputEvent) => {
-        // workaround android not giving out proper key codes
-        if (
-            e.data.charCodeAt(0) == 10 ||
-            e.data.charCodeAt(e.data.length - 1) == 10
-        ) {
-            e.preventDefault();
-            document.execCommand("insertLineBreak");
-        }
-    };
-
     const handleWindowKeyDown = (e: KeyboardEvent) => {
         e.key == "Escape" && window.history.back();
     };
 
-    const handleComment = useCallback((payload) => {
-        setComments([payload].concat(comments));
-    }, [comments]);
+    const handleComment = useCallback(
+        (payload) => {
+            setComments([payload].concat(comments));
+        },
+        [comments]
+    );
 
     useEffect(() => {
         socket?.on("commentToClient", handleComment);
@@ -318,16 +200,23 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <>
                             {comments.map((comment, i) => {
                                 return (
-                                    <div className={postStyles.previewComment} key={i}>
+                                    <div
+                                        className={postStyles.previewComment}
+                                        key={i}
+                                    >
                                         {comment.author ? (
                                             <img
                                                 className="profileImage"
                                                 src={`${
-                                                    comment.author?.profile_image ==
-                                                      "default_profile.svg"
+                                                    comment.author
+                                                        ?.profile_image ==
+                                                    "default_profile.svg"
                                                         ? "/"
                                                         : ""
-                                                }${comment.author?.profile_image}`}
+                                                }${
+                                                    comment.author
+                                                        ?.profile_image
+                                                }`}
                                                 width="30"
                                                 height="30"
                                             />
@@ -342,13 +231,15 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                         <div className="text-bold text-small flex flex-column justify-content-center">
                                             <p className="ml-1">
                                                 {comment.author?.display_name ??
-                                                      "Deleted Account"}
+                                                    "Deleted Account"}
                                             </p>
                                         </div>
                                         <div
                                             className={`text-small ${postStyles.postText}`}
                                         >
-                                            <p className="ml-1">{comment.content}</p>
+                                            <p className="ml-1">
+                                                {comment.content}
+                                            </p>
                                         </div>
                                     </div>
                                 );
@@ -365,7 +256,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         }`}
                         style={{
                             width: `${
-                                ((charLimit - charsLeft) * 100) / charLimit
+                                ((postCharLimit - charsLeft) * 100) / postCharLimit
                             }%`,
                         }}
                     ></div>
@@ -385,7 +276,16 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                                 messagesStyles.previewImageClose
                                             }
                                             onClick={(e) =>
-                                                handlePreviewImageClose(e, i)
+                                                handlePreviewImageClose(
+                                                    e,
+                                                    i,
+                                                    previewImages,
+                                                    setPreviewImages,
+                                                    attachments,
+                                                    setAttachments,
+                                                    commentBoxRef,
+                                                    setCommentingAllowed
+                                                )
                                             }
                                         >
                                             <X weight="bold"></X>
@@ -401,9 +301,32 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             className={messagesStyles.messageInput}
                             contentEditable="true"
                             data-placeholder="Comment on this..."
-                            onInput={handleInput}
-                            onPaste={handlePaste}
-                            onKeyDown={handleKeyDown}
+                            onInput={(e) =>
+                                handleInput(
+                                    e,
+                                    postCharLimit,
+                                    attachments,
+                                    setCommentingAllowed,
+                                    setCharsLeft
+                                )
+                            }
+                            onPaste={(e) =>
+                                handlePaste(
+                                    e,
+                                    postCharLimit,
+                                    charsLeft,
+                                    setCharsLeft,
+                                    setCommentingAllowed,
+                                    previewImages,
+                                    setPreviewImages,
+                                    attachments,
+                                    setAttachments,
+                                    toast
+                                )
+                            }
+                            onKeyDown={(e) =>
+                                handleKeyDown(e, commentBoxRef, handleClick)
+                            }
                         ></span>
                         <div
                             className={`flex ${messagesStyles.messageInputOptions}`}
@@ -414,7 +337,17 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                 <ImageSquare size="30"></ImageSquare>
                                 <input
                                     className={messagesStyles.fileInput}
-                                    onChange={handleChange}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            e,
+                                            attachments,
+                                            setAttachments,
+                                            previewImages,
+                                            setPreviewImages,
+                                            setCommentingAllowed,
+                                            toast
+                                        )
+                                    }
                                     onClick={(e) => {
                                         e.currentTarget.value = null;
                                     }}

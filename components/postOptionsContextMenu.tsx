@@ -1,11 +1,11 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./postOptionsContextMenu.module.scss";
 import { Flag, Share, Eraser } from "phosphor-react";
-import axios from "../src/utils/axios";
+import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { PostOptionsMenuProps } from "../src/types/props";
 import { ReactElement } from "react";
-import { socket } from "../src/contexts/socket";
+import { socket } from "../src/socket";
 
 export default function PostOptionsMenu(
     props: PostOptionsMenuProps

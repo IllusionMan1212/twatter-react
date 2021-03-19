@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Router from "next/router";
 import useSWR from "swr";
-import { socket, connectSocket } from "../contexts/socket";
+import { socket, connectSocket } from "../socket";
 
 const fetcher = (url: string) =>
     fetch(url, { credentials: "include" })

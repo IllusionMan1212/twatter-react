@@ -11,7 +11,7 @@ import axios from "axios";
 import Router from "next/router";
 import Loading from "../components/loading";
 import { useToastContext } from "../src/contexts/toastContext";
-import { connectSocket } from "../src/contexts/socket";
+import { connectSocket } from "../src/socket";
 
 export default function Login(): ReactElement {
     const toast = useToastContext();

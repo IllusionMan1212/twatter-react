@@ -8,7 +8,7 @@ import { ReactElement, useEffect, useState } from "react";
 import { useUser } from "../../src/hooks/useUserHook";
 import Loading from "../../components/loading";
 import Router from "next/router";
-import axios from "../../src/utils/axios";
+import axios from "../../src/axios";
 import { useToastContext } from "../../src/contexts/toastContext";
 
 export default function UserSetup(): ReactElement {

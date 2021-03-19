@@ -5,7 +5,7 @@ import { useUser } from "../src/hooks/useUserHook";
 import Loading from "../components/loading";
 import NavbarLoggedIn from "../components/navbarLoggedIn";
 import styles from "../styles/home.module.scss";
-import { FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import {
     ArrowElbowRightDown,
     ImageSquare,
@@ -14,16 +14,23 @@ import {
     X,
 } from "phosphor-react";
 import Post from "../components/post";
-import axios from "../src/utils/axios";
+import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal";
 import Router from "next/router";
-import { connectSocket, socket } from "../src/contexts/socket";
+import { connectSocket, socket } from "../src/socket";
+import { Attachment, Post as PostType } from "src/types/general";
+import {
+    handleChange,
+    handleInput,
+    handleKeyDown,
+    handlePaste,
+    handlePreviewImageClose,
+    handleTextInput,
+} from "src/utils/eventHandlers";
+import { postCharLimit } from "src/utils/variables";
 
 export default function Home(): ReactElement {
-    const charLimit = 128;
-    const maxAttachments = 4;
-
     const user = useUser("/login", null);
 
     const composePostRef = useRef(null);
@@ -32,11 +39,11 @@ export default function Home(): ReactElement {
     const toast = useToastContext();
 
     const [postingAllowed, setPostingAllowed] = useState(false);
-    const [charsLeft, setCharsLeft] = useState(charLimit);
+    const [charsLeft, setCharsLeft] = useState(postCharLimit);
     const [mobileCompose, setMobileCompose] = useState(false);
     const [posts, setPosts] = useState([]);
-    const [attachments, setAttachments] = useState([]);
-    const [previewImages, setPreviewImages] = useState([]);
+    const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+    const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [nowPosting, setNowPosting] = useState(false);
     const [mediaModal, setMediaModal] = useState(false);
     const [modalData, setModalData] = useState({
@@ -57,77 +64,12 @@ export default function Home(): ReactElement {
     });
     const [touchY, setTouchY] = useState(null);
 
-    const handleInput = (e: FormEvent<HTMLInputElement>) => {
-        if ((e.target as HTMLElement).textContent.trim().length > charLimit) {
-            setPostingAllowed(false);
-        } else if (
-            (e.target as HTMLElement).textContent.trim().length != 0 ||
-            attachments.length
-        ) {
-            setPostingAllowed(true);
-        } else {
-            setPostingAllowed(false);
-        }
-        setCharsLeft(charLimit - (e.target as HTMLElement).textContent.trim().length);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
-        if (e.key == "Enter") {
-            e.preventDefault();
-
-            if (!composePostRef.current.textContent.length) return;
-
-            document.execCommand("insertLineBreak");
-
-            e.ctrlKey && handleClick(e as unknown as React.MouseEvent<HTMLElement, MouseEvent>);
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
-        e.preventDefault();
-        // handle pasting strings as plain text
-        if (e.clipboardData.items.length && e.clipboardData.items[0].kind == "string") {
-            const text = e.clipboardData.getData("text/plain");
-            (e.target as HTMLElement).textContent += text;
-    
-            if ((e.target as HTMLElement).textContent.length > charLimit) {
-                setPostingAllowed(false);
-            } else if ((e.target as HTMLElement).textContent.length) {
-                setPostingAllowed(true);
-            }
-            setCharsLeft(charLimit - (e.target as HTMLElement).textContent.length);
-        // handle pasting images
-        } else if (e.clipboardData.items.length && e.clipboardData.items[0].kind == "file") {
-            const file = e.clipboardData.items[0].getAsFile();
-            console.log(file);
-            if (
-                file.type != "image/jpeg" &&
-                file.type != "image/jpg" &&
-                file.type != "image/png" &&
-                file.type != "image/gif" &&
-                file.type != "image/webp"
-            ) {
-                return;
-            }
-            if (file.size > 8 * 1024 * 1024) {
-                toast("File size is limited to 8MB", 4000);
-                return;
-            }
-
-            setPreviewImages(previewImages.concat(URL.createObjectURL(file)));
-            setAttachments(attachments.concat({data: file, name: file.name, mimetype: file.type}));
-            if (charsLeft >= 0) {
-                setPostingAllowed(true);
-            }
-        }
-    };
-
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!postingAllowed) {
             e.preventDefault();
             return;
         }
-        if (composePostRef.current.textContent.trim().length > charLimit) {
+        if (composePostRef.current.textContent.trim().length > postCharLimit) {
             e.preventDefault();
             return;
         }
@@ -139,7 +81,9 @@ export default function Home(): ReactElement {
             return;
         }
         setNowPosting(true);
-        const content = composePostRef.current.innerText.replace(/(\n){2,}/g, "\n\n").trim();
+        const content = composePostRef.current.innerText
+            .replace(/(\n){2,}/g, "\n\n")
+            .trim();
         const payload = {
             content: content,
             author: user,
@@ -149,7 +93,7 @@ export default function Home(): ReactElement {
         setAttachments([]);
         setPreviewImages([]);
         setPostingAllowed(false);
-        setCharsLeft(charLimit);
+        setCharsLeft(postCharLimit);
         if (socket) {
             socket?.emit("post", payload);
         } else {
@@ -162,7 +106,11 @@ export default function Home(): ReactElement {
         setMobileCompose(false);
     };
 
-    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: any, index: number) => {
+    const handleMediaClick = (
+        _e: React.MouseEvent<HTMLElement, MouseEvent>,
+        post: PostType,
+        index: number
+    ) => {
         setModalData({
             post: post,
             imageIndex: index,
@@ -171,104 +119,53 @@ export default function Home(): ReactElement {
         setMediaModal(true);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files: File[] = Array.from(e.target?.files as ArrayLike<File>);
-        const validFiles = [...attachments];
-        const validPreviewImages = [...previewImages];
-
-        if (files.length > maxAttachments) {
-            toast("You can only upload up to 4 images", 4000);
-            return;
-        }
-        for (let i = 0; i < files.length; i++) {
-            if (
-                files[i].type != "image/jpeg" &&
-                files[i].type != "image/jpg" &&
-                files[i].type != "image/png" &&
-                files[i].type != "image/gif" &&
-                files[i].type != "image/webp"
-            ) {
-                toast("This file format is not supported", 4000);
-                continue;
-            }
-            if (files[i].size > 8 * 1024 * 1024) {
-                toast("File size is limited to 8MB", 4000);
-                continue;
-            }
-            if (attachments.length < maxAttachments && previewImages.length < maxAttachments) {
-                validFiles.push({data: files[i], name: files[i].name, mimetype: files[i].type});
-                validPreviewImages.push(URL.createObjectURL(files[i]));
-            }
-        }
-        if (validPreviewImages.length) {
-            setPostingAllowed(true);
-            setPreviewImages(validPreviewImages);
-            setAttachments(validFiles);
-        }
-        // TODO: videos
-    };
-
-    const handleImagePreviewClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, i: number) => {
-        const tempPreviewImages = [...previewImages];
-        tempPreviewImages.splice(i, 1);
-        setPreviewImages(tempPreviewImages);
-        const tempAttachments = [...attachments];
-        tempAttachments.splice(i, 1);
-        setAttachments(tempAttachments);
-        // if there're no attachments AND no text, disable the posting button
-        if (
-            !tempAttachments.length &&
-            !composePostRef.current.textContent.trim().length
-        ) {
-            setPostingAllowed(false);
-        }
-    };
-
-    const handleTextInput = (e: InputEvent) => {
-        // workaround android not giving out proper key codes
-        if (
-            e.data.charCodeAt(0) == 10 ||
-            e.data.charCodeAt(e.data.length - 1) == 10
-        ) {
-            e.preventDefault();
-            document.execCommand("insertLineBreak");
-        }
-    };
-
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         setTouchY(e.targetTouches[0]?.clientY);
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         if (e.targetTouches[0]?.clientY - touchY > 0) {
-            e.currentTarget.style.top = `${e.targetTouches[0]?.clientY - touchY}px`;
+            e.currentTarget.style.top = `${
+                e.targetTouches[0]?.clientY - touchY
+            }px`;
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (e.changedTouches[0]?.clientY > (touchY + 200)) {
+        if (e.changedTouches[0]?.clientY > touchY + 200) {
             setMobileCompose(false);
         }
         e.currentTarget.style.top = "0";
     };
 
-    const handlePost = useCallback((post) => {
-        setPosts([post].concat(posts));
-    }, [posts]);
+    const handlePost = useCallback(
+        (post) => {
+            setPosts([post].concat(posts));
+        },
+        [posts]
+    );
 
-    const handleDeletePost = useCallback((postId) => {
-        setPosts(posts?.filter(post => post._id != postId));
-    }, [posts]);
+    const handleDeletePost = useCallback(
+        (postId) => {
+            setPosts(posts?.filter((post) => post._id != postId));
+        },
+        [posts]
+    );
 
-    const handleComment = useCallback((comment) => {
-        setPosts(posts.map(post => {
-            if (post._id == comment.replyingTo) {
-                post.comments.length < 4 && post.comments.push(comment);
-                return post;
-            }
-            return post;
-        }));
-    }, [posts]);
+    const handleComment = useCallback(
+        (comment) => {
+            setPosts(
+                posts.map((post) => {
+                    if (post._id == comment.replyingTo) {
+                        post.comments.length < 4 && post.comments.push(comment);
+                        return post;
+                    }
+                    return post;
+                })
+            );
+        },
+        [posts]
+    );
 
     useEffect(() => {
         socket?.on("post", handlePost);
@@ -374,9 +271,36 @@ export default function Home(): ReactElement {
                                         className={`${styles.composePostDiv}`}
                                         contentEditable="true"
                                         data-placeholder="What's on your mind?"
-                                        onInput={handleInput}
-                                        onPaste={handlePaste}
-                                        onKeyDown={handleKeyDown}
+                                        onInput={(e) =>
+                                            handleInput(
+                                                e,
+                                                postCharLimit,
+                                                attachments,
+                                                setPostingAllowed,
+                                                setCharsLeft
+                                            )
+                                        }
+                                        onPaste={(e) =>
+                                            handlePaste(
+                                                e,
+                                                postCharLimit,
+                                                charsLeft,
+                                                setCharsLeft,
+                                                setPostingAllowed,
+                                                previewImages,
+                                                setPreviewImages,
+                                                attachments,
+                                                setAttachments,
+                                                toast
+                                            )
+                                        }
+                                        onKeyDown={(e) =>
+                                            handleKeyDown(
+                                                e,
+                                                composePostRef,
+                                                handleClick
+                                            )
+                                        }
                                     ></span>
                                     <div
                                         className={`flex ${styles.composePostOptions}`}
@@ -385,7 +309,17 @@ export default function Home(): ReactElement {
                                             <ImageSquare size="30"></ImageSquare>
                                             <input
                                                 className={styles.fileInput}
-                                                onChange={handleChange}
+                                                onChange={(e) =>
+                                                    handleChange(
+                                                        e,
+                                                        attachments,
+                                                        setAttachments,
+                                                        previewImages,
+                                                        setPreviewImages,
+                                                        setPostingAllowed,
+                                                        toast
+                                                    )
+                                                }
                                                 onClick={(e) => {
                                                     e.currentTarget.value = null;
                                                 }}
@@ -429,9 +363,15 @@ export default function Home(): ReactElement {
                                                     <div
                                                         className={`${styles.imageAttachmentClose}`}
                                                         onClick={(e) =>
-                                                            handleImagePreviewClick(
+                                                            handlePreviewImageClose(
                                                                 e,
-                                                                i
+                                                                i,
+                                                                previewImages,
+                                                                setPreviewImages,
+                                                                attachments,
+                                                                setAttachments,
+                                                                composePostRef,
+                                                                setPostingAllowed
                                                             )
                                                         }
                                                     >
@@ -453,8 +393,8 @@ export default function Home(): ReactElement {
                                     }`}
                                     style={{
                                         width: `${
-                                            ((charLimit - charsLeft) * 100) /
-                                            charLimit
+                                            ((postCharLimit - charsLeft) * 100) /
+                                            postCharLimit
                                         }%`,
                                     }}
                                 ></div>
@@ -474,7 +414,17 @@ export default function Home(): ReactElement {
                                         <ImageSquare size="36"></ImageSquare>
                                         <input
                                             className={styles.fileInputMobile}
-                                            onChange={handleChange}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    e,
+                                                    attachments,
+                                                    setAttachments,
+                                                    previewImages,
+                                                    setPreviewImages,
+                                                    setPostingAllowed,
+                                                    toast
+                                                )
+                                            }
                                             onClick={(e) =>
                                                 (e.currentTarget.value = null)
                                             }

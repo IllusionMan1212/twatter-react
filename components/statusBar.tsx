@@ -6,9 +6,9 @@ import { ChatsTeardrop } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
 import { ReactElement, useState, useCallback, useEffect } from "react";
 import { StatusBarProps } from "../src/types/props";
-import { socket } from "../src/contexts/socket";
+import { socket } from "../src/socket";
 import { useToastContext } from "../src/contexts/toastContext";
-import axiosInstance from "../src/utils/axios";
+import axiosInstance from "../src/axios";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
     const [userMenu, setUserMenu] = useState(false);

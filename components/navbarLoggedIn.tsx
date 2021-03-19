@@ -10,9 +10,9 @@ import {
 import Router from "next/router";
 import { NavbarLoggedInProps } from "../src/types/props";
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import axiosInstance from "../src/utils/axios";
+import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
-import { socket } from "../src/contexts/socket";
+import { socket } from "../src/socket";
 
 export default function NavbarLoggedIn(
     props: NavbarLoggedInProps

@@ -1,11 +1,11 @@
 /* eslint-disable react/react-in-jsx-scope */
-import axios from "../src/utils/axios";
+import axios from "../src/axios";
 import Router from "next/router";
 import { ReactElement } from "react";
 import { useToastContext } from "../src/contexts/toastContext";
 import { UserContextMenuProps } from "../src/types/props";
 import styles from "./userContextMenu.module.scss";
-import { socket } from "../src/contexts/socket";
+import { socket } from "../src/socket";
 
 export default function UserContextMenu(
     props: UserContextMenuProps

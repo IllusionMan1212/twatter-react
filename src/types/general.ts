@@ -26,3 +26,9 @@ export interface Post {
     likeUsers: Array<string>;
     comments: Array<Post>;
 }
+
+export interface Attachment {
+    data: File;
+    name: string;
+    mimetype: string;
+}
