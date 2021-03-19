@@ -1,3 +1,5 @@
+@use "../styles/variables";
+
 .post {
     display: flex;
     flex-direction: row;
@@ -61,7 +63,7 @@
     position: absolute;
     bottom: 7px;
     right: 7px;
-    color: #6067fe;
+    color: variables.$accent-color;
     cursor: pointer;
     width: 40px;
     height: 40px;
@@ -80,7 +82,7 @@
     position: absolute;
     bottom: 10px;
     right: 10px;
-    color: #6067fe;
+    color: variables.$accent-color;
     cursor: pointer;
 
     @media (max-width: 1000px) {

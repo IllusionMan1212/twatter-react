@@ -1,3 +1,5 @@
+@use "./variables";
+
 .container {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -119,7 +121,7 @@
 }
 
 .followButton {
-    background-color: #6067fe;
+    background-color: variables.$accent-color;
     padding: 13px 20px;
     font-weight: bold;
     cursor: pointer;

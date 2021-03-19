@@ -1,3 +1,5 @@
+@use "./variables";
+
 .description {
     margin: 0 25%;
 
@@ -28,7 +30,7 @@
 }
 
 .filledButton {
-    background-color: #6067fe;
+    background-color: variables.$accent-color;
     color: white;
     cursor: pointer;
 

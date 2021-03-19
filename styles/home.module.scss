@@ -1,3 +1,5 @@
+@use "./variables";
+
 .inputContainer {
     @media (max-width: 800px) {
         position: fixed;
@@ -57,7 +59,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 15px;
-        background-color: #6067fe;
+        background-color: variables.$accent-color;
     }
 }
 
@@ -161,7 +163,7 @@
 }
 
 .charLimit {
-    background-color: #6067fe;
+    background-color: variables.$accent-color;
     position: absolute;
     left: 0;
     right: 0;
@@ -209,7 +211,7 @@
     bottom: 90px;
     right: 15px;
     border-radius: 55px;
-    border: 3px solid #6067fe;
+    border: 3px solid variables.$accent-color;
     width: 64px;
     height: 64px;
     background-color: #252525;

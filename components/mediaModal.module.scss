@@ -1,3 +1,5 @@
+@use "../styles/variables.scss";
+
 .withMediaModal {
     position: fixed;
     top: 0;
@@ -131,7 +133,7 @@
 }
 
 .charLimit {
-    background-color: #6067fe;
+    background-color: variables.$accent-color;
     position: absolute;
     left: 0;
     right: 0;

@@ -1,3 +1,5 @@
+@use "../styles/variables";
+
 .statusBar {
     height: 83px;
 }
@@ -65,7 +67,7 @@
 }
 
 .unreadBubble {
-    background-color: #6067fe;
+    background-color: variables.$accent-color;
     color: #ddd;
     font-weight: bold;
     font-size: 0.8em;

@@ -1,3 +1,5 @@
+@use "../styles/variables";
+
 .menu {
     background-color: #252525;
     width: 200px;
@@ -21,8 +23,8 @@
 
     hr {
         margin: 1% auto;
-        color: #6067fe;
-        background: #6067fe;
+        color: variables.$accent-color;
+        background: variables.$accent-color;
         width: 90%;
         border: none;
         height: 1px;

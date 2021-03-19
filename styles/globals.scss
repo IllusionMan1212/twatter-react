@@ -1,3 +1,5 @@
+@use "./variables";
+
 @font-face {
     font-family: "Sora";
     src: url("/Sora-VariableFont_wght.ttf") format("truetype");
@@ -43,7 +45,7 @@ p {
 
 * {
     box-sizing: border-box;
-    scrollbar-color: #6067fe #151515;
+    scrollbar-color: variables.$accent-color #151515;
 
     &::selection {
         background-color: khaki;
@@ -54,7 +56,7 @@ p {
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #6067fe;
+        background: variables.$accent-color;
     }
 
     -webkit-tap-highlight-color: transparent;
@@ -70,6 +72,14 @@ textarea {
     font-family: inherit;
     color: inherit;
     background: transparent;
+}
+
+.accent-color {
+    color: variables.$accent-color
+}
+
+.accent-color-bg {
+    background-color: variables.$accent-color;
 }
 
 /* General */

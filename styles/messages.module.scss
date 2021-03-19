@@ -1,3 +1,5 @@
+@use "./variables";
+
 .messagesContainer {
     width: 100%;
     height: calc(100vh - 83px - 1em);
@@ -129,7 +131,7 @@
     right: 0;
     z-index: 2;
     background-color: #252525;
-    border: 2px solid #6067fe;
+    border: 2px solid variables.$accent-color;
     padding: 5px 10px;
     margin: 0 auto;
     width: fit-content;
@@ -274,7 +276,7 @@
 }
 
 .charLimit {
-    background-color: #6067fe;
+    background-color: variables.$accent-color;
     position: absolute;
     left: 0;
     right: 0;
