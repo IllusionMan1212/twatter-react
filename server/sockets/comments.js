@@ -7,19 +7,19 @@ const removeExif = require("../utils/helperFunctions");
 const handleComments = (io, socket) => {
     socket.on("commentToServer", (comment) => {
         if (!comment.author) {
-            console.log("no user");
+            socket.emit("error", "An error has occurred");
             return;
         }
         if (!comment.content && !comment.attachments.length) {
-            console.log("empty post");
+            socket.emit("error", "An error has occurred");
             return;
         }
         if (comment.content.length > postCharLimit) {
-            console.log("post too long");
+            socket.emit("error", "Comment content exceeds limit");
             return;
         }
         if (comment.attachments?.length > maxAttachments) {
-            console.log("too many images");
+            socket.emit("error", "Too many attachments");
             return;
         }
 
@@ -27,17 +27,21 @@ const handleComments = (io, socket) => {
         const newComment = new Post();
 
         if (comment.attachments?.length) {
-            mkdirSync(`cdn/posts/${commentId}`, { recursive: true });
+            try {
+                mkdirSync(`cdn/posts/${commentId}`, { recursive: true });
+            } catch (err) {
+                socket.emit("error", "An error has occurred");
+                return;
+            }
             for (let i = 0; i < comment.attachments?.length; i++) {
                 if (comment.attachments[i].size > fileSizeLimit) {
-                    console.log("file too large");
+                    socket.emit("error", "File size is limited to 8MB");
                     return;
                 }
                 if (
                     !supportedFileTypes.includes(comment.attachments[i].mimetype.toString())
                 ) {
-                    console.log(comment);
-                    console.log("this file format is not supported");
+                    socket.emit("error", "This file format is not supported");
                     return;
                 }
                 let imageData = "";
@@ -71,13 +75,12 @@ const handleComments = (io, socket) => {
 
         newComment.save((err) => {
             if (err) {
-                console.log("error while saving");
+                socket.emit("error", "An error has occurred");
                 return;
             }
             Post.findByIdAndUpdate(comment.replyingTo, {
                 $addToSet: { comments: commentId }
             }).exec();
-            console.log("success");
             socket.emit("commentToClient", {
                 ...newComment._doc,
                 author: comment.author

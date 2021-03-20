@@ -102,9 +102,6 @@ export default function Home(): ReactElement {
             connectSocket(user.token);
             socket?.emit("post", payload);
         }
-        toast("Posted Successfully", 3000);
-        setNowPosting(false);
-        setMobileCompose(false);
     };
 
     const handleMediaClick = (
@@ -141,6 +138,10 @@ export default function Home(): ReactElement {
 
     const handlePost = useCallback(
         (post) => {
+            toast("Posted Successfully", 3000);
+            setNowPosting(false);
+            setMobileCompose(false);
+    
             setPosts([post].concat(posts));
         },
         [posts]

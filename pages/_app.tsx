@@ -1,13 +1,28 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
-import React, { ReactElement } from "react";
-import { ToastWrapper } from "../src/contexts/toastContext";
+import React, { ReactElement, useCallback, useEffect } from "react";
+import { ToastWrapper, useToastContext } from "../src/contexts/toastContext";
 import "../styles/globals.scss";
 
 import "swiper/swiper.scss";
 import "swiper/components/navigation/navigation.scss";
+import { socket } from "src/socket";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
+    const toast = useToastContext();
+
+    const handleError = useCallback((message) => {
+        toast(message, 4000);
+    }, []);
+
+    useEffect(() => {
+        socket?.on("error", handleError);
+
+        return () => {
+            socket?.off("error", handleError);
+        };
+    }, [socket, handleError]);
+
     return (
         <>
             <Head>

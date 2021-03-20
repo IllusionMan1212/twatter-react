@@ -1,30 +1,30 @@
 const Post = require("../mvc/models/post");
 const { mkdirSync, writeFileSync } = require("fs");
 const { Types } = require("mongoose");
-const removeExif = require("server/utils/helperFunctions");
+const removeExif = require("../utils/helperFunctions");
 const {
     fileSizeLimit,
     supportedFileTypes,
     maxAttachments,
     postCharLimit
-} = require("server/utils/variables");
+} = require("../utils/variables");
 
 const handlePosts = (io, socket) => {
     socket.on("post", (post) => {
         if (!post.author) {
-            console.log("no user");
+            socket.emit("error", "An error has occurred");
             return;
         }
         if (!post.content && !post.attachments.length) {
-            console.log("empty post");
+            socket.emit("error", "An error has occurred");
             return;
         }
         if (post.content.length > postCharLimit) {
-            console.log("post too long");
+            socket.emit("error", "Post content exceeds limit");
             return;
         }
         if (post.attachments?.length > maxAttachments) {
-            console.log("too many images");
+            socket.emit("error", "Too many attachments");
             return;
         }
         const postId = Types.ObjectId();
@@ -34,19 +34,18 @@ const handlePosts = (io, socket) => {
             try {
                 mkdirSync(`cdn/posts/${postId}`, { recursive: true });
             } catch (err) {
-                console.log("err");
-                console.log(err);
+                socket.emit("error", "An error has occurred");
+                return;
             }
             for (let i = 0; i < post.attachments?.length; i++) {
                 if (post.attachments[i].size > fileSizeLimit) {
-                    console.log("file too large");
+                    socket.emit("error", "File size is limited to 8MB");
                     return;
                 }
                 if (
                     !supportedFileTypes.includes(post.attachments[i].mimetype.toString())
                 ) {
-                    console.log(post);
-                    console.log("this file format is not supported");
+                    socket.emit("error", "This file format is not supported");
                     return;
                 }
 
@@ -79,11 +78,10 @@ const handlePosts = (io, socket) => {
 
         newPost.save((err) => {
             if (err) {
-                console.log("error while saving");
+                socket.emit("error", "An error has occurred");
                 return;
             }
-            console.log("success");
-            io.emit("post", { ...newPost._doc,
+            socket.emit("post", { ...newPost._doc,
                 author: post.author });
         });
     });

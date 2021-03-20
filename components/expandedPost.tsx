@@ -73,12 +73,14 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             connectSocket(props.currentUser.token);
             socket?.emit("commentToServer", payload);
         }
-        toast("Commented Successfully", 3000);
-        setNowCommenting(false);
+
     };
 
     const handleComment = useCallback(
         (payload) => {
+            toast("Commented Successfully", 3000);
+            setNowCommenting(false);
+
             props.post.comments.unshift(payload);
         },
         [props.post]

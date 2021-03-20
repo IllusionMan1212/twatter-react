@@ -7,21 +7,21 @@ const {
     supportedFileTypes,
     fileSizeLimit
 } = require("../utils/variables");
-const removeExif = require("server/utils/helperFunctions");
+const removeExif = require("../utils/helperFunctions");
 
 const handleMessage = (socket, connectedSockets) => {
     socket.on("messageToServer", (msg) => {
         msg.token = socket.handshake.query.token;
         if (!msg.conversationId || !msg.receiverId) {
-            console.log("empty msg");
+            socket.emit("error", "An error has occurred");
             return;
         }
         if (!msg.messageContent && !msg.attachment) {
-            console.log("no content and no attachment");
+            socket.emit("error", "An error has occurred");
             return;
         }
         if (msg.messageContent.length > messageCharLimit) {
-            console.log("msg too big");
+            socket.emit("error", "Message content exceeds limit");
             return;
         }
 
@@ -38,14 +38,20 @@ const handleMessage = (socket, connectedSockets) => {
             msg?.attachment?.mimetype &&
             msg?.attachment?.name
         ) {
-            mkdirSync(`cdn/messages/${messageId}`, { recursive: true });
+            try {
+                mkdirSync(`cdn/messages/${messageId}`, { recursive: true });
+            } catch (err) {
+                socket.emit("error", "An error has occurred");
+                return;
+            }
             if (msg.attachment.size > fileSizeLimit) {
+                socket.emit("error", "File size is limited to 8MB");
                 return;
             }
             if (
                 !supportedFileTypes.includes(msg.attachment.mimetype.toString())
             ) {
-                console.log("Unsupported file format");
+                socket.emit("error", "Unsupported file format");
                 return;
             }
             let imageData = "";
@@ -68,7 +74,7 @@ const handleMessage = (socket, connectedSockets) => {
         }
         Conversation.findById(msg.conversationId).exec(async (err, conversation) => {
             if (err) {
-                console.log("err");
+                socket.emit("error", "An error has occurred");
                 return;
             }
             if (conversation) {
@@ -93,7 +99,7 @@ const handleMessage = (socket, connectedSockets) => {
                     await conversation.save();
                     await newMessage.save();
                 } catch (err) {
-                    console.log("err");
+                    socket.emit("error", "An error has occurred");
                     return;
                 }
                 if (connectedSockets.has(msg.receiverId)) {
@@ -123,7 +129,7 @@ const handleMessage = (socket, connectedSockets) => {
                     });
                 });
             } else {
-                console.log("convo not found");
+                console.log("conversation not found");
             }
         });
     });
@@ -135,8 +141,7 @@ const handleMessage = (socket, connectedSockets) => {
             null,
             (err) => {
                 if (err) {
-                    // TODO: emit an error event
-                    console.log(err);
+                    socket.emit("error", "Error marking messages as read");
                     return;
                 }
                 const newPayload = {
