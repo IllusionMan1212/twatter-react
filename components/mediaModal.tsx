@@ -49,6 +49,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const [nowCommenting, setNowCommenting] = useState(false);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        console.log(nowCommenting);
         if (!commentingAllowed) {
             e.preventDefault();
             return;

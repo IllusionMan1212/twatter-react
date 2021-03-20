@@ -35,6 +35,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const [nowCommenting, setNowCommenting] = useState(false);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        console.log(nowCommenting);
         if (!commentingAllowed) {
             e.preventDefault();
             return;
