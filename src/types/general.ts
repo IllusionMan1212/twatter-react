@@ -31,4 +31,5 @@ export interface Attachment {
     data: File;
     name: string;
     mimetype: string;
+    size: number;
 }

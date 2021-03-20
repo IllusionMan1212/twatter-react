@@ -149,6 +149,7 @@ export default function Messages(): ReactElement {
                 data: file,
                 mimetype: file.type,
                 name: file.name,
+                size: file.size,
             });
             setPreviewImage(URL.createObjectURL(file));
             if (charsLeft >= 0) {
@@ -287,6 +288,7 @@ export default function Messages(): ReactElement {
             data: file,
             mimetype: file.type,
             name: file.name,
+            size: file.size,
         });
         setPreviewImage(URL.createObjectURL(file));
         if (charsLeft >= 0) {

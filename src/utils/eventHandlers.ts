@@ -43,6 +43,7 @@ export const handlePaste = (
                 data: file,
                 name: file.name,
                 mimetype: file.type,
+                size: file.size,
             })
         );
         if (charsLeft >= 0) {
@@ -135,6 +136,7 @@ export const handleChange = (
                 data: files[i],
                 name: files[i].name,
                 mimetype: files[i].type,
+                size: files[i].size,
             });
             validPreviewImages.push(URL.createObjectURL(files[i]));
         }
