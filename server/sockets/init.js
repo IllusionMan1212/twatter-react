@@ -2,7 +2,7 @@
 const socketio = require("socket.io");
 const handleMessage = require("./messaging");
 const connectedSockets = new Map();
-const { validateSession } = require("../mvc/controllers/utils");
+const { validateSession } = require("../utils/cookies");
 const handlePosts = require("./posts");
 const handleComments = require("./comments");
 

@@ -12,7 +12,7 @@ const setTokenCookie = (res, token) => {
         maxAge: MAX_AGE,
         path: "/",
         sameSite: "lax",
-        secure: true
+        secure: false,
     });
 
     res.setHeader("Set-Cookie", cookie);

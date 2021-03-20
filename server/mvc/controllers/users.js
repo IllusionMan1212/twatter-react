@@ -1,10 +1,10 @@
 const User = require("../models/user");
 const passport = require("passport");
-const Cookies = require("./utils");
+const Cookies = require("../../utils/cookies");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-const piexifjs = require("piexifjs");
+const removeExif = require("../../utils/helperFunctions");
 
 const create = (req, res) => {
     const username = req.body.username.toLowerCase().trim();
@@ -289,33 +289,7 @@ const initialSetup = (req, res) => {
                 }
                 let imageData = "";
                 if (req.files.profileImage.mimetype.toString() === "image/jpeg") {
-                    const data = `data:${
-                        req.files.profileImage.mimetype
-                    };base64,${req.files.profileImage.data.toString("base64")}`;
-                    const image64 = piexifjs.remove(data);
-                    // Get orientation data
-                    const oldExif = piexifjs.load(data);
-                    const orientation =
-                        oldExif["0th"][piexifjs.ImageIFD.Orientation];
-                    const newExif = {
-                        // Keep the image orientation
-                        "0th": { 274: orientation },
-                        "1st": {},
-                        Exif: {},
-                        GPS: {},
-                        Interop: {},
-                        thumbnail: null
-                    };
-
-                    // Put orientation data into new image buffer
-                    const exifString = piexifjs.dump(newExif);
-                    imageData = Buffer.from(
-                        piexifjs
-                            .insert(exifString, image64)
-                            .split(";base64,")
-                            .pop(),
-                        "base64"
-                    );
+                    imageData = removeExif(req.files.profileImage);
                 } else {
                     imageData = req.files.profileImage.data;
                 }

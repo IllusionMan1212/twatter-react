@@ -2,7 +2,12 @@ const Conversation = require("../mvc/models/conversation");
 const Message = require("../mvc/models/message");
 const { Types } = require("mongoose");
 const { mkdirSync, writeFileSync } = require("fs");
-const { remove, load, ImageIFD, dump, insert } = require("piexifjs");
+const {
+    messageCharLimit,
+    supportedFileTypes,
+    fileSizeLimit
+} = require("../utils/variables");
+const removeExif = require("server/utils/helperFunctions");
 
 const handleMessage = (socket, connectedSockets) => {
     socket.on("messageToServer", (msg) => {
@@ -15,10 +20,11 @@ const handleMessage = (socket, connectedSockets) => {
             console.log("no content and no attachment");
             return;
         }
-        if (msg.messageContent.length > 1000) {
+        if (msg.messageContent.length > messageCharLimit) {
             console.log("msg too big");
             return;
         }
+
         const newMessage = new Message();
         const messageId = Types.ObjectId();
         newMessage._id = messageId;
@@ -26,18 +32,18 @@ const handleMessage = (socket, connectedSockets) => {
         newMessage.conversation = msg.conversationId;
         newMessage.ownerId = msg.senderId;
         newMessage.readBy.push(msg.senderId);
+
         if (
             msg?.attachment?.data &&
             msg?.attachment?.mimetype &&
             msg?.attachment?.name
         ) {
             mkdirSync(`cdn/messages/${messageId}`, { recursive: true });
+            if (msg.attachment.size > fileSizeLimit) {
+                return;
+            }
             if (
-                msg.attachment.mimetype.toString() !== "image/jpeg" &&
-                msg.attachment.mimetype.toString() !== "image/jpg" &&
-                msg.attachment.mimetype.toString() !== "image/png" &&
-                msg.attachment.mimetype.toString() !== "image/gif" &&
-                msg.attachment.mimetype.toString() !== "image/webp"
+                !supportedFileTypes.includes(msg.attachment.mimetype.toString())
             ) {
                 console.log("Unsupported file format");
                 return;
@@ -48,30 +54,7 @@ const handleMessage = (socket, connectedSockets) => {
                 msg.attachment.data.toString("hex", 0, 2).toUpperCase() ===
                     "FFD8"
             ) {
-                const data = `data:${
-                    msg.attachment.mimetype
-                };base64,${msg.attachment.data.toString("base64")}`;
-                const image64 = remove(data);
-                // Get orientation data
-                const oldExif = load(data);
-                const orientation = oldExif["0th"][ImageIFD.Orientation];
-                const newExif = {
-                    // Keep the image orientation
-                    "0th": { 274: orientation },
-                    "1st": {},
-                    Exif: {},
-                    GPS: {},
-                    Interop: {},
-                    thumbnail: null
-                };
-
-                // Put orientation data into new image buffer
-                const exifString = dump(newExif);
-                imageData = Buffer.from(
-                    insert(exifString, image64).split(";base64,")
-                        .pop(),
-                    "base64"
-                );
+                imageData = removeExif(msg.attachment);
             } else {
                 imageData = msg.attachment.data;
             }
@@ -124,7 +107,7 @@ const handleMessage = (socket, connectedSockets) => {
                                 lastUpdated: newMessage.sentTime,
                                 receiver: msg.receiverId,
                                 sender: newMessage.ownerId,
-                                sentTime: newMessage.sentTime,
+                                sentTime: newMessage.sentTime
                             });
                         });
                 }
@@ -136,7 +119,7 @@ const handleMessage = (socket, connectedSockets) => {
                         lastUpdated: newMessage.sentTime,
                         receiver: msg.receiverId,
                         sender: newMessage.ownerId,
-                        sentTime: newMessage.sentTime,
+                        sentTime: newMessage.sentTime
                     });
                 });
             } else {

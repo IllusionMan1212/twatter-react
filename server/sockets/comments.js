@@ -1,7 +1,8 @@
 const Post = require("../mvc/models/post");
 const { mkdirSync, writeFileSync } = require("fs");
 const { Types } = require("mongoose");
-const { remove, load, ImageIFD, dump, insert } = require("piexifjs");
+const { supportedFileTypes, postCharLimit, maxAttachments, fileSizeLimit } = require("../utils/variables");
+const removeExif = require("../utils/helperFunctions");
 
 const handleComments = (io, socket) => {
     socket.on("commentToServer", (comment) => {
@@ -13,30 +14,27 @@ const handleComments = (io, socket) => {
             console.log("empty post");
             return;
         }
-        if (comment.content.length > 128) {
+        if (comment.content.length > postCharLimit) {
             console.log("post too long");
             return;
         }
-        if (comment.attachments?.length > 4) {
+        if (comment.attachments?.length > maxAttachments) {
             console.log("too many images");
             return;
         }
+
         const commentId = Types.ObjectId();
         const newComment = new Post();
 
         if (comment.attachments?.length) {
             mkdirSync(`cdn/posts/${commentId}`, { recursive: true });
             for (let i = 0; i < comment.attachments?.length; i++) {
-                if (comment.attachments[i].size > 8 * 1024 * 1024) {
+                if (comment.attachments[i].size > fileSizeLimit) {
                     console.log("file too large");
                     return;
                 }
                 if (
-                    comment.attachments[i].mimetype.toString() !== "image/jpeg" &&
-                    comment.attachments[i].mimetype.toString() !== "image/jpg" &&
-                    comment.attachments[i].mimetype.toString() !== "image/png" &&
-                    comment.attachments[i].mimetype.toString() !== "image/gif" &&
-                    comment.attachments[i].mimetype.toString() !== "image/webp"
+                    !supportedFileTypes.includes(comment.attachments[i].mimetype.toString())
                 ) {
                     console.log(comment);
                     console.log("this file format is not supported");
@@ -44,35 +42,13 @@ const handleComments = (io, socket) => {
                 }
                 let imageData = "";
                 if (
-                    comment.attachments[i].mimetype.toString() === "image/jpeg" &&
+                    comment.attachments[i].mimetype.toString() ===
+                        "image/jpeg" &&
                     comment.attachments[i].data
                         .toString("hex", 0, 2)
                         .toUpperCase() === "FFD8"
                 ) {
-                    const data = `data:${
-                        comment.attachments[i].mimetype
-                    };base64,${comment.attachments[i].data.toString("base64")}`;
-                    const image64 = remove(data);
-                    // Get orientation data
-                    const oldExif = load(data);
-                    const orientation = oldExif["0th"][ImageIFD.Orientation];
-                    const newExif = {
-                        // Keep the image orientation
-                        "0th": { 274: orientation },
-                        "1st": {},
-                        Exif: {},
-                        GPS: {},
-                        Interop: {},
-                        thumbnail: null
-                    };
-
-                    // Put orienation data into new image buffer
-                    const exifString = dump(newExif);
-                    imageData = Buffer.from(
-                        insert(exifString, image64).split(";base64,")
-                            .pop(),
-                        "base64"
-                    );
+                    imageData = removeExif(comment.attachments[i]);
                 } else {
                     imageData = comment.attachments[i].data;
                 }

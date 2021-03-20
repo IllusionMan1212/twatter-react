@@ -1,5 +1,5 @@
 const ratelimiter = require("express-rate-limit");
-const { getLoginSession, validateSession } = require("../../controllers/utils");
+const { getLoginSession, validateSession } = require("../../../utils/cookies");
 const User = require("../../models/user");
 
 const getLimit = ratelimiter({
