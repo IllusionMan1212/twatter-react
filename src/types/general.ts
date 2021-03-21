@@ -25,6 +25,10 @@ export interface Post {
     createdAt: string;
     likeUsers: Array<string>;
     comments: Array<Post>;
+    replyingTo: Array<Post>;
+
+    // not real db values
+    numberOfComments?: number;
 }
 
 export interface Attachment {

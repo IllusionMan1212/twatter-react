@@ -7,7 +7,7 @@ import Link from "next/link";
 import { formatDate, timeSince } from "../src/utils/functions";
 import LikeButton from "./likeButton";
 import PostOptionsMenuButton from "./postOptionsMenuButton";
-import { ImageSquare, PaperPlane, X } from "phosphor-react";
+import { ArrowArcLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import messagesStyles from "../styles/messages.module.scss";
 import { useToastContext } from "../src/contexts/toastContext";
 import { connectSocket, socket } from "../src/socket";
@@ -22,6 +22,8 @@ import {
     handleTextInput,
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
+import CommentButton from "./commentButton";
+import Router from "next/router";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -73,7 +75,14 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             connectSocket(props.currentUser.token);
             socket?.emit("commentToServer", payload);
         }
+    };
 
+    const handleCommentButtonClick = () => {
+        commentBoxRef?.current?.focus();
+    };
+
+    const handleCommentButtonClickOnComment = (commentId: string) => {
+        Router.push(`/u/${props.post.author.username}/${commentId}`);
     };
 
     const handleComment = useCallback(
@@ -112,9 +121,56 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
         <>
             <div className={`mx-auto ${styles.expandedPost}`}>
                 <div className={styles.expandedPostContent}>
-                    <Link
-                        href={`/u/${props.post.author.display_name.toLowerCase()}`}
-                    >
+                    {props.post.replyingTo[0] && (
+                        <Link
+                            href={`/u/${props.post.replyingTo[0].author.username}/${props.post.replyingTo[0]._id}`}
+                        >
+                            <a
+                                className={`flex mb-1Percent text-small ${styles.replyingTo}`}
+                            >
+                                <div className="flex">
+                                    <ArrowArcLeft size={25}></ArrowArcLeft>
+                                    <div className="flex align-items-center">
+                                        <span className="px-1">
+                                            Replying to:{" "}
+                                        </span>
+                                        <img
+                                            className="round"
+                                            src={
+                                                props.post.replyingTo[0].author
+                                                    .profile_image
+                                            }
+                                            width={25}
+                                            height={25}
+                                        ></img>{" "}
+                                        <span
+                                            className="text-bold"
+                                            style={{ paddingLeft: "0.5em" }}
+                                        >
+                                            {
+                                                props.post.replyingTo[0].author
+                                                    .display_name
+                                            }
+                                            {"'s post: "}
+                                        </span>
+                                        {props.post.replyingTo[0].content && (
+                                            <span
+                                                style={{ paddingLeft: "0.5em" }}
+                                            >
+                                                &quot;
+                                                {
+                                                    props.post.replyingTo[0]
+                                                        .content
+                                                }
+                                                &quot;
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </a>
+                        </Link>
+                    )}
+                    <Link href={`/u/${props.post.author.username}`}>
                         <a
                             className="flex"
                             onClick={(e) => e.stopPropagation()}
@@ -134,9 +190,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         </a>
                     </Link>
                     <div className={styles.user}>
-                        <Link
-                            href={`/u/${props.post.author.display_name.toLowerCase()}`}
-                        >
+                        <Link href={`/u/${props.post.author.username}`}>
                             <a onClick={(e) => e.stopPropagation()}>
                                 <div className="text-bold flex flex-column justify-content-center">
                                     <p className="ml-1">
@@ -404,10 +458,16 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     >
                         {formatDate(props.post.createdAt)}
                     </div>
-                    <LikeButton
-                        post={props.post}
-                        currentUserId={props.currentUser?._id}
-                    ></LikeButton>
+                    <div className="flex gap-1">
+                        <CommentButton
+                            post={props.post}
+                            handleClick={handleCommentButtonClick}
+                        ></CommentButton>
+                        <LikeButton
+                            post={props.post}
+                            currentUserId={props.currentUser?._id}
+                        ></LikeButton>
+                    </div>
                 </div>
             </div>
             <div className={styles.commentsSection}>
@@ -415,20 +475,32 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     return (
                         <div className={styles.comment} key={i}>
                             <div className={styles.commentUser}>
-                                <img
-                                    className="profileImage"
-                                    src={`${
-                                        comment.author.profile_image ==
-                                        "default_profile.svg"
-                                            ? "/"
-                                            : ""
-                                    }${comment.author.profile_image}`}
-                                    width="30"
-                                    height="30"
-                                    alt="User profile picture"
-                                />
-                                <div className="text-bold justify-content-center">
-                                    <p>{comment.author.display_name}</p>
+                                <Link href={`/u/${comment.author.username}`}>
+                                    <a>
+                                        <img
+                                            className="profileImage"
+                                            src={`${
+                                                comment.author.profile_image ==
+                                                "default_profile.svg"
+                                                    ? "/"
+                                                    : ""
+                                            }${comment.author.profile_image}`}
+                                            width="30"
+                                            height="30"
+                                            alt="User profile picture"
+                                        />
+                                    </a>
+                                </Link>
+                                <div
+                                    className={`text-bold justify-content-center ${postStyles.user}`}
+                                >
+                                    <Link
+                                        href={`/u/${comment.author.username}`}
+                                    >
+                                        <a>
+                                            <p>{comment.author.display_name}</p>
+                                        </a>
+                                    </Link>
                                 </div>
                             </div>
                             <div className={` ${styles.postText}`}>
@@ -440,10 +512,20 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                 >
                                     {timeSince(comment.createdAt)}
                                 </div>
-                                <LikeButton
-                                    post={comment}
-                                    currentUserId={props.currentUser?._id}
-                                ></LikeButton>
+                                <div className="flex gap-1 justify-content-end">
+                                    <CommentButton
+                                        post={comment}
+                                        handleClick={() =>
+                                            handleCommentButtonClickOnComment(
+                                                comment._id
+                                            )
+                                        }
+                                    ></CommentButton>
+                                    <LikeButton
+                                        post={comment}
+                                        currentUserId={props.currentUser?._id}
+                                    ></LikeButton>
+                                </div>
                             </div>
                             <PostOptionsMenuButton
                                 postId={comment._id}
@@ -462,7 +544,8 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         }`}
                         style={{
                             width: `${
-                                ((postCharLimit - charsLeft) * 100) / postCharLimit
+                                ((postCharLimit - charsLeft) * 100) /
+                                postCharLimit
                             }%`,
                         }}
                     ></div>

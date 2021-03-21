@@ -47,6 +47,8 @@
     padding: 15px;
     position: relative;
     background-color: #1f1f1f;
+    display: flex;
+    flex-direction: column;
 
     @media (max-width: 1000px) {
         display: none;
@@ -57,6 +59,12 @@
     display: grid;
     grid-template-columns: auto 10fr;
     grid-template-rows: 25px auto;
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .commentButton {
@@ -87,6 +95,12 @@
 
     @media (max-width: 1000px) {
         display: inline;
+    }
+}
+
+.viewCommentsText {
+    &:hover {
+        text-decoration: underline;
     }
 }
 

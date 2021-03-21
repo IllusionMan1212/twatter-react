@@ -350,6 +350,50 @@ h6 {
     }
 }
 
+@for $i from 1 through 10 {
+    .py-#{$i}Percent {
+        padding-top: #{$i}#{"%"} !important;
+        padding-bottom: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .px-#{$i}Percent {
+        padding-left: #{$i}#{"%"} !important;
+        padding-right: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .pt-#{$i}Percent {
+        padding-top: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .pb-#{$i}Percent {
+        padding-bottom: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .pr-#{$i}Percent {
+        padding-right: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .pl-#{$i}Percent {
+        padding-left: #{$i}#{"%"} !important;
+    }
+}
+
+@for $i from 1 through 10 {
+    .p-#{$i}Percent {
+        padding: #{$i}#{"%"} !important;
+    }
+}
+
 .px-auto {
     padding-left: auto;
     padding-right: auto;
@@ -408,6 +452,10 @@ h6 {
 
 .justify-content-space-between {
     justify-content: space-between;
+}
+
+.justify-content-end {
+    justify-content: flex-end;
 }
 
 .justify-self-center {

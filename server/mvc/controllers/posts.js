@@ -28,6 +28,11 @@ const getPosts = (req, res) => {
                 }
             },
             {
+                $addFields: {
+                    numberOfComments: { $size: "$comments" }
+                }
+            },
+            {
                 $lookup: {
                     as: "comments",
                     from: Post.collection.name,
@@ -123,6 +128,11 @@ const getPosts = (req, res) => {
                 }
             },
             {
+                $addFields: {
+                    numberOfComments: { $size: "$comments" }
+                }
+            },
+            {
                 $lookup: {
                     as: "comments",
                     from: Post.collection.name,
@@ -194,7 +204,7 @@ const getPosts = (req, res) => {
     }
 };
 
-const deletePost = (req, res) => {
+const deletePost = async (req, res) => {
     if (!req.body.postAuthor || !res.locals.userId || !req.body.postId) {
         res.status(400).json({
             message: "Invalid or incomplete request",
@@ -211,7 +221,19 @@ const deletePost = (req, res) => {
         });
         return;
     }
-    Post.findByIdAndDelete(req.body.postId, null, async (err, post) => {
+    Post.updateOne({
+        comments: req.body.postId
+    }, { $pull: { comments: req.body.postId } }).exec((err) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({
+                message: "An error has occurred",
+                status: 500,
+                success: false,
+            });
+        }
+    });
+    await Post.findByIdAndDelete(req.body.postId, null, async (err, post) => {
         if (err) {
             console.error(err);
             res.status(500).json({
@@ -407,8 +429,48 @@ const getPost = (req, res) => {
             }
         },
         {
+            $lookup: {
+                as: "replyingTo",
+                from: Post.collection.name,
+                let: { postId: { $toObjectId: "$replyingTo" } },
+                pipeline: [
+                    {
+                        $match: { $expr: { $eq: [
+                            "$_id",
+                            "$$postId"
+                        ] } }
+                    },
+                    {
+                        $lookup: {
+                            as: "author",
+                            from: User.collection.name,
+                            let: { author: { $toObjectId: "$author" } },
+                            pipeline: [
+                                {
+                                    $match: { $expr: { $eq: [
+                                        "$_id",
+                                        "$$author"
+                                    ] } }
+                                },
+                                {
+                                    $project: {
+                                        display_name: 1,
+                                        username: 1,
+                                        profile_image: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $unwind: "$author"
+                    }
+                ]
+            }
+        },
+        {
             $unwind: "$author"
-        }
+        },
     ]).exec((err, posts) => {
         if (err) {
             console.error(err);

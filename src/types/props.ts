@@ -27,8 +27,8 @@ export interface MessageProps {
     sender: boolean;
     children: string;
     sentTime: string;
-    attachment: string,
-    conversationId: string,
+    attachment: string;
+    conversationId: string;
     setImageModal: (bool: boolean) => void;
     setModalAttachment: (attachment: string) => void;
 }
@@ -49,7 +49,11 @@ export interface MessageMediaModalProps {
 export interface PostProps {
     post: Post;
     currentUser?: User;
-    handleMediaClick: (e: any, post: any, index: number) => void;
+    handleMediaClick: (
+        e: React.MouseEvent<HTMLElement, MouseEvent>,
+        post: Post,
+        index: number
+    ) => void;
 }
 
 export interface ExpandedPostProps extends PostProps {
@@ -65,18 +69,7 @@ export interface PostOptionsMenuProps {
 
 export interface MediaModalProps {
     modalData: {
-        post: {
-            _id: string;
-            content: string;
-            attachments: Array<string>;
-            createdAt: string;
-            likeUsers: Array<string>;
-            author: {
-                _id: string;
-                display_name: string;
-                profile_image: string;
-            };
-        };
+        post: Post;
         imageIndex: number;
         currentUser: User;
     };
@@ -84,9 +77,11 @@ export interface MediaModalProps {
 }
 
 export interface LikeButtonProps {
-    post: {
-        _id: string;
-        likeUsers: Array<string>;
-    };
+    post: Post;
     currentUserId?: string;
+}
+
+export interface CommentButtonProps {
+    post: Post;
+    handleClick: () => void
 }

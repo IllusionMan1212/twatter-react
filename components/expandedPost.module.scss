@@ -121,6 +121,21 @@
     margin-right: auto;
 }
 
+.commentButton {
+    color: variables.$accent-color;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+        background-color: #6067fe33;
+    }
+}
+
 .postNotFound {
     display: flex;
     height: calc(100vh - 83px - 83px);
@@ -130,4 +145,14 @@
     @media (max-width: 800px) {
         height: calc(100vh - 83px - 65px - 83px);
     }
+}
+
+.replyingTo {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 50px);
 }

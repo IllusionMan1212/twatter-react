@@ -11,7 +11,7 @@ import axios from "axios";
 import ExpandedPost from "../../../components/expandedPost";
 import styles from "../../../components/expandedPost.module.scss";
 import MediaModal from "../../../components/mediaModal";
-import { User } from "../../../src/types/general";
+import { User, Post } from "../../../src/types/general";
 
 export default function UserPost(): ReactElement {
     const router = useRouter();
@@ -20,27 +20,16 @@ export default function UserPost(): ReactElement {
     const [loading, setLoading] = useState(true);
     const [post, setPost] = useState(null);
     const [modalData, setModalData] = useState({
-        post: {
-            content: "",
-            attachments: [],
-            createdAt: null,
-            likeUsers: [],
-            _id: "",
-            author: {
-                _id: "",
-                display_name: "",
-                profile_image: "",
-            },
-        },
+        post: null as Post,
         imageIndex: 0,
-        currentUser: null,
+        currentUser: null as User,
     });
     const [mediaModal, setMediaModal] = useState(false);
 
     let currentUser: User = null;
     currentUser = useUser();
 
-    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: any, index: number) => {
+    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => {
         setModalData({
             post: post,
             imageIndex: index,
@@ -50,6 +39,9 @@ export default function UserPost(): ReactElement {
     };
 
     useEffect(() => {
+        const cancelToken = axios.CancelToken;
+        const tokenSource = cancelToken.source();
+
         if (router.query.postId?.[0]) {
             // if url contains other queries after the post id, remove them
             if (router.query.postId.length > 1) {
@@ -66,7 +58,7 @@ export default function UserPost(): ReactElement {
             axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost/${router.query.postId[0]}`,
-                    { withCredentials: true }
+                    { withCredentials: true, cancelToken: tokenSource.token }
                 )
                 .then((res) => {
                     setPost(res.data.post);
@@ -74,12 +66,20 @@ export default function UserPost(): ReactElement {
                     setLoading(false);
                 })
                 .catch((err) => {
-                    setLoading(false);
-                    if (err.response.status == 404) {
-                        setNotFound(true);
+                    if (axios.isCancel(err)) {
+                        console.log("Request canceled");
+                    } else {
+                        setLoading(false);
+                        if (err.response.status == 404) {
+                            setNotFound(true);
+                        }
                     }
                 });
         }
+
+        return () => {
+            tokenSource.cancel();
+        };
     }, [router.query.postId?.[0]]);
 
     useEffect(() => {
