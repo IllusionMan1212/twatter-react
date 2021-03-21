@@ -120,7 +120,7 @@ export const handleChange = (
         return;
     }
     for (let i = 0; i < files.length; i++) {
-        if (supportedFileTypes.includes(files[i].type)) {
+        if (!supportedFileTypes.includes(files[i].type)) {
             toast("This file format is not supported", 4000);
             continue;
         }

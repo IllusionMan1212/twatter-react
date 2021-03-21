@@ -138,7 +138,7 @@ export default function Messages(): ReactElement {
             // handle pasting images
         } else if (e.clipboardData.items?.[0].kind == "file") {
             const file = e.clipboardData.items[0].getAsFile();
-            if (supportedFileTypes.includes(file.type)) {
+            if (!supportedFileTypes.includes(file.type)) {
                 return;
             }
             if (file.size > fileSizeLimit) {
@@ -276,7 +276,7 @@ export default function Messages(): ReactElement {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file: File = e.target?.files[0];
 
-        if (supportedFileTypes.includes(file.type)) {
+        if (!supportedFileTypes.includes(file.type)) {
             toast("This file format is not supported", 4000);
             return;
         }
