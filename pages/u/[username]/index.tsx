@@ -16,7 +16,7 @@ import MediaModal from "../../../components/mediaModal";
 import { ChatTeardropText } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
 import { socket } from "../../../src/socket";
-import { User } from "../../../src/types/general";
+import { User, Post as PostType } from "../../../src/types/general";
 
 export default function Profile(): ReactElement {
     const router = useRouter();
@@ -29,20 +29,9 @@ export default function Profile(): ReactElement {
     const [posts, setPosts] = useState([]);
     const [postsLoading, setPostsLoading] = useState(true);
     const [modalData, setModalData] = useState({
-        post: {
-            content: "",
-            attachments: [],
-            createdAt: null,
-            likeUsers: [],
-            _id: "",
-            author: {
-                _id: "",
-                display_name: "",
-                profile_image: "",
-            },
-        },
+        post: null as PostType,
         imageIndex: 0,
-        currentUser: null,
+        currentUser: null as User,
     });
     const [mediaModal, setMediaModal] = useState(false);
 

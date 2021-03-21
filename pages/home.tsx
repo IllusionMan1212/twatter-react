@@ -19,7 +19,7 @@ import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal";
 import Router from "next/router";
 import { connectSocket, socket } from "../src/socket";
-import { Attachment, Post as PostType } from "src/types/general";
+import { Attachment, Post as PostType, User } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -48,20 +48,9 @@ export default function Home(): ReactElement {
     const [nowPosting, setNowPosting] = useState(false);
     const [mediaModal, setMediaModal] = useState(false);
     const [modalData, setModalData] = useState({
-        post: {
-            content: "",
-            attachments: [],
-            createdAt: null,
-            likeUsers: [],
-            _id: "",
-            author: {
-                _id: "",
-                display_name: "",
-                profile_image: "",
-            },
-        },
+        post: null as PostType,
         imageIndex: 0,
-        currentUser: null,
+        currentUser: null as User,
     });
     const [touchY, setTouchY] = useState(null);
 
