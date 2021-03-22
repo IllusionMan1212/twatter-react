@@ -221,6 +221,7 @@ const deletePost = async (req, res) => {
         });
         return;
     }
+    // Remove the deleted comment from a post's comments array
     Post.updateOne({
         comments: req.body.postId
     }, { $pull: { comments: req.body.postId } }).exec((err) => {
@@ -233,6 +234,7 @@ const deletePost = async (req, res) => {
             });
         }
     });
+    // Delete the comment or post
     await Post.findByIdAndDelete(req.body.postId, null, async (err, post) => {
         if (err) {
             console.error(err);
@@ -257,6 +259,11 @@ const deletePost = async (req, res) => {
                 return;
             }
         }
+
+        /*
+         * Delete the comments on the deleted post
+         * TODO: remove this in the future and properly handle deleted posts in the client
+         */
         try {
             await Post.deleteMany({ replyingTo: req.body.postId }).exec();
         } catch (err) {

@@ -133,7 +133,7 @@ const login = async (req, res) => {
             )(req, res);
         });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(400).json({
             message: "Incorrect credentials",
             status: 400,
@@ -145,7 +145,6 @@ const login = async (req, res) => {
     // Session is the payload to save in the token, it may contain basic info about the user
     const session = { ...user };
 
-    console.log(session);
     const token = await Cookies.setLoginSession(res, session);
     res.status(200).json({
         message: "Logged In",

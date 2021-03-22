@@ -130,7 +130,7 @@ export default function Home(): ReactElement {
             toast("Posted Successfully", 3000);
             setNowPosting(false);
             setMobileCompose(false);
-    
+
             setPosts([post].concat(posts));
         },
         [posts]

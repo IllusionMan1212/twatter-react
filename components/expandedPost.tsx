@@ -136,10 +136,12 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                         </span>
                                         <img
                                             className="round"
-                                            src={
-                                                props.post.replyingTo[0].author
-                                                    .profile_image
-                                            }
+                                            src={`${
+                                                props.post.replyingTo[0].author.profile_image ==
+                                                "default_profile.svg"
+                                                    ? "/"
+                                                    : ""
+                                            }${props.post.replyingTo[0].author.profile_image}`}
                                             width={25}
                                             height={25}
                                         ></img>{" "}
