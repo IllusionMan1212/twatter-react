@@ -12,7 +12,7 @@ import messagesStyles from "../styles/messages.module.scss";
 import { useToastContext } from "../src/contexts/toastContext";
 import { connectSocket, socket } from "../src/socket";
 import mediaModalStyles from "./mediaModal.module.scss";
-import { Attachment } from "src/types/general";
+import { Attachment, User } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -81,8 +81,8 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
         commentBoxRef?.current?.focus();
     };
 
-    const handleCommentButtonClickOnComment = (commentId: string) => {
-        Router.push(`/u/${props.post.author.username}/${commentId}`);
+    const handleCommentButtonClickOnComment = (commentId: string, commentAuthor: User) => {
+        Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
 
     const handleComment = useCallback(
@@ -519,7 +519,8 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                         post={comment}
                                         handleClick={() =>
                                             handleCommentButtonClickOnComment(
-                                                comment._id
+                                                comment._id,
+                                                comment.author,
                                             )
                                         }
                                     ></CommentButton>
