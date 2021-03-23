@@ -14,7 +14,7 @@ router.post("/deletePost", authorizeUser, putLimit, deletePost);
 router.post("/likePost", authorizeUser, putLimit, likePost);
 
 router.get("/getPosts/:userId?", getLimit, getPosts);
-router.get("/getPost/:postId", getLimit, getPost);
+router.get("/getPost", getLimit, getPost);
 router.get("/getComments/:postId", getLimit, getComments);
 
 module.exports = router;

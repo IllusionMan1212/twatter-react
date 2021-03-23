@@ -29,7 +29,11 @@ export default function UserPost(): ReactElement {
     let currentUser: User = null;
     currentUser = useUser();
 
-    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => {
+    const handleMediaClick = (
+        _e: React.MouseEvent<HTMLElement, MouseEvent>,
+        post: Post,
+        index: number
+    ) => {
         setModalData({
             post: post,
             imageIndex: index,
@@ -41,6 +45,7 @@ export default function UserPost(): ReactElement {
     useEffect(() => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
+        setPost(null);
 
         if (router.query.postId?.[0]) {
             // if url contains other queries after the post id, remove them
@@ -57,7 +62,7 @@ export default function UserPost(): ReactElement {
             }
             axios
                 .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost/${router.query.postId[0]}`,
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost?username=${router.query.username}&postId=${router.query.postId[0]}`,
                     { withCredentials: true, cancelToken: tokenSource.token }
                 )
                 .then((res) => {
@@ -120,7 +125,9 @@ export default function UserPost(): ReactElement {
                                         title={`${post.author.display_name}'s post`}
                                         user={currentUser}
                                     ></StatusBar>
-                                    <NavbarLoggedIn user={currentUser}></NavbarLoggedIn>
+                                    <NavbarLoggedIn
+                                        user={currentUser}
+                                    ></NavbarLoggedIn>
                                 </div>
                             ) : (
                                 <NavbarLoggedOut></NavbarLoggedOut>
@@ -146,7 +153,7 @@ export default function UserPost(): ReactElement {
                                 ></MediaModal>
                             )}
                         </>
-                    ) : (
+                    ) : (notFound) ? (
                         <>
                             {currentUser ? (
                                 <div className="feed">
@@ -154,7 +161,9 @@ export default function UserPost(): ReactElement {
                                         title="Not Found"
                                         user={currentUser}
                                     ></StatusBar>
-                                    <NavbarLoggedIn user={currentUser}></NavbarLoggedIn>
+                                    <NavbarLoggedIn
+                                        user={currentUser}
+                                    ></NavbarLoggedIn>
                                 </div>
                             ) : (
                                 <NavbarLoggedOut></NavbarLoggedOut>
@@ -164,8 +173,27 @@ export default function UserPost(): ReactElement {
                                     currentUser && "feed"
                                 } ${styles.postNotFound}`}
                             >
-                                <div className="text-bold text-large">Post Not Found</div>
+                                <div className="text-bold text-large">
+                                    Post Not Found
+                                </div>
                             </div>
+                        </>
+                    ) : !post && (
+                        <>
+                            {currentUser ? (
+                                <div className="feed">
+                                    <StatusBar
+                                        title="Loading"
+                                        user={currentUser}
+                                    ></StatusBar>
+                                    <NavbarLoggedIn
+                                        user={currentUser}
+                                    ></NavbarLoggedIn>
+                                </div>
+                            ) : (
+                                <NavbarLoggedOut></NavbarLoggedOut>
+                            )}
+                            <Loading height="100" width="100"></Loading>
                         </>
                     )}
                 </>

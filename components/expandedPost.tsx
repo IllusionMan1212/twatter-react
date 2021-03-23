@@ -81,7 +81,10 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
         commentBoxRef?.current?.focus();
     };
 
-    const handleCommentButtonClickOnComment = (commentId: string, commentAuthor: User) => {
+    const handleCommentButtonClickOnComment = (
+        commentId: string,
+        commentAuthor: User
+    ) => {
         Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
 
@@ -137,11 +140,15 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                         <img
                                             className="round"
                                             src={`${
-                                                props.post.replyingTo[0].author.profile_image ==
+                                                props.post.replyingTo[0].author
+                                                    .profile_image ==
                                                 "default_profile.svg"
                                                     ? "/"
                                                     : ""
-                                            }${props.post.replyingTo[0].author.profile_image}`}
+                                            }${
+                                                props.post.replyingTo[0].author
+                                                    .profile_image
+                                            }`}
                                             width={25}
                                             height={25}
                                         ></img>{" "}
@@ -475,10 +482,18 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             <div className={styles.commentsSection}>
                 {props.post.comments.map((comment, i) => {
                     return (
-                        <div className={styles.comment} key={i}>
+                        <div
+                            className={`${styles.comment} pointer`}
+                            key={i}
+                            onClick={() =>
+                                Router.push(
+                                    `/u/${comment.author.username}/${comment._id}`
+                                )
+                            }
+                        >
                             <div className={styles.commentUser}>
                                 <Link href={`/u/${comment.author.username}`}>
-                                    <a>
+                                    <a onClick={(e) => e.stopPropagation()}>
                                         <img
                                             className="profileImage"
                                             src={`${
@@ -499,7 +514,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                     <Link
                                         href={`/u/${comment.author.username}`}
                                     >
-                                        <a>
+                                        <a onClick={(e) => e.stopPropagation()}>
                                             <p>{comment.author.display_name}</p>
                                         </a>
                                     </Link>
@@ -520,7 +535,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                         handleClick={() =>
                                             handleCommentButtonClickOnComment(
                                                 comment._id,
-                                                comment.author,
+                                                comment.author
                                             )
                                         }
                                     ></CommentButton>

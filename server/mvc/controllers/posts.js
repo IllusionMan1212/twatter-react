@@ -362,15 +362,24 @@ const likePost = (req, res) => {
 };
 
 const getPost = (req, res) => {
-    if (!req.params.postId) {
+    if (!req.query.postId || !req.query.username) {
         res.status(400).json({
             message: "Invalid or incomplete request",
             status: 400,
             success: false
         });
+        return;
+    }
+    if (req.query.postId.length < 24) {
+        res.status(404).json({
+            message: "Post not found",
+            status: 404,
+            success: false
+        });
+        return;
     }
     Post.aggregate([
-        { $match: { _id: Types.ObjectId(req.params.postId) } },
+        { $match: { _id: Types.ObjectId(req.query.postId) } },
         {
             $lookup: {
                 as: "author",
@@ -393,6 +402,10 @@ const getPost = (req, res) => {
                 ]
             }
         },
+        {
+            $unwind: "$author"
+        },
+        { $match: { "author.username": req.query.username } },
         {
             $lookup: {
                 as: "comments",
@@ -474,9 +487,6 @@ const getPost = (req, res) => {
                     }
                 ]
             }
-        },
-        {
-            $unwind: "$author"
         },
     ]).exec((err, posts) => {
         if (err) {
