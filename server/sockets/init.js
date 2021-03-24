@@ -5,6 +5,7 @@ const connectedSockets = new Map();
 const { validateSession } = require("../utils/cookies");
 const handlePosts = require("./posts");
 const handleComments = require("./comments");
+const { fileSizeLimit } = require("../utils/variables");
 
 const initSockets = (server) => {
     const io = socketio(server, {
@@ -18,7 +19,9 @@ const initSockets = (server) => {
             ],
             origin: process.env.CLIENT_DOMAIN_URL,
         },
-        serveClient: false
+        maxHttpBufferSize: fileSizeLimit,
+        pingTimeout: 30000,
+        serveClient: false,
     });
     io.use(async (socket, next) => {
         if (socket.handshake.query?.token) {
