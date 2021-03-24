@@ -21,7 +21,7 @@ export default function CommentButton(props: CommentButtonProps): ReactElement {
                 </div>
             </div>
             {props.post.comments.length != 0 && (
-                <p>{formatBigNumbers(props.post.comments.length)}</p>
+                <p>{formatBigNumbers(props.numberOfComments)}</p>
             )}
         </div>
     );

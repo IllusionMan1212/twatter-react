@@ -470,6 +470,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     <div className="flex gap-1">
                         <CommentButton
                             post={props.post}
+                            numberOfComments={props.post.comments.length}
                             handleClick={handleCommentButtonClick}
                         ></CommentButton>
                         <LikeButton
@@ -532,6 +533,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                 <div className="flex gap-1 justify-content-end">
                                     <CommentButton
                                         post={comment}
+                                        numberOfComments={comment.comments.length}
                                         handleClick={() =>
                                             handleCommentButtonClickOnComment(
                                                 comment._id,

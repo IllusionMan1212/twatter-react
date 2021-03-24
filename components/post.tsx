@@ -331,12 +331,13 @@ export default function Post(props: PostProps): ReactElement {
                         {timeSince(props.post.createdAt)}
                     </div>
                     <div className="flex gap-1 justify-content-end">
-                        {window.innerWidth <= 1000 && (
+                        <div className={styles.commentButtonMobile}>
                             <CommentButton
                                 post={props.post}
+                                numberOfComments={props.post.numberOfComments}
                                 handleClick={handleCommentButtonClickMobile}
                             ></CommentButton>
-                        )}
+                        </div>
                         <LikeButton
                             post={props.post}
                             currentUserId={props.currentUser?._id}

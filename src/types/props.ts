@@ -17,6 +17,7 @@ export interface NavbarLoggedInProps {
 export interface StatusBarProps {
     title: string;
     user: User;
+    backButton?: boolean;
 }
 
 export interface UserContextMenuProps {
@@ -83,5 +84,6 @@ export interface LikeButtonProps {
 
 export interface CommentButtonProps {
     post: Post;
-    handleClick: () => void
+    handleClick: () => void;
+    numberOfComments: number;
 }

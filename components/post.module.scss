@@ -87,11 +87,6 @@
 
 .commentButtonMobile {
     display: none;
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    color: variables.$accent-color;
-    cursor: pointer;
 
     @media (max-width: 1000px) {
         display: inline;

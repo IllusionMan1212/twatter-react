@@ -27,7 +27,7 @@ export default function PostOptionsMenu(
         axios
             .post("posts/deletePost", payload)
             .then((res) => {
-                socket.emit("deletePost", socketPayload);
+                socket?.emit("deletePost", socketPayload);
                 toast(res.data.message, 3000);
             })
             .catch((err) => {

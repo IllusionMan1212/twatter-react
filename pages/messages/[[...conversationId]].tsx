@@ -187,7 +187,7 @@ export default function Messages(): ReactElement {
                     userId: user._id,
                     unreadMessages: msg.sender == user._id ? 0 : 1,
                 };
-                socket.emit("markMessagesAsRead", payload); // conversation is active, so the user has read the message
+                socket?.emit("markMessagesAsRead", payload); // conversation is active, so the user has read the message
             }
             const newConversations = conversations.map((conversation) => {
                 return conversation._id == msg.conversationId
@@ -334,7 +334,7 @@ export default function Messages(): ReactElement {
             userId: user._id,
             unreadMessages: conversation.unreadMessages,
         };
-        socket.emit("markMessagesAsRead", payload); // when a conversation is opened, we mark its messages as read
+        socket?.emit("markMessagesAsRead", payload); // when a conversation is opened, we mark its messages as read
         if (router.query?.conversationId?.[0] != conversation._id) {
             router.push(`/messages/${conversation._id}`, null, {
                 shallow: true,

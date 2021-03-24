@@ -2,7 +2,7 @@
 import styles from "./statusBar.module.scss";
 import Router from "next/router";
 import Search from "./search";
-import { ChatsTeardrop } from "phosphor-react";
+import { ChatsTeardrop, ArrowLeft } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
 import { ReactElement, useState, useCallback, useEffect } from "react";
 import { StatusBarProps } from "../src/types/props";
@@ -17,6 +17,10 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
     const toast = useToastContext();
 
     const [unreadMessages, setUnreadMessages] = useState(0);
+
+    const handleClickBack = () => {
+        history.back();
+    };
 
     const handleMessageFromServer = useCallback(
         (msg) => {
@@ -74,6 +78,14 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
         <div
             className={`flex text-white align-items-center mr-1Percent ${styles.statusBar}`}
         >
+            {props.backButton && (
+                <div
+                    className={styles.backButton}
+                    onClick={handleClickBack}
+                >
+                    <ArrowLeft size="30"></ArrowLeft>
+                </div>
+            )}
             <div
                 className={`ml-3Percent mt-1Percent flex align-items-center ${styles.title}`}
             >

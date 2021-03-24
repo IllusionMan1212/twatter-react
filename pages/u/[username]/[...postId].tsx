@@ -42,6 +42,29 @@ export default function UserPost(): ReactElement {
         setMediaModal(true);
     };
 
+    const renderBars = (title: string): ReactElement => {
+        return (
+            <>
+                {currentUser ? (
+                    <div className="feed">
+                        <StatusBar
+                            title={title}
+                            user={currentUser}
+                            backButton={true}
+                        ></StatusBar>
+                        <div className={styles.loggedInNavbarContainer}>
+                            <NavbarLoggedIn
+                                user={currentUser}
+                            ></NavbarLoggedIn>
+                        </div>
+                    </div>
+                ) : (
+                    <NavbarLoggedOut></NavbarLoggedOut>
+                )}
+            </>
+        );
+    };
+
     useEffect(() => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
@@ -119,19 +142,7 @@ export default function UserPost(): ReactElement {
                     </Head>
                     {!notFound && post ? (
                         <>
-                            {currentUser ? (
-                                <div className="feed">
-                                    <StatusBar
-                                        title={`${post.author.display_name}'s post`}
-                                        user={currentUser}
-                                    ></StatusBar>
-                                    <NavbarLoggedIn
-                                        user={currentUser}
-                                    ></NavbarLoggedIn>
-                                </div>
-                            ) : (
-                                <NavbarLoggedOut></NavbarLoggedOut>
-                            )}
+                            {renderBars(`${post.author.display_name}'s post`)}
                             <div
                                 className={`text-white ${
                                     currentUser && "feed"
@@ -155,19 +166,7 @@ export default function UserPost(): ReactElement {
                         </>
                     ) : (notFound) ? (
                         <>
-                            {currentUser ? (
-                                <div className="feed">
-                                    <StatusBar
-                                        title="Not Found"
-                                        user={currentUser}
-                                    ></StatusBar>
-                                    <NavbarLoggedIn
-                                        user={currentUser}
-                                    ></NavbarLoggedIn>
-                                </div>
-                            ) : (
-                                <NavbarLoggedOut></NavbarLoggedOut>
-                            )}
+                            {renderBars("Not Found")}
                             <div
                                 className={`text-white ${
                                     currentUser && "feed"
@@ -180,19 +179,7 @@ export default function UserPost(): ReactElement {
                         </>
                     ) : !post && (
                         <>
-                            {currentUser ? (
-                                <div className="feed">
-                                    <StatusBar
-                                        title="Loading"
-                                        user={currentUser}
-                                    ></StatusBar>
-                                    <NavbarLoggedIn
-                                        user={currentUser}
-                                    ></NavbarLoggedIn>
-                                </div>
-                            ) : (
-                                <NavbarLoggedOut></NavbarLoggedOut>
-                            )}
+                            {renderBars("Loading")}
                             <Loading height="100" width="100"></Loading>
                         </>
                     )}

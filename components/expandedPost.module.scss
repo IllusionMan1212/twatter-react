@@ -1,5 +1,13 @@
 @use "../styles/variables";
 
+.loggedInNavbarContainer {
+    display: initial;
+
+    @media (max-width: 800px) {
+        display: none;
+    }
+}
+
 .expandedPostContainer {
     display: flex;
     flex-direction: column;
@@ -7,7 +15,7 @@
     height: calc(100vh - 83px - 2em); // 2em is the top margin
 
     @media (max-width: 800px) {
-        margin: 1em 0 5em;
+        margin: 1em 0 0;
         height: calc(100vh - 83px - 1em); // 1em is the top margin
     }
 }
@@ -54,10 +62,6 @@
     display: flex;
     background-color: #111;
     flex-direction: column;
-
-    @media (max-width: 800px) {
-        bottom: 65px;
-    }
 }
 
 .postFooter {
@@ -75,7 +79,7 @@
     flex-grow: 1;
 
     @media (max-width: 800px) {
-        padding-bottom: 9em;
+        padding-bottom: 65px;
     }
 }
 

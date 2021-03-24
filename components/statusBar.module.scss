@@ -83,3 +83,22 @@
     justify-content: center;
     align-items: center;
 }
+
+.backButton {
+    border-radius: 55px;
+    height: 40px;
+    width: 40px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    margin-left: 1em;
+
+    &:active {
+        background-color: #373737;
+        cursor: pointer;
+    }
+
+    @media (max-width: 800px) {
+        display: flex;
+    }
+}
