@@ -8,9 +8,15 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: #0005;
         z-index: 3;
         animation: slide-from-bottom 0.4s both;
+    }
+}
+
+.inputContainerMobile {
+    @media (max-width: 800px) {
+        background-color: #0005;
+        height: 100%;        
     }
 }
 

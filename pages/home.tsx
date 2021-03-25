@@ -34,8 +34,9 @@ import axios from "axios";
 export default function Home(): ReactElement {
     const user = useUser("/login", null);
 
-    const composePostRef = useRef(null);
-    const composePostButtonMobileRef = useRef(null);
+    const composePostRef = useRef<HTMLSpanElement>(null);
+    const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
+    const inputContainerMobileRef = useRef<HTMLDivElement>(null);
 
     const toast = useToastContext();
 
@@ -110,19 +111,37 @@ export default function Home(): ReactElement {
         setTouchY(e.targetTouches[0]?.clientY);
     };
 
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (e.targetTouches[0]?.clientY - touchY > 0) {
-            e.currentTarget.style.top = `${
+    const handleTouchMove = (e: React.TouchEvent<HTMLElement>) => {
+        if (window.innerWidth <= 800 && e.targetTouches[0]?.clientY - touchY > 0) {
+            e.currentTarget.style.transform = `translate(0, ${
                 e.targetTouches[0]?.clientY - touchY
-            }px`;
+            }px)`;
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+        inputContainerMobileRef.current.style.transitionDuration = "300ms";
+
         if (e.changedTouches[0]?.clientY > touchY + 200) {
-            setMobileCompose(false);
+            closeMobileComposeSmoothly();
+        } else if (mobileCompose) {
+            inputContainerMobileRef.current.style.transform = "translate(0, 0)";
+            setTimeout(() => {
+                inputContainerMobileRef.current.style.transitionDuration =
+                    "0ms";
+            }, 300);
         }
-        e.currentTarget.style.top = "0";
+    };
+
+    const closeMobileComposeSmoothly = () => {
+        inputContainerMobileRef.current.style.transform = `translate(0, ${window.innerHeight}px)`;
+        setTimeout(() => {
+            inputContainerMobileRef.current.style.transform =
+                "translate(0, 0)";
+            inputContainerMobileRef.current.style.transitionDuration =
+                "0ms";
+            setMobileCompose(false);
+        }, 300);
     };
 
     const handlePost = useCallback(
@@ -248,68 +267,194 @@ export default function Home(): ReactElement {
                             className={
                                 mobileCompose ? styles.inputContainer : ""
                             }
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
                         >
-                            {/* 75px is the height of the navbar on mobile */}
                             <div
-                                style={{ minHeight: "calc(50% - 75px)" }}
-                                onClick={() => setMobileCompose(false)}
-                            ></div>
-                            <div
-                                className={`flex mx-auto my-2Percent ${
-                                    styles.composePost
-                                } ${
-                                    mobileCompose
-                                        ? styles.composePostMobile
-                                        : ""
-                                }`}
+                                className={styles.inputContainerMobile}
+                                ref={inputContainerMobileRef}
+                                onTouchStart={handleTouchStart}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
                             >
-                                <div className={`${styles.postDivContainer}`}>
-                                    <span
-                                        ref={composePostRef}
-                                        className={`${styles.composePostDiv}`}
-                                        contentEditable="true"
-                                        data-placeholder="What's on your mind?"
-                                        onInput={(e) =>
-                                            handleInput(
-                                                e,
-                                                postCharLimit,
-                                                attachments,
-                                                setPostingAllowed,
-                                                setCharsLeft
-                                            )
-                                        }
-                                        onPaste={(e) =>
-                                            handlePaste(
-                                                e,
-                                                postCharLimit,
-                                                charsLeft,
-                                                setCharsLeft,
-                                                setPostingAllowed,
-                                                previewImages,
-                                                setPreviewImages,
-                                                attachments,
-                                                setAttachments,
-                                                toast
-                                            )
-                                        }
-                                        onKeyDown={(e) =>
-                                            handleKeyDown(
-                                                e,
-                                                composePostRef,
-                                                handleClick
-                                            )
-                                        }
-                                    ></span>
+                                {/* 75px is the height of the navbar on mobile */}
+                                <div
+                                    style={{ minHeight: "calc(50% - 75px)" }}
+                                    onClick={() => closeMobileComposeSmoothly()}
+                                ></div>
+                                <div
+                                    className={`flex mx-auto my-2Percent ${
+                                        styles.composePost
+                                    } ${
+                                        mobileCompose
+                                            ? styles.composePostMobile
+                                            : ""
+                                    }`}
+                                >
                                     <div
-                                        className={`flex ${styles.composePostOptions}`}
+                                        className={`${styles.postDivContainer}`}
                                     >
-                                        <div className={`${styles.button}`}>
-                                            <ImageSquare size="30"></ImageSquare>
+                                        <span
+                                            ref={composePostRef}
+                                            className={`${styles.composePostDiv}`}
+                                            contentEditable="true"
+                                            data-placeholder="What's on your mind?"
+                                            onInput={(e) =>
+                                                handleInput(
+                                                    e,
+                                                    postCharLimit,
+                                                    attachments,
+                                                    setPostingAllowed,
+                                                    setCharsLeft
+                                                )
+                                            }
+                                            onPaste={(e) =>
+                                                handlePaste(
+                                                    e,
+                                                    postCharLimit,
+                                                    charsLeft,
+                                                    setCharsLeft,
+                                                    setPostingAllowed,
+                                                    previewImages,
+                                                    setPreviewImages,
+                                                    attachments,
+                                                    setAttachments,
+                                                    toast
+                                                )
+                                            }
+                                            onKeyDown={(e) =>
+                                                handleKeyDown(
+                                                    e,
+                                                    composePostRef,
+                                                    handleClick
+                                                )
+                                            }
+                                        ></span>
+                                        <div
+                                            className={`flex ${styles.composePostOptions}`}
+                                        >
+                                            <div className={`${styles.button}`}>
+                                                <ImageSquare size="30"></ImageSquare>
+                                                <input
+                                                    className={styles.fileInput}
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            e,
+                                                            attachments,
+                                                            setAttachments,
+                                                            previewImages,
+                                                            setPreviewImages,
+                                                            setPostingAllowed,
+                                                            toast
+                                                        )
+                                                    }
+                                                    onClick={(e) => {
+                                                        e.currentTarget.value = null;
+                                                    }}
+                                                    type="file"
+                                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                                    multiple
+                                                />
+                                            </div>
+                                            <button
+                                                className={styles.button}
+                                                disabled={
+                                                    postingAllowed
+                                                        ? false
+                                                        : true
+                                                }
+                                                onClick={handleClick}
+                                            >
+                                                <ArrowElbowRightDown
+                                                    size="30"
+                                                    opacity={
+                                                        postingAllowed
+                                                            ? "1"
+                                                            : "0.3"
+                                                    }
+                                                ></ArrowElbowRightDown>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {previewImages.length != 0 && (
+                                        <div
+                                            className={
+                                                styles.attachmentsPreview
+                                            }
+                                        >
+                                            {previewImages.map(
+                                                (_attachment, i) => {
+                                                    return (
+                                                        <div
+                                                            key={i}
+                                                            className={
+                                                                styles.imageAttachment
+                                                            }
+                                                            style={{
+                                                                backgroundImage: `url('${previewImages[i]}')`,
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className={`${styles.imageAttachmentOverlay}`}
+                                                            ></div>
+                                                            <div
+                                                                className={`${styles.imageAttachmentClose}`}
+                                                                onClick={(e) =>
+                                                                    handlePreviewImageClose(
+                                                                        e,
+                                                                        i,
+                                                                        previewImages,
+                                                                        setPreviewImages,
+                                                                        attachments,
+                                                                        setAttachments,
+                                                                        composePostRef,
+                                                                        setPostingAllowed
+                                                                    )
+                                                                }
+                                                            >
+                                                                <X
+                                                                    size="16"
+                                                                    weight="bold"
+                                                                ></X>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+                                            )}
+                                        </div>
+                                    )}
+                                    <div
+                                        className={`${styles.charLimit} ${
+                                            charsLeft < 0
+                                                ? styles.charLimitReached
+                                                : ""
+                                        }`}
+                                        style={{
+                                            width: `${
+                                                ((postCharLimit - charsLeft) *
+                                                    100) /
+                                                postCharLimit
+                                            }%`,
+                                        }}
+                                    ></div>
+                                    <div
+                                        className={`${styles.progressBar} ${
+                                            nowPosting
+                                                ? styles.progressBarInProgress
+                                                : ""
+                                        }`}
+                                    ></div>
+                                </div>
+                                {mobileCompose ? (
+                                    <div
+                                        className={
+                                            styles.composePostButtonsMobile
+                                        }
+                                    >
+                                        <div className={styles.buttonMobile}>
+                                            <ImageSquare size="36"></ImageSquare>
                                             <input
-                                                className={styles.fileInput}
+                                                className={
+                                                    styles.fileInputMobile
+                                                }
                                                 onChange={(e) =>
                                                     handleChange(
                                                         e,
@@ -321,133 +466,31 @@ export default function Home(): ReactElement {
                                                         toast
                                                     )
                                                 }
-                                                onClick={(e) => {
-                                                    e.currentTarget.value = null;
-                                                }}
+                                                onClick={(e) =>
+                                                    (e.currentTarget.value = null)
+                                                }
                                                 type="file"
                                                 accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                                 multiple
                                             />
                                         </div>
                                         <button
-                                            className={styles.button}
+                                            className={styles.buttonMobile}
                                             disabled={
                                                 postingAllowed ? false : true
                                             }
                                             onClick={handleClick}
                                         >
-                                            <ArrowElbowRightDown
-                                                size="30"
+                                            <PaperPlaneRight
+                                                size="36"
                                                 opacity={
                                                     postingAllowed ? "1" : "0.3"
                                                 }
-                                            ></ArrowElbowRightDown>
+                                            ></PaperPlaneRight>
                                         </button>
                                     </div>
-                                </div>
-                                {previewImages.length != 0 && (
-                                    <div className={styles.attachmentsPreview}>
-                                        {previewImages.map((_attachment, i) => {
-                                            return (
-                                                <div
-                                                    key={i}
-                                                    className={
-                                                        styles.imageAttachment
-                                                    }
-                                                    style={{
-                                                        backgroundImage: `url('${previewImages[i]}')`,
-                                                    }}
-                                                >
-                                                    <div
-                                                        className={`${styles.imageAttachmentOverlay}`}
-                                                    ></div>
-                                                    <div
-                                                        className={`${styles.imageAttachmentClose}`}
-                                                        onClick={(e) =>
-                                                            handlePreviewImageClose(
-                                                                e,
-                                                                i,
-                                                                previewImages,
-                                                                setPreviewImages,
-                                                                attachments,
-                                                                setAttachments,
-                                                                composePostRef,
-                                                                setPostingAllowed
-                                                            )
-                                                        }
-                                                    >
-                                                        <X
-                                                            size="16"
-                                                            weight="bold"
-                                                        ></X>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                                <div
-                                    className={`${styles.charLimit} ${
-                                        charsLeft < 0
-                                            ? styles.charLimitReached
-                                            : ""
-                                    }`}
-                                    style={{
-                                        width: `${
-                                            ((postCharLimit - charsLeft) * 100) /
-                                            postCharLimit
-                                        }%`,
-                                    }}
-                                ></div>
-                                <div
-                                    className={`${styles.progressBar} ${
-                                        nowPosting
-                                            ? styles.progressBarInProgress
-                                            : ""
-                                    }`}
-                                ></div>
+                                ) : null}
                             </div>
-                            {mobileCompose ? (
-                                <div
-                                    className={styles.composePostButtonsMobile}
-                                >
-                                    <div className={styles.buttonMobile}>
-                                        <ImageSquare size="36"></ImageSquare>
-                                        <input
-                                            className={styles.fileInputMobile}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    e,
-                                                    attachments,
-                                                    setAttachments,
-                                                    previewImages,
-                                                    setPreviewImages,
-                                                    setPostingAllowed,
-                                                    toast
-                                                )
-                                            }
-                                            onClick={(e) =>
-                                                (e.currentTarget.value = null)
-                                            }
-                                            type="file"
-                                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                            multiple
-                                        />
-                                    </div>
-                                    <button
-                                        className={styles.buttonMobile}
-                                        disabled={postingAllowed ? false : true}
-                                        onClick={handleClick}
-                                    >
-                                        <PaperPlaneRight
-                                            size="36"
-                                            opacity={
-                                                postingAllowed ? "1" : "0.3"
-                                            }
-                                        ></PaperPlaneRight>
-                                    </button>
-                                </div>
-                            ) : null}
                         </div>
                         <div className={`text-white ${styles.posts}`}>
                             {posts &&
