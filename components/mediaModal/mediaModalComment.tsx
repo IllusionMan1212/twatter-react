@@ -28,32 +28,39 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                 )
             }
         >
-            <div className={styles.commentUser}>
-                <Link href={`/u/${props.comment.author.username}`}>
-                    <a onClick={(e) => e.stopPropagation()}>
-                        <img
-                            className="profileImage"
-                            src={`${
-                                props.comment.author.profile_image ==
-                                "default_profile.svg"
-                                    ? "/"
-                                    : ""
-                            }${props.comment.author.profile_image}`}
-                            width="30"
-                            height="30"
-                            alt="User profile picture"
-                        />
-                    </a>
-                </Link>
-                <div
-                    className={`text-bold justify-content-center ${postStyles.user}`}
-                >
+            <div className="flex">
+                <div className={`mr-auto underline ${styles.commentUser}`}>
                     <Link href={`/u/${props.comment.author.username}`}>
                         <a onClick={(e) => e.stopPropagation()}>
-                            <p>{props.comment.author.display_name}</p>
+                            <img
+                                className="profileImage"
+                                src={`${
+                                    props.comment.author.profile_image ==
+                                    "default_profile.svg"
+                                        ? "/"
+                                        : ""
+                                }${props.comment.author.profile_image}`}
+                                width="30"
+                                height="30"
+                                alt="User profile picture"
+                            />
                         </a>
                     </Link>
+                    <div
+                        className={`text-bold justify-content-center ${postStyles.user}`}
+                    >
+                        <Link href={`/u/${props.comment.author.username}`}>
+                            <a onClick={(e) => e.stopPropagation()}>
+                                <p>{props.comment.author.display_name}</p>
+                            </a>
+                        </Link>
+                    </div>
                 </div>
+                <PostOptionsMenuButton
+                    postId={props.comment._id}
+                    postAuthorId={props.comment.author?._id}
+                    currentUserId={props.currentUser?._id}
+                ></PostOptionsMenuButton>
             </div>
             <div className={` ${styles.commentText}`}>
                 <p>{props.comment.content}</p>
@@ -81,11 +88,6 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                     ></LikeButton>
                 </div>
             </div>
-            <PostOptionsMenuButton
-                postId={props.comment._id}
-                postAuthorId={props.comment.author?._id}
-                currentUserId={props.currentUser?._id}
-            ></PostOptionsMenuButton>
         </div>
     );
 }

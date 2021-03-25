@@ -46,7 +46,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     </a>
                 </Link>
                 <div
-                    className={`text-bold justify-content-center ${postStyles.user}`}
+                    className={`text-bold justify-content-center mr-auto underline ${postStyles.user}`}
                 >
                     <Link href={`/u/${props.comment.author.username}`}>
                         <a onClick={(e) => e.stopPropagation()}>
@@ -54,6 +54,11 @@ export default function Comment(props: CommentProps): ReactElement {
                         </a>
                     </Link>
                 </div>
+                <PostOptionsMenuButton
+                    postId={props.comment._id}
+                    postAuthorId={props.comment.author?._id}
+                    currentUserId={props.currentUser?._id}
+                ></PostOptionsMenuButton>
             </div>
             <div className={` ${styles.commentText}`}>
                 <p>{props.comment.content}</p>
@@ -81,11 +86,6 @@ export default function Comment(props: CommentProps): ReactElement {
                     ></LikeButton>
                 </div>
             </div>
-            <PostOptionsMenuButton
-                postId={props.comment._id}
-                postAuthorId={props.comment.author?._id}
-                currentUserId={props.currentUser?._id}
-            ></PostOptionsMenuButton>
         </div>
     );
 }

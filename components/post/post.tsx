@@ -67,7 +67,7 @@ export default function Post(props: PostProps): ReactElement {
                         >
                             <a onClick={(e) => e.stopPropagation()}>
                                 <div className="text-bold flex flex-column justify-content-center">
-                                    <p className="ml-1">
+                                    <p className="ml-1 underline">
                                         {props.post.author.display_name}
                                     </p>
                                 </div>
@@ -82,6 +82,11 @@ export default function Post(props: PostProps): ReactElement {
                         </div>
                     )}
                 </div>
+                <PostOptionsMenuButton
+                    postId={props.post._id}
+                    postAuthorId={props.post.author?._id}
+                    currentUserId={props.currentUser?._id}
+                ></PostOptionsMenuButton>
                 <div className={`ml-1 ${styles.postText}`}>
                     <p>{props.post.content}</p>
                     {props.post.attachments?.length ? (
@@ -344,11 +349,6 @@ export default function Post(props: PostProps): ReactElement {
                         ></LikeButton>
                     </div>
                 </div>
-                <PostOptionsMenuButton
-                    postId={props.post._id}
-                    postAuthorId={props.post.author?._id}
-                    currentUserId={props.currentUser?._id}
-                ></PostOptionsMenuButton>
             </div>
             <div className={styles.postCommentsPreview}>
                 {props.post.attachments?.length
@@ -461,10 +461,10 @@ export default function Post(props: PostProps): ReactElement {
                     >
                         <a>
                             <p
-                                className={`text-small text-bold usernameGrey ${styles.viewCommentsText}`}
+                                className={"text-small text-bold usernameGrey underline"}
                             >
                                 View all{" "}
-                                {formatBigNumbers(props.post.numberOfComments)}{" "}
+                                {formatBigNumbers(props.post.numberOfComments || props.post.comments.length)}{" "}
                                 comment(s)
                             </p>
                         </a>

@@ -18,10 +18,11 @@ export default function PostOptionsMenuButton(
                 e.stopPropagation();
                 setOptionsMenu(!optionsMenu);
             }}
+            className={styles.optionsButton}
         >
             <DotsThree
                 ref={optionsButtonRef}
-                className={`pointer ${styles.optionsButton}`}
+                className="pointer"
                 size="30"
                 color="#8F8F8F"
                 onClick={() => {

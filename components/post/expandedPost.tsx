@@ -193,9 +193,9 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     </Link>
                     <div className={styles.user}>
                         <Link href={`/u/${props.post.author.username}`}>
-                            <a onClick={(e) => e.stopPropagation()}>
+                            <a className="mr-auto" onClick={(e) => e.stopPropagation()}>
                                 <div className="ml-1 flex flex-column justify-content-center">
-                                    <p className={styles.displayName}>
+                                    <p className={`underline ${styles.displayName}`}>
                                         {props.post.author.display_name}
                                     </p>
                                     <p className={styles.username}>
@@ -205,6 +205,12 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             </a>
                         </Link>
                     </div>
+                    <PostOptionsMenuButton
+                        postId={props.post._id}
+                        postAuthorId={props.post.author._id}
+                        currentUserId={props.currentUser?._id}
+                        callback={props.callback}
+                    ></PostOptionsMenuButton>
                     <div
                         className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
                     >
@@ -450,12 +456,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             </div>
                         ) : null}
                     </div>
-                    <PostOptionsMenuButton
-                        postId={props.post._id}
-                        postAuthorId={props.post.author._id}
-                        currentUserId={props.currentUser?._id}
-                        callback={props.callback}
-                    ></PostOptionsMenuButton>
                 </div>
                 <div className={styles.postFooter}>
                     <div

@@ -182,6 +182,12 @@ h6 {
     text-align: right;
 }
 
+.underline {
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
 /* Text */
 
 /* ----------------------------*/

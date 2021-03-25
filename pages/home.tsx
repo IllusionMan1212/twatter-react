@@ -42,7 +42,7 @@ export default function Home(): ReactElement {
     const [postingAllowed, setPostingAllowed] = useState(false);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
     const [mobileCompose, setMobileCompose] = useState(false);
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState<Array<PostType>>([]);
     const [attachments, setAttachments] = useState<Array<Attachment>>([]);
     const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [nowPosting, setNowPosting] = useState(false);
@@ -149,6 +149,7 @@ export default function Home(): ReactElement {
                 posts.map((post) => {
                     if (post._id == comment.replyingTo) {
                         post.comments.length < 4 && post.comments.push(comment);
+                        post.numberOfComments++;
                         return post;
                     }
                     return post;

@@ -168,7 +168,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <Link
                             href={`/u/${props.modalData.post.author.username}`}
                         >
-                            <a className={styles.user}>
+                            <a className={`mr-auto ${styles.user}`}>
                                 <img
                                     className="round"
                                     src={`${
@@ -186,7 +186,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     alt="User profile picture"
                                 />
                                 <div className="flex flex-column">
-                                    <p className={styles.displayName}>
+                                    <p className={`underline ${styles.displayName}`}>
                                         {
                                             props.modalData.post.author
                                                 .display_name
@@ -217,7 +217,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             post={props.modalData.post}
                             handleClick={handleCommentClick}
                             numberOfComments={
-                                props.modalData.post.numberOfComments ??
+                                props.modalData.post.numberOfComments ||
                                 props.modalData.post.comments.length
                             }
                         ></CommentButton>

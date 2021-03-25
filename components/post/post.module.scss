@@ -13,7 +13,7 @@
     padding: 15px;
     display: grid;
     position: relative;
-    grid-template-columns: auto 10fr;
+    grid-template-columns: auto 10fr auto;
 
     @media (max-width: 1000px) {
         flex-basis: 100%;
@@ -22,6 +22,7 @@
 
 .postText {
     grid-column-start: 2;
+    grid-column-end: 4;
     margin-bottom: 1em;
 
     p {
@@ -30,7 +31,7 @@
 
     @media (max-width: 800px) {
         grid-column-start: 1;
-        grid-column-end: 3;
+        grid-column-end: 4;
         margin-left: 0.3em !important;
         margin: 1em 0 0.5em 0;
     }
@@ -93,27 +94,12 @@
     }
 }
 
-.viewCommentsText {
-    &:hover {
-        text-decoration: underline;
-    }
-}
-
 .user {
     display: flex;
     align-items: center;
 
     a:hover {
         color: inherit;
-    }
-
-    div {
-        display: inline-flex;
-
-        &:hover {
-            text-decoration: underline;
-            cursor: pointer;
-        }
     }
 }
 
@@ -161,7 +147,7 @@
 .footer {
     display: grid;
     grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column-end: 4;
     grid-template-columns: 1fr 15fr;
     text-align: center;
 }
