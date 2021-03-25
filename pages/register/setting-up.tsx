@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import LayoutWide from "../../components/layout_wide";
+import LayoutWide from "../../components/layouts/layout_wide";
 import styles from "../../styles/setting-up.module.scss";
 import homeStyles from "../../styles/home.module.scss";
 import Head from "next/head";

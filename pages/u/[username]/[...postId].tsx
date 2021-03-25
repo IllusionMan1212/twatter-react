@@ -8,9 +8,9 @@ import NavbarLoggedOut from "../../../components/navbarLoggedOut";
 import StatusBar from "../../../components/statusBar";
 import { useUser } from "../../../src/hooks/useUserHook";
 import axios from "axios";
-import ExpandedPost from "../../../components/expandedPost";
-import styles from "../../../components/expandedPost.module.scss";
-import MediaModal from "../../../components/mediaModal";
+import ExpandedPost from "../../../components/post/expandedPost";
+import styles from "../../../components/post/expandedPost.module.scss";
+import MediaModal from "../../../components/mediaModal/mediaModal";
 import { User, Post } from "../../../src/types/general";
 
 export default function UserPost(): ReactElement {

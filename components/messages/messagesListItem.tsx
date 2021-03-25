@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./messagesListItem.module.scss";
-import { MessageListItemProps } from "../src/types/props";
+import { MessageListItemProps } from "../../src/types/props";
 import { ReactElement } from "react";
 import Link from "next/link";
 

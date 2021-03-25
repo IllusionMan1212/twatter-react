@@ -2,7 +2,7 @@
 import axios from "axios";
 import Head from "next/head";
 import { ReactElement, useState } from "react";
-import LayoutRegular from "../components/layoutRegular";
+import LayoutRegular from "../components/layouts/layoutRegular";
 import { useToastContext } from "../src/contexts/toastContext";
 import registerLoginStyles from "../styles/register-login.module.scss";
 import styles from "../styles/forgot-password.module.scss";

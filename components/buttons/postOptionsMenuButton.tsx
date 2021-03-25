@@ -1,9 +1,9 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useRef, useState } from "react";
 import styles from "./postOptionsMenuButton.module.scss";
-import PostOptionsMenu from "./postOptionsContextMenu";
+import PostOptionsMenu from "../postOptionsContextMenu";
 import { DotsThree } from "phosphor-react";
-import { PostOptionsMenuProps } from "../src/types/props";
+import { PostOptionsMenuProps } from "../../src/types/props";
 
 export default function PostOptionsMenuButton(
     props: PostOptionsMenuProps

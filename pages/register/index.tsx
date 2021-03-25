@@ -1,4 +1,4 @@
-import LayoutRegular from "../../components/layoutRegular";
+import LayoutRegular from "../../components/layouts/layoutRegular";
 import NavbarLoggedOut from "../../components/navbarLoggedOut";
 import styles from "../../styles/register-login.module.scss";
 import indexStyles from "../../styles/index.module.scss";

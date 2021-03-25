@@ -13,10 +13,10 @@ import {
     PenNib,
     X,
 } from "phosphor-react";
-import Post from "../components/post";
+import Post from "../components/post/post";
 import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
-import MediaModal from "../components/mediaModal";
+import MediaModal from "../components/mediaModal/mediaModal";
 import Router from "next/router";
 import { connectSocket, socket } from "../src/socket";
 import { Attachment, Post as PostType, User } from "src/types/general";

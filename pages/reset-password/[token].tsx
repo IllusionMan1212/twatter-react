@@ -3,7 +3,7 @@ import Head from "next/head";
 import axios from "axios";
 import { FormEvent, ReactElement, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import LayoutRegular from "../../components/layoutRegular";
+import LayoutRegular from "../../components/layouts/layoutRegular";
 import registerStyles from "../../styles/register-login.module.scss";
 import forgotPassStyles from "../../styles/forgot-password.module.scss";
 import NavbarLoggedOut from "../../components/navbarLoggedOut";

@@ -2,12 +2,12 @@
 import styles from "./post.module.scss";
 import Link from "next/link";
 import { ReactElement } from "react";
-import { formatBigNumbers, timeSince } from "../src/utils/functions";
-import LikeButton from "./likeButton";
-import { PostProps } from "../src/types/props";
-import PostOptionsMenuButton from "./postOptionsMenuButton";
+import { formatBigNumbers, timeSince } from "../../src/utils/functions";
+import LikeButton from "../buttons/likeButton";
+import { PostProps } from "../../src/types/props";
+import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import Router from "next/router";
-import CommentButton from "./commentButton";
+import CommentButton from "../buttons/commentButton";
 import { ChatCircle } from "phosphor-react";
 
 export default function Post(props: PostProps): ReactElement {

@@ -5,7 +5,7 @@ import Loading from "../../components/loading";
 import { useUser } from "../../src/hooks/useUserHook";
 import Head from "next/head";
 import styles from "../../styles/messages.module.scss";
-import MessagesListItem from "../../components/messagesListItem";
+import MessagesListItem from "../../components/messages/messagesListItem";
 import { ArrowLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import {
     FormEvent,
@@ -15,14 +15,14 @@ import {
     useRef,
     useState,
 } from "react";
-import Message from "../../components/message";
+import Message from "../../components/messages/message";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axiosInstance from "../../src/axios";
 import { useRouter } from "next/router";
 import { Attachment, Conversation } from "../../src/types/general";
 import { connectSocket, socket } from "../../src/socket";
 import Link from "next/link";
-import MessageMediaModal from "../../components/messageMediaModal";
+import MessageMediaModal from "../../components/messages/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
 import {
     fileSizeLimit,

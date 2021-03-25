@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import LayoutRegular from "./layoutRegular";
+import LayoutRegular from "./layouts/layoutRegular";
 import styles from "./navbarLoggedOut.module.scss";
 import Link from "next/link";
 import { ReactElement } from "react";

@@ -1,4 +1,4 @@
-@use "../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .withMediaModal {
     position: fixed;
@@ -40,10 +40,33 @@
     grid-gap: 10px;
 }
 
-.username {
+.user {
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+
+    &:hover {
+        color: inherit;
+    }
+}
+
+.displayName, .username {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.displayName {
+    font-weight: bold;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.username {
+    color: #666;
+    font-size: 0.9em;
 }
 
 .date {
@@ -55,7 +78,6 @@
 
 .modalPostComments {
     background-color: #1a1a1a;
-    padding: 15px;
     flex-grow: 1;
     overflow-y: scroll;
 }

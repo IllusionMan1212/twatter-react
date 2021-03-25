@@ -1,18 +1,18 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { ExpandedPostProps } from "../src/types/props";
+import { ExpandedPostProps } from "../../src/types/props";
 import styles from "./expandedPost.module.scss";
 import postStyles from "./post.module.scss";
 import Link from "next/link";
-import { formatDate, timeSince } from "../src/utils/functions";
-import LikeButton from "./likeButton";
-import PostOptionsMenuButton from "./postOptionsMenuButton";
+import { formatDate } from "../../src/utils/functions";
+import LikeButton from "../buttons/likeButton";
+import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import { ArrowArcLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
-import messagesStyles from "../styles/messages.module.scss";
-import { useToastContext } from "../src/contexts/toastContext";
-import { connectSocket, socket } from "../src/socket";
-import mediaModalStyles from "./mediaModal.module.scss";
-import { Attachment, User } from "src/types/general";
+import messagesStyles from "../../styles/messages.module.scss";
+import { useToastContext } from "../../src/contexts/toastContext";
+import { connectSocket, socket } from "../../src/socket";
+import mediaModalStyles from "../mediaModal/mediaModal.module.scss";
+import { Attachment } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -22,8 +22,8 @@ import {
     handleTextInput,
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
-import CommentButton from "./commentButton";
-import Router from "next/router";
+import CommentButton from "../buttons/commentButton";
+import Comment from "./comment";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -79,13 +79,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
 
     const handleCommentButtonClick = () => {
         commentBoxRef?.current?.focus();
-    };
-
-    const handleCommentButtonClickOnComment = (
-        commentId: string,
-        commentAuthor: User
-    ) => {
-        Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
 
     const handleComment = useCallback(
@@ -201,16 +194,19 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     <div className={styles.user}>
                         <Link href={`/u/${props.post.author.username}`}>
                             <a onClick={(e) => e.stopPropagation()}>
-                                <div className="text-bold flex flex-column justify-content-center">
-                                    <p className="ml-1">
+                                <div className="ml-1 flex flex-column justify-content-center">
+                                    <p className={styles.displayName}>
                                         {props.post.author.display_name}
+                                    </p>
+                                    <p className={styles.username}>
+                                        @{props.post.author.username}
                                     </p>
                                 </div>
                             </a>
                         </Link>
                     </div>
                     <div
-                        className={`ml-1 ${postStyles.postText} ${styles.expandedPostText}`}
+                        className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
                     >
                         <p>{props.post.content}</p>
                         {props.post.attachments.length ? (
@@ -481,78 +477,13 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                 </div>
             </div>
             <div className={styles.commentsSection}>
-                {props.post.comments.map((comment, i) => {
+                {props.post.comments.map((comment) => {
                     return (
-                        <div
-                            className={`${styles.comment} pointer`}
-                            key={i}
-                            onClick={() =>
-                                Router.push(
-                                    `/u/${comment.author.username}/${comment._id}`
-                                )
-                            }
-                        >
-                            <div className={styles.commentUser}>
-                                <Link href={`/u/${comment.author.username}`}>
-                                    <a onClick={(e) => e.stopPropagation()}>
-                                        <img
-                                            className="profileImage"
-                                            src={`${
-                                                comment.author.profile_image ==
-                                                "default_profile.svg"
-                                                    ? "/"
-                                                    : ""
-                                            }${comment.author.profile_image}`}
-                                            width="30"
-                                            height="30"
-                                            alt="User profile picture"
-                                        />
-                                    </a>
-                                </Link>
-                                <div
-                                    className={`text-bold justify-content-center ${postStyles.user}`}
-                                >
-                                    <Link
-                                        href={`/u/${comment.author.username}`}
-                                    >
-                                        <a onClick={(e) => e.stopPropagation()}>
-                                            <p>{comment.author.display_name}</p>
-                                        </a>
-                                    </Link>
-                                </div>
-                            </div>
-                            <div className={` ${styles.postText}`}>
-                                <p>{comment.content}</p>
-                            </div>
-                            <div className={postStyles.footer}>
-                                <div
-                                    className={`flex align-items-end text-small ${styles.commentDate}`}
-                                >
-                                    {timeSince(comment.createdAt)}
-                                </div>
-                                <div className="flex gap-1 justify-content-end">
-                                    <CommentButton
-                                        post={comment}
-                                        numberOfComments={comment.comments.length}
-                                        handleClick={() =>
-                                            handleCommentButtonClickOnComment(
-                                                comment._id,
-                                                comment.author
-                                            )
-                                        }
-                                    ></CommentButton>
-                                    <LikeButton
-                                        post={comment}
-                                        currentUserId={props.currentUser?._id}
-                                    ></LikeButton>
-                                </div>
-                            </div>
-                            <PostOptionsMenuButton
-                                postId={comment._id}
-                                postAuthorId={comment.author?._id}
-                                currentUserId={props.currentUser?._id}
-                            ></PostOptionsMenuButton>
-                        </div>
+                        <Comment
+                            key={comment._id}
+                            comment={comment}
+                            currentUser={props.currentUser}
+                        ></Comment>
                     );
                 })}
             </div>

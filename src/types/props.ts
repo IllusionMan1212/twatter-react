@@ -87,3 +87,8 @@ export interface CommentButtonProps {
     handleClick: () => void;
     numberOfComments: number;
 }
+
+export interface CommentProps {
+    comment: Post;
+    currentUser?: User;
+}

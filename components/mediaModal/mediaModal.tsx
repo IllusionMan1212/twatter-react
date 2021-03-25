@@ -7,19 +7,18 @@ import {
     ArrowRight,
 } from "phosphor-react";
 import styles from "./mediaModal.module.scss";
-import messagesStyles from "../styles/messages.module.scss";
+import messagesStyles from "../../styles/messages.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { formatDate } from "../src/utils/functions";
-import LikeButton from "./likeButton";
-import { MediaModalProps } from "../src/types/props";
-import PostOptionsMenuButton from "./postOptionsMenuButton";
-import { useToastContext } from "../src/contexts/toastContext";
+import { formatDate } from "../../src/utils/functions";
+import LikeButton from "../buttons/likeButton";
+import { MediaModalProps } from "../../src/types/props";
+import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
+import { useToastContext } from "../../src/contexts/toastContext";
 import SwiperCore, { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import Loading from "./loading";
+import Loading from "../loading";
 import axios from "axios";
-import postStyles from "./post.module.scss";
-import { connectSocket, socket } from "../src/socket";
+import { connectSocket, socket } from "../../src/socket";
 import { Attachment } from "src/types/general";
 import {
     handleChange,
@@ -30,6 +29,9 @@ import {
     handleTextInput,
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
+import MediaModalComment from "./mediaModalComment";
+import Link from "next/link";
+import CommentButton from "../buttons/commentButton";
 
 SwiperCore.use([Navigation]);
 
@@ -93,6 +95,10 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const handleWindowKeyDown = (e: KeyboardEvent) => {
         e.key == "Escape" && window.history.back();
+    };
+
+    const handleCommentClick = () => {
+        commentBoxRef?.current?.focus();
     };
 
     const handleComment = useCallback(
@@ -159,21 +165,39 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             <div className={`text-white ${styles.modalPost}`}>
                 <div className={styles.modalPostContent}>
                     <div className={styles.modalPostUser}>
-                        <img
-                            className="round"
-                            src={`${
-                                props.modalData.post.author.profile_image ==
-                                "default_profile.svg"
-                                    ? "/"
-                                    : ""
-                            }${props.modalData.post.author.profile_image}`}
-                            width="50"
-                            height="50"
-                            alt="User profile picture"
-                        />
-                        <p className={styles.username}>
-                            {props.modalData.post.author.display_name}
-                        </p>
+                        <Link
+                            href={`/u/${props.modalData.post.author.username}`}
+                        >
+                            <a className={styles.user}>
+                                <img
+                                    className="round"
+                                    src={`${
+                                        props.modalData.post.author
+                                            .profile_image ==
+                                        "default_profile.svg"
+                                            ? "/"
+                                            : ""
+                                    }${
+                                        props.modalData.post.author
+                                            .profile_image
+                                    }`}
+                                    width="50"
+                                    height="50"
+                                    alt="User profile picture"
+                                />
+                                <div className="flex flex-column">
+                                    <p className={styles.displayName}>
+                                        {
+                                            props.modalData.post.author
+                                                .display_name
+                                        }
+                                    </p>
+                                    <p className={styles.username}>
+                                        @{props.modalData.post.author.username}
+                                    </p>
+                                </div>
+                            </a>
+                        </Link>
                         <PostOptionsMenuButton
                             postId={props.modalData.post._id}
                             postAuthorId={props.modalData.post.author._id}
@@ -188,10 +212,20 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                     {props.modalData.post.content && (
                         <p>{props.modalData.post.content}</p>
                     )}
-                    <LikeButton
-                        post={props.modalData.post}
-                        currentUserId={props.modalData.currentUser._id}
-                    ></LikeButton>
+                    <div className="flex gap-1 justify-content-end">
+                        <CommentButton
+                            post={props.modalData.post}
+                            handleClick={handleCommentClick}
+                            numberOfComments={
+                                props.modalData.post.numberOfComments ??
+                                props.modalData.post.comments.length
+                            }
+                        ></CommentButton>
+                        <LikeButton
+                            post={props.modalData.post}
+                            currentUserId={props.modalData.currentUser._id}
+                        ></LikeButton>
+                    </div>
                     <p className={styles.date}>
                         {formatDate(props.modalData.post.createdAt)}
                     </p>
@@ -199,50 +233,15 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 <div className={styles.modalPostComments}>
                     {!commentsLoading ? (
                         <>
-                            {comments.map((comment, i) => {
+                            {comments.map((comment) => {
                                 return (
-                                    <div
-                                        className={postStyles.previewComment}
-                                        key={i}
-                                    >
-                                        {comment.author ? (
-                                            <img
-                                                className="profileImage"
-                                                src={`${
-                                                    comment.author
-                                                        ?.profile_image ==
-                                                    "default_profile.svg"
-                                                        ? "/"
-                                                        : ""
-                                                }${
-                                                    comment.author
-                                                        ?.profile_image
-                                                }`}
-                                                width="30"
-                                                height="30"
-                                            />
-                                        ) : (
-                                            <img
-                                                className="profileImage"
-                                                src="/default_profile.svg"
-                                                width="30"
-                                                height="30"
-                                            />
-                                        )}
-                                        <div className="text-bold text-small flex flex-column justify-content-center">
-                                            <p className="ml-1">
-                                                {comment.author?.display_name ??
-                                                    "Deleted Account"}
-                                            </p>
-                                        </div>
-                                        <div
-                                            className={`text-small ${postStyles.postText}`}
-                                        >
-                                            <p className="ml-1">
-                                                {comment.content}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <MediaModalComment
+                                        key={comment._id}
+                                        comment={comment}
+                                        currentUser={
+                                            props.modalData.currentUser
+                                        }
+                                    ></MediaModalComment>
                                 );
                             })}
                         </>
@@ -257,7 +256,8 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         }`}
                         style={{
                             width: `${
-                                ((postCharLimit - charsLeft) * 100) / postCharLimit
+                                ((postCharLimit - charsLeft) * 100) /
+                                postCharLimit
                             }%`,
                         }}
                     ></div>

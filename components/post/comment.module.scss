@@ -1,0 +1,42 @@
+@use "../../styles/variables";
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    position: relative;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.commentDate {
+    color: variables.$date-color;
+    align-items: center;
+}
+
+.commentUser {
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    margin-right: auto;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.commentText {
+    grid-column-start: 2;
+    margin: 1em 0;
+
+    p {
+        white-space: pre-wrap;
+    }
+
+    @media (max-width: 800px) {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        margin-left: 0.3em !important;
+        margin: 1em 0 0.5em 0;
+    }
+}

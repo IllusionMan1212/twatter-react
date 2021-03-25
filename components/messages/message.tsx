@@ -1,8 +1,8 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./message.module.scss";
-import { MessageProps } from "../src/types/props";
+import { MessageProps } from "../../src/types/props";
 import { ReactElement } from "react";
-import { formatMessgeTime } from "../src/utils/functions";
+import { formatMessgeTime } from "../../src/utils/functions";
 
 export default function Message({
     sender,

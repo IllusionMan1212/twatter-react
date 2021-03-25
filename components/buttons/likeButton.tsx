@@ -1,10 +1,10 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./likeButton.module.scss";
 import { ReactElement, useRef, useState } from "react";
-import { useToastContext } from "../src/contexts/toastContext";
-import axios from "../src/axios";
-import { LikeButtonProps } from "../src/types/props";
-import { formatBigNumbers } from "../src/utils/functions";
+import { useToastContext } from "../../src/contexts/toastContext";
+import axios from "../../src/axios";
+import { LikeButtonProps } from "../../src/types/props";
+import { formatBigNumbers } from "../../src/utils/functions";
 
 export default function LikeButton(props: LikeButtonProps): ReactElement {
     const [likes, setLikes] = useState(props.post.likeUsers.length);
