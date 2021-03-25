@@ -309,7 +309,7 @@ export default function Profile(): ReactElement {
                                 </div>
                             </div>
                             {mediaModal && (
-                                <MediaModal modalData={modalData}></MediaModal>
+                                <MediaModal modalData={modalData} handleMediaClick={handleMediaClick}></MediaModal>
                             )}
                         </>
                     ) : (
