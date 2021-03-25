@@ -24,6 +24,7 @@ import {
 import { postCharLimit } from "src/utils/variables";
 import CommentButton from "../buttons/commentButton";
 import Comment from "./comment";
+import AttachmentsContainer from "components/attachmentsContainer";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -215,246 +216,10 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
                     >
                         <p>{props.post.content}</p>
-                        {props.post.attachments.length ? (
-                            <div
-                                className={`my-1 ${postStyles.imagesContainer}`}
-                            >
-                                {props.post.attachments.length == 2 ? (
-                                    <>
-                                        <div
-                                            className={postStyles.halfImageGrid}
-                                        >
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment} ${postStyles.halfImageGrid2Images}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[0]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        0
-                                                    );
-                                                }}
-                                            ></div>
-                                        </div>
-                                        <div
-                                            className={postStyles.halfImageGrid}
-                                        >
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment} ${postStyles.halfImageGrid2Images}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[1]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        1
-                                                    );
-                                                }}
-                                            ></div>
-                                        </div>
-                                    </>
-                                ) : props.post.attachments.length == 3 ? (
-                                    <>
-                                        <div
-                                            className={postStyles.halfImageGrid}
-                                        >
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[0]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        0
-                                                    );
-                                                }}
-                                            ></div>
-                                        </div>
-                                        <div
-                                            className={postStyles.halfImageGrid}
-                                        >
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[1]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        1
-                                                    );
-                                                }}
-                                            ></div>
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[2]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        2
-                                                    );
-                                                }}
-                                            ></div>
-                                        </div>
-                                    </>
-                                ) : props.post.attachments.length == 4 ? (
-                                    <>
-                                        <div
-                                            className={postStyles.halfImageGrid}
-                                        >
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[0]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        0
-                                                    );
-                                                }}
-                                            ></div>
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[1]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        1
-                                                    );
-                                                }}
-                                            ></div>
-                                        </div>
-                                        <div
-                                            className={postStyles.halfImageGrid}
-                                        >
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[2]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        2
-                                                    );
-                                                }}
-                                            ></div>
-                                            <div
-                                                className={`max-w-100 ${postStyles.imageAttachment}`}
-                                                style={{
-                                                    backgroundImage: `url('${props.post.attachments[3]}')`,
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    window.history.pushState(
-                                                        null,
-                                                        null,
-                                                        `/u/${props.post.author.username}/${props.post._id}/media`
-                                                    );
-                                                    props.handleMediaClick(
-                                                        e,
-                                                        props.post,
-                                                        3
-                                                    );
-                                                }}
-                                            ></div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className={postStyles.halfImageGrid}>
-                                        <div
-                                            className={`max-w-100 ${postStyles.imageAttachment}`}
-                                            style={{
-                                                padding: "0",
-                                            }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                window.history.pushState(
-                                                    null,
-                                                    null,
-                                                    `/u/${props.post.author.username}/${props.post._id}/media`
-                                                );
-                                                props.handleMediaClick(
-                                                    e,
-                                                    props.post,
-                                                    0
-                                                );
-                                            }}
-                                        >
-                                            <img
-                                                src={`${props.post.attachments[0]}`}
-                                                width="100%"
-                                                height="100%"
-                                                alt="Post's attached image"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : null}
+                        <AttachmentsContainer
+                            post={props.post}
+                            handleMediaClick={props.handleMediaClick}
+                        ></AttachmentsContainer>
                     </div>
                 </div>
                 <div className={styles.postFooter}>
@@ -483,6 +248,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             key={comment._id}
                             comment={comment}
                             currentUser={props.currentUser}
+                            handleMediaClick={props.handleMediaClick}
                         ></Comment>
                     );
                 })}

@@ -10,6 +10,7 @@ import { User } from "src/types/general";
 import styles from "./mediaModalComment.module.scss";
 import postStyles from "../post/post.module.scss";
 import { CommentProps } from "src/types/props";
+import AttachmentsContainer from "components/attachmentsContainer";
 
 export default function MediaModalComment(props: CommentProps): ReactElement {
     const handleCommentButtonClickOnComment = (
@@ -64,6 +65,10 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
             </div>
             <div className={` ${styles.commentText}`}>
                 <p>{props.comment.content}</p>
+                <AttachmentsContainer
+                    post={props.comment}
+                    handleMediaClick={props.handleMediaClick}
+                ></AttachmentsContainer>
             </div>
             <div className={postStyles.footer}>
                 <div

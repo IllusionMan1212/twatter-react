@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./likeButton.module.scss";
-import { ReactElement, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axios from "../../src/axios";
 import { LikeButtonProps } from "../../src/types/props";
@@ -15,6 +15,11 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
     const likeRef = useRef(null);
 
     const toast = useToastContext();
+
+    useEffect(() => {
+        setLikes(props.post.likeUsers.length);
+        setLiked(props.post.likeUsers.includes(props.currentUserId));
+    }, [props.post]);
 
     const handleClick = () => {
         if (!props.currentUserId) {

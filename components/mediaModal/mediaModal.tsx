@@ -109,6 +109,34 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     );
 
     useEffect(() => {
+        setCommentsLoading(true);
+        setComments([]);
+        setCommentingAllowed(false);
+        setCharsLeft(postCharLimit);
+        setAttachments([]);
+        setPreviewImages([]);
+        setNowCommenting(false);
+
+        axios
+            .get(
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.modalData.post._id}`
+            )
+            .then((res) => {
+                setComments(res.data.comments);
+                setCommentsLoading(false);
+            })
+            .catch((err) => {
+                setCommentsLoading(false);
+                if (err?.response?.data?.status != 404) {
+                    toast(
+                        err?.response?.data?.message ?? "An error has occurred",
+                        4000
+                    );
+                }
+            });
+    }, [props.modalData.post]);
+
+    useEffect(() => {
         socket?.on("commentToClient", handleComment);
 
         return () => {
@@ -241,6 +269,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                         currentUser={
                                             props.modalData.currentUser
                                         }
+                                        handleMediaClick={props.handleMediaClick}
                                     ></MediaModalComment>
                                 );
                             })}

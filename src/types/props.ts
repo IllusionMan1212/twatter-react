@@ -75,6 +75,7 @@ export interface MediaModalProps {
         currentUser: User;
     };
     goBackTwice?: boolean;
+    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
 }
 
 export interface LikeButtonProps {
@@ -91,4 +92,10 @@ export interface CommentButtonProps {
 export interface CommentProps {
     comment: Post;
     currentUser?: User;
+    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
+}
+
+export interface ImageContainerProps {
+    post: Post;
+    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
 }

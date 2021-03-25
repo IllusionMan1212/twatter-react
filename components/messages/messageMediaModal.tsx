@@ -7,9 +7,21 @@ import { MessageMediaModalProps } from "../../src/types/props";
 export default function MessageMediaModal(
     props: MessageMediaModalProps
 ): ReactElement {
+    const handleWindowKeyDown = (e: KeyboardEvent) => {
+        e.key == "Escape" && window.history.back();
+    };
+
     useEffect(() => {
         window.onpopstate = () => {
             props.setImageModal(false);
+        };
+    });
+
+    useEffect(() => {
+        window?.addEventListener("keydown", handleWindowKeyDown);
+
+        return () => {
+            window?.removeEventListener("keydown", handleWindowKeyDown);
         };
     });
 

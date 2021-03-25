@@ -10,6 +10,7 @@ import { User } from "src/types/general";
 import styles from "./comment.module.scss";
 import postStyles from "./post.module.scss";
 import { CommentProps } from "src/types/props";
+import AttachmentsContainer from "../attachmentsContainer";
 
 export default function Comment(props: CommentProps): ReactElement {
     const handleCommentButtonClickOnComment = (
@@ -63,6 +64,10 @@ export default function Comment(props: CommentProps): ReactElement {
             <div className={` ${styles.commentText}`}>
                 <p>{props.comment.content}</p>
             </div>
+            <AttachmentsContainer
+                post={props.comment}
+                handleMediaClick={props.handleMediaClick}
+            ></AttachmentsContainer>
             <div className={postStyles.footer}>
                 <div
                     className={`flex align-items-end text-small ${styles.commentDate}`}

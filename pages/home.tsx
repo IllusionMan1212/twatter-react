@@ -523,7 +523,7 @@ export default function Home(): ReactElement {
                         <PenNib size="30"></PenNib>
                     </div>
                     {mediaModal && (
-                        <MediaModal modalData={modalData}></MediaModal>
+                        <MediaModal modalData={modalData} handleMediaClick={handleMediaClick}></MediaModal>
                     )}
                 </>
             ) : (

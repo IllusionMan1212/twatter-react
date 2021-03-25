@@ -161,6 +161,7 @@ export default function UserPost(): ReactElement {
                                 <MediaModal
                                     modalData={modalData}
                                     goBackTwice={true}
+                                    handleMediaClick={handleMediaClick}
                                 ></MediaModal>
                             )}
                         </>

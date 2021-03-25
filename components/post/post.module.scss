@@ -103,47 +103,6 @@
     }
 }
 
-.imagesContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-    grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
-    row-gap: 7px;
-    column-gap: 7px;
-}
-
-.halfImageGrid {
-    display: grid;
-    row-gap: 7px;
-    div {
-        height: auto;
-    }
-}
-
-.halfImageGrid2Images {
-    padding: 55% 30% !important;
-}
-
-.imageAttachment {
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    padding: 30%;
-    border-radius: 10px;
-
-    &:hover {
-        cursor: pointer;
-    }
-
-    @media (max-width: 800px) {
-        height: 200px;
-    }
-
-    @media (min-width: 801px) {
-        height: 45vh;
-    }
-}
-
 .footer {
     display: grid;
     grid-column-start: 1;
