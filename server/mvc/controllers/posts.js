@@ -235,7 +235,7 @@ const deletePost = async (req, res) => {
         }
     });
     // Delete the comment or post
-    await Post.findByIdAndDelete(req.body.postId, null, async (err, post) => {
+    await Post.findByIdAndDelete(req.body.postId, null, async (err) => {
         if (err) {
             console.error(err);
             res.status(500).json({
@@ -276,11 +276,7 @@ const deletePost = async (req, res) => {
             return;
         }
         res.status(200).json({
-            message: `Your ${
-                post.replyingTo
-                    ? "comment"
-                    : "post"
-            } has been deleted`,
+            message: "Your post has been deleted",
             status: 200,
             success: true
         });

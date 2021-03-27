@@ -59,6 +59,8 @@ export interface PostProps {
 
 export interface ExpandedPostProps extends PostProps {
     callback?: <T extends unknown[]>(...args: T) => void;
+    handleComment: (payload: Post) => void;
+    handlePostDelete?: (payload: string) => void;
 }
 
 export interface PostOptionsMenuProps {
@@ -66,6 +68,7 @@ export interface PostOptionsMenuProps {
     currentUserId: string;
     postId: string;
     callback?: <T extends unknown[]>(...args: T) => void;
+    handlePostDelete?: (payload: string) => void;
 }
 
 export interface MediaModalProps {
@@ -76,6 +79,8 @@ export interface MediaModalProps {
     };
     goBackTwice?: boolean;
     handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
+    handleComment: (payload: Post) => void;
+    handleCommentDelete: (commentId: string) => void;
 }
 
 export interface LikeButtonProps {

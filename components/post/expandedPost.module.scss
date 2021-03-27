@@ -39,11 +39,17 @@
 }
 
 .inputContainer {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 116px;
+    right: 0;
     display: flex;
     background-color: #111;
     flex-direction: column;
+
+    @media (max-width: 800px) {
+        left: 0;
+    }
 }
 
 .postFooter {
@@ -105,4 +111,33 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: calc(100% - 50px);
+}
+
+.progressBar {
+    background-color: #16c79a;
+    position: absolute;
+    left: -30%;
+    right: 0;
+    top: 0;
+    height: 7px;
+    border-radius: 0 0 8px 8px;
+    max-width: 30%;
+
+    @media (max-width: 800px) {
+        top: 0;
+        border-radius: 0;
+    }
+}
+
+.progressBarInProgress {
+    animation: infinte-loading 2s both infinite;
+}
+
+@keyframes infinte-loading {
+    0% {
+        left: -30%;
+    }
+    100% {
+        left: 100%;
+    }
 }

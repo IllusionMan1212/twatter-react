@@ -483,25 +483,6 @@ h6 {
 
 /* Custom Misc Stuff */
 
-/* TODO: dont forget to either use this class or remove it */
-
-.placeholder-glow {
-    position: absolute;
-    top: -200%;
-    bottom: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.001) 23%,
-        rgba(255, 255, 255, 0.14) 77%,
-        rgba(255, 255, 255, 0.5) 77%,
-        rgba(255, 255, 255, 0) 23%
-    );
-    width: 200%;
-    height: 600%;
-    transform: rotate(30deg);
-    animation: glow-slide 1.5s both infinite;
-}
-
 .outsideClickOverlay {
     position: fixed;
     left: 0;

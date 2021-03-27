@@ -157,7 +157,23 @@ export default function Home(): ReactElement {
 
     const handleDeletePost = useCallback(
         (postId) => {
-            setPosts(posts?.filter((post) => post._id != postId));
+            if (posts.some((post) => {
+                return post._id == postId;
+            })) {
+                setPosts(posts?.filter((post) => post._id != postId));
+            } else {
+                setPosts(posts.map((post) => {
+                    post.comments.map((comment) => {
+                        if (comment._id == postId) {
+                            post.comments = post.comments.filter((comment) => comment._id != postId);
+                            post.numberOfComments--;
+                            return comment;
+                        }
+                        return comment;
+                    });
+                    return post;
+                }));
+            }
         },
         [posts]
     );
@@ -523,7 +539,12 @@ export default function Home(): ReactElement {
                         <PenNib size="30"></PenNib>
                     </div>
                     {mediaModal && (
-                        <MediaModal modalData={modalData} handleMediaClick={handleMediaClick}></MediaModal>
+                        <MediaModal 
+                            modalData={modalData} 
+                            handleMediaClick={handleMediaClick}
+                            handleComment={handlePost}
+                            handleCommentDelete={handleDeletePost}
+                        ></MediaModal>
                     )}
                 </>
             ) : (

@@ -4,7 +4,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 100;
+    z-index: 1;
     display: flex;
     min-height: 100vh;
     max-height: 100vh;
@@ -12,6 +12,7 @@
 
     @media (max-width: 1024px) {
         left: 0 !important;
+        z-index: 10;
     }
 }
 
@@ -63,6 +64,10 @@
 .username {
     color: #666;
     font-size: 0.9em;
+}
+
+.postText {
+    white-space: pre-wrap;
 }
 
 .date {
@@ -163,4 +168,33 @@
 
 .charLimitReached {
     background-color: #ec4646;
+}
+
+.progressBar {
+    background-color: #16c79a;
+    position: absolute;
+    left: -30%;
+    right: 0;
+    top: 0;
+    height: 7px;
+    border-radius: 0 0 8px 8px;
+    max-width: 30%;
+
+    @media (max-width: 800px) {
+        top: 0;
+        border-radius: 0;
+    }
+}
+
+.progressBarInProgress {
+    animation: infinte-loading 2s both infinite;
+}
+
+@keyframes infinte-loading {
+    0% {
+        left: -30%;
+    }
+    100% {
+        left: 100%;
+    }
 }

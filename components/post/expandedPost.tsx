@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { ExpandedPostProps } from "../../src/types/props";
 import styles from "./expandedPost.module.scss";
 import postStyles from "./post.module.scss";
@@ -25,6 +25,7 @@ import { postCharLimit } from "src/utils/variables";
 import CommentButton from "../buttons/commentButton";
 import Comment from "./comment";
 import AttachmentsContainer from "components/attachmentsContainer";
+import axios from "axios";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -38,7 +39,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const [nowCommenting, setNowCommenting] = useState(false);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-        console.log(nowCommenting);
         if (!commentingAllowed) {
             e.preventDefault();
             return;
@@ -73,32 +73,28 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             socket?.emit("commentToServer", payload);
         } else {
             console.log("socket not connected, trying to connect");
-            connectSocket(props.currentUser.token);
-            socket?.emit("commentToServer", payload);
+            axios
+                .get(
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
+                )
+                .then((res) => {
+                    new Promise((resolve) => {
+                        connectSocket(res.data.token);
+                        resolve("resolved");
+                    }).then(() => {
+                        socket?.on("commentToClient", props.handleComment);
+                        socket.emit("commentToServer", payload);
+                    });
+                })
+                .catch((err) => {
+                    toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                });
         }
     };
 
     const handleCommentButtonClick = () => {
         commentBoxRef?.current?.focus();
     };
-
-    const handleComment = useCallback(
-        (payload) => {
-            toast("Commented Successfully", 3000);
-            setNowCommenting(false);
-
-            props.post.comments.unshift(payload);
-        },
-        [props.post]
-    );
-
-    useEffect(() => {
-        socket?.on("commentToClient", handleComment);
-
-        return () => {
-            socket?.off("commentToClient", handleComment);
-        };
-    }, [socket, handleComment]);
 
     useEffect(() => {
         commentBoxRef?.current?.addEventListener(
@@ -186,17 +182,22 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                         ? "/"
                                         : ""
                                 }${props.post.author.profile_image}`}
-                                width="40"
-                                height="40"
+                                width="50"
+                                height="50"
                                 alt="User profile picture"
                             />
                         </a>
                     </Link>
                     <div className={styles.user}>
                         <Link href={`/u/${props.post.author.username}`}>
-                            <a className="mr-auto" onClick={(e) => e.stopPropagation()}>
+                            <a
+                                className="mr-auto"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <div className="ml-1 flex flex-column justify-content-center">
-                                    <p className={`underline ${styles.displayName}`}>
+                                    <p
+                                        className={`underline ${styles.displayName}`}
+                                    >
                                         {props.post.author.display_name}
                                     </p>
                                     <p className={styles.username}>
@@ -211,6 +212,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         postAuthorId={props.post.author._id}
                         currentUserId={props.currentUser?._id}
                         callback={props.callback}
+                        handlePostDelete={props.handlePostDelete}
                     ></PostOptionsMenuButton>
                     <div
                         className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
@@ -265,6 +267,11 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                 postCharLimit
                             }%`,
                         }}
+                    ></div>
+                    <div
+                        className={`${styles.progressBar} ${
+                            nowCommenting ? styles.progressBarInProgress : ""
+                        }`}
                     ></div>
                     {attachments.length != 0 && (
                         <div

@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./post.module.scss";
 import Link from "next/link";
-import { ReactElement } from "react";
+import { ReactElement, useCallback, useEffect } from "react";
 import { formatBigNumbers, timeSince } from "../../src/utils/functions";
 import LikeButton from "../buttons/likeButton";
 import { PostProps } from "../../src/types/props";
@@ -10,6 +10,7 @@ import Router from "next/router";
 import CommentButton from "../buttons/commentButton";
 import { ChatCircle } from "phosphor-react";
 import AttachmentsContainer from "../attachmentsContainer";
+import { socket } from "src/socket";
 
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
@@ -19,6 +20,18 @@ export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClickMobile = () => {
         Router.push(`/u/${props.post.author.username}/${props.post._id}`);
     };
+
+    // const handleCommentDelete = useCallback((commentId) => {
+    //     props.post.
+    // });
+
+    // useEffect(() => {
+    //     socket?.on("deletePost", handleCommentDelete);
+
+    //     return () => {
+    //         socket?.off("deletePost", handleCommentDelete);
+    //     };
+    // }, [socket, handleCommentDelete]);
 
     return (
         <div

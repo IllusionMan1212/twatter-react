@@ -5,7 +5,7 @@ import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { PostOptionsMenuProps } from "../src/types/props";
 import { ReactElement } from "react";
-import { socket } from "../src/socket";
+import { connectSocket, socket } from "../src/socket";
 
 export default function PostOptionsMenu(
     props: PostOptionsMenuProps
@@ -27,7 +27,29 @@ export default function PostOptionsMenu(
         axios
             .post("posts/deletePost", payload)
             .then((res) => {
-                socket?.emit("deletePost", socketPayload);
+                if (socket) {
+                    socket?.emit("deletePost", socketPayload);
+                } else {
+                    console.log("socket not connected, trying to connect");
+                    axios
+                        .get(
+                            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
+                        )
+                        .then((res) => {
+                            new Promise((resolve) => {
+                                connectSocket(res.data.token);
+                                resolve("resolved");
+                            }).then(() => {
+                                // This function is being passed down so that the socket
+                                // can resubscribe to this event immediately
+                                socket?.on("deletePost", props.handlePostDelete);
+                                socket?.emit("deletePost", socketPayload);
+                            });
+                        })
+                        .catch((err) => {
+                            toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                        });
+                }
                 toast(res.data.message, 3000);
             })
             .catch((err) => {
@@ -47,19 +69,18 @@ export default function PostOptionsMenu(
                     <Share size="20"></Share>
                     Share Post
                 </div>
-                {props.currentUserId &&
-                props.postAuthorId == props.currentUserId ? (
-                        <>
-                            <hr />
-                            <div
-                                className={styles.deletePostButton}
-                                onClick={handleOnClick}
-                            >
-                                <Eraser size="20"></Eraser>
-                            Delete Post
-                            </div>
-                        </>
-                    ) : null}
+                {props.postAuthorId == props.currentUserId ? (
+                    <>
+                        <hr />
+                        <div
+                            className={styles.deletePostButton}
+                            onClick={handleOnClick}
+                        >
+                            <Eraser size="20"></Eraser>
+                        Delete Post
+                        </div>
+                    </>
+                ) : null}
             </div>
             <div className="outsideClickOverlay"></div>
         </>

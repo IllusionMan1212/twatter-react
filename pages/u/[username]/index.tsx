@@ -26,7 +26,7 @@ export default function Profile(): ReactElement {
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState<Array<PostType>>([]);
     const [postsLoading, setPostsLoading] = useState(true);
     const [modalData, setModalData] = useState({
         post: null as PostType,
@@ -38,7 +38,7 @@ export default function Profile(): ReactElement {
     let currentUser: User = null;
     currentUser = useUser();
 
-    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: any, index: number) => {
+    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: PostType, index: number) => {
         setModalData({
             post: post,
             imageIndex: index,
@@ -75,11 +75,33 @@ export default function Profile(): ReactElement {
         }));
     }, [posts]);
 
+    const handleCommentDelete = useCallback((commentId) => {
+        if (posts.some((post) => {
+            return post._id == commentId;
+        })) {
+            setPosts(posts?.filter((post) => post._id != commentId));
+        } else {
+            setPosts(posts.map((post) => {
+                post.comments.map((comment) => {
+                    if (comment._id == commentId) {
+                        post.comments = post.comments.filter((comment) => comment._id != commentId);
+                        post.numberOfComments--;
+                        return comment;
+                    }
+                    return comment;
+                });
+                return post;
+            }));
+        }
+    }, [posts]);
+
     useEffect(() => {
         socket?.on("commentToClient", handleComment);
+        socket?.on("deletePost", handleCommentDelete);
 
         return () => {
             socket?.off("commentToClient", handleComment);
+            socket?.off("deletePost", handleCommentDelete);
         };
     }, [socket, handleComment]);
 
@@ -309,7 +331,12 @@ export default function Profile(): ReactElement {
                                 </div>
                             </div>
                             {mediaModal && (
-                                <MediaModal modalData={modalData} handleMediaClick={handleMediaClick}></MediaModal>
+                                <MediaModal
+                                    modalData={modalData}
+                                    handleMediaClick={handleMediaClick}
+                                    handleComment={handleComment}
+                                    handleCommentDelete={handleCommentDelete}
+                                ></MediaModal>
                             )}
                         </>
                     ) : (

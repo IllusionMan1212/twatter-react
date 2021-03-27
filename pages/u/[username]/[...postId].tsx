@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import Loading from "../../../components/loading";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -12,13 +12,17 @@ import ExpandedPost from "../../../components/post/expandedPost";
 import styles from "../../../components/post/expandedPost.module.scss";
 import MediaModal from "../../../components/mediaModal/mediaModal";
 import { User, Post } from "../../../src/types/general";
+import { socket } from "../../../src/socket";
+import { useToastContext } from "src/contexts/toastContext";
 
 export default function UserPost(): ReactElement {
     const router = useRouter();
 
+    const toast = useToastContext();
+
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [post, setPost] = useState(null);
+    const [post, setPost] = useState<Post>(null);
     const [modalData, setModalData] = useState({
         post: null as Post,
         imageIndex: 0,
@@ -65,10 +69,40 @@ export default function UserPost(): ReactElement {
         );
     };
 
+    const handleComment = useCallback(
+        (payload: Post) => {
+            const newPost = post;
+            newPost.comments = newPost.comments.concat(payload);
+            setPost(newPost);
+            toast("Commented Successfully", 2000);
+        },
+        [post]
+    );
+
+    const handleCommentDelete = useCallback(
+        (commentId) => {
+            const newPost = post;
+            newPost.comments = post.comments.filter((comment) => comment._id != commentId);
+            setPost(newPost);
+        },
+        [post]
+    );
+
+    useEffect(() => {
+        socket?.on("deletePost", handleCommentDelete);
+        socket?.on("commentToClient", handleComment);
+
+        return () => {
+            socket?.off("deletePost", handleCommentDelete);
+            socket?.off("commentToClient", handleComment);
+        };
+    }, [socket, handleComment, handleCommentDelete]);
+
     useEffect(() => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
         setPost(null);
+        setMediaModal(false);
 
         if (router.query.postId?.[0]) {
             // if url contains other queries after the post id, remove them
@@ -150,8 +184,11 @@ export default function UserPost(): ReactElement {
                             >
                                 <div className={styles.expandedPostContainer}>
                                     <ExpandedPost
+                                        key={post.comments.length}
                                         currentUser={currentUser}
                                         post={post}
+                                        handleComment={handleComment}
+                                        handlePostDelete={handleCommentDelete}
                                         handleMediaClick={handleMediaClick}
                                         callback={() => window.history.back()}
                                     ></ExpandedPost>
@@ -162,6 +199,8 @@ export default function UserPost(): ReactElement {
                                     modalData={modalData}
                                     goBackTwice={true}
                                     handleMediaClick={handleMediaClick}
+                                    handleComment={handleComment}
+                                    handleCommentDelete={handleCommentDelete}
                                 ></MediaModal>
                             )}
                         </>

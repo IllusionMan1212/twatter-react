@@ -3,7 +3,7 @@ import axios from "axios";
 const baseUrl = `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api`;
 const axiosInstance = axios.create({
     baseURL: `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api`,
-    timeout: 60000,
+    timeout: 15000,
     withCredentials: true,
 });
 
