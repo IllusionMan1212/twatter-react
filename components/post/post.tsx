@@ -1,16 +1,15 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./post.module.scss";
 import Link from "next/link";
-import { ReactElement, useCallback, useEffect } from "react";
+import { ReactElement } from "react";
 import { formatBigNumbers, timeSince } from "../../src/utils/functions";
 import LikeButton from "../buttons/likeButton";
 import { PostProps } from "../../src/types/props";
 import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import Router from "next/router";
 import CommentButton from "../buttons/commentButton";
-import { ChatCircle } from "phosphor-react";
+import { ChatCircle, ImageSquare } from "phosphor-react";
 import AttachmentsContainer from "../attachmentsContainer";
-import { socket } from "src/socket";
 
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
@@ -20,18 +19,6 @@ export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClickMobile = () => {
         Router.push(`/u/${props.post.author.username}/${props.post._id}`);
     };
-
-    // const handleCommentDelete = useCallback((commentId) => {
-    //     props.post.
-    // });
-
-    // useEffect(() => {
-    //     socket?.on("deletePost", handleCommentDelete);
-
-    //     return () => {
-    //         socket?.off("deletePost", handleCommentDelete);
-    //     };
-    // }, [socket, handleCommentDelete]);
 
     return (
         <div
@@ -174,9 +161,25 @@ export default function Post(props: PostProps): ReactElement {
                                         <div
                                             className={`text-small ${styles.postText}`}
                                         >
-                                            <p className="ml-1">
-                                                {comment.content}
-                                            </p>
+                                            {comment.content ? (
+                                                <p className="ml-1 flex align-items-center">
+                                                    {comment.content}
+                                                    {comment.attachments.length != 0 && (
+                                                        <ImageSquare
+                                                            className="ml-2Percent usernameGrey"
+                                                            size={20}
+                                                        ></ImageSquare>
+                                                    )}
+                                                </p>
+                                            ) : comment.attachments.length != 0 && (
+                                                <p className="ml-1 flex align-items-center text-small usernameGrey">
+                                                      [Click to view attachment]
+                                                    <ImageSquare
+                                                        className="ml-2Percent"
+                                                        size={20}
+                                                    ></ImageSquare>
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -240,10 +243,15 @@ export default function Post(props: PostProps): ReactElement {
                     >
                         <a>
                             <p
-                                className={"text-small text-bold usernameGrey underline"}
+                                className={
+                                    "text-small text-bold usernameGrey underline"
+                                }
                             >
                                 View all{" "}
-                                {formatBigNumbers(props.post.numberOfComments || props.post.comments.length)}{" "}
+                                {formatBigNumbers(
+                                    props.post.numberOfComments ||
+                                        props.post.comments.length
+                                )}{" "}
                                 comment(s)
                             </p>
                         </a>
