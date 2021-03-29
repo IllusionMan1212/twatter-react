@@ -307,6 +307,11 @@
     animation: infinte-loading 2s both infinite;
 }
 
+.typing {
+    background-color: #6067fe;
+    padding: 5px 10px;
+}
+
 @keyframes infinte-loading {
     0% {
         left: -30%;

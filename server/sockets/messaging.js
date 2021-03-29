@@ -156,4 +156,25 @@ const handleMessage = (socket, connectedSockets) => {
     });
 };
 
-module.exports = handleMessage;
+const handleTyping = (socket, connectedSockets) => {
+    socket.on("typing", (payload) => {
+        if (connectedSockets.has(payload.receiverId)) {
+            connectedSockets.get(payload.receiverId).forEach((_socket) => {
+                _socket.emit("typing", payload.conversationId);
+            });
+        }
+    });
+
+    socket.on("stopTyping", (payload) => {
+        if (connectedSockets.has(payload.receiverId)) {
+            connectedSockets.get(payload.receiverId).forEach((_socket) => {
+                _socket.emit("stopTyping", payload.conversationId);
+            });
+        }
+    });
+};
+
+module.exports = {
+    handleMessage,
+    handleTyping,
+};

@@ -61,6 +61,8 @@ export default function Messages(): ReactElement {
     const [imageModal, setImageModal] = useState(false);
     const [modalAttachment, setModalAttachment] = useState("");
     const [atBottom, setAtBottom] = useState(false);
+    const [typing, setTyping] = useState(false);
+    const [timeoutId, setTimeoutId] = useState(null);
 
     const scrollToBottom = () => {
         virtuosoRef.current.scrollToIndex({
@@ -78,6 +80,14 @@ export default function Messages(): ReactElement {
     };
 
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
+        clearTimeout(timeoutId);
+        const payload = {
+            receiverId: activeConversation.receiverId,
+            senderId: user._id,
+            conversationId: activeConversation._id,
+        };
+        socket?.emit("typing", payload);
+
         if (e.currentTarget.textContent.trim().length > messageCharLimit) {
             setSendingAllowed(false);
         } else if (
@@ -91,6 +101,9 @@ export default function Messages(): ReactElement {
         setCharsLeft(
             messageCharLimit - e.currentTarget.textContent.trim().length
         );
+        setTimeoutId(setTimeout(() => {
+            socket?.emit("stopTyping", payload);
+        }, 4000));
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
@@ -170,6 +183,7 @@ export default function Messages(): ReactElement {
             // check if the client's active conversation is the one the message was received in
             // this basically ensures that convos that dont have the same id as the receiving message arent updated
             if (activeConversation?._id == msg.conversationId) {
+                setTyping(false);
                 const newMessages = messages.concat({
                     content: msg.content,
                     sentTime: msg.sentTime,
@@ -229,6 +243,18 @@ export default function Messages(): ReactElement {
         },
         [conversations]
     );
+
+    const handleTyping = (conversationId: string) => {
+        if (activeConversation._id == conversationId) {
+            setTyping(true);
+        }
+    };
+
+    const handleStopTyping = (conversationId: string) => {
+        if (activeConversation._id == conversationId) {
+            setTyping(false);
+        }
+    };
 
     const handleClickSend = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!sendingAllowed) {
@@ -430,12 +456,16 @@ export default function Messages(): ReactElement {
     useEffect(() => {
         socket?.on("messageFromServer", handleMessageRecieved);
         socket?.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        socket?.on("typing", handleTyping);
+        socket?.on("stopTyping", handleStopTyping);
 
         return () => {
             socket?.off("messageFromServer", handleMessageRecieved);
             socket?.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            socket?.off("typing", handleTyping);
+            socket?.off("stopTyping", handleStopTyping);
         };
-    }, [socket, handleMessageRecieved, handleMarkedMessagesAsRead]);
+    }, [socket, handleMessageRecieved, handleMarkedMessagesAsRead, handleTyping]);
 
     return (
         <>
@@ -635,12 +665,19 @@ export default function Messages(): ReactElement {
                                             </div>
                                         )}
                                     </div>
+                                    {typing && (
+                                        <div
+                                            className={styles.typing}
+                                        >
+                                            {activeConversation.display_name} is typing...
+                                        </div>
+                                    )}
                                     <div
                                         className={styles.messageInputContainer}
                                     >
                                         <div
                                             className={`${
-                                                styles.messageCharLimit
+                                                styles.charLimit
                                             } ${
                                                 charsLeft < 0
                                                     ? styles.charLimitReached

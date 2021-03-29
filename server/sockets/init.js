@@ -1,6 +1,6 @@
 /* eslint-disable require-atomic-updates */
 const socketio = require("socket.io");
-const handleMessage = require("./messaging");
+const { handleMessage, handleTyping } = require("./messaging");
 const connectedSockets = new Map();
 const { validateSession } = require("../utils/cookies");
 const handlePosts = require("./posts");
@@ -58,6 +58,7 @@ const initSockets = (server) => {
         handleMessage(socket, connectedSockets);
         handlePosts(io, socket);
         handleComments(io, socket);
+        handleTyping(socket, connectedSockets);
     });
 };
 
