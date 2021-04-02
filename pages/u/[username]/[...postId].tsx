@@ -14,6 +14,7 @@ import MediaModal from "../../../components/mediaModal/mediaModal";
 import { User, Post } from "../../../src/types/general";
 import { socket } from "../../../src/socket";
 import { useToastContext } from "src/contexts/toastContext";
+import { LikePayload } from "src/types/utils";
 
 export default function UserPost(): ReactElement {
     const router = useRouter();
@@ -90,15 +91,34 @@ export default function UserPost(): ReactElement {
         [post]
     );
 
+    const handleLike = useCallback(
+        (payload: LikePayload) => {            
+            if (payload.postId == post._id) {
+                const newPost = {
+                    ...post
+                };
+                if (payload.likeType == "LIKE") {
+                    newPost.likeUsers = newPost.likeUsers.concat(currentUser?._id);
+                } else if (payload.likeType == "UNLIKE") {
+                    newPost.likeUsers = post.likeUsers.filter((user) => user != currentUser?._id);
+                }
+                setPost(newPost);
+            }
+        },
+        [post]
+    );
+
     useEffect(() => {
         socket?.on("deletePost", handleCommentDelete);
         socket?.on("commentToClient", handleComment);
+        socket?.on("likeToClient", handleLike);
 
         return () => {
             socket?.off("deletePost", handleCommentDelete);
             socket?.off("commentToClient", handleComment);
+            socket?.off("likeToClient", handleLike);
         };
-    }, [socket, handleComment, handleCommentDelete]);
+    }, [socket, handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
         const cancelToken = axios.CancelToken;
@@ -186,6 +206,7 @@ export default function UserPost(): ReactElement {
                             >
                                 <div className={styles.expandedPostContainer}>
                                     <ExpandedPost
+                                        key={post._id}
                                         currentUser={currentUser}
                                         post={post}
                                         handleComment={handleComment}
@@ -194,6 +215,7 @@ export default function UserPost(): ReactElement {
                                         callback={() => window.history.back()}
                                         nowCommenting={nowCommenting}
                                         setNowCommenting={setNowCommenting}
+                                        handleLike={handleLike}
                                     ></ExpandedPost>
                                 </div>
                             </div>

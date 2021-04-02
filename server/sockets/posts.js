@@ -89,6 +89,11 @@ const handlePosts = (io, socket) => {
     socket.on("deletePost", ({ postId }) => {
         socket.emit("deletePost", postId);
     });
+
+    socket.on("likeToServer", (payload) => {
+        console.log(payload);
+        socket.emit("likeToClient", payload);
+    });
 };
 
 module.exports = handlePosts;

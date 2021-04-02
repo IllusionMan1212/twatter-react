@@ -95,13 +95,32 @@ export default function Profile(): ReactElement {
         }
     }, [posts]);
 
+    const handleLike = useCallback(
+        (payload) => {
+            setPosts(posts.map((post) => {
+                if (post._id == payload.postId) {
+                    if (payload.likeOrUnlike == "like") {
+                        post.likeUsers = post.likeUsers.concat(user._id);
+                    } else if (payload.likeOrUnlike == "unlike") {
+                        post.likeUsers = post.likeUsers.filter((_user) => _user != user._id);
+                    }
+                    return post;
+                }
+                return post;
+            }));
+        },
+        [posts]
+    );
+
     useEffect(() => {
         socket?.on("commentToClient", handleComment);
         socket?.on("deletePost", handleCommentDelete);
+        socket?.on("likeToClient", handleLike);
 
         return () => {
             socket?.off("commentToClient", handleComment);
             socket?.off("deletePost", handleCommentDelete);
+            socket?.off("likeToClient", handleLike);
         };
     }, [socket, handleComment]);
 
@@ -317,6 +336,7 @@ export default function Profile(): ReactElement {
                                                                 handleMediaClick
                                                             }
                                                             post={post}
+                                                            handleLike={handleLike}
                                                         ></Post>
                                                     );
                                                 })

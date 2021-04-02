@@ -284,7 +284,7 @@ const deletePost = async (req, res) => {
 };
 
 const likePost = (req, res) => {
-    if (!req.body.postId || !res.locals.userId || !req.body.likeOrUnlike) {
+    if (!req.body.postId || !res.locals.userId || !req.body.likeType) {
         res.status(400).json({
             message: "Invalid or incomplete request",
             status: 400,
@@ -292,7 +292,7 @@ const likePost = (req, res) => {
         });
         return;
     }
-    if (req.body.likeOrUnlike.toString() === "like") {
+    if (req.body.likeType === "LIKE") {
         Post.findByIdAndUpdate(
             req.body.postId,
             { $addToSet: { likeUsers: res.locals.userId } },
@@ -323,7 +323,7 @@ const likePost = (req, res) => {
                 });
             }
         );
-    } else if (req.body.likeOrUnlike.toString() === "unlike") {
+    } else if (req.body.likeType === "UNLIKE") {
         Post.findByIdAndUpdate(
             req.body.postId,
             { $pull: { likeUsers: res.locals.userId } },
