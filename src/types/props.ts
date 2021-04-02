@@ -1,5 +1,6 @@
 import { SetStateAction } from "react";
 import { Post, User } from "./general";
+import { LikePayload } from "./utils";
 
 export interface ToastProps {
     text: string;
@@ -56,6 +57,7 @@ export interface PostProps {
         post: Post,
         index: number
     ) => void;
+    handleLike: (payload: LikePayload) => void;
 }
 
 export interface ExpandedPostProps extends PostProps {
@@ -89,6 +91,8 @@ export interface MediaModalProps {
 export interface LikeButtonProps {
     post: Post;
     currentUserId?: string;
+    handleLike: (payload: LikePayload) => void;
+    likeUsers: Array<string>;
 }
 
 export interface CommentButtonProps {
@@ -101,6 +105,10 @@ export interface CommentProps {
     comment: Post;
     currentUser?: User;
     handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
+}
+
+export interface ModalCommentProps extends CommentProps {
+    updateModalCommentLikes: (payload: LikePayload) => void;
 }
 
 export interface ImageContainerProps {

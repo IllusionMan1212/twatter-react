@@ -238,6 +238,8 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         <LikeButton
                             post={props.post}
                             currentUserId={props.currentUser?._id}
+                            handleLike={props.handleLike}
+                            likeUsers={props.post.likeUsers}
                         ></LikeButton>
                     </div>
                 </div>

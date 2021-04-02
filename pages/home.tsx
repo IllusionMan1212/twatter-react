@@ -30,6 +30,7 @@ import {
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
 import axios from "axios";
+import { LikePayload } from "src/types/utils";
 
 export default function Home(): ReactElement {
     const user = useUser("/login", null);
@@ -194,17 +195,36 @@ export default function Home(): ReactElement {
         [posts]
     );
 
+    const handleLike = useCallback(
+        (payload: LikePayload) => {
+            setPosts(posts.map((post) => {
+                if (post._id == payload.postId) {
+                    if (payload.likeType == "LIKE") {
+                        post.likeUsers = post.likeUsers.concat(user._id);
+                    } else if (payload.likeType == "UNLIKE") {
+                        post.likeUsers = post.likeUsers.filter((_user) => _user != user._id);
+                    }
+                    return post;
+                }
+                return post;
+            }));
+        },
+        [posts]
+    );
+
     useEffect(() => {
         socket?.on("post", handlePost);
         socket?.on("deletePost", handleDeletePost);
         socket?.on("commentToClient", handleComment);
+        socket?.on("likeToClient", handleLike);
 
         return () => {
             socket?.off("post", handlePost);
             socket?.off("deletePost", handleDeletePost);
             socket?.off("commentToClient", handleComment);
+            socket?.off("likeToClient", handleLike);
         };
-    }, [socket, handlePost, handleDeletePost, handleComment]);
+    }, [socket, handlePost, handleDeletePost, handleComment, handleLike]);
 
     useEffect(() => {
         const cancelToken = axios.CancelToken;
@@ -517,6 +537,7 @@ export default function Home(): ReactElement {
                                             post={post}
                                             currentUser={user}
                                             handleMediaClick={handleMediaClick}
+                                            handleLike={handleLike}
                                         ></Post>
                                     );
                                 })}

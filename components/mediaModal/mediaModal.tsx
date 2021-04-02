@@ -32,6 +32,7 @@ import { postCharLimit } from "src/utils/variables";
 import MediaModalComment from "./mediaModalComment";
 import Link from "next/link";
 import CommentButton from "../buttons/commentButton";
+import { LikePayload } from "src/types/utils";
 
 SwiperCore.use([Navigation]);
 
@@ -49,6 +50,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [comments, setComments] = useState<Array<Post>>([]);
     const [nowCommenting, setNowCommenting] = useState(false);
+    const [likes, setLikes] = useState<Array<string>>([]);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!commentingAllowed) {
@@ -87,7 +89,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             console.log("socket not connected, trying to connect");
             axios
                 .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`
                 )
                 .then((res) => {
                     new Promise((resolve) => {
@@ -97,11 +99,15 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         socket?.on("commentToClient", props.handleComment);
                         socket?.on("commentToClient", handleComment);
                         socket?.on("deletePost", handleCommentDelete);
+                        socket?.on("likeToClient", handleLike);
                         socket.emit("commentToServer", payload);
                     });
                 })
                 .catch((err) => {
-                    toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                    toast(
+                        err?.response?.data?.message ?? "An error has occurred",
+                        3000
+                    );
                 });
         }
     };
@@ -129,6 +135,37 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         [comments]
     );
 
+    const handleLike = useCallback(
+        (payload: LikePayload) => {
+            if (payload.postId == props.modalData.post._id) {
+                if (payload.likeType == "LIKE") {
+                    setLikes(likes.concat(props.modalData.currentUser?._id));
+                } else if (payload.likeType == "UNLIKE") {
+                    setLikes(
+                        likes.filter(
+                            (user) => user != props.modalData.currentUser?._id
+                        )
+                    );
+                }
+            }
+        },
+        [likes]
+    );
+
+    const updateModalCommentLikes = (payload: LikePayload) => {
+        setComments(comments.map((comment => {
+            if (payload.postId == comment._id) {
+                if (payload.likeType == "LIKE") {
+                    comment.likeUsers = comment.likeUsers.concat(props.modalData.currentUser?._id);
+                } else if (payload.likeType == "UNLIKE") {
+                    comment.likeUsers = comment.likeUsers.filter((user) => user != props.modalData.currentUser?._id);
+                }
+                return comment;
+            }
+            return comment;
+        })));
+    };
+
     useEffect(() => {
         setCommentsLoading(true);
         setComments([]);
@@ -137,6 +174,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setAttachments([]);
         setPreviewImages([]);
         setNowCommenting(false);
+        setLikes(props.modalData.post.likeUsers);
 
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
@@ -156,13 +194,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                     console.log("request canceled");
                 } else {
                     err?.response?.data?.status != 404 &&
-                    toast(
-                        err?.response?.data?.message ?? "An error has occurred",
-                        4000
-                    );
+                        toast(
+                            err?.response?.data?.message ??
+                                "An error has occurred",
+                            4000
+                        );
                 }
             });
-        
+
         return () => {
             tokenSource.cancel();
         };
@@ -171,10 +210,12 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     useEffect(() => {
         socket?.on("commentToClient", handleComment);
         socket?.on("deletePost", handleCommentDelete);
+        socket?.on("likeToClient", handleLike);
 
         return () => {
             socket?.off("commentToClient", handleComment);
             socket?.off("deletePost", handleCommentDelete);
+            socket?.off("likeToClient", handleLike);
         };
     }, [socket, handleComment]);
 
@@ -228,7 +269,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     alt="User profile picture"
                                 />
                                 <div className="flex flex-column">
-                                    <p className={`underline ${styles.displayName}`}>
+                                    <p
+                                        className={`underline ${styles.displayName}`}
+                                    >
                                         {
                                             props.modalData.post.author
                                                 .display_name
@@ -253,7 +296,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         ></PostOptionsMenuButton>
                     </div>
                     {props.modalData.post.content && (
-                        <p className={styles.postText}>{props.modalData.post.content}</p>
+                        <p className={styles.postText}>
+                            {props.modalData.post.content}
+                        </p>
                     )}
                     <div className="flex gap-1 justify-content-end">
                         <CommentButton
@@ -264,6 +309,8 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <LikeButton
                             post={props.modalData.post}
                             currentUserId={props.modalData.currentUser?._id}
+                            handleLike={handleLike}
+                            likeUsers={likes}
                         ></LikeButton>
                     </div>
                     <p className={styles.date}>
@@ -281,7 +328,12 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                         currentUser={
                                             props.modalData.currentUser
                                         }
-                                        handleMediaClick={props.handleMediaClick}
+                                        handleMediaClick={
+                                            props.handleMediaClick
+                                        }
+                                        updateModalCommentLikes={
+                                            updateModalCommentLikes
+                                        }
                                     ></MediaModalComment>
                                 );
                             })}
@@ -299,7 +351,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             style={{
                                 width: `${
                                     ((postCharLimit - charsLeft) * 100) /
-                                postCharLimit
+                                    postCharLimit
                                 }%`,
                             }}
                         ></div>
@@ -414,7 +466,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     <PaperPlane
                                         size="30"
                                         color="#6067fe"
-                                        opacity={commentingAllowed ? "1" : "0.3"}
+                                        opacity={
+                                            commentingAllowed ? "1" : "0.3"
+                                        }
                                     ></PaperPlane>
                                 </button>
                             </div>

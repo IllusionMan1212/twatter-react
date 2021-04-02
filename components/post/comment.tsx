@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import LikeButton from "../buttons/likeButton";
 import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import CommentButton from "../buttons/commentButton";
@@ -11,14 +11,40 @@ import styles from "./comment.module.scss";
 import postStyles from "./post.module.scss";
 import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "../attachmentsContainer";
+import { socket } from "src/socket";
+import { LikePayload } from "src/types/utils";
 
 export default function Comment(props: CommentProps): ReactElement {
+    const [likes, setLikes] = useState<Array<string>>(props.comment.likeUsers);
+
     const handleCommentButtonClickOnComment = (
         commentId: string,
         commentAuthor: User
     ) => {
         Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
+
+    const handleLike = useCallback(
+        (payload: LikePayload) => {
+            const newLikes = [...likes];
+            if (payload.postId == props.comment._id) {
+                if (payload.likeType == "LIKE") {
+                    setLikes(newLikes.concat(props.currentUser?._id));
+                } else if (payload.likeType == "UNLIKE") {
+                    setLikes(newLikes.filter((user) => user != props.currentUser?._id));
+                }
+            }
+        },
+        [likes]
+    );
+
+    useEffect(() => {
+        socket?.on("likeToClient", handleLike);
+
+        return () => {
+            socket?.off("likeToClient", handleLike);
+        };
+    }, [socket, handleLike]);
 
     return (
         <div
@@ -88,6 +114,8 @@ export default function Comment(props: CommentProps): ReactElement {
                     <LikeButton
                         post={props.comment}
                         currentUserId={props.currentUser?._id}
+                        likeUsers={likes}
+                        handleLike={handleLike}
                     ></LikeButton>
                 </div>
             </div>
