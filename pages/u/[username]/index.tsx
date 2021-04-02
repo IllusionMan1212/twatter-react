@@ -17,6 +17,7 @@ import { ChatTeardropText } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
 import { socket } from "../../../src/socket";
 import { User, Post as PostType } from "../../../src/types/general";
+import { LikePayload } from "src/types/utils";
 
 export default function Profile(): ReactElement {
     const router = useRouter();
@@ -96,12 +97,12 @@ export default function Profile(): ReactElement {
     }, [posts]);
 
     const handleLike = useCallback(
-        (payload) => {
+        (payload: LikePayload) => {
             setPosts(posts.map((post) => {
                 if (post._id == payload.postId) {
-                    if (payload.likeOrUnlike == "like") {
+                    if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(user._id);
-                    } else if (payload.likeOrUnlike == "unlike") {
+                    } else if (payload.likeType == "UNLIKE") {
                         post.likeUsers = post.likeUsers.filter((_user) => _user != user._id);
                     }
                     return post;

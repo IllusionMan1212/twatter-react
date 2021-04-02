@@ -91,7 +91,6 @@ const handlePosts = (io, socket) => {
     });
 
     socket.on("likeToServer", (payload) => {
-        console.log(payload);
         socket.emit("likeToClient", payload);
     });
 };
