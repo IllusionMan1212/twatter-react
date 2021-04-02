@@ -36,7 +36,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const [attachments, setAttachments] = useState<Array<Attachment>>([]);
     const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
-    const [nowCommenting, setNowCommenting] = useState(false);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!commentingAllowed) {
@@ -54,7 +53,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             e.preventDefault();
             return;
         }
-        setNowCommenting(true);
+        props.setNowCommenting(true);
         const content = commentBoxRef?.current?.innerText
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
@@ -270,7 +269,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     ></div>
                     <div
                         className={`${styles.progressBar} ${
-                            nowCommenting ? styles.progressBarInProgress : ""
+                            props.nowCommenting ? styles.progressBarInProgress : ""
                         }`}
                     ></div>
                     {attachments.length != 0 && (

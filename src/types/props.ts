@@ -1,3 +1,4 @@
+import { SetStateAction } from "react";
 import { Post, User } from "./general";
 
 export interface ToastProps {
@@ -61,6 +62,8 @@ export interface ExpandedPostProps extends PostProps {
     callback?: <T extends unknown[]>(...args: T) => void;
     handleComment: (payload: Post) => void;
     handlePostDelete?: (payload: string) => void;
+    nowCommenting: boolean;
+    setNowCommenting: (value: SetStateAction<boolean>) => void;
 }
 
 export interface PostOptionsMenuProps {

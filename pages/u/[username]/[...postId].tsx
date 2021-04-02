@@ -29,6 +29,7 @@ export default function UserPost(): ReactElement {
         currentUser: null as User,
     });
     const [mediaModal, setMediaModal] = useState(false);
+    const [nowCommenting, setNowCommenting] = useState(false);
 
     let currentUser: User = null;
     currentUser = useUser();
@@ -74,6 +75,7 @@ export default function UserPost(): ReactElement {
             const newPost = post;
             newPost.comments = newPost.comments.concat(payload);
             setPost(newPost);
+            setNowCommenting(false);
             toast("Commented Successfully", 2000);
         },
         [post]
@@ -184,13 +186,14 @@ export default function UserPost(): ReactElement {
                             >
                                 <div className={styles.expandedPostContainer}>
                                     <ExpandedPost
-                                        key={post.comments.length}
                                         currentUser={currentUser}
                                         post={post}
                                         handleComment={handleComment}
                                         handlePostDelete={handleCommentDelete}
                                         handleMediaClick={handleMediaClick}
                                         callback={() => window.history.back()}
+                                        nowCommenting={nowCommenting}
+                                        setNowCommenting={setNowCommenting}
                                     ></ExpandedPost>
                                 </div>
                             </div>
