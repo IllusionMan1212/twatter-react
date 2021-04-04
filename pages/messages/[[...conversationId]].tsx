@@ -31,12 +31,15 @@ import {
 } from "src/utils/variables";
 
 export default function Messages(): ReactElement {
+    const START_INDEX = 10000;
+
     const toast = useToastContext();
 
     const user = useUser("/login", null);
 
     const messageInputRef = useRef<HTMLSpanElement>(null);
     const virtuosoRef = useRef(null);
+    const pageRef = useRef(null);
 
     const router = useRouter();
 
@@ -55,7 +58,6 @@ export default function Messages(): ReactElement {
     });
     const [isConversationActive, setIsConversationActive] = useState(false);
     const [messages, setMessages] = useState([]); // TODO: explicitly type this
-    const [messagesLoading, setMessagesLoading] = useState(false);
     const [nowSending, setNowSending] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
     const [imageModal, setImageModal] = useState(false);
@@ -63,9 +65,14 @@ export default function Messages(): ReactElement {
     const [atBottom, setAtBottom] = useState(false);
     const [typing, setTyping] = useState(false);
     const [timeoutId, setTimeoutId] = useState(null);
+    const [page, setPage] = useState(0);
+    const [reachedStart, setReachedStart] = useState(false);
+    const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX);
+
+    pageRef.current = page;
 
     const scrollToBottom = () => {
-        virtuosoRef.current.scrollToIndex({
+        virtuosoRef?.current?.scrollToIndex({
             index: messages.length - 1,
             behavior: "smooth",
         });
@@ -201,7 +208,9 @@ export default function Messages(): ReactElement {
                     userId: user._id,
                     unreadMessages: msg.sender == user._id ? 0 : 1,
                 };
-                socket?.emit("markMessagesAsRead", payload); // conversation is active, so the user has read the message
+
+                // conversation is active, so the user has read the message
+                socket?.emit("markMessagesAsRead", payload);
             }
             const newConversations = conversations.map((conversation) => {
                 return conversation._id == msg.conversationId
@@ -360,13 +369,47 @@ export default function Messages(): ReactElement {
             userId: user._id,
             unreadMessages: conversation.unreadMessages,
         };
-        socket?.emit("markMessagesAsRead", payload); // when a conversation is opened, we mark its messages as read
+
+        // when a conversation is opened, we mark its messages as read
+        socket?.emit("markMessagesAsRead", payload);
         if (router.query?.conversationId?.[0] != conversation._id) {
-            router.push(`/messages/${conversation._id}`, null, {
-                shallow: true,
-            });
+            // HACK: this works around virutoso not calling the loadMoreMessages function
+            // when changing conversations
+            router.push("/messages");
+            router.push(`/messages/${conversation._id}`);
         }
     };
+
+    const getMessages = (conversationId: string): Promise<any> => {
+        return axiosInstance
+            .get(`/messaging/getMessages/${conversationId}/${pageRef.current}`)
+            .then((res) => {
+                return res.data.messages;
+            })
+            .catch((err) => {
+                toast(
+                    err?.response?.data?.message ?? "An error has occurred",
+                    5000
+                );
+            });
+    };
+
+    const loadMoreMessages = useCallback(() => {
+        console.log("loading more messages");
+        setPage(pageRef.current + 1);
+        getMessages(activeConversation._id).then((newMessages) => {
+            if (!newMessages.length) {
+                setReachedStart(true);
+                return false;
+            }
+            const messagesToPrepend = newMessages.length;
+            const nextFirstItemIndex = firstItemIndex - messagesToPrepend;
+    
+            setFirstItemIndex(() => nextFirstItemIndex);
+            setMessages((messages) => [...newMessages].concat(messages));
+        });
+        return false;
+    }, [setMessages, messages, page, pageRef, firstItemIndex, reachedStart]);
 
     useEffect(() => {
         if (atBottom) {
@@ -375,9 +418,16 @@ export default function Messages(): ReactElement {
     }, [atBottom, setNewMessagesAlert]);
 
     useEffect(() => {
+        setPage(0);
+        pageRef.current = 0;
+        setReachedStart(false);
+        setFirstItemIndex(START_INDEX);
+
         if (!router.query?.conversationId?.[0]) {
             setIsConversationActive(false);
-            setActiveConversation(null); // used to remove the active class from the last active conversation
+
+            // used to remove the active class from the last active conversation
+            setActiveConversation(null);
             return;
         }
         // if conversations haven't been fetched yet, dont fetch messages
@@ -404,23 +454,12 @@ export default function Messages(): ReactElement {
             receiverId: newActiveConversation.receivers[0]?._id,
         });
         setMessages([]);
-        setMessagesLoading(true);
         setIsConversationActive(true);
-        axiosInstance
-            .get(`/messaging/getMessages/${router.query.conversationId[0]}`)
-            .then((res) => {
-                setMessages(res.data.messages);
-                setMessagesLoading(false);
-                scrollToBottom();
-            })
-            .catch((err) => {
-                toast(
-                    err?.response?.data?.message ?? "An error has occurred",
-                    5000
-                );
-                setMessagesLoading(false);
-            });
-    }, [router.query?.conversationId, conversations]);
+
+        getMessages(router.query.conversationId[0]).then((messages) => {
+            setMessages(messages);
+        });
+    }, [router.query?.conversationId, conversations.length]);
 
     useEffect(() => {
         messageInputRef?.current?.addEventListener(
@@ -599,8 +638,10 @@ export default function Messages(): ReactElement {
                                             className={styles.messagesArea}
                                             totalCount={messages.length}
                                             initialTopMostItemIndex={
-                                                messages.length - 1
+                                                messages.length > 0 ? messages.length - 1 : 0
                                             }
+                                            data={messages}
+                                            firstItemIndex={firstItemIndex}
                                             alignToBottom
                                             followOutput
                                             atBottomStateChange={(bottom) => {
@@ -610,33 +651,39 @@ export default function Messages(): ReactElement {
                                                     setAtBottom(bottom);
                                                 }
                                             }}
+                                            startReached={loadMoreMessages}
                                             // eslint-disable-next-line react/display-name
                                             components={{Header: () => {
                                                 return (
                                                     <>
-                                                        {messagesLoading && (
-                                                            <Loading
-                                                                height="50"
-                                                                width="50"
-                                                            ></Loading>
+                                                        {reachedStart ? (
+                                                            <div className="usernameGrey text-center text-bold py-3">
+                                                                <p>You have reached the beginning of this conversation</p>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="py-3">
+                                                                <Loading
+                                                                    height="50"
+                                                                    width="50"
+                                                                ></Loading>
+                                                            </div>
                                                         )}
                                                     </>
                                                 );
                                             },
                                             }}
-                                            itemContent={(index) => (
+                                            itemContent={(index, message) => (
                                                 <Message
                                                     key={index}
                                                     sender={
                                                         user._id ==
-                                                        messages[index].ownerId
+                                                        message.ownerId
                                                     }
                                                     sentTime={
-                                                        messages[index].sentTime
+                                                        message.sentTime
                                                     }
                                                     attachment={
-                                                        messages[index]
-                                                            .attachment
+                                                        message.attachment
                                                     }
                                                     conversationId={
                                                         activeConversation?._id
@@ -648,7 +695,7 @@ export default function Messages(): ReactElement {
                                                         setModalAttachment
                                                     }
                                                 >
-                                                    {messages[index].content}
+                                                    {message.content}
                                                 </Message>
                                             )}
                                         ></Virtuoso>

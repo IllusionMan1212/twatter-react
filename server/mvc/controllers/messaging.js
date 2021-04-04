@@ -191,7 +191,7 @@ const getConversations = (_req, res) => {
 };
 
 const getMessages = (req, res) => {
-    if (!req.params.conversationId) {
+    if (!req.params.conversationId || !req.params.page) {
         res.status(400).json({
             message: "Invalid of incomplete request",
             status: 400,
@@ -212,27 +212,45 @@ const getMessages = (req, res) => {
         {
             $lookup: {
                 as: "messages",
-                foreignField: "conversation",
                 from: Message.collection.name,
-                localField: "_id"
+                let: { conversationId: { $toObjectId: "$_id" } },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $eq: [
+                                    "$conversation",
+                                    "$$conversationId"
+                                ]
+                            }
+                        }
+                    },
+                    // Sort messages by descending order so we get the newest ones
+                    {
+                        $sort: { "sentTime": -1 }
+                    },
+                    {
+                        $skip: parseInt(req.params.page) * 50
+                    },
+                    {
+                        $limit: 50,
+                    }
+                ]
             }
-        }
-
-        /*
-         * NOTE: this may be needed in the future as messages get sent in real time (right now, messages are fetched in ascending order by default)
-         * break open the messages array
-         * {
-         *   $unwind: "$messages",
-         * },
-         * sort the messages by sent time in ascending order (1)
-         * {
-         *   $sort: { "messages.sentTime": 1 },
-         * },
-         * group the messages back together into an array
-         * {
-         *   $group: { _id: "$_id", messages: { $push: "$messages" } },
-         * },
-         */
+        },
+        // Break open the messages array
+        {
+            $unwind: "$messages",
+        },
+        {
+        // Sort the messages by sent time in ascending order (1)
+            $sort: { "messages.sentTime": 1 },
+        },
+        // Group the messages back together into an array
+        {
+            $group: { _id: "$_id",
+                messages: { $push: "$messages" } },
+        },
     ]).exec((err, conversation) => {
         if (err) {
             console.error(err);
@@ -243,9 +261,14 @@ const getMessages = (req, res) => {
             });
             return;
         }
+        let messages = [];
+        console.log(conversation);
+        if (conversation.length) {
+            messages = [...conversation[0].messages];
+        }
         res.status(200).json({
             message: "Fetched messages successfully",
-            messages: conversation[0].messages,
+            messages,
             status: 200,
             success: true
         });

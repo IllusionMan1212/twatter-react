@@ -17,7 +17,7 @@ router.post("/startConversation", postLimit, authorizeUser, startConversation);
 
 router.get("/getConversations", getLimit, authorizeUser, getConversations);
 router.get(
-    "/getMessages/:conversationId",
+    "/getMessages/:conversationId/:page",
     getLimit,
     authorizeUser,
     getMessages
