@@ -29,6 +29,7 @@ import {
     messageCharLimit,
     supportedFileTypes,
 } from "src/utils/variables";
+import { VirtualList } from "src/utils/VirtualList";
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
@@ -373,9 +374,6 @@ export default function Messages(): ReactElement {
         // when a conversation is opened, we mark its messages as read
         socket?.emit("markMessagesAsRead", payload);
         if (router.query?.conversationId?.[0] != conversation._id) {
-            // HACK: this works around virutoso not calling the loadMoreMessages function
-            // when changing conversations
-            router.push("/messages");
             router.push(`/messages/${conversation._id}`);
         }
     };
@@ -397,6 +395,7 @@ export default function Messages(): ReactElement {
     const loadMoreMessages = useCallback(() => {
         console.log("loading more messages");
         setPage(pageRef.current + 1);
+        pageRef.current += 1;
         getMessages(activeConversation._id).then((newMessages) => {
             if (!newMessages.length) {
                 setReachedStart(true);
@@ -442,11 +441,7 @@ export default function Messages(): ReactElement {
         if (!newActiveConversation) {
             return;
         }
-        // dont fetch messages if current convo id is equal to new convo id
-        // this is to prevent state update from happening when updating convo's last message on socket event
-        if (activeConversation?._id == router.query.conversationId[0]) {
-            return;
-        }
+
         setActiveConversation({
             _id: router.query.conversationId[0],
             username: newActiveConversation.receivers[0]?.username,
@@ -633,25 +628,11 @@ export default function Messages(): ReactElement {
                                     <div
                                         className={styles.messagesAreaContainer}
                                     >
-                                        <Virtuoso
-                                            ref={virtuosoRef}
-                                            className={styles.messagesArea}
-                                            totalCount={messages.length}
-                                            initialTopMostItemIndex={
-                                                messages.length > 0 ? messages.length - 1 : 0
-                                            }
-                                            data={messages}
-                                            firstItemIndex={firstItemIndex}
-                                            alignToBottom
-                                            followOutput
-                                            atBottomStateChange={(bottom) => {
-                                                if (bottom) {
-                                                    setAtBottom(bottom);
-                                                } else {
-                                                    setAtBottom(bottom);
-                                                }
-                                            }}
-                                            startReached={loadMoreMessages}
+                                        <VirtualList
+                                            items={messages}
+                                            reverse={true}
+                                            endReached={loadMoreMessages}
+                                            // hasMore={!reachedStart}
                                             // eslint-disable-next-line react/display-name
                                             components={{Header: () => {
                                                 return (
@@ -670,9 +651,8 @@ export default function Messages(): ReactElement {
                                                         )}
                                                     </>
                                                 );
-                                            },
-                                            }}
-                                            itemContent={(index, message) => (
+                                            }}}
+                                            renderItem={(index, message) => (
                                                 <Message
                                                     key={index}
                                                     sender={
@@ -698,7 +678,7 @@ export default function Messages(): ReactElement {
                                                     {message.content}
                                                 </Message>
                                             )}
-                                        ></Virtuoso>
+                                        ></VirtualList>
                                         {newMessagesAlert && (
                                             <div
                                                 className={

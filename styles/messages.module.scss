@@ -107,6 +107,7 @@
 
 .messagesAreaContainer {
     flex-grow: 1;
+    overflow: auto;
 }
 
 .messagesArea {
