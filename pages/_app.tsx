@@ -11,9 +11,12 @@ import { socket } from "src/socket";
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
 
-    const handleError = useCallback((message) => {
-        toast(message, 4000);
-    }, []);
+    const handleError = useCallback(
+        (message) => {
+            toast(message, 4000);
+        },
+        [toast]
+    );
 
     useEffect(() => {
         socket?.on("error", handleError);
@@ -21,11 +24,12 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
         return () => {
             socket?.off("error", handleError);
         };
-    }, [socket, handleError]);
+    }, [handleError]);
 
     return (
         <>
             <Head>
+                <meta charSet="utf-8" />
                 <meta
                     name="viewport"
                     content="width=device-width, initial-scale=1"
@@ -39,44 +43,67 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                     content="social media, social platform, community"
                 />
                 <meta name="copyright" content="Twatter" />
+                <meta property="og:site_name" content="Twatter" />
                 <meta property="og:locale" content="en_US" />
-                <meta property="og:image" content="https://twatter.illusionman1212.me/assets/img/icons/favicons/android-chrome-192x192.png" />
-                <meta property="og:url" content="https://twatter.illusionman1212.me" />
-                <meta property="og:type" content="website" />
-
-                <link
-                    rel="apple-touch-icon"
-                    sizes="180x180"
-                    href="./assets/img/icons/favicons/apple-touch-icon.png"
+                <meta
+                    property="og:image"
+                    content="https://twatter.illusionman1212.me/android-chrome-192x192.png"
                 />
+                <meta
+                    property="og:url"
+                    content="https://twatter.illusionman1212.me"
+                />
+                <meta
+                    property="og:title"
+                    content="Twatter"
+                />
+                <meta
+                    property="og:description"
+                    content="A social platform to bring people together"
+                />
+                <meta property="og:type" content="website" />
+                <meta name="mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-title" content="Twatter" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+                <meta name="theme-color" content="#6067FE" />
+
                 <link
                     rel="icon"
                     type="image/png"
                     sizes="512x512"
-                    href="./assets/img/icons/favicons/android-chrome-512x512.png"
+                    href="/android-chrome-512x512.png"
                 />
                 <link
                     rel="icon"
                     type="image/png"
                     sizes="192x192"
-                    href="./assets/img/icons/favicons/android-chrome-192x192.png"
+                    href="/android-chrome-192x192.png"
+                />
+                <link
+                    rel="apple-touch-icon"
+                    sizes="180x180"
+                    href="/apple-touch-icon.png"
                 />
                 <link
                     rel="icon"
                     type="image/png"
                     sizes="32x32"
-                    href="./assets/img/icons/favicons/favicon-32x32.png"
+                    href="/favicon-32x32.png"
                 />
                 <link
                     rel="icon"
                     type="image/png"
                     sizes="16x16"
-                    href="./assets/img/icons/favicons/favicon-16x16.png"
+                    href="/favicon-16x16.png"
                 />
                 <link rel="manifest" href="/site.webmanifest" />
-                {/* <link rel="mask-icon" href="./assets/img/icons/favicons/safari-pinned-tab.svg" color="#5d6365" /> */}
-                <meta name="msapplication-TileColor" content="#6067FE" />
-                <meta name="theme-color" content="#6067FE" />
+                <link
+                    rel="mask-icon"
+                    href="/safari-pinned-tab.svg"
+                    color="#6067fe"
+                />
+                <meta name="msapplication-TileColor" content="#151515" />
+                <meta name="theme-color" content="#6067fe" />
             </Head>
             <ToastWrapper>
                 <Component {...pageProps} />
