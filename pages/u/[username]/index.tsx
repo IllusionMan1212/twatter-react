@@ -468,7 +468,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext): any {
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<any> {
     let res = null;
     let user = null;
 
