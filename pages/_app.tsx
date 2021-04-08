@@ -7,6 +7,7 @@ import "../styles/globals.scss";
 import "swiper/swiper.scss";
 import "swiper/components/navigation/navigation.scss";
 import { socket } from "src/socket";
+import { NextSeo } from "next-seo";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
@@ -28,6 +29,23 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
 
     return (
         <>
+            <NextSeo
+                title={"Twatter"}
+                description={"A Social platform to bring people together"}
+                openGraph={{
+                    title: "Twatter",
+                    description: "A Social platform to bring people together",
+                    type: "website",
+                    url: "https://twatter.illusionman1212.me",
+                    site_name: "Twatter",
+                    locale: "en_US",
+                    images: [
+                        {
+                            url: "https://twatter.illusionman1212.me/android-chrome-192x192.png",
+                        },
+                    ]
+                }}
+            />
             <Head>
                 <meta charSet="utf-8" />
                 <meta

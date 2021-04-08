@@ -1,5 +1,4 @@
 /* eslint-disable react/react-in-jsx-scope */
-import Head from "next/head";
 import Link from "next/link";
 import LayoutRegular from "../components/layouts/layoutRegular";
 import NavbarLoggedOut from "../components/navbarLoggedOut";
@@ -33,18 +32,6 @@ export default function Index(): ReactElement {
 
     return !loading ? (
         <>
-            <Head>
-                <title>Twatter</title>
-                <meta property="title" content="Twatter" />
-                <meta property="description" content="A Social platform to bring people together" />
-                <meta property="og:title" content="Twatter" />
-                <meta property="og:description" content="A Social platform to bring people together" />
-                <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://twatter.illusionman1212.me" />
-                <meta property="og:site_name" content="Twatter" />
-                <meta property="og:locale" content="en_US" />
-                <meta property="og:image" content="https://twatter.illusionman1212.me/android-chrome-192x192.png" />
-            </Head>
             <NavbarLoggedOut></NavbarLoggedOut>
             <LayoutRegular>
                 <div className="text-white">
