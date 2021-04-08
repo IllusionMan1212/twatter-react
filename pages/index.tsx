@@ -1,4 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
+import Head from "next/head";
 import Link from "next/link";
 import LayoutRegular from "../components/layouts/layoutRegular";
 import NavbarLoggedOut from "../components/navbarLoggedOut";
@@ -8,7 +9,6 @@ import axios from "axios";
 import Router from "next/router";
 import { useState, useEffect, ReactElement } from "react";
 import Loading from "../components/loading";
-import { NextSeo } from "next-seo";
 
 export default function Index(): ReactElement {
     const [loading, setLoading] = useState(true);
@@ -33,23 +33,18 @@ export default function Index(): ReactElement {
 
     return !loading ? (
         <>
-            <NextSeo
-                title={"Twatter"}
-                description={"A Social platform to bring people together"}
-                openGraph={{
-                    title: "Twatter",
-                    description: "A Social platform to bring people together",
-                    type: "website",
-                    url: "https://twatter.illusionman1212.me",
-                    site_name: "Twatter",
-                    locale: "en_US",
-                    images: [
-                        {
-                            url: "https://twatter.illusionman1212.me/android-chrome-192x192.png",
-                        }
-                    ],
-                }}
-            />
+            <Head>
+                <title>Twatter</title>
+                <meta property="title" content="Twatter" />
+                <meta property="description" content="A Social platform to bring people together" />
+                <meta property="og:title" content="Twatter" />
+                <meta property="og:description" content="A Social platform to bring people together" />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://twatter.illusionman1212.me" />
+                <meta property="og:site_name" content="Twatter" />
+                <meta property="og:locale" content="en_US" />
+                <meta property="og:image" content="https://twatter.illusionman1212.me/android-chrome-192x192.png" />
+            </Head>
             <NavbarLoggedOut></NavbarLoggedOut>
             <LayoutRegular>
                 <div className="text-white">

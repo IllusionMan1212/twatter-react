@@ -15,6 +15,7 @@ import { User, Post } from "../../../src/types/general";
 import { socket } from "../../../src/socket";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
+import { NextSeo } from "next-seo";
 
 export default function UserPost(): ReactElement {
     const router = useRouter();
@@ -189,15 +190,40 @@ export default function UserPost(): ReactElement {
 
     return (
         <>
+            <NextSeo
+                title={post ? `${post.author.display_name}'s Post - Twatter` : "Post not found - Twatter"}
+                description={post?.content}
+                openGraph={{
+                    title: `${post?.author.display_name}'s Post - Twatter`,
+                    description: post?.content,
+                    url: `https://twatter.illusionman1212.me/u/${post?.author.username}/${post?._id}`,
+                    type: "article",
+                    article: {
+                        authors: [post?.author.display_name],
+                        publishedTime: post?.createdAt,
+                    },
+                    images: [
+                        {
+                            url: post?.author.profile_image,
+                        },
+                        {
+                            url: post?.attachments?.[0],
+                        },
+                        {
+                            url: post?.attachments?.[1],
+                        },
+                        {
+                            url: post?.attachments?.[2],
+                        },
+                        {
+                            url: post?.attachments?.[3],
+                        },
+                    ]
+                }}
+            />
             {!loading ? (
                 <>
                     <Head>
-                        <title>
-                            {post
-                                ? `${post.author.display_name}'s Post`
-                                : "Post not found"}{" "}
-                            - Twatter
-                        </title>
                         <meta
                             property={"og:image"}
                             content={post?.author.profile_image}
