@@ -9,6 +9,7 @@ import axios from "axios";
 import Router from "next/router";
 import { useState, useEffect, ReactElement } from "react";
 import Loading from "../components/loading";
+import { NextSeo } from "next-seo";
 
 export default function Index(): ReactElement {
     const [loading, setLoading] = useState(true);
@@ -33,6 +34,23 @@ export default function Index(): ReactElement {
 
     return !loading ? (
         <>
+            <NextSeo
+                title={"Twatter"}
+                description={"A Social platform to bring people together"}
+                openGraph={{
+                    title: "Twatter",
+                    description: "A Social platform to bring people together",
+                    type: "website",
+                    url: "https://twatter.illusionman1212.me",
+                    site_name: "Twatter",
+                    locale: "en_US",
+                    images: [
+                        {
+                            url: "https://twatter.illusionman1212.me/android-chrome-192x192.png",
+                        }
+                    ],
+                }}
+            />
             <Head>
                 <title>Twatter</title>
                 <link rel="icon" href="/favicon.ico" />

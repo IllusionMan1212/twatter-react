@@ -24,6 +24,7 @@ import { User, Post as PostType } from "../../../src/types/general";
 import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext } from "next";
 import { ProfileProps } from "src/types/props";
+import { NextSeo } from "next-seo";
 
 export default function Profile(props: ProfileProps): ReactElement {
     const router = useRouter();
@@ -192,41 +193,26 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     return (
         <>
+            <NextSeo
+                title={`${props.user?.display_name} (@${props.user?.username})`}
+                description={props.user?.bio}
+                openGraph={{
+                    title: `${props.user?.display_name} (@${props.user?.username})`,
+                    description: props.user?.bio,
+                    url: `https://twatter.illusionman1212.me/u/${props.user?.username}`,
+                    type: "profile",
+                    profile: {
+                        username: props.user?.username,
+                    },
+                    images: [
+                        {
+                            url: props.user?.profile_image,
+                        }
+                    ]
+                }}
+            />
             {!loading ? (
                 <>
-                    <Head>
-                        <title>
-                            {props.user
-                                ? `${props.user.display_name}'s Profile`
-                                : "User not found"}{" "}
-                            - Twatter
-                        </title>
-                        <meta
-                            property={"og:image"}
-                            content={props.user?.profile_image}
-                            key="image"
-                        />
-                        <meta
-                            property={"og:url"}
-                            content={`https://twatter.illusionman1212.me/u/${props.user?.username}`}
-                            key="url"
-                        />
-                        <meta
-                            property={"og:title"}
-                            content={`${props.user?.display_name} (@${props.user?.username})`}
-                            key="title"
-                        />
-                        <meta
-                            property={"og:description"}
-                            content={props.user?.bio}
-                            key="description"
-                        />
-                        <meta
-                            property={"og:type"}
-                            content={"profile"}
-                            key="type"
-                        />
-                    </Head>
                     {!notFound && props.user ? (
                         <>
                             {currentUser ? (
