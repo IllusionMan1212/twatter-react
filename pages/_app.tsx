@@ -43,25 +43,29 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                     content="social media, social platform, community"
                 />
                 <meta name="copyright" content="Twatter" />
-                <meta property="og:site_name" content="Twatter" />
-                <meta property="og:locale" content="en_US" />
+                <meta property="og:site_name" content="Twatter" key="site_name" />
+                <meta property="og:locale" content="en_US" key="locale" />
                 <meta
                     property="og:image"
                     content="https://twatter.illusionman1212.me/android-chrome-192x192.png"
+                    key="image"
                 />
                 <meta
                     property="og:url"
                     content="https://twatter.illusionman1212.me"
+                    key="url"
                 />
                 <meta
                     property="og:title"
                     content="Twatter"
+                    key="title"
                 />
                 <meta
                     property="og:description"
                     content="A social platform to bring people together"
+                    key="description"
                 />
-                <meta property="og:type" content="website" />
+                <meta property="og:type" content="website" key="type" />
                 <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-title" content="Twatter" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="black" />

@@ -11,7 +11,11 @@ import { useUser } from "../../../src/hooks/useUserHook";
 import StatusBar from "../../../components/statusBar";
 import styles from "../../../styles/profilePage.module.scss";
 import Post from "../../../components/post/post";
-import { formatBigNumbers, formatBirthday, formatJoinDate } from "../../../src/utils/functions";
+import {
+    formatBigNumbers,
+    formatBirthday,
+    formatJoinDate,
+} from "../../../src/utils/functions";
 import MediaModal from "../../../components/mediaModal/mediaModal";
 import { ChatTeardropText } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
@@ -39,7 +43,11 @@ export default function Profile(): ReactElement {
     let currentUser: User = null;
     currentUser = useUser();
 
-    const handleMediaClick = (_e: React.MouseEvent<HTMLElement, MouseEvent>, post: PostType, index: number) => {
+    const handleMediaClick = (
+        _e: React.MouseEvent<HTMLElement, MouseEvent>,
+        post: PostType,
+        index: number
+    ) => {
         setModalData({
             post: post,
             imageIndex: index,
@@ -62,53 +70,74 @@ export default function Profile(): ReactElement {
                 router.push(`/messages/${res.data.conversationId}`);
             })
             .catch((err) => {
-                toast(err?.response?.data?.message ?? "An error has occurred", 5000);
+                toast(
+                    err?.response?.data?.message ?? "An error has occurred",
+                    5000
+                );
             });
     };
 
-    const handleComment = useCallback((comment) => {
-        setPosts(posts.map(post => {
-            if (post._id == comment.replyingTo) {
-                post.comments.length < 4 && post.comments.push(comment);
-                return post;
-            }
-            return post;
-        }));
-    }, [posts]);
-
-    const handleCommentDelete = useCallback((commentId) => {
-        if (posts.some((post) => {
-            return post._id == commentId;
-        })) {
-            setPosts(posts?.filter((post) => post._id != commentId));
-        } else {
-            setPosts(posts.map((post) => {
-                post.comments.map((comment) => {
-                    if (comment._id == commentId) {
-                        post.comments = post.comments.filter((comment) => comment._id != commentId);
-                        post.numberOfComments--;
-                        return comment;
+    const handleComment = useCallback(
+        (comment) => {
+            setPosts(
+                posts.map((post) => {
+                    if (post._id == comment.replyingTo) {
+                        post.comments.length < 4 && post.comments.push(comment);
+                        return post;
                     }
-                    return comment;
-                });
-                return post;
-            }));
-        }
-    }, [posts]);
+                    return post;
+                })
+            );
+        },
+        [posts]
+    );
+
+    const handleCommentDelete = useCallback(
+        (commentId) => {
+            if (
+                posts.some((post) => {
+                    return post._id == commentId;
+                })
+            ) {
+                setPosts(posts?.filter((post) => post._id != commentId));
+            } else {
+                setPosts(
+                    posts.map((post) => {
+                        post.comments.map((comment) => {
+                            if (comment._id == commentId) {
+                                post.comments = post.comments.filter(
+                                    (comment) => comment._id != commentId
+                                );
+                                post.numberOfComments--;
+                                return comment;
+                            }
+                            return comment;
+                        });
+                        return post;
+                    })
+                );
+            }
+        },
+        [posts]
+    );
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            setPosts(posts.map((post) => {
-                if (post._id == payload.postId) {
-                    if (payload.likeType == "LIKE") {
-                        post.likeUsers = post.likeUsers.concat(user._id);
-                    } else if (payload.likeType == "UNLIKE") {
-                        post.likeUsers = post.likeUsers.filter((_user) => _user != user._id);
+            setPosts(
+                posts.map((post) => {
+                    if (post._id == payload.postId) {
+                        if (payload.likeType == "LIKE") {
+                            post.likeUsers = post.likeUsers.concat(user._id);
+                        } else if (payload.likeType == "UNLIKE") {
+                            post.likeUsers = post.likeUsers.filter(
+                                (_user) => _user != user._id
+                            );
+                        }
+                        return post;
                     }
                     return post;
-                }
-                return post;
-            }));
+                })
+            );
         },
         [posts]
     );
@@ -188,13 +217,39 @@ export default function Profile(): ReactElement {
                                 : "User not found"}{" "}
                             - Twatter
                         </title>
-                        {/* TODO: meta tags here */}
+                        <meta
+                            property={"og:image"}
+                            content={user.profile_image}
+                            key="image"
+                        />
+                        <meta
+                            property={"og:url"}
+                            content={`https://twatter.illusionman1212.me/u/${user.username}`}
+                            key="url"
+                        />
+                        <meta
+                            property={"og:title"}
+                            content={`${user.display_name} (@${user.username})`}
+                            key="title"
+                        />
+                        <meta
+                            property={"og:description"}
+                            content={user.bio}
+                            key="description"
+                        />
+                        <meta
+                            property={"og:type"}
+                            content={"profile"}
+                            key="type"
+                        />
                     </Head>
                     {!notFound && user ? (
                         <>
                             {currentUser ? (
                                 <div className="feed">
-                                    <NavbarLoggedIn user={currentUser}></NavbarLoggedIn>
+                                    <NavbarLoggedIn
+                                        user={currentUser}
+                                    ></NavbarLoggedIn>
                                     <StatusBar
                                         title={user.display_name}
                                         user={currentUser}
@@ -215,7 +270,14 @@ export default function Profile(): ReactElement {
                                                 <div
                                                     className={`round ${styles.userImage}`}
                                                     style={{
-                                                        backgroundImage: `url("${user.profile_image == "default_profile.svg" ? "/" : ""}${user.profile_image}")`,
+                                                        backgroundImage: `url("${
+                                                            user.profile_image ==
+                                                            "default_profile.svg"
+                                                                ? "/"
+                                                                : ""
+                                                        }${
+                                                            user.profile_image
+                                                        }")`,
                                                     }}
                                                 ></div>
                                                 <div>
@@ -269,19 +331,25 @@ export default function Profile(): ReactElement {
                                                 >
                                                     <span>
                                                         <span className="text-bold">
-                                                            {formatBigNumbers(posts.length)}
+                                                            {formatBigNumbers(
+                                                                posts.length
+                                                            )}
                                                         </span>{" "}
                                                         Posts
                                                     </span>{" "}
                                                     <span>
                                                         <span className="text-bold">
-                                                            {formatBigNumbers(0)}
+                                                            {formatBigNumbers(
+                                                                0
+                                                            )}
                                                         </span>{" "}
                                                         Following
                                                     </span>{" "}
                                                     <span>
                                                         <span className="text-bold">
-                                                            {formatBigNumbers(0)}
+                                                            {formatBigNumbers(
+                                                                0
+                                                            )}
                                                         </span>{" "}
                                                         Followers
                                                     </span>
@@ -337,7 +405,9 @@ export default function Profile(): ReactElement {
                                                                 handleMediaClick
                                                             }
                                                             post={post}
-                                                            handleLike={handleLike}
+                                                            handleLike={
+                                                                handleLike
+                                                            }
                                                         ></Post>
                                                     );
                                                 })
@@ -364,7 +434,9 @@ export default function Profile(): ReactElement {
                         <>
                             {currentUser ? (
                                 <div className="feed">
-                                    <NavbarLoggedIn user={currentUser}></NavbarLoggedIn>
+                                    <NavbarLoggedIn
+                                        user={currentUser}
+                                    ></NavbarLoggedIn>
                                     <StatusBar
                                         title="Not Found"
                                         user={currentUser}

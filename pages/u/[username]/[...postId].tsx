@@ -59,9 +59,7 @@ export default function UserPost(): ReactElement {
                             backButton={true}
                         ></StatusBar>
                         <div className={styles.loggedInNavbarContainer}>
-                            <NavbarLoggedIn
-                                user={currentUser}
-                            ></NavbarLoggedIn>
+                            <NavbarLoggedIn user={currentUser}></NavbarLoggedIn>
                         </div>
                     </div>
                 ) : (
@@ -85,22 +83,28 @@ export default function UserPost(): ReactElement {
     const handleCommentDelete = useCallback(
         (commentId) => {
             const newPost = post;
-            newPost.comments = post.comments.filter((comment) => comment._id != commentId);
+            newPost.comments = post.comments.filter(
+                (comment) => comment._id != commentId
+            );
             setPost(newPost);
         },
         [post]
     );
 
     const handleLike = useCallback(
-        (payload: LikePayload) => {            
+        (payload: LikePayload) => {
             if (payload.postId == post._id) {
                 const newPost = {
-                    ...post
+                    ...post,
                 };
                 if (payload.likeType == "LIKE") {
-                    newPost.likeUsers = newPost.likeUsers.concat(currentUser?._id);
+                    newPost.likeUsers = newPost.likeUsers.concat(
+                        currentUser?._id
+                    );
                 } else if (payload.likeType == "UNLIKE") {
-                    newPost.likeUsers = post.likeUsers.filter((user) => user != currentUser?._id);
+                    newPost.likeUsers = post.likeUsers.filter(
+                        (user) => user != currentUser?._id
+                    );
                 }
                 setPost(newPost);
             }
@@ -194,7 +198,31 @@ export default function UserPost(): ReactElement {
                                 : "Post not found"}{" "}
                             - Twatter
                         </title>
-                        {/* TODO: meta tags */}
+                        <meta
+                            property={"og:image"}
+                            content={post?.author.profile_image}
+                            key="image"
+                        />
+                        <meta
+                            property={"og:url"}
+                            content={`https://twatter.illusionman1212.me/u/${post?.author.username}/${post?._id}`}
+                            key="url"
+                        />
+                        <meta
+                            property={"og:title"}
+                            content={`${post?.author.display_name}'s post`}
+                            key="title"
+                        />
+                        <meta
+                            property={"og:description"}
+                            content={post?.content}
+                            key="description"
+                        />
+                        <meta
+                            property={"og:type"}
+                            content={"article"}
+                            key="type"
+                        />
                     </Head>
                     {!notFound && post ? (
                         <>
@@ -229,7 +257,7 @@ export default function UserPost(): ReactElement {
                                 ></MediaModal>
                             )}
                         </>
-                    ) : (notFound) ? (
+                    ) : notFound ? (
                         <>
                             {renderBars("Not Found")}
                             <div
@@ -242,11 +270,13 @@ export default function UserPost(): ReactElement {
                                 </div>
                             </div>
                         </>
-                    ) : !post && (
-                        <>
-                            {renderBars("Loading")}
-                            <Loading height="100" width="100"></Loading>
-                        </>
+                    ) : (
+                        !post && (
+                            <>
+                                {renderBars("Loading")}
+                                <Loading height="100" width="100"></Loading>
+                            </>
+                        )
                     )}
                 </>
             ) : (
