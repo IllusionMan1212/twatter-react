@@ -16,8 +16,10 @@ import { socket } from "../../../src/socket";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
+import { GetServerSidePropsContext } from "next";
+import { UserPostProps } from "src/types/props";
 
-export default function UserPost(): ReactElement {
+export default function UserPost(props: UserPostProps): ReactElement {
     const router = useRouter();
 
     const toast = useToastContext();
@@ -126,9 +128,6 @@ export default function UserPost(): ReactElement {
     }, [socket, handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
-        const cancelToken = axios.CancelToken;
-        const tokenSource = cancelToken.source();
-        setPost(null);
         setMediaModal(false);
 
         if (router.query.postId?.[0]) {
@@ -144,31 +143,15 @@ export default function UserPost(): ReactElement {
                     { shallow: true }
                 );
             }
-            axios
-                .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost?username=${router.query.username}&postId=${router.query.postId[0]}`,
-                    { withCredentials: true, cancelToken: tokenSource.token }
-                )
-                .then((res) => {
-                    setPost(res.data.post);
-                    setNotFound(false);
-                    setLoading(false);
-                })
-                .catch((err) => {
-                    if (axios.isCancel(err)) {
-                        console.log("Request canceled");
-                    } else {
-                        setLoading(false);
-                        if (err.response.status == 404) {
-                            setNotFound(true);
-                        }
-                    }
-                });
+            if (props.post) {
+                setNotFound(false);
+                setLoading(false);
+                setPost(props.post);
+            } else {
+                setNotFound(true);
+                setLoading(false);
+            }
         }
-
-        return () => {
-            tokenSource.cancel();
-        };
     }, [router.query.postId?.[0]]);
 
     useEffect(() => {
@@ -191,65 +174,38 @@ export default function UserPost(): ReactElement {
     return (
         <>
             <NextSeo
-                title={post ? `${post.author.display_name}'s Post - Twatter` : "Post not found - Twatter"}
-                description={post?.content}
+                title={props.post ? `${props.post.author.display_name}'s Post - Twatter` : "Post not found - Twatter"}
+                description={props.post?.content}
                 openGraph={{
-                    title: `${post?.author.display_name}'s Post - Twatter`,
-                    description: post?.content,
-                    url: `https://twatter.illusionman1212.me/u/${post?.author.username}/${post?._id}`,
+                    title: `${props.post?.author.display_name}'s Post - Twatter`,
+                    description: props.post?.content,
+                    url: `https://twatter.illusionman1212.me/u/${props.post?.author.username}/${props.post?._id}`,
                     type: "article",
                     article: {
-                        authors: [post?.author.display_name],
-                        publishedTime: post?.createdAt,
+                        authors: [props.post?.author.display_name],
+                        publishedTime: props.post?.createdAt,
                     },
                     images: [
                         {
-                            url: post?.author.profile_image,
+                            url: props.post?.author.profile_image,
                         },
                         {
-                            url: post?.attachments?.[0],
+                            url: props.post?.attachments?.[0],
                         },
                         {
-                            url: post?.attachments?.[1],
+                            url: props.post?.attachments?.[1],
                         },
                         {
-                            url: post?.attachments?.[2],
+                            url: props.post?.attachments?.[2],
                         },
                         {
-                            url: post?.attachments?.[3],
+                            url: props.post?.attachments?.[3],
                         },
                     ]
                 }}
             />
             {!loading ? (
                 <>
-                    <Head>
-                        <meta
-                            property={"og:image"}
-                            content={post?.author.profile_image}
-                            key="image"
-                        />
-                        <meta
-                            property={"og:url"}
-                            content={`https://twatter.illusionman1212.me/u/${post?.author.username}/${post?._id}`}
-                            key="url"
-                        />
-                        <meta
-                            property={"og:title"}
-                            content={`${post?.author.display_name}'s post`}
-                            key="title"
-                        />
-                        <meta
-                            property={"og:description"}
-                            content={post?.content}
-                            key="description"
-                        />
-                        <meta
-                            property={"og:type"}
-                            content={"article"}
-                            key="type"
-                        />
-                    </Head>
                     {!notFound && post ? (
                         <>
                             {renderBars(`${post.author.display_name}'s post`)}
@@ -310,4 +266,25 @@ export default function UserPost(): ReactElement {
             )}
         </>
     );
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<any> {
+    console.log(context.params);
+    let res = null;
+    let post: Post = null;
+
+    try {
+        res = await axios
+            .get(
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
+                { withCredentials: true }
+            );
+        post = res.data.post;
+    } catch (err) {
+        console.error(err);
+    }
+
+    return {
+        props: { post: post }
+    };
 }

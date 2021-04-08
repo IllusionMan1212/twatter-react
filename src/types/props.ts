@@ -119,3 +119,7 @@ export interface ImageContainerProps {
 export interface ProfileProps {
     user: User;
 }
+
+export interface UserPostProps {
+    post: Post;
+}

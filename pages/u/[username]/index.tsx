@@ -465,7 +465,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
             );
         user = res.data.user;
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 
     return {
