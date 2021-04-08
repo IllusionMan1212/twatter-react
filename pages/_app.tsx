@@ -44,6 +44,8 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
                 <meta name="theme-color" content="#6067FE" />
 
+                <meta name="google-site-verification" content="3KdsfNqPVXfzkXL-s_aZF58J1fqLuoojTN47XEkyf2Q" />
+
                 <link
                     rel="icon"
                     type="image/png"
