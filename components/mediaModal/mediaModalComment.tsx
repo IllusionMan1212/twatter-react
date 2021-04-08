@@ -6,7 +6,7 @@ import CommentButton from "../buttons/commentButton";
 import Router from "next/router";
 import Link from "next/link";
 import { timeSince } from "../../src/utils/functions";
-import { User } from "src/types/general";
+import { IUser } from "src/types/general";
 import styles from "./mediaModalComment.module.scss";
 import postStyles from "../post/post.module.scss";
 import { ModalCommentProps } from "src/types/props";
@@ -19,7 +19,7 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
 
     const handleCommentButtonClickOnComment = (
         commentId: string,
-        commentAuthor: User
+        commentAuthor: IUser
     ) => {
         Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };

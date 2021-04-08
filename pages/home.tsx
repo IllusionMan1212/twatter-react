@@ -19,7 +19,7 @@ import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal/mediaModal";
 import Router from "next/router";
 import { connectSocket, socket } from "../src/socket";
-import { Attachment, Post as PostType, User } from "src/types/general";
+import { IAttachment, IPost, IUser } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -44,15 +44,15 @@ export default function Home(): ReactElement {
     const [postingAllowed, setPostingAllowed] = useState(false);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
     const [mobileCompose, setMobileCompose] = useState(false);
-    const [posts, setPosts] = useState<Array<PostType>>([]);
-    const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+    const [posts, setPosts] = useState<Array<IPost>>([]);
+    const [attachments, setAttachments] = useState<Array<IAttachment>>([]);
     const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [nowPosting, setNowPosting] = useState(false);
     const [mediaModal, setMediaModal] = useState(false);
     const [modalData, setModalData] = useState({
-        post: null as PostType,
+        post: null as IPost,
         imageIndex: 0,
-        currentUser: null as User,
+        currentUser: null as IUser,
     });
     const [touchY, setTouchY] = useState(null);
 
@@ -97,7 +97,7 @@ export default function Home(): ReactElement {
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
-        post: PostType,
+        post: IPost,
         index: number
     ) => {
         setModalData({

@@ -1,4 +1,4 @@
-export interface User {
+export interface IUser {
     _id: string;
     username: string;
     display_name: string;
@@ -9,29 +9,29 @@ export interface User {
     token: string;
 }
 
-export interface Conversation {
+export interface IConversation {
     _id: string;
-    members: Array<User>;
-    participants: Array<User>;
-    receivers: Array<User>;
+    members: Array<IUser>;
+    participants: Array<IUser>;
+    receivers: Array<IUser>;
     unreadMessages: number,
 }
 
-export interface Post {
+export interface IPost {
     _id: string;
-    author: User;
+    author: IUser;
     content: string;
     attachments: Array<string>;
     createdAt: string;
     likeUsers: Array<string>;
-    comments: Array<Post>;
-    replyingTo: Array<Post>;
+    comments: Array<IPost>;
+    replyingTo: Array<IPost>;
 
     // not real db values
     numberOfComments?: number;
 }
 
-export interface Attachment {
+export interface IAttachment {
     data: File;
     name: string;
     mimetype: string;

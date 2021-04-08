@@ -10,7 +10,7 @@ import axios from "axios";
 import ExpandedPost from "../../../components/post/expandedPost";
 import styles from "../../../components/post/expandedPost.module.scss";
 import MediaModal from "../../../components/mediaModal/mediaModal";
-import { User, Post } from "../../../src/types/general";
+import { IUser, IPost } from "../../../src/types/general";
 import { socket } from "../../../src/socket";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
@@ -25,21 +25,21 @@ export default function UserPost(props: UserPostProps): ReactElement {
 
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [post, setPost] = useState<Post>(null);
+    const [post, setPost] = useState<IPost>(null);
     const [modalData, setModalData] = useState({
-        post: null as Post,
+        post: null as IPost,
         imageIndex: 0,
-        currentUser: null as User,
+        currentUser: null as IUser,
     });
     const [mediaModal, setMediaModal] = useState(false);
     const [nowCommenting, setNowCommenting] = useState(false);
 
-    let currentUser: User = null;
+    let currentUser: IUser = null;
     currentUser = useUser();
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
-        post: Post,
+        post: IPost,
         index: number
     ) => {
         setModalData({
@@ -72,7 +72,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
     };
 
     const handleComment = useCallback(
-        (payload: Post) => {
+        (payload: IPost) => {
             const newPost = post;
             newPost.comments = newPost.comments.concat(payload);
             setPost(newPost);
@@ -270,7 +270,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
 export async function getServerSideProps(context: GetServerSidePropsContext): Promise<any> {
     console.log(context.params);
     let res = null;
-    let post: Post = null;
+    let post: IPost = null;
 
     try {
         res = await axios

@@ -1,5 +1,5 @@
-import { SetStateAction } from "react";
-import { Post, User } from "./general";
+import { MutableRefObject, SetStateAction } from "react";
+import { IPost, IUser } from "./general";
 import { LikePayload } from "./utils";
 
 export interface ToastProps {
@@ -13,17 +13,17 @@ export interface LoadingProps {
 
 export interface NavbarLoggedInProps {
     setMediaModal?: (active: boolean) => void;
-    user: User;
+    user: IUser;
 }
 
 export interface StatusBarProps {
     title: string;
-    user: User;
+    user: IUser;
     backButton?: boolean;
 }
 
 export interface UserContextMenuProps {
-    currentUser: User;
+    currentUser: IUser;
 }
 
 export interface MessageProps {
@@ -38,7 +38,7 @@ export interface MessageProps {
 
 export interface MessageListItemProps {
     lastMessage: string;
-    receivers: Array<User>;
+    receivers: Array<IUser>;
     onClick: () => void;
     isActive: boolean;
     unreadMessages: number;
@@ -50,25 +50,28 @@ export interface MessageMediaModalProps {
 }
 
 export interface PostProps {
-    post: Post;
-    currentUser?: User;
+    post: IPost;
+    currentUser?: IUser;
     handleMediaClick: (
         e: React.MouseEvent<HTMLElement, MouseEvent>,
-        post: Post,
+        post: IPost,
         index: number
     ) => void;
     handleLike: (payload: LikePayload) => void;
+
+    // ref of container that the menu shouldn't exceed in height
+    parentContainerRef?: MutableRefObject<HTMLElement>;
 }
 
 export interface ExpandedPostProps extends PostProps {
     callback?: <T extends unknown[]>(...args: T) => void;
-    handleComment: (payload: Post) => void;
+    handleComment: (payload: IPost) => void;
     handlePostDelete?: (payload: string) => void;
     nowCommenting: boolean;
     setNowCommenting: (value: SetStateAction<boolean>) => void;
 }
 
-export interface PostOptionsMenuProps {
+interface PostOptionsMenuBaseProps {
     postAuthorId: string;
     currentUserId: string;
     postId: string;
@@ -76,35 +79,47 @@ export interface PostOptionsMenuProps {
     handlePostDelete?: (payload: string) => void;
 }
 
+export interface PostOptionsMenuProps extends PostOptionsMenuBaseProps {
+    topOffset?: number;
+}
+
+export interface PostOptionsMenuButtonProps extends PostOptionsMenuBaseProps {
+    // ref of container that the menu shouldn't exceed in height
+    parentContainerRef?: MutableRefObject<HTMLElement>;
+}
+
 export interface MediaModalProps {
     modalData: {
-        post: Post;
+        post: IPost;
         imageIndex: number;
-        currentUser: User;
+        currentUser: IUser;
     };
     goBackTwice?: boolean;
-    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
-    handleComment: (payload: Post) => void;
+    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: IPost, index: number) => void;
+    handleComment: (payload: IPost) => void;
     handleCommentDelete: (commentId: string) => void;
 }
 
 export interface LikeButtonProps {
-    post: Post;
+    post: IPost;
     currentUserId?: string;
     handleLike: (payload: LikePayload) => void;
     likeUsers: Array<string>;
 }
 
 export interface CommentButtonProps {
-    post: Post;
+    post: IPost;
     handleClick: () => void;
     numberOfComments: number;
 }
 
 export interface CommentProps {
-    comment: Post;
-    currentUser?: User;
-    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
+    comment: IPost;
+    currentUser?: IUser;
+    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: IPost, index: number) => void;
+
+    // ref of container that the menu shouldn't pop out of
+    parentContainerRef?: MutableRefObject<HTMLElement>;
 }
 
 export interface ModalCommentProps extends CommentProps {
@@ -112,14 +127,14 @@ export interface ModalCommentProps extends CommentProps {
 }
 
 export interface ImageContainerProps {
-    post: Post;
-    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
+    post: IPost;
+    handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: IPost, index: number) => void;
 }
 
 export interface ProfileProps {
-    user: User;
+    user: IUser;
 }
 
 export interface UserPostProps {
-    post: Post;
+    post: IPost;
 }

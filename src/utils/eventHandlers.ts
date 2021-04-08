@@ -1,5 +1,5 @@
 import { FormEvent, MutableRefObject, SetStateAction } from "react";
-import { Attachment } from "src/types/general";
+import { IAttachment } from "src/types/general";
 import { fileSizeLimit, maxAttachments, supportedFileTypes } from "./variables";
 
 export const handlePaste = (
@@ -10,8 +10,8 @@ export const handlePaste = (
     setPostingAllowed: (value: SetStateAction<boolean>) => void,
     previewImages: Array<string>,
     setPreviewImages: (value: SetStateAction<Array<string>>) => void,
-    attachments: Array<Attachment>,
-    setAttachments: (value: SetStateAction<Array<Attachment>>) => void,
+    attachments: Array<IAttachment>,
+    setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
     toast: (text: string, length: number) => void
 ): void => {
     e.preventDefault();
@@ -74,7 +74,7 @@ export const handleKeyDown = (
 export const handleInput = (
     e: FormEvent<HTMLElement>,
     charLimit: number,
-    attachments: Array<Attachment>,
+    attachments: Array<IAttachment>,
     setPostingAllowed: (value: SetStateAction<boolean>) => void,
     setCharsLeft: (value: SetStateAction<number>) => void
 ): void => {
@@ -104,15 +104,15 @@ export const handleTextInput = (e: InputEvent): void => {
 
 export const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    attachments: Array<Attachment>,
-    setAttachments: (value: SetStateAction<Array<Attachment>>) => void,
+    attachments: Array<IAttachment>,
+    setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
     previewImages: Array<string>,
     setPreviewImages: (value: SetStateAction<Array<string>>) => void,
     setPostingAllowed: (value: SetStateAction<boolean>) => void,
     toast: (text: string, length: number) => void
 ): void => {
     const files: File[] = Array.from(e.target?.files as ArrayLike<File>);
-    const validFiles: Array<Attachment> = [...attachments];
+    const validFiles: Array<IAttachment> = [...attachments];
     const validPreviewImages: Array<string> = [...previewImages];
 
     if (files.length > maxAttachments) {
@@ -154,8 +154,8 @@ export const handlePreviewImageClose = (
     i: number,
     previewImages: Array<string>,
     setPreviewImages: (value: SetStateAction<Array<string>>) => void,
-    attachments: Array<Attachment>,
-    setAttachments: (value: SetStateAction<Array<Attachment>>) => void,
+    attachments: Array<IAttachment>,
+    setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
     ref: MutableRefObject<HTMLElement>,
     setPostingAllowed: (value: SetStateAction<boolean>) => void
 ): void => {

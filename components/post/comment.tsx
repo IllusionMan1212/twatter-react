@@ -6,7 +6,7 @@ import CommentButton from "../buttons/commentButton";
 import Router from "next/router";
 import Link from "next/link";
 import { timeSince } from "../../src/utils/functions";
-import { User } from "src/types/general";
+import { IUser } from "src/types/general";
 import styles from "./comment.module.scss";
 import postStyles from "./post.module.scss";
 import { CommentProps } from "src/types/props";
@@ -19,7 +19,7 @@ export default function Comment(props: CommentProps): ReactElement {
 
     const handleCommentButtonClickOnComment = (
         commentId: string,
-        commentAuthor: User
+        commentAuthor: IUser
     ) => {
         Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
@@ -85,6 +85,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     postId={props.comment._id}
                     postAuthorId={props.comment.author?._id}
                     currentUserId={props.currentUser?._id}
+                    parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
             </div>
             <div className={` ${styles.commentText}`}>

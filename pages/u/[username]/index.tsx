@@ -2,7 +2,7 @@
 import axios from "axios";
 import axiosInstance from "../../../src/axios";
 import { useRouter } from "next/router";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Loading from "../../../components/loading";
 import NavbarLoggedIn from "../../../components/navbarLoggedIn";
 import NavbarLoggedOut from "../../../components/navbarLoggedOut";
@@ -19,7 +19,7 @@ import MediaModal from "../../../components/mediaModal/mediaModal";
 import { ChatTeardropText } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
 import { socket } from "../../../src/socket";
-import { User, Post as PostType } from "../../../src/types/general";
+import { IUser, IPost } from "../../../src/types/general";
 import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext } from "next";
 import { ProfileProps } from "src/types/props";
@@ -30,23 +30,25 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const toast = useToastContext();
 
+    const parentContainerRef = useRef(null);
+
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [posts, setPosts] = useState<Array<PostType>>([]);
+    const [posts, setPosts] = useState<Array<IPost>>([]);
     const [postsLoading, setPostsLoading] = useState(true);
     const [modalData, setModalData] = useState({
-        post: null as PostType,
+        post: null as IPost,
         imageIndex: 0,
-        currentUser: null as User,
+        currentUser: null as IUser,
     });
     const [mediaModal, setMediaModal] = useState(false);
 
-    let currentUser: User = null;
+    let currentUser: IUser = null;
     currentUser = useUser();
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
-        post: PostType,
+        post: IPost,
         index: number
     ) => {
         setModalData({
@@ -232,7 +234,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                                     currentUser && "feed"
                                 }`}
                             >
-                                <div className={`${styles.container}`}>
+                                <div
+                                    ref={parentContainerRef}
+                                    className={`${styles.container}`}
+                                >
                                     <div className={styles.scrollableArea}>
                                         <div className={styles.user}>
                                             <div className={styles.userInfo}>
@@ -325,7 +330,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className={styles.userExtraInfo}>
+                                        <div className={styles.userExtraInfoMobile}>
                                             {props.user.bio && (
                                                 <>
                                                     <p
@@ -377,6 +382,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             handleLike={
                                                                 handleLike
                                                             }
+                                                            parentContainerRef={parentContainerRef}
                                                         ></Post>
                                                     );
                                                 })
@@ -387,6 +393,42 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 ></Loading>
                                             )}
                                         </div>
+                                    </div>
+                                    <div className={styles.userExtraInfo}>
+                                        {props.user.bio && (
+                                            <>
+                                                <p
+                                                    className={`text-bold ${styles.bioBirthdayTitle}`}
+                                                >
+                                                    Bio
+                                                </p>
+                                                <p className="mt-1Percent">
+                                                    {props.user.bio}
+                                                </p>
+                                            </>
+                                        )}
+                                        {props.user.birthday && (
+                                            <>
+                                                <p
+                                                    className={`text-bold ${styles.bioBirthdayTitle}`}
+                                                >
+                                                    Birthday
+                                                </p>
+                                                <p className="mt-1Percent">
+                                                    {formatBirthday(
+                                                        props.user.birthday
+                                                    )}
+                                                </p>
+                                            </>
+                                        )}
+                                        <p
+                                            className={`text-bold ${styles.bioBirthdayTitle}`}
+                                        >
+                                            Member Since
+                                        </p>
+                                        <p className="mt-1Percent">
+                                            {formatJoinDate(props.user.createdAt)}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

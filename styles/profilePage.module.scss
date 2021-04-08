@@ -5,12 +5,11 @@
     grid-template-columns: 2fr 1fr;
     grid-gap: 20px;
     position: relative;
-    height: calc(100vh - 84px - 2em);
-    max-height: calc(100vh - 84px - 2em);
     margin: 2em 2em 0 2em;
 
     @media (max-width: 1200px) {
-        display: block;
+        display: flex;
+        flex-direction: column;
         height: 100%;
         margin: 1em 1em 5em 1em;
         max-height: 100%;
@@ -130,16 +129,28 @@
 .userExtraInfo {
     background-color: #1f1f1f;
     padding: 20px;
-    position: absolute;
-    right: 1em;
-    top: 0;
-    width: 30%;
-    height: calc(100vh - 84px - 3em);
+    position: sticky;
+    top: 30px;
+    height: min-content;
     display: flex;
     flex-direction: column;
     grid-gap: 10px;
     
     @media (max-width: 1200px) {
+        display: none;
+    }
+}
+
+.userExtraInfoMobile {
+    display: none;
+
+    @media (max-width: 1200px) {
+        background-color: #1f1f1f;
+        padding: 20px;
+        height: min-content;
+        display: flex;
+        flex-direction: column;
+        grid-gap: 10px;    
         position: initial;
         width: initial;
         height: initial;

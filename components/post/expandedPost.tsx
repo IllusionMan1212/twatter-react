@@ -12,7 +12,7 @@ import messagesStyles from "../../styles/messages.module.scss";
 import { useToastContext } from "../../src/contexts/toastContext";
 import { connectSocket, socket } from "../../src/socket";
 import mediaModalStyles from "../mediaModal/mediaModal.module.scss";
-import { Attachment } from "src/types/general";
+import { IAttachment } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -31,9 +31,10 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
 
     const commentBoxRef = useRef<HTMLSpanElement>(null);
+    const parentContainerRef = useRef<HTMLDivElement>(null);
 
     const [commentingAllowed, setCommentingAllowed] = useState(false);
-    const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+    const [attachments, setAttachments] = useState<Array<IAttachment>>([]);
     const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
 
@@ -244,7 +245,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     </div>
                 </div>
             </div>
-            <div className={styles.commentsSection}>
+            <div ref={parentContainerRef} className={styles.commentsSection}>
                 {props.post.comments.map((comment) => {
                     return (
                         <Comment
@@ -252,6 +253,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             comment={comment}
                             currentUser={props.currentUser}
                             handleMediaClick={props.handleMediaClick}
+                            parentContainerRef={parentContainerRef}
                         ></Comment>
                     );
                 })}

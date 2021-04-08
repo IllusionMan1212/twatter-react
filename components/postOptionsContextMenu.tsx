@@ -4,13 +4,17 @@ import { Flag, Share, Eraser } from "phosphor-react";
 import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { PostOptionsMenuProps } from "../src/types/props";
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { connectSocket, socket } from "../src/socket";
 
 export default function PostOptionsMenu(
     props: PostOptionsMenuProps
 ): ReactElement {
     const toast = useToastContext();
+
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const [top, setTop] = useState(-1);
 
     const handleOnClick = () => {
         if (props.postAuthorId != props.currentUserId) {
@@ -57,9 +61,18 @@ export default function PostOptionsMenu(
             });
     };
 
+    useEffect(() => {
+        if (props.topOffset >= 0) {
+            const height = containerRef.current.getBoundingClientRect().height;
+            if (props.topOffset < height) {
+                setTop(props.topOffset - height);
+            }
+        }
+    }, []);
+
     return (
         <>
-            <div className={`pointer ${styles.menu}`}>
+            <div ref={containerRef} className={`pointer ${styles.menu}`} style={{top: top != -1 ? top : "30px"}}>
                 <div>
                     <Flag size="20"></Flag>
                     Report Post

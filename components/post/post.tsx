@@ -87,6 +87,7 @@ export default function Post(props: PostProps): ReactElement {
                     postId={props.post._id}
                     postAuthorId={props.post.author?._id}
                     currentUserId={props.currentUser?._id}
+                    parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
                 <div className={`ml-1 ${styles.postText}`}>
                     <p>{props.post.content}</p>

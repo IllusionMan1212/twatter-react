@@ -19,7 +19,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "../loading";
 import axios from "axios";
 import { connectSocket, socket } from "../../src/socket";
-import { Attachment, Post } from "src/types/general";
+import { IAttachment, IPost } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -45,10 +45,10 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const [commentingAllowed, setCommentingAllowed] = useState(false);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
-    const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+    const [attachments, setAttachments] = useState<Array<IAttachment>>([]);
     const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
-    const [comments, setComments] = useState<Array<Post>>([]);
+    const [comments, setComments] = useState<Array<IPost>>([]);
     const [nowCommenting, setNowCommenting] = useState(false);
     const [likes, setLikes] = useState<Array<string>>([]);
 

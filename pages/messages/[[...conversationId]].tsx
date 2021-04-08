@@ -19,7 +19,7 @@ import Message from "../../components/messages/message";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axiosInstance from "../../src/axios";
 import { useRouter } from "next/router";
-import { Attachment, Conversation } from "../../src/types/general";
+import { IAttachment, IConversation } from "../../src/types/general";
 import { connectSocket, socket } from "../../src/socket";
 import Link from "next/link";
 import MessageMediaModal from "../../components/messages/messageMediaModal";
@@ -45,7 +45,7 @@ export default function Messages(): ReactElement {
 
     const [charsLeft, setCharsLeft] = useState(messageCharLimit);
     const [sendingAllowed, setSendingAllowed] = useState(false);
-    const [attachment, setAttachment] = useState<Attachment>(null);
+    const [attachment, setAttachment] = useState<IAttachment>(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [conversations, setConversations] = useState([]); // TODO: explicitly type this
     const [messagesListLoading, setMessagesListLoading] = useState(true);
@@ -353,7 +353,7 @@ export default function Messages(): ReactElement {
         }
     };
 
-    const handleConversationClick = (conversation: Conversation) => {
+    const handleConversationClick = (conversation: IConversation) => {
         if (conversation._id == activeConversation?._id) {
             return;
         }

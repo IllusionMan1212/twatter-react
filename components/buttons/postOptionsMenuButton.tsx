@@ -1,27 +1,30 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useRef, useState } from "react";
+import { ReactElement, useState } from "react";
 import styles from "./postOptionsMenuButton.module.scss";
 import PostOptionsMenu from "../postOptionsContextMenu";
 import { DotsThree } from "phosphor-react";
-import { PostOptionsMenuProps } from "../../src/types/props";
+import { PostOptionsMenuButtonProps } from "../../src/types/props";
 
 export default function PostOptionsMenuButton(
-    props: PostOptionsMenuProps
+    props: PostOptionsMenuButtonProps
 ): ReactElement {
-    const optionsButtonRef = useRef(null);
-
     const [optionsMenu, setOptionsMenu] = useState(false);
+    const [offset, setOffset] = useState(-1);
 
     return (
         <div
             onClick={(e) => {
                 e.stopPropagation();
                 setOptionsMenu(!optionsMenu);
+                if (props.parentContainerRef && !optionsMenu) {
+                    const parent = props.parentContainerRef.current.getBoundingClientRect();
+                    console.log(parent);
+                    setOffset(parent.height - (e.clientY - parent.top));
+                }
             }}
             className={styles.optionsButton}
         >
             <DotsThree
-                ref={optionsButtonRef}
                 className="pointer"
                 size="30"
                 color="#8F8F8F"
@@ -35,6 +38,7 @@ export default function PostOptionsMenuButton(
                     postAuthorId={props.postAuthorId}
                     currentUserId={props.currentUserId}
                     callback={props.callback}
+                    topOffset={offset}
                 ></PostOptionsMenu>
             )}
         </div>
