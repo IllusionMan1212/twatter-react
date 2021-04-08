@@ -115,3 +115,7 @@ export interface ImageContainerProps {
     post: Post;
     handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: Post, index: number) => void;
 }
+
+export interface ProfileProps {
+    user: User;
+}

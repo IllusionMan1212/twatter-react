@@ -22,15 +22,16 @@ import { useToastContext } from "../../../src/contexts/toastContext";
 import { socket } from "../../../src/socket";
 import { User, Post as PostType } from "../../../src/types/general";
 import { LikePayload } from "src/types/utils";
+import { GetServerSidePropsContext } from "next";
+import { ProfileProps } from "src/types/props";
 
-export default function Profile(): ReactElement {
+export default function Profile(props: ProfileProps): ReactElement {
     const router = useRouter();
 
     const toast = useToastContext();
 
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState(null);
     const [posts, setPosts] = useState<Array<PostType>>([]);
     const [postsLoading, setPostsLoading] = useState(true);
     const [modalData, setModalData] = useState({
@@ -57,12 +58,12 @@ export default function Profile(): ReactElement {
     };
 
     const handleMessageClick = () => {
-        if (!currentUser || currentUser._id == user._id) {
+        if (!currentUser || currentUser._id == props.user._id) {
             return;
         }
         const payload = {
             senderId: currentUser._id,
-            receiverId: user._id,
+            receiverId: props.user._id,
         };
         axiosInstance
             .post("/messaging/startConversation", payload)
@@ -127,10 +128,10 @@ export default function Profile(): ReactElement {
                 posts.map((post) => {
                     if (post._id == payload.postId) {
                         if (payload.likeType == "LIKE") {
-                            post.likeUsers = post.likeUsers.concat(user._id);
+                            post.likeUsers = post.likeUsers.concat(currentUser._id);
                         } else if (payload.likeType == "UNLIKE") {
                             post.likeUsers = post.likeUsers.filter(
-                                (_user) => _user != user._id
+                                (_user) => _user != currentUser._id
                             );
                         }
                         return post;
@@ -155,39 +156,22 @@ export default function Profile(): ReactElement {
     }, [socket, handleComment]);
 
     useEffect(() => {
-        if (router.query.username) {
-            axios
-                .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/getUserData?username=${router.query.username}`,
-                    { withCredentials: true }
-                )
-                .then((res) => {
-                    setUser(res.data.user);
-                    setNotFound(false);
-                })
-                .catch((err) => {
-                    setLoading(false);
-                    if (err.response.status == 404) {
-                        setNotFound(true);
-                    }
-                });
-        }
-    }, [router.query.username]);
-
-    useEffect(() => {
-        if (user) {
+        if (props.user) {
             setLoading(false);
             axios
                 .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${user._id}`,
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${props.user._id}`,
                     { withCredentials: true }
                 )
                 .then((res) => {
                     setPosts(res.data.posts);
                     setPostsLoading(false);
                 });
+        } else {
+            setLoading(false);
+            setNotFound(true);
         }
-    }, [user]);
+    }, [props.user]);
 
     useEffect(() => {
         if (mediaModal) {
@@ -212,29 +196,29 @@ export default function Profile(): ReactElement {
                 <>
                     <Head>
                         <title>
-                            {user
-                                ? `${user.display_name}'s Profile`
+                            {props.user
+                                ? `${props.user.display_name}'s Profile`
                                 : "User not found"}{" "}
                             - Twatter
                         </title>
                         <meta
                             property={"og:image"}
-                            content={user.profile_image}
+                            content={props.user?.profile_image}
                             key="image"
                         />
                         <meta
                             property={"og:url"}
-                            content={`https://twatter.illusionman1212.me/u/${user.username}`}
+                            content={`https://twatter.illusionman1212.me/u/${props.user?.username}`}
                             key="url"
                         />
                         <meta
                             property={"og:title"}
-                            content={`${user.display_name} (@${user.username})`}
+                            content={`${props.user?.display_name} (@${props.user?.username})`}
                             key="title"
                         />
                         <meta
                             property={"og:description"}
-                            content={user.bio}
+                            content={props.user?.bio}
                             key="description"
                         />
                         <meta
@@ -243,7 +227,7 @@ export default function Profile(): ReactElement {
                             key="type"
                         />
                     </Head>
-                    {!notFound && user ? (
+                    {!notFound && props.user ? (
                         <>
                             {currentUser ? (
                                 <div className="feed">
@@ -251,7 +235,7 @@ export default function Profile(): ReactElement {
                                         user={currentUser}
                                     ></NavbarLoggedIn>
                                     <StatusBar
-                                        title={user.display_name}
+                                        title={props.user.display_name}
                                         user={currentUser}
                                     ></StatusBar>
                                 </div>
@@ -271,12 +255,12 @@ export default function Profile(): ReactElement {
                                                     className={`round ${styles.userImage}`}
                                                     style={{
                                                         backgroundImage: `url("${
-                                                            user.profile_image ==
+                                                            props.user.profile_image ==
                                                             "default_profile.svg"
                                                                 ? "/"
                                                                 : ""
                                                         }${
-                                                            user.profile_image
+                                                            props.user.profile_image
                                                         }")`,
                                                     }}
                                                 ></div>
@@ -284,18 +268,18 @@ export default function Profile(): ReactElement {
                                                     <p
                                                         className={`${styles.display_name} text-bold`}
                                                     >
-                                                        {user.display_name}
+                                                        {props.user.display_name}
                                                     </p>
                                                     <p
                                                         className={`usernameGrey ${styles.username}`}
                                                     >
-                                                        @{user.username}
+                                                        @{props.user.username}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className={styles.userStats}>
                                                 {currentUser?._id !=
-                                                    user._id && (
+                                                    props.user._id && (
                                                     <div
                                                         className={
                                                             styles.userButtons
@@ -357,7 +341,7 @@ export default function Profile(): ReactElement {
                                             </div>
                                         </div>
                                         <div className={styles.userExtraInfo}>
-                                            {user.bio && (
+                                            {props.user.bio && (
                                                 <>
                                                     <p
                                                         className={`text-bold ${styles.bioBirthdayTitle}`}
@@ -365,11 +349,11 @@ export default function Profile(): ReactElement {
                                                         Bio
                                                     </p>
                                                     <p className="mt-1Percent">
-                                                        {user.bio}
+                                                        {props.user.bio}
                                                     </p>
                                                 </>
                                             )}
-                                            {user.birthday && (
+                                            {props.user.birthday && (
                                                 <>
                                                     <p
                                                         className={`text-bold ${styles.bioBirthdayTitle}`}
@@ -378,7 +362,7 @@ export default function Profile(): ReactElement {
                                                     </p>
                                                     <p className="mt-1Percent">
                                                         {formatBirthday(
-                                                            user.birthday
+                                                            props.user.birthday
                                                         )}
                                                     </p>
                                                 </>
@@ -389,7 +373,7 @@ export default function Profile(): ReactElement {
                                                 Member Since
                                             </p>
                                             <p className="mt-1Percent">
-                                                {formatJoinDate(user.createdAt)}
+                                                {formatJoinDate(props.user.createdAt)}
                                             </p>
                                         </div>
                                         <div className={styles.userPosts}>
@@ -482,4 +466,24 @@ export default function Profile(): ReactElement {
             )}
         </>
     );
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext): any {
+    let res = null;
+    let user = null;
+
+    try {
+        res = await axios
+            .get(
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/getUserData?username=${context.params.username}`,
+                { withCredentials: true }
+            );
+        user = res.data.user;
+    } catch (err) {
+        console.log(err);
+    }
+
+    return {
+        props: { user: user }
+    };
 }
