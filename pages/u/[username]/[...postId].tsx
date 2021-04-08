@@ -1,7 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import Loading from "../../../components/loading";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import NavbarLoggedIn from "../../../components/navbarLoggedIn";
 import NavbarLoggedOut from "../../../components/navbarLoggedOut";
