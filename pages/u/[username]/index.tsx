@@ -1,7 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import axios from "axios";
 import axiosInstance from "../../../src/axios";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import Loading from "../../../components/loading";

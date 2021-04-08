@@ -1,5 +1,4 @@
 /* eslint-disable react/react-in-jsx-scope */
-import Head from "next/head";
 import Link from "next/link";
 import LayoutRegular from "../components/layouts/layoutRegular";
 import NavbarLoggedOut from "../components/navbarLoggedOut";
@@ -51,11 +50,6 @@ export default function Index(): ReactElement {
                     ],
                 }}
             />
-            <Head>
-                <title>Twatter</title>
-                <link rel="icon" href="/favicon.ico" />
-                {/* TODO: write meta tags and other important head tags */}
-            </Head>
             <NavbarLoggedOut></NavbarLoggedOut>
             <LayoutRegular>
                 <div className="text-white">
