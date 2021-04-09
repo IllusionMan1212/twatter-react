@@ -188,6 +188,12 @@ h6 {
     }
 }
 
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Text */
 
 /* ----------------------------*/

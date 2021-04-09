@@ -89,7 +89,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
             <div
                 className={`ml-3Percent mt-1Percent flex align-items-center ${styles.title}`}
             >
-                <p className="text-bold">{props.title}</p>
+                <p className="text-bold ellipsis">{props.title}</p>
             </div>
             <div className={`ml-3Percent mt-1Percent ${styles.search}`}>
                 <Search></Search>
