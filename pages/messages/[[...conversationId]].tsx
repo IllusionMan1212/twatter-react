@@ -2,7 +2,7 @@
 import StatusBar from "../../components/statusBar";
 import NavbarLoggedIn from "../../components/navbarLoggedIn";
 import Loading from "../../components/loading";
-import { useUser } from "../../src/hooks/useUserHook";
+import { useUser } from "../../src/hooks/useUser";
 import Head from "next/head";
 import styles from "../../styles/messages.module.scss";
 import MessagesListItem from "../../components/messages/messagesListItem";
@@ -375,7 +375,7 @@ export default function Messages(): ReactElement {
         if (router.query?.conversationId?.[0] != conversation._id) {
             // HACK: this works around virutoso not calling the loadMoreMessages function
             // when changing conversations
-            router.push("/messages");
+            // router.push("/messages");
             router.push(`/messages/${conversation._id}`);
         }
     };
@@ -394,21 +394,22 @@ export default function Messages(): ReactElement {
             });
     };
 
-    const loadMoreMessages = useCallback(() => {
+    const loadMoreMessages = useCallback((index: number) => {
         console.log("loading more messages");
+        console.log(index);
         setPage(pageRef.current + 1);
         getMessages(activeConversation._id).then((newMessages) => {
             if (!newMessages.length) {
                 setReachedStart(true);
-                return false;
+                return true;
             }
             const messagesToPrepend = newMessages.length;
             const nextFirstItemIndex = firstItemIndex - messagesToPrepend;
     
             setFirstItemIndex(() => nextFirstItemIndex);
             setMessages((messages) => [...newMessages].concat(messages));
+            return false;
         });
-        return false;
     }, [setMessages, messages, page, pageRef, firstItemIndex, reachedStart]);
 
     useEffect(() => {
@@ -458,6 +459,9 @@ export default function Messages(): ReactElement {
 
         getMessages(router.query.conversationId[0]).then((messages) => {
             setMessages(messages);
+            if (messages.length < 50) {
+                setReachedStart(true);
+            }
         });
     }, [router.query?.conversationId, conversations.length]);
 
