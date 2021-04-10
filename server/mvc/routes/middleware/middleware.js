@@ -50,6 +50,22 @@ const putLimit = ratelimiter({
     windowMs: 60 * 1000
 });
 
+const cdnGetLimit = ratelimiter({
+    draft_polli_ratelimit_headers: true,
+    handler: (req, res) => {
+        res.status(429).json({
+            message: `Too many requests, try again in ${(
+                (req.rateLimit.resetTime.getTime() - Date.now()) /
+                1000
+            ).toFixed(1)} seconds`,
+            status: 429,
+            success: false
+        });
+    },
+    max: 300,
+    windowMs: 60 * 1000
+});
+
 const authorizeUser = async (req, res, next) => {
     try {
         const session =
@@ -85,6 +101,7 @@ const authorizeUser = async (req, res, next) => {
 
 module.exports = {
     authorizeUser,
+    cdnGetLimit,
     getLimit,
     postLimit,
     putLimit,
