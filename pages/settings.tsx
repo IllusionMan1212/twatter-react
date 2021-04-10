@@ -2,7 +2,7 @@
 import StatusBar from "../components/statusBar";
 import NavbarLoggedIn from "../components/navbarLoggedIn";
 import Loading from "../components/loading";
-import { useUser } from "../src/hooks/useUserHook";
+import { useUser } from "../src/hooks/useUser";
 import { ReactElement } from "react";
 
 export default function Settings(): ReactElement {

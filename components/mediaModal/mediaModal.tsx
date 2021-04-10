@@ -18,7 +18,7 @@ import SwiperCore, { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "../loading";
 import axios from "axios";
-import { connectSocket, socket } from "../../src/socket";
+import { socket } from "src/hooks/useSocket";
 import { IAttachment, IPost } from "src/types/general";
 import {
     handleChange,
@@ -83,33 +83,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setPreviewImages([]);
         setCommentingAllowed(false);
         setCharsLeft(postCharLimit);
-        if (socket) {
-            socket?.emit("commentToServer", payload);
-        } else {
-            console.log("socket not connected, trying to connect");
-            axios
-                .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`
-                )
-                .then((res) => {
-                    new Promise((resolve) => {
-                        connectSocket(res.data.token);
-                        resolve("resolved");
-                    }).then(() => {
-                        socket?.on("commentToClient", props.handleComment);
-                        socket?.on("commentToClient", handleComment);
-                        socket?.on("deletePost", handleCommentDelete);
-                        socket?.on("likeToClient", handleLike);
-                        socket.emit("commentToServer", payload);
-                    });
-                })
-                .catch((err) => {
-                    toast(
-                        err?.response?.data?.message ?? "An error has occurred",
-                        3000
-                    );
-                });
-        }
+        socket.emit("commentToServer", payload);
     };
 
     const handleWindowKeyDown = (e: KeyboardEvent) => {
@@ -208,16 +182,20 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     }, [props.modalData.post]);
 
     useEffect(() => {
-        socket?.on("commentToClient", handleComment);
-        socket?.on("deletePost", handleCommentDelete);
-        socket?.on("likeToClient", handleLike);
+        if (socket?.connected) {
+            socket.on("commentToClient", handleComment);
+            socket.on("deletePost", handleCommentDelete);
+            socket.on("likeToClient", handleLike);
+        }
 
         return () => {
-            socket?.off("commentToClient", handleComment);
-            socket?.off("deletePost", handleCommentDelete);
-            socket?.off("likeToClient", handleLike);
+            if (socket?.connected) {
+                socket.off("commentToClient", handleComment);
+                socket.off("deletePost", handleCommentDelete);
+                socket.off("likeToClient", handleLike);
+            }
         };
-    }, [socket, handleComment]);
+    }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
         if (commentBoxRef?.current) {
@@ -292,7 +270,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     ? window.history.go(-2)
                                     : window.history.back();
                             }}
-                            handlePostDelete={props.handleCommentDelete}
                         ></PostOptionsMenuButton>
                     </div>
                     {props.modalData.post.content && (
@@ -309,7 +286,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <LikeButton
                             post={props.modalData.post}
                             currentUserId={props.modalData.currentUser?._id}
-                            handleLike={handleLike}
                             likeUsers={likes}
                         ></LikeButton>
                     </div>

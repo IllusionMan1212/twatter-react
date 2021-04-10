@@ -114,7 +114,6 @@ export default function Post(props: PostProps): ReactElement {
                             post={props.post}
                             currentUserId={props.currentUser?._id}
                             likeUsers={props.post.likeUsers}
-                            handleLike={props.handleLike}
                         ></LikeButton>
                     </div>
                 </div>

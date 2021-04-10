@@ -11,7 +11,7 @@ import styles from "./comment.module.scss";
 import postStyles from "./post.module.scss";
 import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "../attachmentsContainer";
-import { socket } from "src/socket";
+import { socket } from "src/hooks/useSocket";
 import { LikePayload } from "src/types/utils";
 
 export default function Comment(props: CommentProps): ReactElement {
@@ -39,12 +39,16 @@ export default function Comment(props: CommentProps): ReactElement {
     );
 
     useEffect(() => {
-        socket?.on("likeToClient", handleLike);
+        if (socket?.connected) {
+            socket.on("likeToClient", handleLike);
+        }
 
         return () => {
-            socket?.off("likeToClient", handleLike);
+            if (socket?.connected) {
+                socket.off("likeToClient", handleLike);
+            }
         };
-    }, [socket, handleLike]);
+    }, [handleLike]);
 
     return (
         <div
@@ -116,7 +120,6 @@ export default function Comment(props: CommentProps): ReactElement {
                         post={props.comment}
                         currentUserId={props.currentUser?._id}
                         likeUsers={likes}
-                        handleLike={handleLike}
                     ></LikeButton>
                 </div>
             </div>

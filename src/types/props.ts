@@ -57,7 +57,6 @@ export interface PostProps {
         post: IPost,
         index: number
     ) => void;
-    handleLike: (payload: LikePayload) => void;
 
     // ref of container that the menu shouldn't exceed in height
     parentContainerRef?: MutableRefObject<HTMLElement>;
@@ -65,8 +64,6 @@ export interface PostProps {
 
 export interface ExpandedPostProps extends PostProps {
     callback?: <T extends unknown[]>(...args: T) => void;
-    handleComment: (payload: IPost) => void;
-    handlePostDelete?: (payload: string) => void;
     nowCommenting: boolean;
     setNowCommenting: (value: SetStateAction<boolean>) => void;
 }
@@ -76,7 +73,6 @@ interface PostOptionsMenuBaseProps {
     currentUserId: string;
     postId: string;
     callback?: <T extends unknown[]>(...args: T) => void;
-    handlePostDelete?: (payload: string) => void;
 }
 
 export interface PostOptionsMenuProps extends PostOptionsMenuBaseProps {
@@ -96,14 +92,11 @@ export interface MediaModalProps {
     };
     goBackTwice?: boolean;
     handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: IPost, index: number) => void;
-    handleComment: (payload: IPost) => void;
-    handleCommentDelete: (commentId: string) => void;
 }
 
 export interface LikeButtonProps {
     post: IPost;
     currentUserId?: string;
-    handleLike: (payload: LikePayload) => void;
     likeUsers: Array<string>;
 }
 

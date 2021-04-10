@@ -5,7 +5,7 @@ import homeStyles from "../../styles/home.module.scss";
 import Head from "next/head";
 import { Plus } from "phosphor-react";
 import { ReactElement, useEffect, useState } from "react";
-import { useUser } from "../../src/hooks/useUserHook";
+import { useUser } from "../../src/hooks/useUser";
 import Loading from "../../components/loading";
 import Router from "next/router";
 import axios from "../../src/axios";

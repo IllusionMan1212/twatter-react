@@ -6,7 +6,7 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Loading from "../../../components/loading";
 import NavbarLoggedIn from "../../../components/navbarLoggedIn";
 import NavbarLoggedOut from "../../../components/navbarLoggedOut";
-import { useUser } from "../../../src/hooks/useUserHook";
+import { useUser } from "../../../src/hooks/useUser";
 import StatusBar from "../../../components/statusBar";
 import styles from "../../../styles/profilePage.module.scss";
 import Post from "../../../components/post/post";
@@ -18,7 +18,7 @@ import {
 import MediaModal from "../../../components/mediaModal/mediaModal";
 import { ChatTeardropText } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
-import { socket } from "../../../src/socket";
+import { socket } from "src/hooks/useSocket";
 import { IUser, IPost } from "../../../src/types/general";
 import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext } from "next";
@@ -146,16 +146,20 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     useEffect(() => {
-        socket?.on("commentToClient", handleComment);
-        socket?.on("deletePost", handleCommentDelete);
-        socket?.on("likeToClient", handleLike);
+        if (socket?.connected) {
+            socket.on("commentToClient", handleComment);
+            socket.on("deletePost", handleCommentDelete);
+            socket.on("likeToClient", handleLike);
+        }
 
         return () => {
-            socket?.off("commentToClient", handleComment);
-            socket?.off("deletePost", handleCommentDelete);
-            socket?.off("likeToClient", handleLike);
+            if (socket?.connected) {
+                socket.off("commentToClient", handleComment);
+                socket.off("deletePost", handleCommentDelete);
+                socket.off("likeToClient", handleLike);
+            }
         };
-    }, [socket, handleComment]);
+    }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
         if (props.user) {
@@ -379,9 +383,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 handleMediaClick
                                                             }
                                                             post={post}
-                                                            handleLike={
-                                                                handleLike
-                                                            }
                                                             parentContainerRef={parentContainerRef}
                                                         ></Post>
                                                     );
@@ -436,8 +437,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                 <MediaModal
                                     modalData={modalData}
                                     handleMediaClick={handleMediaClick}
-                                    handleComment={handleComment}
-                                    handleCommentDelete={handleCommentDelete}
                                 ></MediaModal>
                             )}
                         </>

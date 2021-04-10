@@ -5,13 +5,13 @@ import { useRouter } from "next/router";
 import NavbarLoggedIn from "../../../components/navbarLoggedIn";
 import NavbarLoggedOut from "../../../components/navbarLoggedOut";
 import StatusBar from "../../../components/statusBar";
-import { useUser } from "../../../src/hooks/useUserHook";
+import { useUser } from "../../../src/hooks/useUser";
 import axios from "axios";
 import ExpandedPost from "../../../components/post/expandedPost";
 import styles from "../../../components/post/expandedPost.module.scss";
 import MediaModal from "../../../components/mediaModal/mediaModal";
 import { IUser, IPost } from "../../../src/types/general";
-import { socket } from "../../../src/socket";
+import { socket } from "src/hooks/useSocket";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
@@ -115,16 +115,20 @@ export default function UserPost(props: UserPostProps): ReactElement {
     );
 
     useEffect(() => {
-        socket?.on("deletePost", handleCommentDelete);
-        socket?.on("commentToClient", handleComment);
-        socket?.on("likeToClient", handleLike);
+        if (socket?.connected) {
+            socket.on("deletePost", handleCommentDelete);
+            socket.on("commentToClient", handleComment);
+            socket.on("likeToClient", handleLike);
+        }
 
         return () => {
-            socket?.off("deletePost", handleCommentDelete);
-            socket?.off("commentToClient", handleComment);
-            socket?.off("likeToClient", handleLike);
+            if (socket?.connected) {
+                socket.off("deletePost", handleCommentDelete);
+                socket.off("commentToClient", handleComment);
+                socket.off("likeToClient", handleLike);
+            }
         };
-    }, [socket, handleComment, handleCommentDelete, handleLike]);
+    }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
         setMediaModal(false);
@@ -218,13 +222,10 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                         key={post._id}
                                         currentUser={currentUser}
                                         post={post}
-                                        handleComment={handleComment}
-                                        handlePostDelete={handleCommentDelete}
                                         handleMediaClick={handleMediaClick}
                                         callback={() => window.history.back()}
                                         nowCommenting={nowCommenting}
                                         setNowCommenting={setNowCommenting}
-                                        handleLike={handleLike}
                                     ></ExpandedPost>
                                 </div>
                             </div>
@@ -233,8 +234,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                     modalData={modalData}
                                     goBackTwice={true}
                                     handleMediaClick={handleMediaClick}
-                                    handleComment={handleComment}
-                                    handleCommentDelete={handleCommentDelete}
                                 ></MediaModal>
                             )}
                         </>

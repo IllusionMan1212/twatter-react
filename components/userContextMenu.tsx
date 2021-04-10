@@ -5,21 +5,20 @@ import { ReactElement } from "react";
 import { useToastContext } from "../src/contexts/toastContext";
 import { UserContextMenuProps } from "../src/types/props";
 import styles from "./userContextMenu.module.scss";
-import { socket } from "../src/socket";
+import { socket } from "../src/hooks/useSocket";
 
 export default function UserContextMenu(
     props: UserContextMenuProps
 ): ReactElement {
     const toast = useToastContext();
-    // const socket = useSocketContext();
 
     const logout = () => {
         axios
             .delete("/users/logout")
             .then(() => {
-                toast("Logged out", 3000);
-                socket.disconnect();
+                socket.close();
                 Router.push("/login");
+                toast("Logged out", 3000);
             })
             .catch((err) => {
                 console.error(err);

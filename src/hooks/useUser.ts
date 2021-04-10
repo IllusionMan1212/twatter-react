@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import Router from "next/router";
 import useSWR from "swr";
-import { socket, connectSocket } from "../socket";
 
 const fetcher = (url: string) =>
     fetch(url, { credentials: "include" })
@@ -21,10 +20,6 @@ export function useUser(redirectTo?: string, redirectIfFound?: boolean): any {
 
     useEffect(() => {
         if (!redirectTo || !finished) return;
-        if (hasUser && !socket) {
-            user.token = data?.token;
-            connectSocket(data?.token);
-        }
         if (
             // If redirectTo is set, redirect if the user was not found.
             (redirectTo && !redirectIfFound && !hasUser) ||

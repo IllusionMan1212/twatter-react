@@ -6,7 +6,7 @@ import { ChatsTeardrop, ArrowLeft } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
 import { ReactElement, useState, useCallback, useEffect } from "react";
 import { StatusBarProps } from "../src/types/props";
-import { socket } from "../src/socket";
+import { socket } from "src/hooks/useSocket";
 import { useToastContext } from "../src/contexts/toastContext";
 import axiosInstance from "../src/axios";
 import axios from "axios";
@@ -65,14 +65,18 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
     }, []);
 
     useEffect(() => {
-        socket?.on("messageFromServer", handleMessageFromServer);
-        socket?.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        if (socket?.connected) {
+            socket.on("messageFromServer", handleMessageFromServer);
+            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        }
 
         return () => {
-            socket?.off("messageFromServer", handleMessageFromServer);
-            socket?.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            if (socket?.connected) {
+                socket.off("messageFromServer", handleMessageFromServer);
+                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            }
         };
-    }, [socket, handleMessageFromServer, handleMarkedMessagesAsRead]);
+    }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
 
     return (
         <div

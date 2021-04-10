@@ -12,7 +12,7 @@ import { NavbarLoggedInProps } from "../src/types/props";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
-import { socket } from "../src/socket";
+import { socket } from "src/hooks/useSocket";
 import axios from "axios";
 
 export default function NavbarLoggedIn(
@@ -70,14 +70,18 @@ export default function NavbarLoggedIn(
     }, []);
 
     useEffect(() => {
-        socket?.on("messageFromServer", handleMessageFromServer);
-        socket?.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        if (socket?.connected) {
+            socket.on("messageFromServer", handleMessageFromServer);
+            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        }
 
         return () => {
-            socket?.off("messageFromServer", handleMessageFromServer);
-            socket?.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            if (socket?.connected) {
+                socket.off("messageFromServer", handleMessageFromServer);
+                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            }
         };
-    }, [socket, handleMessageFromServer, handleMarkedMessagesAsRead]);
+    }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
 
     return (
         <div className={`${styles.navbar}`}>

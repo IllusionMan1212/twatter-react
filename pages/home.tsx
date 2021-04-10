@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import StatusBar from "../components/statusBar";
 import Head from "next/head";
-import { useUser } from "../src/hooks/useUserHook";
+import { useUser } from "../src/hooks/useUser";
 import Loading from "../components/loading";
 import NavbarLoggedIn from "../components/navbarLoggedIn";
 import styles from "../styles/home.module.scss";
@@ -18,7 +18,6 @@ import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal/mediaModal";
 import Router from "next/router";
-import { connectSocket, socket } from "../src/socket";
 import { IAttachment, IPost, IUser } from "src/types/general";
 import {
     handleChange,
@@ -31,6 +30,7 @@ import {
 import { postCharLimit } from "src/utils/variables";
 import axios from "axios";
 import { LikePayload } from "src/types/utils";
+import { socket } from "src/hooks/useSocket";
 
 export default function Home(): ReactElement {
     const user = useUser("/login", null);
@@ -86,13 +86,7 @@ export default function Home(): ReactElement {
         setPreviewImages([]);
         setPostingAllowed(false);
         setCharsLeft(postCharLimit);
-        if (socket) {
-            socket?.emit("post", payload);
-        } else {
-            console.log("socket not connected, trying to connect");
-            connectSocket(user.token);
-            socket?.emit("post", payload);
-        }
+        socket?.emit("post", payload);
     };
 
     const handleMediaClick = (
@@ -213,18 +207,22 @@ export default function Home(): ReactElement {
     );
 
     useEffect(() => {
-        socket?.on("post", handlePost);
-        socket?.on("deletePost", handleDeletePost);
-        socket?.on("commentToClient", handleComment);
-        socket?.on("likeToClient", handleLike);
+        if (socket?.connected) {
+            socket.on("post", handlePost);
+            socket.on("deletePost", handleDeletePost);
+            socket.on("commentToClient", handleComment);
+            socket.on("likeToClient", handleLike);
+        }
 
         return () => {
-            socket?.off("post", handlePost);
-            socket?.off("deletePost", handleDeletePost);
-            socket?.off("commentToClient", handleComment);
-            socket?.off("likeToClient", handleLike);
+            if (socket?.connected) {
+                socket.off("post", handlePost);
+                socket.off("deletePost", handleDeletePost);
+                socket.off("commentToClient", handleComment);
+                socket.off("likeToClient", handleLike);
+            }
         };
-    }, [socket, handlePost, handleDeletePost, handleComment, handleLike]);
+    }, [handlePost, handleDeletePost, handleComment, handleLike]);
 
     useEffect(() => {
         const cancelToken = axios.CancelToken;
@@ -537,7 +535,6 @@ export default function Home(): ReactElement {
                                             post={post}
                                             currentUser={user}
                                             handleMediaClick={handleMediaClick}
-                                            handleLike={handleLike}
                                         ></Post>
                                     );
                                 })}
@@ -563,8 +560,6 @@ export default function Home(): ReactElement {
                         <MediaModal 
                             modalData={modalData} 
                             handleMediaClick={handleMediaClick}
-                            handleComment={handlePost}
-                            handleCommentDelete={handleDeletePost}
                         ></MediaModal>
                     )}
                 </>

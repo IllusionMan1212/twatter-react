@@ -6,11 +6,13 @@ import "../styles/globals.scss";
 
 import "swiper/swiper.scss";
 import "swiper/components/navigation/navigation.scss";
-import { socket } from "src/socket";
 import { NextSeo } from "next-seo";
+import { useSocket, socket } from "src/hooks/useSocket";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
+
+    useSocket();
 
     const handleError = useCallback(
         (message) => {
@@ -25,7 +27,7 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
         return () => {
             socket?.off("error", handleError);
         };
-    }, [handleError]);
+    }, [socket, handleError]);
 
     return (
         <>

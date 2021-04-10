@@ -10,7 +10,7 @@ import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import { ArrowArcLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import messagesStyles from "../../styles/messages.module.scss";
 import { useToastContext } from "../../src/contexts/toastContext";
-import { connectSocket, socket } from "../../src/socket";
+import { socket } from "src/hooks/useSocket";
 import mediaModalStyles from "../mediaModal/mediaModal.module.scss";
 import { IAttachment } from "src/types/general";
 import {
@@ -25,7 +25,6 @@ import { postCharLimit } from "src/utils/variables";
 import CommentButton from "../buttons/commentButton";
 import Comment from "./comment";
 import AttachmentsContainer from "components/attachmentsContainer";
-import axios from "axios";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -69,27 +68,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
         setPreviewImages([]);
         setCommentingAllowed(false);
         setCharsLeft(postCharLimit);
-        if (socket) {
-            socket?.emit("commentToServer", payload);
-        } else {
-            console.log("socket not connected, trying to connect");
-            axios
-                .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
-                )
-                .then((res) => {
-                    new Promise((resolve) => {
-                        connectSocket(res.data.token);
-                        resolve("resolved");
-                    }).then(() => {
-                        socket?.on("commentToClient", props.handleComment);
-                        socket.emit("commentToServer", payload);
-                    });
-                })
-                .catch((err) => {
-                    toast(err?.response?.data?.message ?? "An error has occurred", 3000);
-                });
-        }
+        socket.emit("commentToServer", payload);
     };
 
     const handleCommentButtonClick = () => {
@@ -212,7 +191,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         postAuthorId={props.post.author._id}
                         currentUserId={props.currentUser?._id}
                         callback={props.callback}
-                        handlePostDelete={props.handlePostDelete}
                     ></PostOptionsMenuButton>
                     <div
                         className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
@@ -239,7 +217,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         <LikeButton
                             post={props.post}
                             currentUserId={props.currentUser?._id}
-                            handleLike={props.handleLike}
                             likeUsers={props.post.likeUsers}
                         ></LikeButton>
                     </div>

@@ -20,7 +20,7 @@ import { useToastContext } from "../../src/contexts/toastContext";
 import axiosInstance from "../../src/axios";
 import { useRouter } from "next/router";
 import { IAttachment, IConversation } from "../../src/types/general";
-import { connectSocket, socket } from "../../src/socket";
+import { socket } from "src/hooks/useSocket";
 import Link from "next/link";
 import MessageMediaModal from "../../components/messages/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
@@ -93,7 +93,7 @@ export default function Messages(): ReactElement {
             senderId: user._id,
             conversationId: activeConversation._id,
         };
-        socket?.emit("typing", payload);
+        socket.emit("typing", payload);
 
         if (e.currentTarget.textContent.trim().length > messageCharLimit) {
             setSendingAllowed(false);
@@ -109,7 +109,7 @@ export default function Messages(): ReactElement {
             messageCharLimit - e.currentTarget.textContent.trim().length
         );
         setTimeoutId(setTimeout(() => {
-            socket?.emit("stopTyping", payload);
+            socket.emit("stopTyping", payload);
         }, 4000));
     };
 
@@ -210,7 +210,7 @@ export default function Messages(): ReactElement {
                 };
 
                 // conversation is active, so the user has read the message
-                socket?.emit("markMessagesAsRead", payload);
+                socket.emit("markMessagesAsRead", payload);
             }
             const newConversations = conversations.map((conversation) => {
                 return conversation._id == msg.conversationId
@@ -299,13 +299,7 @@ export default function Messages(): ReactElement {
         setPreviewImage(null);
         setSendingAllowed(false);
         setCharsLeft(messageCharLimit);
-        if (socket) {
-            socket?.emit("messageToServer", payload);
-        } else {
-            console.log("socket not connected, trying to connect");
-            connectSocket(user.token);
-            socket?.emit("messageToServer", payload);
-        }
+        socket.emit("messageToServer", payload);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -371,11 +365,11 @@ export default function Messages(): ReactElement {
         };
 
         // when a conversation is opened, we mark its messages as read
-        socket?.emit("markMessagesAsRead", payload);
+        socket.emit("markMessagesAsRead", payload);
         if (router.query?.conversationId?.[0] != conversation._id) {
             // HACK: this works around virutoso not calling the loadMoreMessages function
             // when changing conversations
-            // router.push("/messages");
+            router.push("/messages");
             router.push(`/messages/${conversation._id}`);
         }
     };
@@ -394,9 +388,8 @@ export default function Messages(): ReactElement {
             });
     };
 
-    const loadMoreMessages = useCallback((index: number) => {
+    const loadMoreMessages = useCallback(() => {
         console.log("loading more messages");
-        console.log(index);
         setPage(pageRef.current + 1);
         getMessages(activeConversation._id).then((newMessages) => {
             if (!newMessages.length) {
@@ -497,18 +490,22 @@ export default function Messages(): ReactElement {
     }, [user]);
 
     useEffect(() => {
-        socket?.on("messageFromServer", handleMessageRecieved);
-        socket?.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
-        socket?.on("typing", handleTyping);
-        socket?.on("stopTyping", handleStopTyping);
+        if (socket?.connected) {
+            socket.on("messageFromServer", handleMessageRecieved);
+            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            socket.on("typing", handleTyping);
+            socket.on("stopTyping", handleStopTyping);
+        }
 
         return () => {
-            socket?.off("messageFromServer", handleMessageRecieved);
-            socket?.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
-            socket?.off("typing", handleTyping);
-            socket?.off("stopTyping", handleStopTyping);
+            if (socket?.connected) {
+                socket.off("messageFromServer", handleMessageRecieved);
+                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+                socket.off("typing", handleTyping);
+                socket.off("stopTyping", handleStopTyping);
+            }
         };
-    }, [socket, handleMessageRecieved, handleMarkedMessagesAsRead, handleTyping]);
+    }, [handleMessageRecieved, handleMarkedMessagesAsRead, handleTyping, handleStopTyping]);
 
     return (
         <>
