@@ -164,6 +164,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     useEffect(() => {
         if (props.user) {
             setLoading(false);
+            setNotFound(false);
             axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${props.user._id}`,
@@ -199,10 +200,10 @@ export default function Profile(props: ProfileProps): ReactElement {
     return (
         <>
             <NextSeo
-                title={`${props.user?.display_name} (@${props.user?.username})`}
+                title={props.user ? `${props.user.display_name} (@${props.user.username})` : "Profile - Twatter"}
                 description={props.user?.bio}
                 openGraph={{
-                    title: `${props.user?.display_name} (@${props.user?.username})`,
+                    title: props.user ? `${props.user.display_name} (@${props.user.username})` : "Profile - Twatter",
                     description: props.user?.bio,
                     url: `https://twatter.illusionman1212.me/u/${props.user?.username}`,
                     type: "profile",
@@ -475,11 +476,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     </p>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div
-                                            className={`text-medium ${styles.userExtraInfo} ${styles.userExtraInfoNotFound}`}
-                                        >
-                                            User Not Found
                                         </div>
                                     </div>
                                 </div>

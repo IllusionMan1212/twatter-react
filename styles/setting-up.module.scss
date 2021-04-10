@@ -37,6 +37,7 @@
 
 .birthday {
     width: 30%;
+    position: relative;
 
     @media (max-width: 1700px) {
         width: 40%;
@@ -128,4 +129,20 @@
         background-color: #7178fe;
         cursor: pointer;
     }
+}
+
+.cancelProfileButton {
+    position: absolute;
+    right: 0;
+    top: 0;
+    max-height: 0;
+    max-width: 0;
+    color: white;
+}
+
+.cancelBirthdayButton {
+    position: absolute;
+    right: 0;
+    top: -10px;
+    color: white;
 }

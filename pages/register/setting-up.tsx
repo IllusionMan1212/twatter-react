@@ -3,8 +3,8 @@ import LayoutWide from "../../components/layouts/layout_wide";
 import styles from "../../styles/setting-up.module.scss";
 import homeStyles from "../../styles/home.module.scss";
 import Head from "next/head";
-import { Plus } from "phosphor-react";
-import { ReactElement, useEffect, useState } from "react";
+import { Plus, X } from "phosphor-react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useUser } from "../../src/hooks/useUser";
 import Loading from "../../components/loading";
 import Router from "next/router";
@@ -13,6 +13,10 @@ import { useToastContext } from "../../src/contexts/toastContext";
 
 export default function UserSetup(): ReactElement {
     const toast = useToastContext();
+
+    const dayRef = useRef<HTMLSelectElement>(null);
+    const monthRef = useRef<HTMLSelectElement>(null);
+    const yearRef = useRef<HTMLSelectElement>(null);
 
     const [maxDays, setMaxDays] = useState(31);
     const [birthday, setBirthday] = useState({
@@ -201,6 +205,22 @@ export default function UserSetup(): ReactElement {
             });
     };
 
+    const handleCancelBirthday = () => {
+        dayRef.current.value = "";
+        monthRef.current.value = "";
+        yearRef.current.value = "";
+        setBirthday({
+            day: null,
+            month: null,
+            year: null,
+        });
+    };
+
+    const handleCancelProfileImage = () => {
+        setProfileImage(null);
+        setPreviewImage(null);
+    };
+
     useEffect(() => {
         if (user?.finished_setup) {
             Router.push("/home");
@@ -239,9 +259,6 @@ export default function UserSetup(): ReactElement {
                                             type="file"
                                             accept="image/jpeg,image/jpg,image/png"
                                             onChange={handleChange}
-                                            onClick={(e) =>
-                                                (e.currentTarget.value = null)
-                                            }
                                         ></input>
                                         <Plus
                                             width="95"
@@ -250,6 +267,14 @@ export default function UserSetup(): ReactElement {
                                             color="white"
                                         ></Plus>
                                     </div>
+                                    {profileImage && (
+                                        <div
+                                            className={`pointer ${styles.cancelProfileButton}`}
+                                            onClick={handleCancelProfileImage}
+                                        >
+                                            <X size="40"></X>
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="text-white text-large my-1">
                                     Add a profile picture
@@ -262,6 +287,7 @@ export default function UserSetup(): ReactElement {
                                     </p>
                                     <div className="flex justify-content-space-between">
                                         <select
+                                            ref={dayRef}
                                             className={styles.dropdownSelector}
                                             onChange={handleDayChange}
                                             defaultValue=""
@@ -290,6 +316,7 @@ export default function UserSetup(): ReactElement {
                                                 })}
                                         </select>
                                         <select
+                                            ref={monthRef}
                                             className={styles.dropdownSelector}
                                             onChange={handleMonthChange}
                                             defaultValue=""
@@ -375,6 +402,7 @@ export default function UserSetup(): ReactElement {
                                             </option>
                                         </select>
                                         <select
+                                            ref={yearRef}
                                             className={styles.dropdownSelector}
                                             onChange={handleYearChange}
                                             defaultValue=""
@@ -405,6 +433,14 @@ export default function UserSetup(): ReactElement {
                                                 })}
                                         </select>
                                     </div>
+                                    {birthday.day != null && birthday.month != null && birthday.year && (
+                                        <div
+                                            className={`pointer ${styles.cancelBirthdayButton}`}
+                                            onClick={handleCancelBirthday}
+                                        >
+                                            <X size="40"></X>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex flex-column align-items-center text-white text-medium mt-2Percent">
