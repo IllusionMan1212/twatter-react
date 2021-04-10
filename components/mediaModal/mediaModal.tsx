@@ -42,6 +42,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const commentBoxRef = useRef<HTMLSpanElement>(null);
     const prevRef = useRef<HTMLDivElement>(null);
     const nextRef = useRef<HTMLDivElement>(null);
+    const parentContainerRef = useRef<HTMLDivElement>(null);
 
     const [commentingAllowed, setCommentingAllowed] = useState(false);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
@@ -293,7 +294,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         {formatDate(props.modalData.post.createdAt)}
                     </p>
                 </div>
-                <div className={styles.modalPostComments}>
+                <div ref={parentContainerRef} className={styles.modalPostComments}>
                     {!commentsLoading ? (
                         <>
                             {comments.map((comment) => {
@@ -310,6 +311,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                         updateModalCommentLikes={
                                             updateModalCommentLikes
                                         }
+                                        parentContainerRef={parentContainerRef}
                                     ></MediaModalComment>
                                 );
                             })}

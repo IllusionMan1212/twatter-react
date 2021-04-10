@@ -91,6 +91,7 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                     postId={props.comment._id}
                     postAuthorId={props.comment.author?._id}
                     currentUserId={props.currentUser?._id}
+                    parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
             </div>
             <div className={` ${styles.commentText}`}>
