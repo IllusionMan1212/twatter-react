@@ -143,7 +143,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         router.asPath.indexOf(router.query.postId[0]) +
                             router.query.postId[0].length
                     ),
-                    { shallow: true }
+                    { shallow: true, scroll: false }
                 );
             }
             if (props.post) {

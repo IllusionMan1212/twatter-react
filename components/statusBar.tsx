@@ -104,7 +104,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                         className={"mr-1"}
                         size="30"
                         onClick={() => {
-                            Router.push("/messages", "/messages", {
+                            Router.push("/messages", null, {
                                 shallow: true,
                             });
                         }}

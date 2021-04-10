@@ -369,8 +369,8 @@ export default function Messages(): ReactElement {
         if (router.query?.conversationId?.[0] != conversation._id) {
             // HACK: this works around virutoso not calling the loadMoreMessages function
             // when changing conversations
-            router.push("/messages");
-            router.push(`/messages/${conversation._id}`);
+            router.push("/messages", null, { scroll: false });
+            router.push(`/messages/${conversation._id}`, null, { scroll: false });
         }
     };
 
@@ -398,7 +398,7 @@ export default function Messages(): ReactElement {
             }
             const messagesToPrepend = newMessages.length;
             const nextFirstItemIndex = firstItemIndex - messagesToPrepend;
-    
+
             setFirstItemIndex(() => nextFirstItemIndex);
             setMessages((messages) => [...newMessages].concat(messages));
             return false;
