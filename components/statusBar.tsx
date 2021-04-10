@@ -51,12 +51,16 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                     setUnreadMessages(res.data.unreadMessages);
                 })
                 .catch((err) => {
-                    err?.response?.data?.status != 404 &&
-                        toast(
-                            err?.response?.data?.message ??
-                                "An error has occurred while fetching unread messages",
-                            4000
-                        );
+                    if (axios.isCancel(err)) {
+                        console.log("request canceled");
+                    } else {
+                        err?.response?.data?.status != 404 &&
+                            toast(
+                                err?.response?.data?.message ??
+                                    "An error has occurred while fetching unread messages",
+                                4000
+                            );
+                    }
                 });
         }
         return () => {
