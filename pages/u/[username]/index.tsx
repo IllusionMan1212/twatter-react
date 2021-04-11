@@ -388,7 +388,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                                         <div className={styles.userExtraInfo}>
                                             {props.user.bio && (
                                                 <div className="flex gap-1">
-                                                    <Note size="32"></Note>
+                                                    <Note
+                                                        className={styles.icon}
+                                                        size="32"
+                                                    ></Note>
                                                     <p className="mt-1Percent">
                                                         {props.user.bio}
                                                     </p>
@@ -396,7 +399,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             )}
                                             {props.user.birthday && (
                                                 <div className="flex gap-1">
-                                                    <Gift size="32"></Gift>
+                                                    <Gift
+                                                        className={styles.icon}
+                                                        size="32"
+                                                    ></Gift>
                                                     <p className="mt-1Percent">
                                                         {formatBirthday(
                                                             props.user.birthday
@@ -405,7 +411,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 </div>
                                             )}
                                             <div className="flex gap-1">
-                                                <Calendar size="32"></Calendar>
+                                                <Calendar
+                                                    className={styles.icon}
+                                                    size="32"
+                                                ></Calendar>
                                                 <p className="mt-1Percent">
                                                     Member since{" "}
                                                     {formatJoinDate(
@@ -478,6 +487,13 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             ></Post>
                                                         );
                                                     })}
+                                                    {(activeTab == Tabs.Posts ?
+                                                        posts : activeTab == Tabs.PostsAndComments ?
+                                                            postsAndComments : mediaPosts).length == 0 && (
+                                                        <div className="flex justify-content-center" style={{padding: "20px"}}>
+                                                            <p>@{props.user.username} doesn&apos;t have any posts under this tab.</p>
+                                                        </div>
+                                                    )}
                                                 </>
                                             ) : (
                                                 <Loading
