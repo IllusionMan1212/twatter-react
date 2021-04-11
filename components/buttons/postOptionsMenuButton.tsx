@@ -18,7 +18,6 @@ export default function PostOptionsMenuButton(
                 setOptionsMenu(!optionsMenu);
                 if (props.parentContainerRef && !optionsMenu) {
                     const parent = props.parentContainerRef.current.getBoundingClientRect();
-                    console.log(parent);
                     setOffset(parent.height - (e.clientY - parent.top));
                 }
             }}

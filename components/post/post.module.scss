@@ -110,3 +110,13 @@
     grid-template-columns: 1fr 15fr;
     text-align: center;
 }
+
+.replyingTo {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 50px);
+}

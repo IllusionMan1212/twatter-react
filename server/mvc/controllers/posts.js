@@ -8,7 +8,6 @@ const getPosts = (req, res) => {
         const userId = Types.ObjectId(req.params.userId);
         Post.aggregate([
             { $match: { author: userId } },
-            { $match: { replyingTo: null } },
             {
                 $lookup: {
                     as: "author",
@@ -79,7 +78,47 @@ const getPosts = (req, res) => {
                     ]
                 }
             },
-            { $unwind: "$author" }
+            { $unwind: "$author" },
+            {
+                $lookup: {
+                    as: "replyingTo",
+                    from: Post.collection.name,
+                    let: { postId: { $toObjectId: "$replyingTo" } },
+                    pipeline: [
+                        {
+                            $match: { $expr: { $eq: [
+                                "$_id",
+                                "$$postId"
+                            ] } }
+                        },
+                        {
+                            $lookup: {
+                                as: "author",
+                                from: User.collection.name,
+                                let: { author: { $toObjectId: "$author" } },
+                                pipeline: [
+                                    {
+                                        $match: { $expr: { $eq: [
+                                            "$_id",
+                                            "$$author"
+                                        ] } }
+                                    },
+                                    {
+                                        $project: {
+                                            display_name: 1,
+                                            username: 1,
+                                            profile_image: 1
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            $unwind: "$author"
+                        }
+                    ]
+                }
+            },
         ])
             .sort({ createdAt: -1 })
             .exec((err, posts) => {

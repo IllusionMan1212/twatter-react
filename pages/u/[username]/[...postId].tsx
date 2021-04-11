@@ -267,7 +267,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext): Promise<any> {
-    console.log(context.params);
     let res = null;
     let post: IPost = null;
 

@@ -8,7 +8,7 @@ import { PostProps } from "../../src/types/props";
 import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import Router from "next/router";
 import CommentButton from "../buttons/commentButton";
-import { ChatCircle, ImageSquare } from "phosphor-react";
+import { ChatCircle, ImageSquare, ArrowArcLeft } from "phosphor-react";
 import AttachmentsContainer from "../attachmentsContainer";
 
 export default function Post(props: PostProps): ReactElement {
@@ -31,6 +31,62 @@ export default function Post(props: PostProps): ReactElement {
             }
         >
             <div className={styles.postContent}>
+                {props.post.replyingTo?.[0] && (
+                    <Link
+                        href={`/u/${props.post.replyingTo[0].author.username}/${props.post.replyingTo[0]._id}`}
+                    >
+                        <a
+                            className={`flex mb-1Percent text-small ${styles.replyingTo}`}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex">
+                                <ArrowArcLeft size={25}></ArrowArcLeft>
+                                <div className="flex align-items-center">
+                                    <span className="px-1">
+                                        Replying to:{" "}
+                                    </span>
+                                    <img
+                                        className="round"
+                                        src={`${
+                                            props.post.replyingTo[0].author
+                                                .profile_image ==
+                                            "default_profile.svg"
+                                                ? "/"
+                                                : ""
+                                        }${
+                                            props.post.replyingTo[0].author
+                                                .profile_image
+                                        }`}
+                                        width={25}
+                                        height={25}
+                                    ></img>{" "}
+                                    <span
+                                        className="text-bold"
+                                        style={{ paddingLeft: "0.5em" }}
+                                    >
+                                        {
+                                            props.post.replyingTo[0].author
+                                                .display_name
+                                        }
+                                        {"'s post: "}
+                                    </span>
+                                    {props.post.replyingTo[0].content && (
+                                        <span
+                                            style={{ paddingLeft: "0.5em" }}
+                                        >
+                                            &quot;
+                                            {
+                                                props.post.replyingTo[0]
+                                                    .content
+                                            }
+                                            &quot;
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </a>
+                    </Link>
+                )}
                 {props.post.author ? (
                     <Link
                         href={`/u/${props.post.author.display_name.toLowerCase()}`}

@@ -16,7 +16,7 @@ import {
     formatJoinDate,
 } from "../../../src/utils/functions";
 import MediaModal from "../../../components/mediaModal/mediaModal";
-import { ChatTeardropText } from "phosphor-react";
+import { Calendar, ChatTeardropText, Gift, Note } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
 import { socket } from "src/hooks/useSocket";
 import { IUser, IPost } from "../../../src/types/general";
@@ -26,6 +26,12 @@ import { ProfileProps } from "src/types/props";
 import { NextSeo } from "next-seo";
 
 export default function Profile(props: ProfileProps): ReactElement {
+    enum Tabs {
+        Posts = 1,
+        PostsAndComments,
+        MediaPosts,
+    }
+
     const router = useRouter();
 
     const toast = useToastContext();
@@ -35,6 +41,8 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState<Array<IPost>>([]);
+    const [postsAndComments, setPostsAndComments] = useState<Array<IPost>>([]);
+    const [mediaPosts, setMediaPosts] = useState<Array<IPost>>([]);
     const [postsLoading, setPostsLoading] = useState(true);
     const [modalData, setModalData] = useState({
         post: null as IPost,
@@ -42,6 +50,7 @@ export default function Profile(props: ProfileProps): ReactElement {
         currentUser: null as IUser,
     });
     const [mediaModal, setMediaModal] = useState(false);
+    const [activeTab, setActiveTab] = useState(Tabs.Posts);
 
     let currentUser: IUser = null;
     currentUser = useUser();
@@ -78,6 +87,18 @@ export default function Profile(props: ProfileProps): ReactElement {
                     5000
                 );
             });
+    };
+
+    const handlePostsTabClick = () => {
+        setActiveTab(Tabs.Posts);
+    };
+
+    const handleAllTabClick = () => {
+        setActiveTab(Tabs.PostsAndComments);
+    };
+
+    const handleMediaTabClick = () => {
+        setActiveTab(Tabs.MediaPosts);
     };
 
     const handleComment = useCallback(
@@ -130,7 +151,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                 posts.map((post) => {
                     if (post._id == payload.postId) {
                         if (payload.likeType == "LIKE") {
-                            post.likeUsers = post.likeUsers.concat(currentUser._id);
+                            post.likeUsers = post.likeUsers.concat(
+                                currentUser._id
+                            );
                         } else if (payload.likeType == "UNLIKE") {
                             post.likeUsers = post.likeUsers.filter(
                                 (_user) => _user != currentUser._id
@@ -162,6 +185,11 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
+        setPostsLoading(true);
+        setPosts([]);
+        setPostsAndComments([]);
+        setMediaPosts([]);
+
         if (props.user) {
             setLoading(false);
             setNotFound(false);
@@ -171,12 +199,15 @@ export default function Profile(props: ProfileProps): ReactElement {
                     { withCredentials: true }
                 )
                 .then((res) => {
-                    setPosts(res.data.posts);
+                    setPosts(res.data.posts.filter((post: IPost) => post.replyingTo.length == 0));
+                    setPostsAndComments(res.data.posts);
+                    setMediaPosts(res.data.posts.filter((post: IPost) => post.attachments.length != 0));
                     setPostsLoading(false);
                 });
         } else {
             setLoading(false);
             setNotFound(true);
+            setPostsLoading(false);
         }
     }, [props.user]);
 
@@ -200,10 +231,16 @@ export default function Profile(props: ProfileProps): ReactElement {
     return (
         <>
             <NextSeo
-                title={props.user ? `${props.user.display_name} (@${props.user.username})` : "Profile - Twatter"}
+                title={
+                    props.user
+                        ? `${props.user.display_name} (@${props.user.username})`
+                        : "Profile - Twatter"
+                }
                 description={props.user?.bio}
                 openGraph={{
-                    title: props.user ? `${props.user.display_name} (@${props.user.username})` : "Profile - Twatter",
+                    title: props.user
+                        ? `${props.user.display_name} (@${props.user.username})`
+                        : "Profile - Twatter",
                     description: props.user?.bio,
                     url: `https://twatter.illusionman1212.me/u/${props.user?.username}`,
                     type: "profile",
@@ -213,8 +250,8 @@ export default function Profile(props: ProfileProps): ReactElement {
                     images: [
                         {
                             url: props.user?.profile_image,
-                        }
-                    ]
+                        },
+                    ],
                 }}
             />
             {!loading ? (
@@ -250,12 +287,14 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     className={`round ${styles.userImage}`}
                                                     style={{
                                                         backgroundImage: `url("${
-                                                            props.user.profile_image ==
+                                                            props.user
+                                                                .profile_image ==
                                                             "default_profile.svg"
                                                                 ? "/"
                                                                 : ""
                                                         }${
-                                                            props.user.profile_image
+                                                            props.user
+                                                                .profile_image
                                                         }")`,
                                                     }}
                                                 ></div>
@@ -263,7 +302,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     <p
                                                         className={`${styles.display_name} text-bold`}
                                                     >
-                                                        {props.user.display_name}
+                                                        {
+                                                            props.user
+                                                                .display_name
+                                                        }
                                                     </p>
                                                     <p
                                                         className={`usernameGrey ${styles.username}`}
@@ -274,35 +316,43 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             </div>
                                             <div className={styles.userStats}>
                                                 {currentUser?._id !=
-                                                    props.user._id && (
-                                                    <div
-                                                        className={
-                                                            styles.userButtons
-                                                        }
-                                                    >
-                                                        {currentUser && (
+                                                props.user._id ? (
+                                                        <div
+                                                            className={
+                                                                styles.userButtons
+                                                            }
+                                                        >
+                                                            {currentUser && (
+                                                                <div
+                                                                    className="pointer"
+                                                                    onClick={
+                                                                        handleMessageClick
+                                                                    }
+                                                                >
+                                                                    <ChatTeardropText
+                                                                        color="#6067FE"
+                                                                        size="40"
+                                                                        weight="fill"
+                                                                    ></ChatTeardropText>
+                                                                </div>
+                                                            )}
                                                             <div
-                                                                className="pointer"
-                                                                onClick={
-                                                                    handleMessageClick
+                                                                className={
+                                                                    styles.followButton
                                                                 }
                                                             >
-                                                                <ChatTeardropText
-                                                                    color="#6067FE"
-                                                                    size="40"
-                                                                    weight="fill"
-                                                                ></ChatTeardropText>
+                                                            Follow
                                                             </div>
-                                                        )}
+                                                        </div>
+                                                    ) : (
                                                         <div
                                                             className={
                                                                 styles.followButton
                                                             }
                                                         >
-                                                            Follow
+                                                        Edit Profile
                                                         </div>
-                                                    </div>
-                                                )}
+                                                    )}
                                                 <div
                                                     className={
                                                         styles.statsContainer
@@ -311,7 +361,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     <span>
                                                         <span className="text-bold">
                                                             {formatBigNumbers(
-                                                                posts.length
+                                                                postsAndComments.length
                                                             )}
                                                         </span>{" "}
                                                         Posts
@@ -335,59 +385,100 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className={styles.userExtraInfoMobile}>
+                                        <div className={styles.userExtraInfo}>
                                             {props.user.bio && (
-                                                <>
-                                                    <p
-                                                        className={`text-bold ${styles.bioBirthdayTitle}`}
-                                                    >
-                                                        Bio
-                                                    </p>
+                                                <div className="flex gap-1">
+                                                    <Note size="32"></Note>
                                                     <p className="mt-1Percent">
                                                         {props.user.bio}
                                                     </p>
-                                                </>
+                                                </div>
                                             )}
                                             {props.user.birthday && (
-                                                <>
-                                                    <p
-                                                        className={`text-bold ${styles.bioBirthdayTitle}`}
-                                                    >
-                                                        Birthday
-                                                    </p>
+                                                <div className="flex gap-1">
+                                                    <Gift size="32"></Gift>
                                                     <p className="mt-1Percent">
                                                         {formatBirthday(
                                                             props.user.birthday
                                                         )}
                                                     </p>
-                                                </>
+                                                </div>
                                             )}
-                                            <p
-                                                className={`text-bold ${styles.bioBirthdayTitle}`}
-                                            >
-                                                Member Since
-                                            </p>
-                                            <p className="mt-1Percent">
-                                                {formatJoinDate(props.user.createdAt)}
-                                            </p>
+                                            <div className="flex gap-1">
+                                                <Calendar size="32"></Calendar>
+                                                <p className="mt-1Percent">
+                                                    Member since{" "}
+                                                    {formatJoinDate(
+                                                        props.user.createdAt
+                                                    )}
+                                                </p>
+                                            </div>
                                         </div>
                                         <div className={styles.userPosts}>
+                                            <div className={styles.tabs}>
+                                                <div
+                                                    className={`pointer ${
+                                                        styles.postsTab
+                                                    } ${
+                                                        activeTab ==
+                                                            Tabs.Posts &&
+                                                        styles.activeTab
+                                                    }`}
+                                                    onClick={
+                                                        handlePostsTabClick
+                                                    }
+                                                >
+                                                    Posts
+                                                </div>
+                                                <div
+                                                    className={`pointer ${
+                                                        styles.postsAndCommentsTab
+                                                    } ${
+                                                        activeTab ==
+                                                            Tabs.PostsAndComments &&
+                                                        styles.activeTab
+                                                    }`}
+                                                    onClick={handleAllTabClick}
+                                                >
+                                                    Posts &amp; Comments
+                                                </div>
+                                                <div
+                                                    className={`pointer ${
+                                                        styles.mediaTab
+                                                    } ${
+                                                        activeTab ==
+                                                            Tabs.MediaPosts &&
+                                                        styles.activeTab
+                                                    }`}
+                                                    onClick={
+                                                        handleMediaTabClick
+                                                    }
+                                                >
+                                                    Media
+                                                </div>
+                                            </div>
                                             {!postsLoading ? (
-                                                posts.map((post) => {
-                                                    return (
-                                                        <Post
-                                                            key={post._id}
-                                                            currentUser={
-                                                                currentUser
-                                                            }
-                                                            handleMediaClick={
-                                                                handleMediaClick
-                                                            }
-                                                            post={post}
-                                                            parentContainerRef={parentContainerRef}
-                                                        ></Post>
-                                                    );
-                                                })
+                                                <>
+                                                    {(activeTab == Tabs.Posts ? 
+                                                        posts : activeTab == Tabs.PostsAndComments ? 
+                                                            postsAndComments : mediaPosts).map((post) => {
+                                                        return (
+                                                            <Post
+                                                                key={post._id}
+                                                                currentUser={
+                                                                    currentUser
+                                                                }
+                                                                handleMediaClick={
+                                                                    handleMediaClick
+                                                                }
+                                                                post={post}
+                                                                parentContainerRef={
+                                                                    parentContainerRef
+                                                                }
+                                                            ></Post>
+                                                        );
+                                                    })}
+                                                </>
                                             ) : (
                                                 <Loading
                                                     height="50"
@@ -395,42 +486,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 ></Loading>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className={styles.userExtraInfo}>
-                                        {props.user.bio && (
-                                            <>
-                                                <p
-                                                    className={`text-bold ${styles.bioBirthdayTitle}`}
-                                                >
-                                                    Bio
-                                                </p>
-                                                <p className="mt-1Percent">
-                                                    {props.user.bio}
-                                                </p>
-                                            </>
-                                        )}
-                                        {props.user.birthday && (
-                                            <>
-                                                <p
-                                                    className={`text-bold ${styles.bioBirthdayTitle}`}
-                                                >
-                                                    Birthday
-                                                </p>
-                                                <p className="mt-1Percent">
-                                                    {formatBirthday(
-                                                        props.user.birthday
-                                                    )}
-                                                </p>
-                                            </>
-                                        )}
-                                        <p
-                                            className={`text-bold ${styles.bioBirthdayTitle}`}
-                                        >
-                                            Member Since
-                                        </p>
-                                        <p className="mt-1Percent">
-                                            {formatJoinDate(props.user.createdAt)}
-                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -490,22 +545,23 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext): Promise<any> {
+export async function getServerSideProps(
+    context: GetServerSidePropsContext
+): Promise<any> {
     let res = null;
     let user = null;
 
     try {
-        res = await axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/getUserData?username=${context.params.username}`,
-                { withCredentials: true }
-            );
+        res = await axios.get(
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/getUserData?username=${context.params.username}`,
+            { withCredentials: true }
+        );
         user = res.data.user;
     } catch (err) {
         console.error(err);
     }
 
     return {
-        props: { user: user }
+        props: { user: user },
     };
 }

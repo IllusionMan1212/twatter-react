@@ -17,7 +17,6 @@
 }
 
 .scrollableArea {
-    overflow: auto;
     scrollbar-width: none;
     display: flex;
     flex-direction: column;
@@ -88,6 +87,13 @@
         min-width: 150px;
         min-height: 150px;    
     }
+
+    @media (max-width: 400px) {
+        width: 120px;
+        height: 120px;
+        min-width: 120px;
+        min-height: 120px;
+    }
 }
 
 .userImageNotFound {
@@ -127,35 +133,14 @@
 }
 
 .userExtraInfo {
-    background-color: #1f1f1f;
     padding: 20px;
-    position: sticky;
-    top: 30px;
     height: min-content;
     display: flex;
     flex-direction: column;
-    grid-gap: 10px;
-    
-    @media (max-width: 1200px) {
-        display: none;
-    }
-}
-
-.userExtraInfoMobile {
-    display: none;
-
-    @media (max-width: 1200px) {
-        background-color: #1f1f1f;
-        padding: 20px;
-        height: min-content;
-        display: flex;
-        flex-direction: column;
-        grid-gap: 10px;    
-        position: initial;
-        width: initial;
-        height: initial;
-        margin: 1em 0;
-    }
+    grid-gap: 10px;    
+    position: initial;
+    width: initial;
+    height: initial;
 }
 
 .userExtraInfoNotFound {
@@ -180,5 +165,61 @@
 
     @media (max-width: 1200px) {
         grid-column-end: 3;
+    }
+}
+
+.tabs {
+    background-color: #252525;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    justify-content: space-evenly;
+    text-align: center;
+}
+
+.postsTab {
+    padding: 15px 0;
+    flex-basis: 25%;
+    border-right: 3px solid #151515;
+    border-top-left-radius: 8px;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: #202020;
+        }
+    }
+}
+
+.postsAndCommentsTab {
+    padding: 15px 2px;
+    flex-basis: 50%;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: #202020;
+        }
+    }
+}
+
+.mediaTab {
+    padding: 15px 0;
+    flex-basis: 25%;
+    border-left: 3px solid #151515;
+    border-top-right-radius: 8px;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: #202020;
+        }
+    }
+}
+
+.activeTab {
+    background-color: variables.$accent-color;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: variables.$accent-color;
+        }
     }
 }

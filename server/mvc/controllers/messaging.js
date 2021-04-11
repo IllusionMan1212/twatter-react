@@ -262,7 +262,6 @@ const getMessages = (req, res) => {
             return;
         }
         let messages = [];
-        console.log(conversation);
         if (conversation.length) {
             messages = [...conversation[0].messages];
         }
