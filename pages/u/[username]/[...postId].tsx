@@ -17,9 +17,11 @@ import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
 import { GetServerSidePropsContext } from "next";
 import { UserPostProps } from "src/types/props";
+import useScrollRestoration from "src/hooks/useScrollRestoration";
 
 export default function UserPost(props: UserPostProps): ReactElement {
     const router = useRouter();
+    useScrollRestoration(router);
 
     const toast = useToastContext();
 

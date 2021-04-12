@@ -10,11 +10,9 @@ const connectSocket = (token: string): void => {
 
 export function useSocket(): void {
     if (!socket || socket.disconnected) {
-        console.log("socket is disconnected, so we attempt connection");
         axios.get(`${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`)
             .then((res) => {
                 connectSocket(res.data.token);
-                console.log(socket);
             })
             .catch((err) => {
                 if (err.response.data.status != 401) {
@@ -22,7 +20,5 @@ export function useSocket(): void {
                     console.error("An error has occurred while connecting socket");
                 }
             });
-    } else if (socket.connected) {
-        console.log("socket already connected");
     }
 }

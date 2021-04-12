@@ -24,6 +24,7 @@ import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext } from "next";
 import { ProfileProps } from "src/types/props";
 import { NextSeo } from "next-seo";
+import useScrollRestoration from "src/hooks/useScrollRestoration";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -33,6 +34,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     }
 
     const router = useRouter();
+    useScrollRestoration(router);
 
     const toast = useToastContext();
 
@@ -51,6 +53,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     });
     const [mediaModal, setMediaModal] = useState(false);
     const [activeTab, setActiveTab] = useState(Tabs.Posts);
+    const [user, setUser] = useState<IUser>(props.user);
 
     let currentUser: IUser = null;
     currentUser = useUser();
@@ -69,12 +72,12 @@ export default function Profile(props: ProfileProps): ReactElement {
     };
 
     const handleMessageClick = () => {
-        if (!currentUser || currentUser._id == props.user._id) {
+        if (!currentUser || currentUser._id == user._id) {
             return;
         }
         const payload = {
             senderId: currentUser._id,
-            receiverId: props.user._id,
+            receiverId: user._id,
         };
         axiosInstance
             .post("/messaging/startConversation", payload)
@@ -185,12 +188,33 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
-        setPostsLoading(true);
-        setPosts([]);
-        setPostsAndComments([]);
-        setMediaPosts([]);
-
         if (props.user) {
+            setNotFound(false);
+            setLoading(false);
+            axios
+                .get(
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${props.user._id}`,
+                    { withCredentials: true }
+                )
+                .then((res) => {
+                    setPosts(res.data.posts.filter((post: IPost) => post.replyingTo.length == 0));
+                    setPostsAndComments(res.data.posts);
+                    setMediaPosts(res.data.posts.filter((post: IPost) => post.attachments.length != 0));
+                    setPostsLoading(false);
+                });
+        } else {
+            setNotFound(true);
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (props.user && user?._id != props.user._id) {
+            setUser(props.user);
+            setPostsLoading(true);
+            setPosts([]);
+            setPostsAndComments([]);
+            setMediaPosts([]);
             setLoading(false);
             setNotFound(false);
             axios
@@ -204,12 +228,13 @@ export default function Profile(props: ProfileProps): ReactElement {
                     setMediaPosts(res.data.posts.filter((post: IPost) => post.attachments.length != 0));
                     setPostsLoading(false);
                 });
-        } else {
-            setLoading(false);
-            setNotFound(true);
-            setPostsLoading(false);
         }
-    }, [props.user]);
+        if (!props.user) {
+            setUser(null);
+            setNotFound(true);
+            setLoading(false);
+        }
+    }, [user, props.user]);
 
     useEffect(() => {
         if (mediaModal) {
@@ -256,7 +281,7 @@ export default function Profile(props: ProfileProps): ReactElement {
             />
             {!loading ? (
                 <>
-                    {!notFound && props.user ? (
+                    {!notFound && user ? (
                         <>
                             {currentUser ? (
                                 <div className="feed">
@@ -264,7 +289,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                         user={currentUser}
                                     ></NavbarLoggedIn>
                                     <StatusBar
-                                        title={props.user.display_name}
+                                        title={user.display_name}
                                         user={currentUser}
                                     ></StatusBar>
                                 </div>
@@ -287,13 +312,13 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     className={`round ${styles.userImage}`}
                                                     style={{
                                                         backgroundImage: `url("${
-                                                            props.user
+                                                            user
                                                                 .profile_image ==
                                                             "default_profile.svg"
                                                                 ? "/"
                                                                 : ""
                                                         }${
-                                                            props.user
+                                                            user
                                                                 .profile_image
                                                         }")`,
                                                     }}
@@ -303,20 +328,20 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         className={`${styles.display_name} text-bold`}
                                                     >
                                                         {
-                                                            props.user
+                                                            user
                                                                 .display_name
                                                         }
                                                     </p>
                                                     <p
                                                         className={`usernameGrey ${styles.username}`}
                                                     >
-                                                        @{props.user.username}
+                                                        @{user.username}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className={styles.userStats}>
                                                 {currentUser?._id !=
-                                                props.user._id ? (
+                                                user._id ? (
                                                         <div
                                                             className={
                                                                 styles.userButtons
@@ -386,18 +411,18 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             </div>
                                         </div>
                                         <div className={styles.userExtraInfo}>
-                                            {props.user.bio && (
+                                            {user.bio && (
                                                 <div className="flex gap-1">
                                                     <Note
                                                         className={styles.icon}
                                                         size="32"
                                                     ></Note>
                                                     <p className="mt-1Percent">
-                                                        {props.user.bio}
+                                                        {user.bio}
                                                     </p>
                                                 </div>
                                             )}
-                                            {props.user.birthday && (
+                                            {user.birthday && (
                                                 <div className="flex gap-1">
                                                     <Gift
                                                         className={styles.icon}
@@ -405,7 +430,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     ></Gift>
                                                     <p className="mt-1Percent">
                                                         {formatBirthday(
-                                                            props.user.birthday
+                                                            user.birthday
                                                         )}
                                                     </p>
                                                 </div>
@@ -418,7 +443,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 <p className="mt-1Percent">
                                                     Member since{" "}
                                                     {formatJoinDate(
-                                                        props.user.createdAt
+                                                        user.createdAt
                                                     )}
                                                 </p>
                                             </div>
@@ -491,7 +516,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         posts : activeTab == Tabs.PostsAndComments ?
                                                             postsAndComments : mediaPosts).length == 0 && (
                                                         <div className="flex justify-content-center" style={{padding: "20px"}}>
-                                                            <p>@{props.user.username} doesn&apos;t have any posts under this tab.</p>
+                                                            <p>@{user.username} doesn&apos;t have any posts under this tab.</p>
                                                         </div>
                                                     )}
                                                 </>
