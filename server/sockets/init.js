@@ -17,7 +17,7 @@ const initSockets = (server) => {
                 "DELETE",
                 "PUT"
             ],
-            origin: process.env.CLIENT_DOMAIN_URL,
+            origin: process.env.DOMAIN_URL,
         },
         maxHttpBufferSize: fileSizeLimit,
         pingTimeout: 30000,
