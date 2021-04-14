@@ -2,7 +2,7 @@
 
 .container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr minmax(0, 1fr);
     grid-gap: 20px;
     position: relative;
     margin: 2em 2em 0 2em;
@@ -125,7 +125,7 @@
     grid-gap: 20px;
 }
 
-.followButton {
+.editProfileButton {
     background-color: variables.$accent-color;
     padding: 13px 20px;
     font-weight: bold;
@@ -227,4 +227,16 @@
 .icon {
     min-width: 32px;
     min-height: 32px;
+}
+
+.suggestedUsersDesktop {
+    @media (max-width: 1200px) {
+        display: none;
+    }
+}
+
+.suggestedUsersMobile {
+    @media (min-width: 1200px) {
+        display: none;
+    }
 }

@@ -25,6 +25,8 @@ import { GetServerSidePropsContext } from "next";
 import { ProfileProps } from "src/types/props";
 import { NextSeo } from "next-seo";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
+import SuggestedUsers from "components/suggestedUsers/suggestedUsers";
+import FollowButton from "components/buttons/followButton";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -361,18 +363,12 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     ></ChatTeardropText>
                                                                 </div>
                                                             )}
-                                                            <div
-                                                                className={
-                                                                    styles.followButton
-                                                                }
-                                                            >
-                                                            Follow
-                                                            </div>
+                                                            <FollowButton size={10}></FollowButton>
                                                         </div>
                                                     ) : (
                                                         <div
                                                             className={
-                                                                styles.followButton
+                                                                styles.editProfileButton
                                                             }
                                                         >
                                                         Edit Profile
@@ -447,6 +443,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     )}
                                                 </p>
                                             </div>
+                                        </div>
+                                        <div className={styles.suggestedUsersMobile}>
+                                            <SuggestedUsers
+                                                users={new Array(3).fill(props.user)}
+                                            ></SuggestedUsers>
                                         </div>
                                         <div className={styles.userPosts}>
                                             <div className={styles.tabs}>
@@ -527,6 +528,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 ></Loading>
                                             )}
                                         </div>
+                                    </div>
+                                    <div>
+                                        <SuggestedUsers
+                                            users={new Array(5).fill(user)}
+                                        ></SuggestedUsers>
                                     </div>
                                 </div>
                             </div>

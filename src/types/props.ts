@@ -131,3 +131,16 @@ export interface ProfileProps {
 export interface UserPostProps {
     post: IPost;
 }
+
+export interface FollowButtonProps {
+    size: number;
+    // TODO: pass in userid here
+}
+
+export interface SuggestedUsersProps {
+    users: Array<IUser>;
+}
+
+export interface SuggestedUserProps {
+    user: IUser;
+}
