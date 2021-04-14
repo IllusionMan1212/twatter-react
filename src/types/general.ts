@@ -14,7 +14,9 @@ export interface IConversation {
     members: Array<IUser>;
     participants: Array<IUser>;
     receivers: Array<IUser>;
-    unreadMessages: number,
+    unreadMessages: number;
+    lastUpdated: string;
+    lastMessage: string;
 }
 
 export interface IPost {

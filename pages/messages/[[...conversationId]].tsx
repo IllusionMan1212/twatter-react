@@ -19,7 +19,7 @@ import Message from "../../components/messages/message";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axiosInstance from "../../src/axios";
 import { useRouter } from "next/router";
-import { IAttachment, IConversation } from "../../src/types/general";
+import { IAttachment, IConversation, IUser } from "../../src/types/general";
 import { socket } from "src/hooks/useSocket";
 import Link from "next/link";
 import MessageMediaModal from "../../components/messages/messageMediaModal";
@@ -35,7 +35,7 @@ export default function Messages(): ReactElement {
 
     const toast = useToastContext();
 
-    const user = useUser("/login", null);
+    const user: IUser = useUser("/login", null);
 
     const messageInputRef = useRef<HTMLSpanElement>(null);
     const virtuosoRef = useRef(null);
@@ -212,11 +212,15 @@ export default function Messages(): ReactElement {
                 // conversation is active, so the user has read the message
                 socket.emit("markMessagesAsRead", payload);
             }
-            const newConversations = conversations.map((conversation) => {
+            const newConversations = conversations.map((conversation: IConversation) => {
                 return conversation._id == msg.conversationId
                     ? {
                         ...conversation,
-                        lastMessage: msg.content,
+                        lastMessage: msg.content ? 
+                            msg.content : 
+                            msg.sender == user._id ?
+                                `${user.display_name} sent an image` :
+                                `${conversation.receivers[0].display_name} sent an image`,
                         lastUpdated: msg.sentTime,
                         unreadMessages:
                               activeConversation?._id == msg.conversationId

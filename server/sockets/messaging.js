@@ -1,4 +1,5 @@
 const Conversation = require("../mvc/models/conversation");
+const User = require("../mvc/models/user");
 const Message = require("../mvc/models/message");
 const { Types } = require("mongoose");
 const { mkdirSync, writeFileSync } = require("fs");
@@ -81,7 +82,12 @@ const handleMessage = (socket, connectedSockets) => {
                 if (!conversation.participants.includes(msg.receiverId)) {
                     conversation.participants.push(msg.receiverId);
                 }
-                conversation.lastMessage = msg.messageContent;
+                if (msg.messageContent) {
+                    conversation.lastMessage = msg.messageContent;
+                } else if (msg.attachment) {
+                    const user = await User.findById(msg.senderId).exec();
+                    conversation.lastMessage = `${user.display_name} sent an image`;
+                }
                 conversation.lastUpdated = new Date();
                 if (
                     !conversation.members.every((member) => {
