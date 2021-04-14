@@ -529,7 +529,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             )}
                                         </div>
                                     </div>
-                                    <div>
+                                    <div className={styles.suggestedUsersDesktop}>
                                         <SuggestedUsers
                                             users={new Array(5).fill(user)}
                                         ></SuggestedUsers>
