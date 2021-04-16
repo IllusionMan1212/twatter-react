@@ -17,7 +17,6 @@ import Post from "../components/post/post";
 import axiosInstance from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal/mediaModal";
-import Router from "next/router";
 import { IAttachment, IPost, IUser } from "src/types/general";
 import {
     handleChange,
