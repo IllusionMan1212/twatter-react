@@ -277,12 +277,6 @@ export default function Home(): ReactElement {
         }
     }, [mobileCompose, mediaModal]);
 
-    useEffect(() => {
-        if (!user?.finished_setup) {
-            Router.push("/register/setting-up");
-        }
-    }, [user]);
-
     return (
         <>
             <Head>

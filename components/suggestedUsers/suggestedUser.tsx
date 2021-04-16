@@ -11,7 +11,7 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                 <div className={styles.userImage}>
                     <img
                         className="round"
-                        style={{ height: "100%", width: "100%" }}
+                        style={{ height: "100%", width: "100%", objectFit: "cover" }}
                         src={`${
                             props.user.profile_image == "default_profile.svg"
                                 ? "/"

@@ -6,7 +6,7 @@ export interface IUser {
     bio: string;
     birthday: string;
     createdAt: string;
-    token: string;
+    finished_setup: boolean;
 }
 
 export interface IConversation {
