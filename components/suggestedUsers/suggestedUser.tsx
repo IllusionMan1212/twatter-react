@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import FollowButton from "components/buttons/followButton";
+import Button from "components/buttons/button";
 import { ReactElement } from "react";
 import { SuggestedUserProps } from "src/types/props";
 import styles from "./suggestedUser.module.scss";
@@ -29,7 +29,7 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                 </div>
             </div>
             <div className={styles.followButtonContainer}>
-                <FollowButton size={8}></FollowButton>
+                <Button text="Follow" size={8} handleClick={() => console.log("coming soon")}></Button>
             </div>
         </div>
     );

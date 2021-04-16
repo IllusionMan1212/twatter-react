@@ -132,9 +132,10 @@ export interface UserPostProps {
     post: IPost;
 }
 
-export interface FollowButtonProps {
+export interface ButtonProps {
     size: number;
-    // TODO: pass in userid here
+    text: string;
+    handleClick: () => void;
 }
 
 export interface SuggestedUsersProps {
@@ -143,4 +144,9 @@ export interface SuggestedUsersProps {
 
 export interface SuggestedUserProps {
     user: IUser;
+}
+
+export interface EditProfilePopupProps {
+    setEditProfilePopup: (value: SetStateAction<boolean>) => void;
+    userData: IUser;
 }

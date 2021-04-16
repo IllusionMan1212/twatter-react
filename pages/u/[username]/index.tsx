@@ -26,7 +26,8 @@ import { ProfileProps } from "src/types/props";
 import { NextSeo } from "next-seo";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
 import SuggestedUsers from "components/suggestedUsers/suggestedUsers";
-import FollowButton from "components/buttons/followButton";
+import Button from "components/buttons/button";
+import EditProfilePopup from "components/editProfilePopup";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -56,6 +57,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [mediaModal, setMediaModal] = useState(false);
     const [activeTab, setActiveTab] = useState(Tabs.Posts);
     const [user, setUser] = useState<IUser>(props.user);
+    const [editProfilePopup, setEditProfilePopup] = useState(false);
 
     let currentUser: IUser = null;
     currentUser = useUser();
@@ -92,6 +94,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                     5000
                 );
             });
+    };
+
+    const handleFollowClick = () => {
+        toast("Coming Soon™", 3000);
     };
 
     const handlePostsTabClick = () => {
@@ -239,14 +245,14 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, [user, props.user]);
 
     useEffect(() => {
-        if (mediaModal) {
+        if (mediaModal || editProfilePopup) {
             document.body.classList.add("overflow-hidden");
             document.body.classList.remove("overflow-unset");
         } else {
             document.body.classList.remove("overflow-hidden");
             document.body.classList.add("overflow-unset");
         }
-    }, [mediaModal]);
+    }, [mediaModal, editProfilePopup]);
 
     useEffect(() => {
         // on browser back button press, close the media modal
@@ -363,16 +369,18 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     ></ChatTeardropText>
                                                                 </div>
                                                             )}
-                                                            <FollowButton size={10}></FollowButton>
+                                                            <Button
+                                                                text="Follow"
+                                                                size={10}
+                                                                handleClick={handleFollowClick}
+                                                            ></Button>
                                                         </div>
                                                     ) : (
-                                                        <div
-                                                            className={
-                                                                styles.editProfileButton
-                                                            }
-                                                        >
-                                                        Edit Profile
-                                                        </div>
+                                                        <Button
+                                                            text="Edit Profile"
+                                                            size={10}
+                                                            handleClick={() => setEditProfilePopup(true)}
+                                                        ></Button>
                                                     )}
                                                 <div
                                                     className={
@@ -541,6 +549,12 @@ export default function Profile(props: ProfileProps): ReactElement {
                                     modalData={modalData}
                                     handleMediaClick={handleMediaClick}
                                 ></MediaModal>
+                            )}
+                            {editProfilePopup && (
+                                <EditProfilePopup
+                                    setEditProfilePopup={setEditProfilePopup}
+                                    userData={currentUser}
+                                ></EditProfilePopup>
                             )}
                         </>
                     ) : (
