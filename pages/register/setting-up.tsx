@@ -29,6 +29,9 @@ export default function UserSetup(): ReactElement {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files[0];
+        if (!file) {
+            return;
+        }
         if (
             file.type != "image/jpeg" &&
             file.type != "image/jpg" &&
@@ -50,12 +53,25 @@ export default function UserSetup(): ReactElement {
             toast("Bio cannot be longer than 150 characters", 4000);
             return;
         }
+        let birthday_year = null;
+        let birthday_month = null;
+        let birthday_day = null;
+
+        if (birthday?.year) {
+            birthday_year = birthday.year.toString();
+        }
+        if (birthday?.month) {
+            birthday_month = birthday.month.toString();
+        }
+        if (birthday?.day) {
+            birthday_day = birthday.day.toString();
+        }
         const payload: FormData = new FormData();
         payload.append("bio", bio);
         payload.append("userId", user._id);
-        payload.append("birthday_year", birthday.year.toString());
-        payload.append("birthday_month", birthday.month.toString());
-        payload.append("birthday_day", birthday.day.toString());
+        payload.append("birthday_year", birthday_year);
+        payload.append("birthday_month", birthday_month);
+        payload.append("birthday_day", birthday_day);
         payload.append("profileImage", profileImage);
         axios
             .post("users/initialSetup", payload)
@@ -142,6 +158,9 @@ export default function UserSetup(): ReactElement {
                                     type="file"
                                     accept="image/jpeg,image/jpg,image/png"
                                     onChange={handleChange}
+                                    onClick={(e) => {
+                                        e.currentTarget.value = null;
+                                    }}
                                 ></input>
                                 <Plus
                                     width="95"

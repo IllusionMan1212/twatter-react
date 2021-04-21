@@ -25,7 +25,18 @@
     border-radius: 200px;
     transition: opacity 0.2s;
 
-    &:hover {
+    @media (hover: hover) {
+        &:hover {
+            height: 100%;
+            width: 100%;
+            background-color: variables.$accent-color;
+            opacity: 0.9;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+    }
+
+    &:active {
         height: 100%;
         width: 100%;
         background-color: variables.$accent-color;
