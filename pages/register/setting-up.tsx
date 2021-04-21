@@ -313,9 +313,9 @@ export default function UserSetup(): ReactElement {
                                         })}
                                 </select>
                             </div>
-                            {birthday.day != null &&
-                                birthday.month != null &&
-                                birthday.year && (
+                            {birthday?.day != null &&
+                                birthday?.month != null &&
+                                birthday?.year && (
                                 <div
                                     className={`pointer ${styles.cancelBirthdayButton}`}
                                     onClick={handleCancelBirthday}
@@ -339,7 +339,7 @@ export default function UserSetup(): ReactElement {
                         <button className={styles.button} onClick={handleClick}>
                             {!profileImage &&
                             !bio &&
-                            !(birthday.day && birthday.month && birthday.year)
+                            !(birthday?.day && birthday?.month && birthday?.year)
                                 ? "Skip"
                                 : "Finish"}
                         </button>

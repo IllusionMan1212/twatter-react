@@ -140,7 +140,7 @@ export const handleBirthdayMonthChange = (
     case "6":
     case "9":
     case "11":
-        if (birthday.day > 30) {
+        if (birthday?.day > 30) {
             setBirthday({
                 ...birthday,
                 day: null,
@@ -149,7 +149,7 @@ export const handleBirthdayMonthChange = (
         setMaxDays(30);
         break;
     case "2":
-        if (birthday.year) {
+        if (birthday?.year) {
             if (birthday.year % 400 == 0) {
                 if (birthday.day > 29) {
                     setBirthday({
@@ -194,7 +194,7 @@ export const handleBirthdayMonthChange = (
         }
         break;
     default:
-        if (birthday.day > 30) {
+        if (birthday?.day > 30) {
             setBirthday({
                 ...birthday,
                 day: null,
@@ -216,9 +216,9 @@ export const handleBirthdayYearChange = (
         year: Number(e.target.value),
     });
 
-    if (birthday.month == 2) {
+    if (birthday?.month == 2) {
         if (parseInt(e.target.value) % 400 == 0) {
-            if (birthday.day > 29) {
+            if (birthday?.day > 29) {
                 setBirthday({
                     ...birthday,
                     day: null,
@@ -226,7 +226,7 @@ export const handleBirthdayYearChange = (
             }
             setMaxDays(29);
         } else if (parseInt(e.target.value) % 100 == 0) {
-            if (birthday.day > 28) {
+            if (birthday?.day > 28) {
                 setBirthday({
                     ...birthday,
                     day: null,
@@ -234,7 +234,7 @@ export const handleBirthdayYearChange = (
             }
             setMaxDays(28);
         } else if (parseInt(e.target.value) % 4 == 0) {
-            if (birthday.day > 29) {
+            if (birthday?.day > 29) {
                 setBirthday({
                     ...birthday,
                     day: null,
