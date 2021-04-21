@@ -39,3 +39,9 @@ export interface IAttachment {
     mimetype: string;
     size: number;
 }
+
+export interface IBirthday {
+    year: number;
+    month: number;
+    day: number;
+}

@@ -9,7 +9,8 @@ import Loading from "../../components/loading";
 import Router from "next/router";
 import axios from "../../src/axios";
 import { useToastContext } from "../../src/contexts/toastContext";
-import { IUser } from "src/types/general";
+import { IUser, IBirthday } from "src/types/general";
+import { handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
 
 export default function UserSetup(): ReactElement {
     const toast = useToastContext();
@@ -19,150 +20,12 @@ export default function UserSetup(): ReactElement {
     const yearRef = useRef<HTMLSelectElement>(null);
 
     const [maxDays, setMaxDays] = useState(31);
-    const [birthday, setBirthday] = useState({
-        day: null,
-        month: null,
-        year: null,
-    });
+    const [birthday, setBirthday] = useState<IBirthday>(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
     const [bio, setBio] = useState("");
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<IUser>(null);
-
-    const handleDayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setBirthday({
-            ...birthday,
-            day: e.target.value,
-        });
-    };
-
-    const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setBirthday({
-            ...birthday,
-            month: e.target.value,
-        });
-        switch (e.target.value) {
-        case "1":
-        case "3":
-        case "5":
-        case "7":
-        case "8":
-        case "10":
-        case "12":
-            setMaxDays(31);
-            break;
-        case "4":
-        case "6":
-        case "9":
-        case "11":
-            if (birthday.day > 30) {
-                setBirthday({
-                    ...birthday,
-                    day: null,
-                });
-            }
-            setMaxDays(30);
-            break;
-        case "2":
-            if (birthday.year) {
-                if (birthday.year % 400 == 0) {
-                    if (birthday.day > 29) {
-                        setBirthday({
-                            ...birthday,
-                            day: null,
-                        });
-                    }
-                    setMaxDays(29);
-                } else if (birthday.year % 100 == 0) {
-                    if (birthday.day > 28) {
-                        setBirthday({
-                            ...birthday,
-                            day: null,
-                        });
-                    }
-                    setMaxDays(28);
-                } else if (birthday.year % 4 == 0) {
-                    if (birthday.day > 29) {
-                        setBirthday({
-                            ...birthday,
-                            day: null,
-                        });
-                    }
-                    setMaxDays(29);
-                } else {
-                    if (birthday.day > 28) {
-                        setBirthday({
-                            ...birthday,
-                            day: null,
-                        });
-                    }
-                    setMaxDays(28);
-                }
-            } else {
-                if (birthday.day > 28) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(28);
-            }
-            break;
-        default:
-            if (birthday.day > 30) {
-                setBirthday({
-                    ...birthday,
-                    day: null,
-                });
-            }
-            setMaxDays(30);
-            break;
-        }
-    };
-
-    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setBirthday({
-            ...birthday,
-            year: e.target.value,
-        });
-
-        if (birthday.month == 2) {
-            if (parseInt(e.target.value) % 400 == 0) {
-                if (birthday.day > 29) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(29);
-            } else if (parseInt(e.target.value) % 100 == 0) {
-                if (birthday.day > 28) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(28);
-            } else if (parseInt(e.target.value) % 4 == 0) {
-                if (birthday.day > 29) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(29);
-            } else {
-                if (parseInt(e.target.value) > 28) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(28);
-            }
-        }
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files[0];
@@ -190,9 +53,9 @@ export default function UserSetup(): ReactElement {
         const payload: FormData = new FormData();
         payload.append("bio", bio);
         payload.append("userId", user._id);
-        payload.append("birthday_year", birthday.year);
-        payload.append("birthday_month", birthday.month);
-        payload.append("birthday_day", birthday.day);
+        payload.append("birthday_year", birthday.year.toString());
+        payload.append("birthday_month", birthday.month.toString());
+        payload.append("birthday_day", birthday.day.toString());
         payload.append("profileImage", profileImage);
         axios
             .post("users/initialSetup", payload)
@@ -307,7 +170,7 @@ export default function UserSetup(): ReactElement {
                                 <select
                                     ref={dayRef}
                                     className={styles.dropdownSelector}
-                                    onChange={handleDayChange}
+                                    onChange={(e) => handleBirthdayDayChange(e, setBirthday, birthday)}
                                     defaultValue=""
                                 >
                                     <option
@@ -336,7 +199,7 @@ export default function UserSetup(): ReactElement {
                                 <select
                                     ref={monthRef}
                                     className={styles.dropdownSelector}
-                                    onChange={handleMonthChange}
+                                    onChange={(e) => handleBirthdayMonthChange(e, setBirthday, birthday, setMaxDays)}
                                     defaultValue=""
                                 >
                                     <option
@@ -422,7 +285,7 @@ export default function UserSetup(): ReactElement {
                                 <select
                                     ref={yearRef}
                                     className={styles.dropdownSelector}
-                                    onChange={handleYearChange}
+                                    onChange={(e) => handleBirthdayYearChange(e, setBirthday, birthday, setMaxDays)}
                                     defaultValue=""
                                 >
                                     <option

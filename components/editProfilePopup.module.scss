@@ -42,11 +42,11 @@
 }
 
 .profileImageContainer {
-    padding: 10px;
     min-width: 110px;
     min-height: 110px;
     max-width: 110px;
     max-height: 110px;
+    position: relative;
 
     @media (max-width: 800px) {
         min-width: 95px;
@@ -56,17 +56,58 @@
     }
 }
 
+.imageOverlay {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2000px;
+
+    @media (hover: hover) {
+        &:hover {
+            box-shadow: 0px 0px 30px #151515 inset;
+            cursor: pointer;
+    
+            .iconBackground {
+                background-color: #15151588;
+            }
+        }
+    }
+
+    &:active {
+        box-shadow: 0px 0px 30px #151515 inset;
+        cursor: pointer;
+
+        .iconBackground {
+            background-color: #15151588;
+        }
+    }
+}
+
+.iconBackground {
+    width: 36px;
+    height: 36px;
+    border-radius: 2000px;
+    background-color: #37373788;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .profileImage {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.names {
+.displayName {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .body {
@@ -108,6 +149,25 @@
     }
 }
 
+.birthdaySelector {
+    background-color: #252525;
+    color: white;
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-align: center;
+    text-align-last: center;
+    font-size: 1em;
+    height: 40px;
+    width: 140px;
+    font-weight: bold;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
 .footer {
     display: flex;
     padding: 0 5px;
@@ -117,4 +177,5 @@
 
 .inputs {
     width: 100%;
+    border-bottom: 1px solid grey;
 }

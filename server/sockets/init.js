@@ -6,6 +6,7 @@ const { validateSession } = require("../utils/cookies");
 const handlePosts = require("./posts");
 const handleComments = require("./comments");
 const { fileSizeLimit } = require("../utils/variables");
+const handleUserData = require("./users");
 
 const initSockets = (server) => {
     const io = socketio(server, {
@@ -59,6 +60,7 @@ const initSockets = (server) => {
         handlePosts(io, socket);
         handleComments(io, socket);
         handleTyping(socket, connectedSockets);
+        handleUserData(socket);
     });
 };
 

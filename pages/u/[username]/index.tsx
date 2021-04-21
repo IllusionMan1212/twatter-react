@@ -22,7 +22,7 @@ import { socket } from "src/hooks/useSocket";
 import { IUser, IPost } from "../../../src/types/general";
 import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext } from "next";
-import { ProfileProps } from "src/types/props";
+import { ButtonType, ProfileProps } from "src/types/props";
 import { NextSeo } from "next-seo";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
 import SuggestedUsers from "components/suggestedUsers/suggestedUsers";
@@ -179,11 +179,52 @@ export default function Profile(props: ProfileProps): ReactElement {
         [posts]
     );
 
+    const handleBirthdayRemoved = useCallback(
+        (userId) => {
+            if (currentUser?._id == userId && userId == user._id) {
+                setUser({ ...user, birthday: null });
+            }
+        },
+        [currentUser?._id, user]
+    );
+
+    const handleUpdatedProfile = useCallback(
+        (payload) => {
+            if (currentUser?._id == payload.userId && payload.userId == user._id) {
+                let profile_image: string = null;
+                if (payload.profileImage) {
+                    profile_image = payload.profileImage;
+                    setPostsAndComments(postsAndComments.map((post) => {
+                        post.author.profile_image = profile_image;
+                        post.comments.map((comment) => {
+                            if (comment.author._id == payload.userId) {
+                                comment.author.profile_image = profile_image;
+                            }
+                            return comment;
+                        });
+                        return post;
+                    }));
+                    currentUser.profile_image = profile_image;
+                }
+                setUser({
+                    ...user,
+                    display_name: payload.displayName,
+                    bio: payload.bio,
+                    birthday: payload.birthday ?? user.birthday,
+                    profile_image: profile_image ?? user.profile_image
+                });
+            }
+        },
+        [currentUser, user, postsAndComments]
+    );
+
     useEffect(() => {
         if (socket?.connected) {
             socket.on("commentToClient", handleComment);
             socket.on("deletePost", handleCommentDelete);
             socket.on("likeToClient", handleLike);
+            socket.on("birthdayRemoved", handleBirthdayRemoved);
+            socket.on("updatedProfile", handleUpdatedProfile);
         }
 
         return () => {
@@ -191,9 +232,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                 socket.off("commentToClient", handleComment);
                 socket.off("deletePost", handleCommentDelete);
                 socket.off("likeToClient", handleLike);
+                socket.off("birthdayRemoved", handleBirthdayRemoved);
+                socket.off("updatedProfile", handleUpdatedProfile);
             }
         };
-    }, [handleComment, handleCommentDelete, handleLike]);
+    }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile]);
 
     useEffect(() => {
         if (props.user) {
@@ -205,9 +248,17 @@ export default function Profile(props: ProfileProps): ReactElement {
                     { withCredentials: true }
                 )
                 .then((res) => {
-                    setPosts(res.data.posts.filter((post: IPost) => post.replyingTo.length == 0));
+                    setPosts(
+                        res.data.posts.filter(
+                            (post: IPost) => post.replyingTo.length == 0
+                        )
+                    );
                     setPostsAndComments(res.data.posts);
-                    setMediaPosts(res.data.posts.filter((post: IPost) => post.attachments.length != 0));
+                    setMediaPosts(
+                        res.data.posts.filter(
+                            (post: IPost) => post.attachments.length != 0
+                        )
+                    );
                     setPostsLoading(false);
                 });
         } else {
@@ -231,9 +282,17 @@ export default function Profile(props: ProfileProps): ReactElement {
                     { withCredentials: true }
                 )
                 .then((res) => {
-                    setPosts(res.data.posts.filter((post: IPost) => post.replyingTo.length == 0));
+                    setPosts(
+                        res.data.posts.filter(
+                            (post: IPost) => post.replyingTo.length == 0
+                        )
+                    );
                     setPostsAndComments(res.data.posts);
-                    setMediaPosts(res.data.posts.filter((post: IPost) => post.attachments.length != 0));
+                    setMediaPosts(
+                        res.data.posts.filter(
+                            (post: IPost) => post.attachments.length != 0
+                        )
+                    );
                     setPostsLoading(false);
                 });
         }
@@ -320,14 +379,12 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     className={`round ${styles.userImage}`}
                                                     style={{
                                                         backgroundImage: `url("${
-                                                            user
-                                                                .profile_image ==
+                                                            user.profile_image ==
                                                             "default_profile.svg"
                                                                 ? "/"
                                                                 : ""
                                                         }${
-                                                            user
-                                                                .profile_image
+                                                            user.profile_image
                                                         }")`,
                                                     }}
                                                 ></div>
@@ -335,10 +392,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     <p
                                                         className={`${styles.display_name} text-bold`}
                                                     >
-                                                        {
-                                                            user
-                                                                .display_name
-                                                        }
+                                                        {user.display_name}
                                                     </p>
                                                     <p
                                                         className={`usernameGrey ${styles.username}`}
@@ -372,14 +426,26 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             <Button
                                                                 text="Follow"
                                                                 size={10}
-                                                                handleClick={handleFollowClick}
+                                                                type={
+                                                                    ButtonType.Regular
+                                                                }
+                                                                handleClick={
+                                                                    handleFollowClick
+                                                                }
                                                             ></Button>
                                                         </div>
                                                     ) : (
                                                         <Button
                                                             text="Edit Profile"
                                                             size={10}
-                                                            handleClick={() => setEditProfilePopup(true)}
+                                                            type={
+                                                                ButtonType.Regular
+                                                            }
+                                                            handleClick={() =>
+                                                                setEditProfilePopup(
+                                                                    true
+                                                                )
+                                                            }
                                                         ></Button>
                                                     )}
                                                 <div
@@ -452,9 +518,15 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className={styles.suggestedUsersMobile}>
+                                        <div
+                                            className={
+                                                styles.suggestedUsersMobile
+                                            }
+                                        >
                                             <SuggestedUsers
-                                                users={new Array(3).fill(props.user)}
+                                                users={new Array(3).fill(
+                                                    props.user
+                                                )}
                                             ></SuggestedUsers>
                                         </div>
                                         <div className={styles.userPosts}>
@@ -502,9 +574,13 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             </div>
                                             {!postsLoading ? (
                                                 <>
-                                                    {(activeTab == Tabs.Posts ? 
-                                                        posts : activeTab == Tabs.PostsAndComments ? 
-                                                            postsAndComments : mediaPosts).map((post) => {
+                                                    {(activeTab == Tabs.Posts
+                                                        ? posts
+                                                        : activeTab ==
+                                                          Tabs.PostsAndComments
+                                                            ? postsAndComments
+                                                            : mediaPosts
+                                                    ).map((post) => {
                                                         return (
                                                             <Post
                                                                 key={post._id}
@@ -521,11 +597,25 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             ></Post>
                                                         );
                                                     })}
-                                                    {(activeTab == Tabs.Posts ?
-                                                        posts : activeTab == Tabs.PostsAndComments ?
-                                                            postsAndComments : mediaPosts).length == 0 && (
-                                                        <div className="flex justify-content-center" style={{padding: "20px"}}>
-                                                            <p>@{user.username} doesn&apos;t have any posts under this tab.</p>
+                                                    {(activeTab == Tabs.Posts
+                                                        ? posts
+                                                        : activeTab ==
+                                                          Tabs.PostsAndComments
+                                                            ? postsAndComments
+                                                            : mediaPosts
+                                                    ).length == 0 && (
+                                                        <div
+                                                            className="flex justify-content-center"
+                                                            style={{
+                                                                padding: "20px",
+                                                            }}
+                                                        >
+                                                            <p>
+                                                                @{user.username}{" "}
+                                                                doesn&apos;t
+                                                                have any posts
+                                                                under this tab.
+                                                            </p>
                                                         </div>
                                                     )}
                                                 </>
@@ -537,7 +627,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             )}
                                         </div>
                                     </div>
-                                    <div className={styles.suggestedUsersDesktop}>
+                                    <div
+                                        className={styles.suggestedUsersDesktop}
+                                    >
                                         <SuggestedUsers
                                             users={new Array(5).fill(user)}
                                         ></SuggestedUsers>
@@ -553,7 +645,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                             {editProfilePopup && (
                                 <EditProfilePopup
                                     setEditProfilePopup={setEditProfilePopup}
-                                    userData={currentUser}
+                                    userData={user}
                                 ></EditProfilePopup>
                             )}
                         </>

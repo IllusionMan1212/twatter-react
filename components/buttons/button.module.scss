@@ -5,8 +5,47 @@
     cursor: pointer;
 }
 
-.button {
+.regular {
     background-color: variables.$accent-color;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: variables.$accent-color-dark
+        }
+    }
+
+    &:active {
+        background-color: variables.$accent-color-dark
+    }
+}
+
+.danger {
+    background-color: variables.$danger-color;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: variables.$danger-color-dark
+        }
+    }
+
+    &:active {
+        background-color: variables.$danger-color-dark
+    }
+}
+
+.warning {
+    color: black;
+    background-color: variables.$warning-color;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: variables.$warning-color-dark
+        }
+    }
+
+    &:active {
+        background-color: variables.$warning-color-dark
+    }
 }
 
 .clickedButton {

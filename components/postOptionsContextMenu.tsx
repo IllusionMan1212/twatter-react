@@ -66,7 +66,7 @@ export default function PostOptionsMenu(
                     <>
                         <hr />
                         <div
-                            className={styles.deletePostButton}
+                            className="dangerRed"
                             onClick={handleOnClick}
                         >
                             <Eraser size="20"></Eraser>

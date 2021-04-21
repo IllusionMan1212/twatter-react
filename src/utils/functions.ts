@@ -1,3 +1,6 @@
+import { SetStateAction } from "react";
+import { IBirthday } from "src/types/general";
+
 export const timeSince = (date: string): string => {
     const now = new Date();
     const postDate = new Date(date);
@@ -100,4 +103,152 @@ export const formatBigNumbers = (number: number): string => {
         return `${(number / 1000000000).toFixed(1)}B`;
     }
     return number.toString();
+};
+
+export const handleBirthdayDayChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    setBirthday: (birthday: SetStateAction<IBirthday>) => void,
+    birthday: IBirthday
+): void => {
+    setBirthday({
+        ...birthday,
+        day: Number(e.target.value),
+    });
+};
+
+export const handleBirthdayMonthChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    setBirthday: (birthday: SetStateAction<IBirthday>) => void,
+    birthday: IBirthday,
+    setMaxDays: (days: SetStateAction<number>) => void
+): void => {
+    setBirthday({
+        ...birthday,
+        month: Number(e.target.value),
+    });
+    switch (e.target.value) {
+    case "1":
+    case "3":
+    case "5":
+    case "7":
+    case "8":
+    case "10":
+    case "12":
+        setMaxDays(31);
+        break;
+    case "4":
+    case "6":
+    case "9":
+    case "11":
+        if (birthday.day > 30) {
+            setBirthday({
+                ...birthday,
+                day: null,
+            });
+        }
+        setMaxDays(30);
+        break;
+    case "2":
+        if (birthday.year) {
+            if (birthday.year % 400 == 0) {
+                if (birthday.day > 29) {
+                    setBirthday({
+                        ...birthday,
+                        day: null,
+                    });
+                }
+                setMaxDays(29);
+            } else if (birthday.year % 100 == 0) {
+                if (birthday.day > 28) {
+                    setBirthday({
+                        ...birthday,
+                        day: null,
+                    });
+                }
+                setMaxDays(28);
+            } else if (birthday.year % 4 == 0) {
+                if (birthday.day > 29) {
+                    setBirthday({
+                        ...birthday,
+                        day: null,
+                    });
+                }
+                setMaxDays(29);
+            } else {
+                if (birthday.day > 28) {
+                    setBirthday({
+                        ...birthday,
+                        day: null,
+                    });
+                }
+                setMaxDays(28);
+            }
+        } else {
+            if (birthday.day > 28) {
+                setBirthday({
+                    ...birthday,
+                    day: null,
+                });
+            }
+            setMaxDays(28);
+        }
+        break;
+    default:
+        if (birthday.day > 30) {
+            setBirthday({
+                ...birthday,
+                day: null,
+            });
+        }
+        setMaxDays(30);
+        break;
+    }
+};
+
+export const handleBirthdayYearChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    setBirthday: (birthday: SetStateAction<IBirthday>) => void,
+    birthday: IBirthday,
+    setMaxDays: (days: SetStateAction<number>) => void
+): void => {
+    setBirthday({
+        ...birthday,
+        year: Number(e.target.value),
+    });
+
+    if (birthday.month == 2) {
+        if (parseInt(e.target.value) % 400 == 0) {
+            if (birthday.day > 29) {
+                setBirthday({
+                    ...birthday,
+                    day: null,
+                });
+            }
+            setMaxDays(29);
+        } else if (parseInt(e.target.value) % 100 == 0) {
+            if (birthday.day > 28) {
+                setBirthday({
+                    ...birthday,
+                    day: null,
+                });
+            }
+            setMaxDays(28);
+        } else if (parseInt(e.target.value) % 4 == 0) {
+            if (birthday.day > 29) {
+                setBirthday({
+                    ...birthday,
+                    day: null,
+                });
+            }
+            setMaxDays(29);
+        } else {
+            if (parseInt(e.target.value) > 28) {
+                setBirthday({
+                    ...birthday,
+                    day: null,
+                });
+            }
+            setMaxDays(28);
+        }
+    }
 };

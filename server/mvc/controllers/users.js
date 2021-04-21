@@ -293,12 +293,13 @@ const initialSetup = (req, res) => {
                     imageData = req.files.profileImage.data;
                 }
 
+                const name = crypto.randomBytes(16).toString("hex");
                 const fileExtension = req.files.profileImage.name.substring(req.files.profileImage.name.lastIndexOf("."));
                 fs.writeFileSync(
-                    `cdn/profile_images/${req.body.userId}/profile${fileExtension}`,
+                    `cdn/profile_images/${req.body.userId}/${name}${fileExtension}`,
                     imageData
                 );
-                user.profile_image = `${process.env.DOMAIN_URL}/cdn/profile_images/${req.body.userId}/profile${fileExtension}`;
+                user.profile_image = `${process.env.DOMAIN_URL}/cdn/profile_images/${req.body.userId}/${name}${fileExtension}`;
             }
             user.finished_setup = true;
             user.save((err) => {

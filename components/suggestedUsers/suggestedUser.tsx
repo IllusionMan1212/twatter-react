@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import Button from "components/buttons/button";
 import { ReactElement } from "react";
-import { SuggestedUserProps } from "src/types/props";
+import { ButtonType, SuggestedUserProps } from "src/types/props";
 import styles from "./suggestedUser.module.scss";
 
 export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
@@ -11,7 +11,11 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                 <div className={styles.userImage}>
                     <img
                         className="round"
-                        style={{ height: "100%", width: "100%", objectFit: "cover" }}
+                        style={{
+                            height: "100%",
+                            width: "100%",
+                            objectFit: "cover",
+                        }}
                         src={`${
                             props.user.profile_image == "default_profile.svg"
                                 ? "/"
@@ -29,7 +33,12 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                 </div>
             </div>
             <div className={styles.followButtonContainer}>
-                <Button text="Follow" size={8} handleClick={() => console.log("coming soon")}></Button>
+                <Button
+                    text="Follow"
+                    size={8}
+                    type={ButtonType.Regular}
+                    handleClick={() => console.log("coming soon")}
+                ></Button>
             </div>
         </div>
     );

@@ -29,8 +29,6 @@ function restoreScrollPosition(
 export default function useScrollRestoration(router: NextRouter): void {
     const positions = React.useRef<{ [key: string]: number }>({});
 
-    console.log("positions", positions);
-
     const updatePosition = (url: string, pos: number) => {
         positions.current = {
             ...positions.current,

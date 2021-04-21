@@ -132,9 +132,16 @@ export interface UserPostProps {
     post: IPost;
 }
 
+export enum ButtonType {
+    Regular = 1,
+    Danger,
+    Warning
+}
+
 export interface ButtonProps {
     size: number;
     text: string;
+    type: ButtonType;
     handleClick: () => void;
 }
 
