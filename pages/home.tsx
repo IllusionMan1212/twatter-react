@@ -30,6 +30,7 @@ import { postCharLimit } from "src/utils/variables";
 import axios from "axios";
 import { LikePayload } from "src/types/utils";
 import { socket } from "src/hooks/useSocket";
+import { Virtuoso } from "react-virtuoso";
 
 export default function Home(): ReactElement {
     const user = useUser("/login", null);
@@ -37,6 +38,7 @@ export default function Home(): ReactElement {
     const composePostRef = useRef<HTMLSpanElement>(null);
     const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
     const inputContainerMobileRef = useRef<HTMLDivElement>(null);
+    const pageRef = useRef(null);
 
     const toast = useToastContext();
 
@@ -54,6 +56,10 @@ export default function Home(): ReactElement {
         currentUser: null as IUser,
     });
     const [touchY, setTouchY] = useState(null);
+    const [reachedEnd, setReachedEnd] = useState(false);
+    const [page, setPage] = useState(0);
+
+    pageRef.current = page;
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!postingAllowed) {
@@ -205,6 +211,35 @@ export default function Home(): ReactElement {
         [posts]
     );
 
+    const getPosts = (): Promise<any> => {
+        const cancelToken = axios.CancelToken;
+        const tokenSource = cancelToken.source();
+        return axiosInstance
+            .get(`posts/getPosts/${pageRef.current}`, { cancelToken: tokenSource.token })
+            .then((res) => {
+                return res.data.posts;
+            })
+            .catch((err) => {
+                if (axios.isCancel(err)) {
+                    console.log("Request canceled");
+                    tokenSource.cancel();
+                } else {
+                    console.error(err);
+                }
+            });
+    };
+
+    const loadMorePosts = () => {
+        setPage(pageRef.current + 1);
+        getPosts().then(newPosts => {
+            if (!newPosts.length) {
+                setReachedEnd(true);
+                return;
+            }
+            setPosts(posts.concat(newPosts));
+        });
+    };
+
     useEffect(() => {
         if (socket?.connected) {
             socket.on("post", handlePost);
@@ -224,23 +259,12 @@ export default function Home(): ReactElement {
     }, [handlePost, handleDeletePost, handleComment, handleLike]);
 
     useEffect(() => {
-        const cancelToken = axios.CancelToken;
-        const tokenSource = cancelToken.source();
-        axiosInstance
-            .get("posts/getPosts", { cancelToken: tokenSource.token })
-            .then((res) => {
-                setPosts(res.data.posts);
-            })
-            .catch((err) => {
-                if (axios.isCancel(err)) {
-                    console.log("Request canceled");
-                } else {
-                    console.error(err);
-                }
-            });
-        return () => {
-            tokenSource.cancel();
-        };
+        getPosts().then(posts => {
+            if (posts.length < 50) {
+                setReachedEnd(true);
+            }
+            setPosts(posts);
+        });
     }, []);
 
     useEffect(() => {
@@ -520,20 +544,37 @@ export default function Home(): ReactElement {
                             </div>
                         </div>
                         <div className={`text-white ${styles.posts}`}>
-                            {posts &&
-                                posts.map((post) => {
+                            <Virtuoso
+                                totalCount={posts.length}
+                                data={posts}
+                                endReached={loadMorePosts}
+                                useWindowScroll
+                                overscan={{ main: 500, reverse: 500 }}
+                                // eslint-disable-next-line react/display-name
+                                components={{Footer: () => {
                                     return (
-                                        <Post
-                                            key={post._id}
-                                            post={post}
-                                            currentUser={user}
-                                            handleMediaClick={handleMediaClick}
-                                        ></Post>
+                                        <>
+                                            {!reachedEnd && (
+                                                <div className={styles.loadingContainer}>
+                                                    <Loading
+                                                        height="50"
+                                                        width="50"
+                                                    ></Loading>
+                                                </div>
+                                            )}
+                                        </>
                                     );
-                                })}
-                            <div className={styles.loadingContainer}>
-                                <Loading height="50" width="50"></Loading>
-                            </div>
+                                },
+                                }}
+                                itemContent={(_index, post) => (
+                                    <Post
+                                        key={post._id}
+                                        post={post}
+                                        currentUser={user}
+                                        handleMediaClick={handleMediaClick}
+                                    ></Post>
+                                )}
+                            ></Virtuoso>
                         </div>
                     </div>
                     <div

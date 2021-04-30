@@ -199,7 +199,6 @@ const getMessages = (req, res) => {
         });
         return;
     }
-    // TODO: limit queried messages to 20 (or whatever arbitrary number)
     Conversation.aggregate([
         {
             $match: {
@@ -230,7 +229,7 @@ const getMessages = (req, res) => {
                         $sort: { "sentTime": -1 }
                     },
                     {
-                        $skip: parseInt(req.params.page) * 50
+                        $skip: Number(req.params.page) * 50
                     },
                     {
                         $limit: 50,

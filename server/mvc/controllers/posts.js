@@ -4,6 +4,15 @@ const { Types } = require("mongoose");
 const User = require("../models/user");
 
 const getPosts = (req, res) => {
+    if (!req.params.page) {
+        res.status(400).json({
+            message: "Invalid or incomplete request",
+            status: 400,
+            success: false
+        });
+        return;
+    }
+
     if (req.params.userId) {
         const userId = Types.ObjectId(req.params.userId);
         Post.aggregate([
@@ -139,9 +148,6 @@ const getPosts = (req, res) => {
                 });
             });
     } else {
-        // TODO: get the latest 20 (maybe) posts so that we don't stress the db and so the frontend can quickly load
-
-        // TODO: if a user scrolls to the bottom load the next 20 and so on and so forth whatever
         Post.aggregate([
             { $match: { replyingTo: { $eq: null } } },
             {
@@ -219,10 +225,18 @@ const getPosts = (req, res) => {
                 }
             },
             {
+                $sort: { "createdAt": -1 }
+            },
+            {
+                $skip: Number(req.params.page) * 50
+            },
+            {
+                $limit: 50,
+            },
+            {
                 $unwind: "$author"
             }
         ])
-            .sort({ createdAt: -1 })
             .exec((err, posts) => {
                 if (err) {
                     console.error(err);
