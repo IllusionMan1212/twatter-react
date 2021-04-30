@@ -45,7 +45,7 @@
     "piexifjs": "^1.0.6",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-virtuoso": "^1.5.14",
+    "react-virtuoso": "^1.8.6",
     "sass": "^1.32.4",
     "socket.io": "^3.1.1",
     "socket.io-client": "^3.1.1",
