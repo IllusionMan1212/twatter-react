@@ -1,0 +1,57 @@
+@use "../../styles/variables";
+
+.checkbox {
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: .9rem;
+
+    input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 26px;
+        height: 26px;
+        background-color: #1f1f1f;
+        outline: none;
+        vertical-align: middle;
+        position: relative;
+        cursor: pointer;
+        margin-right: 0.5em;
+        border-radius: 8px;
+        transition: background-color .15s ease;
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: .3rem;
+            top: .5rem;
+            width: .9rem;
+            height: .3rem;
+            background: transparent;
+            border-bottom: 3px solid #1f1f1f;
+            border-left: 3px solid #1f1f1f;
+            transform: rotate(-45deg);
+            opacity: 0;
+            transition: opacity .3s ease;
+        }
+
+        &:checked {
+            background-color: variables.$accent-color;
+
+            &::after {
+                opacity: 1;
+            }
+        }
+
+        &[disabled] {
+            cursor: not-allowed;
+        }
+    }
+
+    &.disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+}

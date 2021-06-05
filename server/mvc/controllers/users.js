@@ -145,7 +145,7 @@ const login = async (req, res) => {
     // Session is the payload to save in the token, it may contain basic info about the user
     const session = { ...user };
 
-    const token = await Cookies.setLoginSession(res, session);
+    const token = await Cookies.setLoginSession(res, session, req.body.stayLoggedIn);
     res.status(200).json({
         message: "Logged In",
         status: 200,

@@ -6,11 +6,12 @@ import indexStyles from "../styles/index.module.scss";
 import Link from "next/link";
 import Head from "next/head";
 import { Eye, EyeClosed } from "phosphor-react";
-import { FormEvent, ReactElement, useEffect, useState } from "react";
+import React, { FormEvent, ReactElement, useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
 import Loading from "../components/loading";
 import { useToastContext } from "../src/contexts/toastContext";
+import { Checkbox } from "components/checkbox/checkbox";
 
 export default function Login(): ReactElement {
     const toast = useToastContext();
@@ -20,6 +21,7 @@ export default function Login(): ReactElement {
     const [form, setForm] = useState({
         username: "",
         password: "",
+        stayLoggedIn: false
     });
     const [loginAllowed, setLoginAllowed] = useState(true);
 
@@ -47,6 +49,13 @@ export default function Login(): ReactElement {
         setForm({
             ...form,
             [name]: value,
+        });
+    };
+
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm({
+            ...form,
+            stayLoggedIn: e.target.checked
         });
     };
 
@@ -136,19 +145,25 @@ export default function Login(): ReactElement {
                                 ></Eye>
                             )}
                         </div>
-                        <p className="text-white text-right mt-2Percent">
-                            <Link href="/forgot-password">
-                                <a>Forgot your password?</a>
-                            </Link>
-                        </p>
+                        <Checkbox
+                            style={{ marginTop: "0.5em" }}
+                            label="Keep me logged in"
+                            handleChange={handleCheckboxChange}
+                        />
                         <button
                             className={`text-medium mt-1 mx-5Percent ${styles.button} ${indexStyles.filledButton}`}
                         >
                             Log In
                         </button>
-                        <p className="text-white text-right my-3Percent">
+                        <p className="text-white text-center mt-1">
+                            <Link href="/forgot-password">
+                                <a>Forgot your password?</a>
+                            </Link>
+                        </p>
+                        <p className="usernameGrey text-center my-1">or</p>
+                        <p className="text-white text-center">
                             <Link href="/register">
-                                <a>Don&apos;t have an account? Sign up</a>
+                                <a>Don&apos;t have an account yet? Sign up</a>
                             </Link>
                         </p>
                     </form>

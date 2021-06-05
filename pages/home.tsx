@@ -260,7 +260,7 @@ export default function Home(): ReactElement {
 
     useEffect(() => {
         getPosts().then(posts => {
-            if (posts.length < 50) {
+            if (posts?.length < 50) {
                 setReachedEnd(true);
             }
             setPosts(posts);

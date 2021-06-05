@@ -1,4 +1,4 @@
-import { MutableRefObject, SetStateAction } from "react";
+import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction } from "react";
 import { IPost, IUser } from "./general";
 import { LikePayload } from "./utils";
 
@@ -156,4 +156,13 @@ export interface SuggestedUserProps {
 export interface EditProfilePopupProps {
     setEditProfilePopup: (value: SetStateAction<boolean>) => void;
     userData: IUser;
+}
+
+export interface CheckboxProps {
+    label?: string;
+    style?: CSSProperties;
+    checked?: boolean;
+    disabled?: boolean;
+    ref?: MutableRefObject<HTMLInputElement>;
+    handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }

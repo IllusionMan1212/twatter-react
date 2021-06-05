@@ -2,18 +2,21 @@ const Iron = require("@hapi/iron");
 const { serialize, parse } = require("cookie");
 
 const TOKEN_NAME = "user_session";
-// 8 hours
-const MAX_AGE = 60 * 60 * 8;
+// 100 years. brave browser limits this to 6 months only
+const MAX_AGE = 60 * 60 * 24 * 365 * 100;
 
-const setTokenCookie = (res, token) => {
-    const cookie = serialize(TOKEN_NAME, token, {
-        expires: new Date(Date.now() + MAX_AGE * 1000),
+const setTokenCookie = (res, token, stayLoggedIn) => {
+    const cookieObj = {
         httpOnly: true,
-        maxAge: MAX_AGE,
         path: "/",
         sameSite: "lax",
-        secure: process.env.NODE_ENV !== "development",
-    });
+        secure: process.env.NODE_ENV !== "development"
+    };
+    if (stayLoggedIn) {
+        cookieObj.expires = new Date(Date.now() + MAX_AGE * 1000);
+        cookieObj.maxAge = MAX_AGE;
+    }
+    const cookie = serialize(TOKEN_NAME, token, cookieObj);
 
     res.setHeader("Set-Cookie", cookie);
 };
@@ -43,15 +46,19 @@ const getTokenCookie = (req) => {
     return cookies[TOKEN_NAME];
 };
 
-const setLoginSession = async function (res, session) {
+const setLoginSession = async function (res, session, stayLoggedIn) {
     const createdAt = Date.now();
     // Create a session object with a max age that we can validate later
-    const obj = { ...session,
-        createdAt,
-        maxAge: MAX_AGE };
+    const obj = {
+        ...session,
+        createdAt
+    };
+    if (stayLoggedIn) {
+        obj.maxAge = MAX_AGE * 1000;
+    }
     const token = await Iron.seal(obj, process.env.TOKEN_SECRET, Iron.defaults);
 
-    setTokenCookie(res, token);
+    setTokenCookie(res, token, stayLoggedIn);
     return token;
 };
 
