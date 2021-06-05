@@ -3,6 +3,30 @@ const { rmSync } = require("fs");
 const { Types } = require("mongoose");
 const User = require("../models/user");
 
+const getPostsCount = (req, res) => {
+    if (!req.params.userId) {
+        res.status(400).json({
+            message: "Invalid or incomplete request",
+            status: 400,
+            success: false
+        });
+    }
+
+    Post.countDocuments({ author: req.params.userId })
+        .exec((err, postsCount) => {
+            if (err) {
+                console.error(err);
+            }
+            console.log(postsCount);
+            res.status(200).json({
+                message: "Retrieved posts count successfully",
+                postsCount,
+                status: 200,
+                success: true
+            });
+        });
+};
+
 const getPosts = (req, res) => {
     if (!req.params.page) {
         res.status(400).json({
@@ -673,5 +697,6 @@ module.exports = {
     getComments,
     getPost,
     getPosts,
+    getPostsCount,
     likePost
 };

@@ -68,6 +68,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [postsPage, setPostsPage] = useState(0);
     const [commentsPage, setCommentsPage] = useState(0);
     const [mediaPage, setMediaPage] = useState(0);
+    const [postsCount, setPostsCount] = useState(0);
 
     postsPageRef.current = postsPage;
     commentsPageRef.current = commentsPage;
@@ -281,6 +282,17 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
     }, [props.user._id]);
 
+    const getPostsCount = useCallback((): Promise<any> => {
+        return axios
+            .get(
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPostsCount/${props.user._id}`,
+                { withCredentials: true }
+            )
+            .then((res) => {
+                return res.data.postsCount;
+            });
+    }, [props.user._id]);
+
     const loadMorePosts = (lastItemIndex: number) => {
         
         switch (activeTab) {
@@ -356,6 +368,9 @@ export default function Profile(props: ProfileProps): ReactElement {
         if (props.user) {
             setNotFound(false);
             setLoading(false);
+            getPostsCount().then(postsCount => {
+                setPostsCount(postsCount);
+            });
             getPosts(postsPageRef.current, "posts").then(posts => {
                 setPosts(posts);
                 setPostsLoading(false);
@@ -368,6 +383,7 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (props.user && user?._id != props.user._id) {
+            setPostsCount(0);
             setActiveTab(Tabs.Posts);
             setUser(props.user);
             setPostsLoading(true);
@@ -386,6 +402,9 @@ export default function Profile(props: ProfileProps): ReactElement {
             setLoading(false);
             setNotFound(false);
 
+            getPostsCount().then(count => {
+                setPostsCount(count);
+            });
             getPosts(postsPageRef.current, "posts").then(posts => {
                 setPosts(posts);
                 setPostsLoading(false);
@@ -551,7 +570,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     <span>
                                                         <span className="text-bold">
                                                             {formatBigNumbers(
-                                                                postsAndComments.length
+                                                                postsCount
                                                             )}
                                                         </span>{" "}
                                                         Posts
