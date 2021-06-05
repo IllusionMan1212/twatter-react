@@ -89,7 +89,7 @@ export default function Post(props: PostProps): ReactElement {
                 )}
                 {props.post.author ? (
                     <Link
-                        href={`/u/${props.post.author.display_name.toLowerCase()}`}
+                        href={`/u/${props.post.author.username}`}
                     >
                         <a
                             className="flex"
@@ -120,7 +120,7 @@ export default function Post(props: PostProps): ReactElement {
                 <div className={styles.user}>
                     {props.post.author ? (
                         <Link
-                            href={`/u/${props.post.author.display_name.toLowerCase()}`}
+                            href={`/u/${props.post.author.username}`}
                         >
                             <a onClick={(e) => e.stopPropagation()}>
                                 <div className="text-bold flex flex-column justify-content-center">
