@@ -14,9 +14,42 @@ const getPosts = (req, res) => {
     }
 
     if (req.params.userId) {
+        if (!req.query.type) {
+            res.status(400).json({
+                message: "Invalid or incomplete request",
+                status: 400,
+                success: false
+            });
+        }
         const userId = Types.ObjectId(req.params.userId);
+        const { type } = req.query;
+        let matchQuery = {};
+
+        switch (type) {
+        case "posts":
+            matchQuery = { $match: { $and: [
+                { author: userId },
+                { replyingTo: null }
+            ] } };
+            break;
+        case "comments":
+            matchQuery = { $match: { author: userId } };
+            break;
+        case "media":
+            matchQuery = { $match: { $and: [
+                { author: userId },
+                { attachments: { $ne: [] } }
+            ] } };
+            break;
+        default:
+            res.status(400).json({
+                message: "Invalid or incomplete request",
+                status: 400,
+                success: false
+            });
+        }
         Post.aggregate([
-            { $match: { author: userId } },
+            matchQuery,
             {
                 $lookup: {
                     as: "author",
@@ -87,6 +120,15 @@ const getPosts = (req, res) => {
                     ]
                 }
             },
+            {
+                $sort: { "createdAt": -1 }
+            },
+            {
+                $skip: Number(req.params.page) * 50
+            },
+            {
+                $limit: 50,
+            },
             { $unwind: "$author" },
             {
                 $lookup: {
@@ -129,7 +171,6 @@ const getPosts = (req, res) => {
                 }
             },
         ])
-            .sort({ createdAt: -1 })
             .exec((err, posts) => {
                 if (err) {
                     console.error(err);

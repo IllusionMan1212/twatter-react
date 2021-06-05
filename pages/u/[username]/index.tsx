@@ -28,6 +28,7 @@ import useScrollRestoration from "src/hooks/useScrollRestoration";
 import SuggestedUsers from "components/suggestedUsers/suggestedUsers";
 import Button from "components/buttons/button";
 import EditProfilePopup from "components/editProfilePopup";
+import { Virtuoso } from "react-virtuoso";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -42,6 +43,9 @@ export default function Profile(props: ProfileProps): ReactElement {
     const toast = useToastContext();
 
     const parentContainerRef = useRef(null);
+    const postsPageRef = useRef(null);
+    const commentsPageRef = useRef(null);
+    const mediaPageRef = useRef(null);
 
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -58,6 +62,16 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [activeTab, setActiveTab] = useState(Tabs.Posts);
     const [user, setUser] = useState<IUser>(props.user);
     const [editProfilePopup, setEditProfilePopup] = useState(false);
+    const [postsReachedEnd, setPostsReachedEnd] = useState(false);
+    const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
+    const [mediaReachedEnd, setMediaReachedEnd] = useState(false);
+    const [postsPage, setPostsPage] = useState(0);
+    const [commentsPage, setCommentsPage] = useState(0);
+    const [mediaPage, setMediaPage] = useState(0);
+
+    postsPageRef.current = postsPage;
+    commentsPageRef.current = commentsPage;
+    mediaPageRef.current = mediaPage;
 
     let currentUser: IUser = null;
     currentUser = useUser();
@@ -106,10 +120,48 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const handleAllTabClick = () => {
         setActiveTab(Tabs.PostsAndComments);
+        if (!postsAndComments.length && !commentsReachedEnd) {
+            getPosts(commentsPageRef.current, "comments").then((newPosts) => {
+                if (newPosts.length < 50) {
+                    setCommentsReachedEnd(true);
+                }
+                setPostsAndComments(newPosts);
+            });
+        }
     };
 
     const handleMediaTabClick = () => {
         setActiveTab(Tabs.MediaPosts);
+        if (!mediaPosts.length && !mediaReachedEnd) {
+            getPosts(mediaPageRef.current, "media").then((newPosts) => {
+                if (newPosts.length < 50) {
+                    setMediaReachedEnd(true);
+                }
+                setMediaPosts(newPosts);
+            });
+        }
+    };
+
+    const getActiveTab = (): Array<IPost> => {
+        switch (activeTab) {
+        case Tabs.Posts:
+            return posts;
+        case Tabs.PostsAndComments:
+            return postsAndComments;
+        case Tabs.MediaPosts:
+            return mediaPosts;
+        }
+    };
+
+    const getActiveReachedEnd = (): boolean => {
+        switch (activeTab) {
+        case Tabs.Posts:
+            return postsReachedEnd;
+        case Tabs.PostsAndComments:
+            return commentsReachedEnd;
+        case Tabs.MediaPosts:
+            return mediaReachedEnd;
+        }
     };
 
     const handleComment = useCallback(
@@ -218,6 +270,68 @@ export default function Profile(props: ProfileProps): ReactElement {
         [currentUser, user, postsAndComments]
     );
 
+    const getPosts = useCallback((page: number, postsType: string): Promise<any> => {
+        return axios
+            .get(
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user._id}?type=${postsType}`,
+                { withCredentials: true }
+            )
+            .then((res) => {
+                return res.data.posts;
+            });
+    }, [props.user._id]);
+
+    const loadMorePosts = (lastItemIndex: number) => {
+        
+        switch (activeTab) {
+        case Tabs.Posts:
+            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+            if (lastItemIndex < 49) {
+                setPostsReachedEnd(true);
+                return;
+            }
+            setPostsPage(postsPageRef.current + 1);
+            getPosts(postsPageRef.current, "posts").then((newPosts) => {
+                if (!newPosts.length) {
+                    setPostsReachedEnd(true);
+                    return;
+                }
+                setPosts(posts.concat(newPosts));
+            });
+            break;
+        case Tabs.PostsAndComments:
+            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+            if (lastItemIndex < 49) {
+                setCommentsReachedEnd(true);
+                return;
+            }
+            setCommentsPage(commentsPageRef.current + 1);
+            getPosts(commentsPageRef.current, "comments").then((newPosts) => {
+                if (!newPosts.length) {
+                    setCommentsReachedEnd(true);
+                    return;
+                }
+                setPostsAndComments(postsAndComments.concat(newPosts));
+            });
+            break;
+        case Tabs.MediaPosts:
+            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+            if (lastItemIndex < 49) {
+                setMediaReachedEnd(true);
+                return;
+            }
+            setMediaPage(mediaPageRef.current + 1);
+            getPosts(mediaPageRef.current, "media").then((newPosts) => {
+                if (!newPosts.length) {
+                    setMediaReachedEnd(true);
+                    return;
+                }
+                setMediaPosts(mediaPosts.concat(newPosts));
+            });
+            break;
+        }
+    };
+
     useEffect(() => {
         if (socket?.connected) {
             socket.on("commentToClient", handleComment);
@@ -242,25 +356,10 @@ export default function Profile(props: ProfileProps): ReactElement {
         if (props.user) {
             setNotFound(false);
             setLoading(false);
-            axios
-                .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${props.user._id}`,
-                    { withCredentials: true }
-                )
-                .then((res) => {
-                    setPosts(
-                        res.data.posts.filter(
-                            (post: IPost) => post.replyingTo.length == 0
-                        )
-                    );
-                    setPostsAndComments(res.data.posts);
-                    setMediaPosts(
-                        res.data.posts.filter(
-                            (post: IPost) => post.attachments.length != 0
-                        )
-                    );
-                    setPostsLoading(false);
-                });
+            getPosts(postsPageRef.current, "posts").then(posts => {
+                setPosts(posts);
+                setPostsLoading(false);
+            });
         } else {
             setNotFound(true);
             setLoading(false);
@@ -269,39 +368,35 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (props.user && user?._id != props.user._id) {
+            setActiveTab(Tabs.Posts);
             setUser(props.user);
             setPostsLoading(true);
+            setPostsReachedEnd(false);
+            setCommentsReachedEnd(false);
+            setMediaReachedEnd(false);
             setPosts([]);
             setPostsAndComments([]);
             setMediaPosts([]);
+            setPostsPage(0);
+            setCommentsPage(0);
+            setMediaPage(0);
+            postsPageRef.current = 0;
+            commentsPageRef.current = 0;
+            mediaPageRef.current = 0;
             setLoading(false);
             setNotFound(false);
-            axios
-                .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${props.user._id}`,
-                    { withCredentials: true }
-                )
-                .then((res) => {
-                    setPosts(
-                        res.data.posts.filter(
-                            (post: IPost) => post.replyingTo.length == 0
-                        )
-                    );
-                    setPostsAndComments(res.data.posts);
-                    setMediaPosts(
-                        res.data.posts.filter(
-                            (post: IPost) => post.attachments.length != 0
-                        )
-                    );
-                    setPostsLoading(false);
-                });
+
+            getPosts(postsPageRef.current, "posts").then(posts => {
+                setPosts(posts);
+                setPostsLoading(false);
+            });
         }
         if (!props.user) {
             setUser(null);
             setNotFound(true);
             setLoading(false);
         }
-    }, [user, props.user]);
+    }, [user, props.user, getPosts]);
 
     useEffect(() => {
         if (mediaModal || editProfilePopup) {
@@ -574,14 +669,29 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             </div>
                                             {!postsLoading ? (
                                                 <>
-                                                    {(activeTab == Tabs.Posts
-                                                        ? posts
-                                                        : activeTab ==
-                                                          Tabs.PostsAndComments
-                                                            ? postsAndComments
-                                                            : mediaPosts
-                                                    ).map((post) => {
-                                                        return (
+                                                    <Virtuoso
+                                                        totalCount={getActiveTab().length}
+                                                        data={getActiveTab()}
+                                                        endReached={loadMorePosts}
+                                                        useWindowScroll
+                                                        overscan={{ main: 500, reverse: 500 }}
+                                                        // eslint-disable-next-line react/display-name
+                                                        components={{Footer: () => {
+                                                            return (
+                                                                <>
+                                                                    {!getActiveReachedEnd() && (
+                                                                        <div className={styles.loadingContainer}>
+                                                                            <Loading
+                                                                                height="50"
+                                                                                width="50"
+                                                                            ></Loading>
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            );
+                                                        },
+                                                        }}
+                                                        itemContent={(_index, post) => (
                                                             <Post
                                                                 key={post._id}
                                                                 currentUser={
@@ -595,15 +705,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     parentContainerRef
                                                                 }
                                                             ></Post>
-                                                        );
-                                                    })}
-                                                    {(activeTab == Tabs.Posts
-                                                        ? posts
-                                                        : activeTab ==
-                                                          Tabs.PostsAndComments
-                                                            ? postsAndComments
-                                                            : mediaPosts
-                                                    ).length == 0 && (
+                                                        )}
+                                                    ></Virtuoso>
+                                                    {getActiveTab().length == 0 && getActiveReachedEnd() && (
                                                         <div
                                                             className="flex justify-content-center"
                                                             style={{
