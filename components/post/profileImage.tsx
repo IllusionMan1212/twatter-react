@@ -1,10 +1,17 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement } from "react";
+import { ReactElement, useRef } from "react";
 import Link from "next/link";
 import styles from "./profileImage.module.scss";
 import { ProfileImageProps } from "src/types/props";
 
 export default function ProfileImage(props: ProfileImageProps): ReactElement {
+    const placeholderRef = useRef<HTMLDivElement>(null);
+
+    const handleImageLoad = () => {
+        console.log("img finished loading");
+        placeholderRef.current.style.visibility = "hidden";
+    };
+
     return (
         <>
             {props.hyperlink ? (
@@ -28,8 +35,10 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
                                 }${props.src}`}
                                 width={props.width}
                                 height={props.height}
+                                onLoad={handleImageLoad}
                             />
                             <div
+                                ref={placeholderRef}
                                 className={styles.placeholder}
                                 style={{
                                     width: `${props.width * 0.95}px`,
@@ -56,8 +65,10 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
                         }`}
                         width={props.width}
                         height={props.height}
+                        onLoad={handleImageLoad}
                     />
                     <div
+                        ref={placeholderRef}
                         className={styles.placeholder}
                         style={{
                             width: `${props.width * 0.95}px`,
