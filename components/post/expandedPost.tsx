@@ -25,6 +25,7 @@ import { postCharLimit } from "src/utils/variables";
 import CommentButton from "../buttons/commentButton";
 import Comment from "./comment";
 import AttachmentsContainer from "components/attachmentsContainer";
+import ProfileImage from "./profileImage";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -148,25 +149,12 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             </a>
                         </Link>
                     )}
-                    <Link href={`/u/${props.post.author.username}`}>
-                        <a
-                            className="flex"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <img
-                                className="pointer profileImage"
-                                src={`${
-                                    props.post.author.profile_image ==
-                                    "default_profile.svg"
-                                        ? "/"
-                                        : ""
-                                }${props.post.author.profile_image}`}
-                                width="50"
-                                height="50"
-                                alt="User profile picture"
-                            />
-                        </a>
-                    </Link>
+                    <ProfileImage
+                        width={50}
+                        height={50}
+                        src={props.post.author.profile_image}
+                        hyperlink={props.post.author.username}
+                    />
                     <div className={styles.user}>
                         <Link href={`/u/${props.post.author.username}`}>
                             <a

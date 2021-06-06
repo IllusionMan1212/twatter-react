@@ -166,3 +166,10 @@ export interface CheckboxProps {
     ref?: MutableRefObject<HTMLInputElement>;
     handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
+
+export interface ProfileImageProps {
+    width: number;
+    height: number;
+    src: string;
+    hyperlink?: string;
+}

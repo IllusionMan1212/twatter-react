@@ -10,6 +10,7 @@ import { socket } from "src/hooks/useSocket";
 import { useToastContext } from "../src/contexts/toastContext";
 import axiosInstance from "../src/axios";
 import axios from "axios";
+import ProfileImage from "./post/profileImage";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
     const [userMenu, setUserMenu] = useState(false);
@@ -95,7 +96,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                 </div>
             )}
             <div
-                className={`ml-3Percent mt-1Percent flex align-items-center ${styles.title}`}
+                className={`mx-3Percent mt-1Percent flex align-items-center ${styles.title}`}
             >
                 <p className="text-bold ellipsis">{props.title}</p>
             </div>
@@ -125,16 +126,10 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                         setUserMenu(!userMenu);
                     }}
                 >
-                    <img
-                        className="profileImage"
-                        src={`${
-                            props.user.profile_image == "default_profile.svg"
-                                ? "/"
-                                : ""
-                        }${props.user.profile_image}`}
-                        width="50"
-                        height="50"
-                        alt="User profile picture"
+                    <ProfileImage
+                        width={50}
+                        height={50}
+                        src={props.user.profile_image}
                     />
                     <p className={`text-bold ${styles.username}`}>
                         {props.user.display_name}

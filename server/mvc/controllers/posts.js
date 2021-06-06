@@ -10,14 +10,20 @@ const getPostsCount = (req, res) => {
             status: 400,
             success: false
         });
+        return;
     }
 
     Post.countDocuments({ author: req.params.userId })
         .exec((err, postsCount) => {
             if (err) {
                 console.error(err);
+                res.status(500).json({
+                    message: "An error occurred",
+                    status: 500,
+                    success: false,
+                });
+                return;
             }
-            console.log(postsCount);
             res.status(200).json({
                 message: "Retrieved posts count successfully",
                 postsCount,
@@ -44,6 +50,7 @@ const getPosts = (req, res) => {
                 status: 400,
                 success: false
             });
+            return;
         }
         const userId = Types.ObjectId(req.params.userId);
         const { type } = req.query;

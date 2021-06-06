@@ -33,6 +33,7 @@ import MediaModalComment from "./mediaModalComment";
 import Link from "next/link";
 import CommentButton from "../buttons/commentButton";
 import { LikePayload } from "src/types/utils";
+import ProfileImage from "../post/profileImage";
 
 SwiperCore.use([Navigation]);
 
@@ -231,21 +232,10 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             href={`/u/${props.modalData.post.author.username}`}
                         >
                             <a className={`mr-auto ${styles.user}`}>
-                                <img
-                                    className="round"
-                                    src={`${
-                                        props.modalData.post.author
-                                            .profile_image ==
-                                        "default_profile.svg"
-                                            ? "/"
-                                            : ""
-                                    }${
-                                        props.modalData.post.author
-                                            .profile_image
-                                    }`}
-                                    width="50"
-                                    height="50"
-                                    alt="User profile picture"
+                                <ProfileImage
+                                    width={50}
+                                    height={50}
+                                    src={props.modalData.post.author.profile_image}
                                 />
                                 <div className="flex flex-column">
                                     <p

@@ -13,6 +13,7 @@ import { ModalCommentProps } from "src/types/props";
 import AttachmentsContainer from "components/attachmentsContainer";
 import { socket } from "src/hooks/useSocket";
 import { LikePayload } from "src/types/utils";
+import ProfileImage from "components/post/profileImage";
 
 export default function MediaModalComment(props: ModalCommentProps): ReactElement {
     const [likes, setLikes] = useState<Array<string>>(props.comment.likeUsers);
@@ -61,22 +62,12 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
         >
             <div className="flex">
                 <div className={`mr-auto underline ${styles.commentUser}`}>
-                    <Link href={`/u/${props.comment.author.username}`}>
-                        <a onClick={(e) => e.stopPropagation()}>
-                            <img
-                                className="profileImage"
-                                src={`${
-                                    props.comment.author.profile_image ==
-                                    "default_profile.svg"
-                                        ? "/"
-                                        : ""
-                                }${props.comment.author.profile_image}`}
-                                width="30"
-                                height="30"
-                                alt="User profile picture"
-                            />
-                        </a>
-                    </Link>
+                    <ProfileImage
+                        width={30}
+                        height={30}
+                        src={props.comment.author.profile_image}
+                        hyperlink={props.comment.author.username}
+                    />
                     <div
                         className={`text-bold justify-content-center ${postStyles.user}`}
                     >

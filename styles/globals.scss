@@ -518,6 +518,10 @@ h6 {
 .profileImage {
     border-radius: 200px;
     object-fit: cover;
+    z-index: 1;
+    position: relative;
+    top: 0;
+    left: 0;
 }
 
 .usernameGrey {

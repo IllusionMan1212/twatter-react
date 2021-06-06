@@ -10,6 +10,7 @@ import Router from "next/router";
 import CommentButton from "../buttons/commentButton";
 import { ChatCircle, ImageSquare, ArrowArcLeft } from "phosphor-react";
 import AttachmentsContainer from "../attachmentsContainer";
+import ProfileImage from "./profileImage";
 
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
@@ -88,33 +89,17 @@ export default function Post(props: PostProps): ReactElement {
                     </Link>
                 )}
                 {props.post.author ? (
-                    <Link
-                        href={`/u/${props.post.author.username}`}
-                    >
-                        <a
-                            className="flex"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <img
-                                className="pointer profileImage"
-                                src={`${
-                                    props.post.author.profile_image ==
-                                    "default_profile.svg"
-                                        ? "/"
-                                        : ""
-                                }${props.post.author.profile_image}`}
-                                width="40"
-                                height="40"
-                            />
-                        </a>
-                    </Link>
+                    <ProfileImage
+                        width={40}
+                        height={40}
+                        hyperlink={props.post.author.username}
+                        src={props.post.author.profile_image}
+                    />
                 ) : (
-                    <img
-                        className="pointer profileImage"
+                    <ProfileImage
+                        width={40}
+                        height={40}
                         src="/default_profile.svg"
-                        width="40"
-                        height="40"
-                        onClick={(e) => e.stopPropagation()}
                     />
                 )}
                 <div className={styles.user}>
@@ -186,27 +171,16 @@ export default function Post(props: PostProps): ReactElement {
                                         key={i}
                                     >
                                         {comment.author ? (
-                                            <img
-                                                className="profileImage"
-                                                src={`${
-                                                    comment.author
-                                                        ?.profile_image ==
-                                                      "default_profile.svg"
-                                                        ? "/"
-                                                        : ""
-                                                }${
-                                                    comment.author
-                                                        ?.profile_image
-                                                }`}
-                                                width="30"
-                                                height="30"
+                                            <ProfileImage
+                                                width={30}
+                                                height={30}
+                                                src={comment.author?.profile_image}
                                             />
                                         ) : (
-                                            <img
-                                                className="profileImage"
+                                            <ProfileImage
+                                                width={30}
+                                                height={30}
                                                 src="/default_profile.svg"
-                                                width="30"
-                                                height="30"
                                             />
                                         )}
                                         <div className="text-bold text-small flex flex-column justify-content-center">
@@ -248,27 +222,16 @@ export default function Post(props: PostProps): ReactElement {
                         <div className={styles.comments}>
                             <div className={styles.previewComment}>
                                 {props.post.comments[0].author ? (
-                                    <img
-                                        className="profileImage"
-                                        src={`${
-                                            props.post.comments[0].author
-                                                ?.profile_image ==
-                                              "default_profile.svg"
-                                                ? "/"
-                                                : ""
-                                        }${
-                                            props.post.comments[0].author
-                                                ?.profile_image
-                                        }`}
-                                        width="30"
-                                        height="30"
+                                    <ProfileImage
+                                        width={30}
+                                        height={30}
+                                        src={props.post.comments[0].author?.profile_image}
                                     />
                                 ) : (
-                                    <img
-                                        className="profileImage"
+                                    <ProfileImage
+                                        width={30}
+                                        height={30}
                                         src="/default_profile.svg"
-                                        width="30"
-                                        height="30"
                                     />
                                 )}
                                 <div className="text-bold text-small flex flex-column justify-content-center">

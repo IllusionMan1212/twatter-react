@@ -1,0 +1,13 @@
+.container {
+    position: relative;
+}
+
+.placeholder {
+    background: #AAA;
+    border-radius: 2000px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+}
