@@ -1,10 +1,10 @@
 /* eslint-disable react/react-in-jsx-scope */
 import LayoutRegular from "./layouts/layoutRegular";
-import styles from "./navbarLoggedOut.module.scss";
+import styles from "./statusBarLoggedOut.module.scss";
 import Link from "next/link";
 import { ReactElement } from "react";
 
-export default function NavbarLoggedOut(): ReactElement {
+export default function StatusBarLoggedOut(): ReactElement {
     return (
         <LayoutRegular>
             <Link href="/">

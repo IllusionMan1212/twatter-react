@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import StatusBar from "../components/statusBar";
-import NavbarLoggedIn from "../components/navbarLoggedIn";
+import Navbar from "../components/navbar";
 import Loading from "../components/loading";
 import { useUser } from "../src/hooks/useUser";
 import { ReactElement } from "react";
@@ -12,8 +12,8 @@ export default function Notifications(): ReactElement {
         <>
             {user ? (
                 <>
-                    <NavbarLoggedIn user={user}></NavbarLoggedIn>
-                    <div className="feed">
+                    <Navbar user={user}></Navbar>
+                    <div>
                         <StatusBar
                             user={user}
                             title="Notifications"

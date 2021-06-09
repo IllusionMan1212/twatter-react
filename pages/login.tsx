@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import LayoutRegular from "../components/layouts/layoutRegular";
-import NavbarLoggedOut from "../components/navbarLoggedOut";
+import StatusBarLoggedOut from "../components/statusBarLoggedOut";
 import styles from "../styles/register-login.module.scss";
 import indexStyles from "../styles/index.module.scss";
 import Link from "next/link";
@@ -99,7 +99,7 @@ export default function Login(): ReactElement {
                 <title>Log in - Twatter</title>
                 {/* TODO: write meta tags and other important head tags */}
             </Head>
-            <NavbarLoggedOut></NavbarLoggedOut>
+            <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
                 <div className="text-white text-bold text-center my-3">
                     <p className="text-extra-large">Log In</p>

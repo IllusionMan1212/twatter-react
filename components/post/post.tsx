@@ -2,22 +2,19 @@
 import styles from "./post.module.scss";
 import Link from "next/link";
 import { ReactElement } from "react";
-import { formatBigNumbers, timeSince } from "../../src/utils/functions";
+import { timeSince } from "../../src/utils/functions";
 import LikeButton from "../buttons/likeButton";
 import { PostProps } from "../../src/types/props";
 import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import Router from "next/router";
 import CommentButton from "../buttons/commentButton";
-import { ChatCircle, ImageSquare, ArrowArcLeft } from "phosphor-react";
+import { ArrowArcLeft } from "phosphor-react";
 import AttachmentsContainer from "../attachmentsContainer";
 import ProfileImage from "./profileImage";
 
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
-        console.log("TODO:comment button click");
-    };
-
-    const handleCommentButtonClickMobile = () => {
+        // TODO: open a modal where you can comment on the post
         Router.push(`/u/${props.post.author.username}/${props.post._id}`);
     };
 
@@ -44,23 +41,13 @@ export default function Post(props: PostProps): ReactElement {
                                 <ArrowArcLeft size={25}></ArrowArcLeft>
                                 <div className="flex align-items-center">
                                     <span className="px-1">
-                                        Replying to:{" "}
+                                        Replying to:
                                     </span>
-                                    <img
-                                        className="round"
-                                        src={`${
-                                            props.post.replyingTo[0].author
-                                                .profile_image ==
-                                            "default_profile.svg"
-                                                ? "/"
-                                                : ""
-                                        }${
-                                            props.post.replyingTo[0].author
-                                                .profile_image
-                                        }`}
+                                    <ProfileImage
                                         width={25}
                                         height={25}
-                                    ></img>{" "}
+                                        src={props.post.replyingTo[0].author.profile_image}
+                                    />
                                     <span
                                         className="text-bold"
                                         style={{ paddingLeft: "0.5em" }}
@@ -144,148 +131,17 @@ export default function Post(props: PostProps): ReactElement {
                         {timeSince(props.post.createdAt)}
                     </div>
                     <div className="flex gap-1 justify-content-end">
-                        <div className={styles.commentButtonMobile}>
-                            <CommentButton
-                                post={props.post}
-                                numberOfComments={props.post.numberOfComments}
-                                handleClick={handleCommentButtonClickMobile}
-                            ></CommentButton>
-                        </div>
+                        <CommentButton
+                            post={props.post}
+                            numberOfComments={props.post.numberOfComments}
+                            handleClick={handleCommentButtonClick}
+                        ></CommentButton>
                         <LikeButton
                             post={props.post}
                             currentUserId={props.currentUser?._id}
                             likeUsers={props.post.likeUsers}
                         ></LikeButton>
                     </div>
-                </div>
-            </div>
-            <div className={styles.postCommentsPreview}>
-                {props.post.attachments?.length
-                    ? props.post.comments.length != 0 && (
-                        <div className={styles.comments}>
-                            {" "}
-                            {props.post.comments.map((comment, i) => {
-                                return (
-                                    <div
-                                        className={styles.previewComment}
-                                        key={i}
-                                    >
-                                        {comment.author ? (
-                                            <ProfileImage
-                                                width={30}
-                                                height={30}
-                                                src={comment.author?.profile_image}
-                                            />
-                                        ) : (
-                                            <ProfileImage
-                                                width={30}
-                                                height={30}
-                                                src="/default_profile.svg"
-                                            />
-                                        )}
-                                        <div className="text-bold text-small flex flex-column justify-content-center">
-                                            <p className="ml-1">
-                                                {comment.author
-                                                    ?.display_name ??
-                                                      "Deleted Account"}
-                                            </p>
-                                        </div>
-                                        <div
-                                            className={`text-small ${styles.postText}`}
-                                        >
-                                            {comment.content ? (
-                                                <p className="ml-1 flex align-items-center">
-                                                    {comment.content}
-                                                    {comment.attachments.length != 0 && (
-                                                        <ImageSquare
-                                                            className="ml-2Percent usernameGrey"
-                                                            size={20}
-                                                        ></ImageSquare>
-                                                    )}
-                                                </p>
-                                            ) : comment.attachments.length != 0 && (
-                                                <p className="ml-1 flex align-items-center text-small usernameGrey">
-                                                      [Click to view attachment]
-                                                    <ImageSquare
-                                                        className="ml-2Percent"
-                                                        size={20}
-                                                    ></ImageSquare>
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )
-                    : props.post.comments.length != 0 && (
-                        <div className={styles.comments}>
-                            <div className={styles.previewComment}>
-                                {props.post.comments[0].author ? (
-                                    <ProfileImage
-                                        width={30}
-                                        height={30}
-                                        src={props.post.comments[0].author?.profile_image}
-                                    />
-                                ) : (
-                                    <ProfileImage
-                                        width={30}
-                                        height={30}
-                                        src="/default_profile.svg"
-                                    />
-                                )}
-                                <div className="text-bold text-small flex flex-column justify-content-center">
-                                    <p className="ml-1">
-                                        {props.post.comments[0].author
-                                            ?.display_name ??
-                                              "Deleted Account"}
-                                    </p>
-                                </div>
-                                <div
-                                    className={`text-small ${styles.postText}`}
-                                >
-                                    <p className="ml-1">
-                                        {props.post.comments[0].content}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                {!props.post.comments.length && (
-                    <div
-                        className={`text-small ${styles.postText} usernameGrey`}
-                    >
-                        <p className="ml-1">This post has no comments</p>
-                    </div>
-                )}
-                {props.post.comments.length != 0 && (
-                    <Link
-                        href={`/u/${props.post.author.username}/${props.post._id}`}
-                    >
-                        <a>
-                            <p
-                                className={
-                                    "text-small text-bold usernameGrey underline"
-                                }
-                            >
-                                View all{" "}
-                                {formatBigNumbers(
-                                    props.post.numberOfComments ||
-                                        props.post.comments.length
-                                )}{" "}
-                                comment(s)
-                            </p>
-                        </a>
-                    </Link>
-                )}
-                <div
-                    className={styles.commentButton}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleCommentButtonClick();
-                    }}
-                >
-                    <ChatCircle size="30"></ChatCircle>
                 </div>
             </div>
         </div>

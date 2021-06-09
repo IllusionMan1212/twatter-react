@@ -1,11 +1,11 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement } from "react";
-import NavbarLoggedOut from "../components/navbarLoggedOut";
+import StatusBarLoggedOut from "../components/statusBarLoggedOut";
 
 export default function TOS(): ReactElement {
     return (
         <div>
-            <NavbarLoggedOut></NavbarLoggedOut>
+            <StatusBarLoggedOut></StatusBarLoggedOut>
         </div>
     );
 }

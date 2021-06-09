@@ -1,13 +1,15 @@
 @use "../styles/variables";
 
 .menu {
-    background-color: #252525;
+    background-color: variables.$bg-color-primary;
     width: 200px;
     position: absolute;
-    top: 80px;
+    top: 60px;
     right: 10px;
     z-index: 6;
     border-radius: 16px;
+    border: 1px solid variables.$divider-color;
+    color: variables.$text-color-primary;
 
     div {
         padding: 15px;
@@ -15,7 +17,7 @@
         animation: menuItem 0.5s forwards;
 
         &:hover {
-            background-color: #333;
+            background-color: variables.$bg-color-secondary;
         }
     }
 
@@ -26,6 +28,12 @@
         width: 90%;
         border: none;
         height: 1px;
+    }
+
+    @media (max-width: 800px) {
+        bottom: 0px;
+        right: 0px;
+        top: unset;
     }
 }
 

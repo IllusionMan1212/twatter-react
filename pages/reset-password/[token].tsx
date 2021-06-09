@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import LayoutRegular from "../../components/layouts/layoutRegular";
 import registerStyles from "../../styles/register-login.module.scss";
 import forgotPassStyles from "../../styles/forgot-password.module.scss";
-import NavbarLoggedOut from "../../components/navbarLoggedOut";
+import StatusBarLoggedOut from "../../components/statusBarLoggedOut";
 import { EyeClosed, Eye } from "phosphor-react";
 import { useToastContext } from "../../src/contexts/toastContext";
 import Loading from "../../components/loading";
@@ -105,7 +105,7 @@ export default function ResetPassword(): ReactElement {
             <Head>
                 <title>Reset Password - Twatter</title>
             </Head>
-            <NavbarLoggedOut></NavbarLoggedOut>
+            <StatusBarLoggedOut></StatusBarLoggedOut>
             {!loading ? (
                 <LayoutRegular>
                     <div className="text-white text-bold text-center mb-3 mt-1">

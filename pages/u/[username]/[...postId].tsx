@@ -2,15 +2,14 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import Loading from "../../../components/loading";
 import { useRouter } from "next/router";
-import NavbarLoggedIn from "../../../components/navbarLoggedIn";
-import NavbarLoggedOut from "../../../components/navbarLoggedOut";
+import StatusBarLoggedOut from "../../../components/statusBarLoggedOut";
 import StatusBar from "../../../components/statusBar";
 import { useUser } from "../../../src/hooks/useUser";
 import axios from "axios";
 import ExpandedPost from "../../../components/post/expandedPost";
 import styles from "../../../components/post/expandedPost.module.scss";
 import MediaModal from "../../../components/mediaModal/mediaModal";
-import { IUser, IPost } from "../../../src/types/general";
+import { IUser, IPost, IExpandedPost } from "../../../src/types/general";
 import { socket } from "src/hooks/useSocket";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
@@ -18,6 +17,7 @@ import { NextSeo } from "next-seo";
 import { GetServerSidePropsContext } from "next";
 import { UserPostProps } from "src/types/props";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
+import { ArrowLeft } from "phosphor-react";
 
 export default function UserPost(props: UserPostProps): ReactElement {
     const router = useRouter();
@@ -27,7 +27,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
 
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [post, setPost] = useState<IPost>(null);
+    const [post, setPost] = useState<IExpandedPost>(null);
     const [modalData, setModalData] = useState({
         post: null as IPost,
         imageIndex: 0,
@@ -56,18 +56,13 @@ export default function UserPost(props: UserPostProps): ReactElement {
         return (
             <>
                 {currentUser ? (
-                    <div className="feed">
-                        <StatusBar
-                            title={title}
-                            user={currentUser}
-                            backButton={true}
-                        ></StatusBar>
-                        <div className={styles.loggedInNavbarContainer}>
-                            <NavbarLoggedIn user={currentUser}></NavbarLoggedIn>
-                        </div>
-                    </div>
+                    <StatusBar
+                        title={title}
+                        user={currentUser}
+                        backButton={true}
+                    ></StatusBar>
                 ) : (
-                    <NavbarLoggedOut></NavbarLoggedOut>
+                    <StatusBarLoggedOut></StatusBarLoggedOut>
                 )}
             </>
         );
@@ -159,6 +154,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
         }
     }, [router.query.postId?.[0]]);
 
+    // TODO: make mediaModal state global and move this into _app.tsx
     useEffect(() => {
         if (mediaModal) {
             document.body.classList.add("overflow-hidden");
@@ -169,6 +165,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
         }
     }, [mediaModal]);
 
+    // TODO: move this into _app.tsx, and refactor it for multiple open modals
     useEffect(() => {
         // on browser back button press, close the media modal
         window.onpopstate = () => {
@@ -195,16 +192,16 @@ export default function UserPost(props: UserPostProps): ReactElement {
                             url: props.post?.author.profile_image,
                         },
                         {
-                            url: props.post?.attachments?.[0],
+                            url: props.post?.attachments?.[0]?.url,
                         },
                         {
-                            url: props.post?.attachments?.[1],
+                            url: props.post?.attachments?.[1]?.url,
                         },
                         {
-                            url: props.post?.attachments?.[2],
+                            url: props.post?.attachments?.[2]?.url,
                         },
                         {
-                            url: props.post?.attachments?.[3],
+                            url: props.post?.attachments?.[3]?.url,
                         },
                     ]
                 }}
@@ -214,12 +211,18 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     {!notFound && post ? (
                         <>
                             {renderBars(`${post.author.display_name}'s post`)}
-                            <div
-                                className={`text-white ${
-                                    currentUser && "feed"
-                                }`}
-                            >
-                                <div className={styles.expandedPostContainer}>
+                            <div className={styles.content}>
+                                <div className={styles.leftSide}>friends</div>
+                                <div className={styles.center}>
+                                    <div className={styles.header}>
+                                        <div
+                                            className={styles.backButton}
+                                            onClick={() => history.back()}
+                                        >
+                                            <ArrowLeft size="30"></ArrowLeft>
+                                        </div>
+                                        <p>{post.author.display_name}&apos;s post</p>
+                                    </div>
                                     <ExpandedPost
                                         key={post._id}
                                         currentUser={currentUser}
@@ -230,6 +233,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                         setNowCommenting={setNowCommenting}
                                     ></ExpandedPost>
                                 </div>
+                                <div className={styles.rightSide}>trending</div>
                             </div>
                             {mediaModal && (
                                 <MediaModal
@@ -243,9 +247,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         <>
                             {renderBars("Not Found")}
                             <div
-                                className={`text-white ${
-                                    currentUser && "feed"
-                                } ${styles.postNotFound}`}
+                                className={`text-white ${styles.postNotFound}`}
                             >
                                 <div className="text-bold text-large">
                                     Post Not Found

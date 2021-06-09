@@ -1,14 +1,18 @@
+@use "../../styles/variables.scss";
+
 .listItem {
     width: 100%;
-    background-color: #2c2c2c;
-    padding: 10px 20px 20px;
+    background-color: variables.$base-bg-color;
+    padding: 10px 20px;
     display: flex;
-    flex-direction: column;
-    grid-gap: 5px;
+    flex-direction: row;
+    border-bottom: 1px solid variables.$divider-color;
+    border-top: 1px solid variables.$divider-color;
+    position: relative;
 
     @media (hover: hover) {
         &:hover:not(.active) {
-            background-color: #1c1c1c;
+            background-color: variables.$bg-color-primary;
             cursor: pointer;
         }
     }
@@ -33,20 +37,42 @@
     color: #999;
 }
 
-.user {
+.profilePicture {
     display: flex;
     grid-gap: 10px;
     align-items: center;
 }
 
+.text {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1em;
+    max-width: 60%;
+}
+
+.date {
+    display: flex;
+    justify-content: flex-end;
+    flex-grow: 1;
+    color: #999;
+    font-size: 0.9em;
+}
+
 .unreadMessages {
-    min-width: 30px;
-    min-height: 30px;
+    min-width: 15px;
+    min-height: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.2em;
+    font-size: 1em;
     font-weight: bold;
-    background-color: #aa2b1d;
+    background-color: variables.$accent-color;
     margin-left: auto;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.unreadMessageBg {
+    background-color: variables.$bg-color-secondary;
 }

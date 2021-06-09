@@ -6,7 +6,7 @@ import LayoutRegular from "../components/layouts/layoutRegular";
 import { useToastContext } from "../src/contexts/toastContext";
 import registerLoginStyles from "../styles/register-login.module.scss";
 import styles from "../styles/forgot-password.module.scss";
-import NavbarLoggedOut from "../components/navbarLoggedOut";
+import StatusBarLoggedOut from "../components/statusBarLoggedOut";
 
 export default function ForgotPassword(): ReactElement {
     const toast = useToastContext();
@@ -55,7 +55,7 @@ export default function ForgotPassword(): ReactElement {
                 <title>Forgot password - Twatter</title>
                 {/* TODO: other meta tags and SEO shit */}
             </Head>
-            <NavbarLoggedOut></NavbarLoggedOut>
+            <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
                 <div className="text-white text-bold text-center my-3">
                     <p className="text-extra-large">Forgot your password?</p>

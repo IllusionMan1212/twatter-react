@@ -1,3 +1,5 @@
+@use "../../styles/variables.scss";
+
 .messageContainer {
     width: 100%;
     display: grid;
@@ -5,7 +7,7 @@
 }
 
 .recipientMessage {
-    background-color: #373737;
+    background-color: variables.$bg-color-secondary;
     justify-self: flex-start;
     max-width: 75%;
     overflow: auto;
