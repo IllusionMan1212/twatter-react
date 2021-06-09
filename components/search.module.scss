@@ -1,6 +1,27 @@
-.search {
-    padding: 20px;
-    color: rgba(255, 255, 255, 0.48);
-    background-color: transparent;
+@use "../styles/variables.scss";
+
+.container {
+    display: flex;
+    align-items: center;
+    background-color: variables.$bg-color-secondary;
+    color: variables.$text-color-secondary;
+    border-radius: 8px;
     width: 100%;
+}
+
+.search {
+    color: white;
+    background-color: transparent;
+    font-size: 1em;
+    width: 100%;
+    margin-right: 20px;
+
+    &::placeholder {
+        color: variables.$text-color-secondary;
+    }
+}
+
+.icon {
+    padding: 10px 20px;
+    box-sizing: content-box;
 }

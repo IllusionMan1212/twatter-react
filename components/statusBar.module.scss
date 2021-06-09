@@ -2,27 +2,48 @@
 
 .statusBar {
     height: 83px;
+    column-gap: 2em;
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    background-color: variables.$base-bg-color;
+
+    @media (max-width: 800px) {
+        height: 60px;
+        column-gap: unset;
+    }
 }
 
 .title {
-    min-width: fit-content;
     min-width: -moz-fit-content;
     font-size: 3.5em;
+    flex-basis: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 20%;
+    justify-content: center;
 
     @media (max-width: 800px) {
         font-size: 1.3em;
         min-width: 0;
+        flex-basis: 70%;
+        flex-grow: unset;
+        flex-shrink: unset;
+        justify-content: flex-start;
+        margin-left: 1em;
     }
 
     @media (max-width: 580px) {
         font-size: 1.2em;
         min-width: 0;
+        flex-grow: unset;
+        flex-shrink: unset;
+        justify-content: flex-start;
     }
 }
 
 .user {
     grid-gap: 10px;
-    margin-left: auto;
     min-width: fit-content;
     min-width: -moz-fit-content;
     position: relative;
@@ -35,37 +56,43 @@
         color: inherit;
         cursor: pointer;
     }
+
+    @media (max-width: 800px) {
+        display: none;
+    }
 }
 
 .search {
     display: block;
-    flex-shrink: 1;
+    flex-basis: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 50%;
+
     @media (max-width: 800px) {
         display: none;
     }
 }
 
-.links {
-    color: inherit;
+.messagesAndNotifs {
+    justify-content: flex-end;
+    flex-basis: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 30%;
 
-    &:hover {
-        color: inherit;
-    }
-}
-
-.username {
     @media (max-width: 800px) {
-        display: none;
+        flex-basis: 30%;
+        min-width: unset;
+        flex-grow: unset;
+        flex-shrink: unset;
     }
 }
 
-.messagesButtonMobile {
-    display: none;
+.messages, .notifs {
+    display: inline;
     position: relative;
-
-    @media (max-width: 800px) {
-        display: inline;
-    }
+    cursor: pointer;
 }
 
 .unreadBubble {
@@ -103,4 +130,8 @@
     @media (max-width: 800px) {
         display: flex;
     }
+}
+
+.icon {
+    color: variables.$icon-color;
 }

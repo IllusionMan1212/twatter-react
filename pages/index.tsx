@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import Link from "next/link";
 import LayoutRegular from "../components/layouts/layoutRegular";
-import NavbarLoggedOut from "../components/navbarLoggedOut";
+import StatusBarLoggedOut from "../components/statusBarLoggedOut";
 import indexStyles from "../styles/index.module.scss";
 import { CurrencyCircleDollar, Fingerprint } from "phosphor-react";
 import axios from "axios";
@@ -32,7 +32,7 @@ export default function Index(): ReactElement {
 
     return !loading ? (
         <>
-            <NavbarLoggedOut></NavbarLoggedOut>
+            <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
                 <div className="text-white">
                     <div className="mt-3 vh-100 text-center">

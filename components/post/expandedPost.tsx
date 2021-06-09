@@ -12,7 +12,7 @@ import messagesStyles from "../../styles/messages.module.scss";
 import { useToastContext } from "../../src/contexts/toastContext";
 import { socket } from "src/hooks/useSocket";
 import mediaModalStyles from "../mediaModal/mediaModal.module.scss";
-import { IAttachment } from "src/types/general";
+import { IAttachment, IPost } from "src/types/general";
 import {
     handleChange,
     handleInput,
@@ -60,6 +60,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             .trim();
         const payload = {
             content: content,
+            contentLength: commentBoxRef?.current?.textContent.length,
             author: props.currentUser,
             attachments: attachments,
             replyingTo: props.post._id,
@@ -185,7 +186,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     >
                         <p>{props.post.content}</p>
                         <AttachmentsContainer
-                            post={props.post}
+                            post={props.post as unknown as IPost}
                             handleMediaClick={props.handleMediaClick}
                         ></AttachmentsContainer>
                     </div>
@@ -198,12 +199,12 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     </div>
                     <div className="flex gap-1">
                         <CommentButton
-                            post={props.post}
+                            post={props.post as unknown as IPost}
                             numberOfComments={props.post.comments.length}
                             handleClick={handleCommentButtonClick}
                         ></CommentButton>
                         <LikeButton
-                            post={props.post}
+                            post={props.post as unknown as IPost}
                             currentUserId={props.currentUser?._id}
                             likeUsers={props.post.likeUsers}
                         ></LikeButton>
@@ -319,7 +320,10 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             <div
                                 className={`${messagesStyles.sendMessageButton}`}
                             >
-                                <ImageSquare size="30"></ImageSquare>
+                                <ImageSquare
+                                    size="30"
+                                    color="white"
+                                />
                                 <input
                                     className={messagesStyles.fileInput}
                                     onChange={(e) =>

@@ -76,6 +76,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             .trim();
         const payload = {
             content: content,
+            contentLength: commentBoxRef.current.textContent.length,
             author: props.modalData.currentUser,
             attachments: attachments,
             replyingTo: props.modalData.post._id,
@@ -223,7 +224,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     return (
         <div
             className={styles.withMediaModal}
-            style={{ left: props.modalData.currentUser ? "116px" : "0px" }}
         >
             <div className={`text-white ${styles.modalPost}`}>
                 <div className={styles.modalPostContent}>
@@ -488,7 +488,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             <SwiperSlide key={i}>
                                 <img
                                     className={styles.modalImage}
-                                    src={`${props.modalData.post.attachments[i]}`}
+                                    src={`${props.modalData.post.attachments[i].url}`}
                                     height="100%"
                                     width="100%"
                                     alt="Post's attached image expanded"

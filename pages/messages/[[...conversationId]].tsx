@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import StatusBar from "../../components/statusBar";
-import NavbarLoggedIn from "../../components/navbarLoggedIn";
+import Navbar from "../../components/navbar";
 import Loading from "../../components/loading";
 import { useUser } from "../../src/hooks/useUser";
 import Head from "next/head";
@@ -258,13 +258,13 @@ export default function Messages(): ReactElement {
     );
 
     const handleTyping = (conversationId: string) => {
-        if (activeConversation._id == conversationId) {
+        if (activeConversation?._id == conversationId) {
             setTyping(true);
         }
     };
 
     const handleStopTyping = (conversationId: string) => {
-        if (activeConversation._id == conversationId) {
+        if (activeConversation?._id == conversationId) {
             setTyping(false);
         }
     };
@@ -519,8 +519,8 @@ export default function Messages(): ReactElement {
             </Head>
             {user ? (
                 <>
-                    <NavbarLoggedIn user={user}></NavbarLoggedIn>
-                    <div className="feed">
+                    <Navbar user={user}></Navbar>
+                    <div>
                         <StatusBar user={user} title="Messages"></StatusBar>
                         <div
                             className={`text-white ${
@@ -557,6 +557,9 @@ export default function Messages(): ReactElement {
                                                             }
                                                             lastMessage={
                                                                 conversation.lastMessage
+                                                            }
+                                                            lastUpdated={
+                                                                conversation.lastUpdated
                                                             }
                                                             isActive={
                                                                 conversation._id ==

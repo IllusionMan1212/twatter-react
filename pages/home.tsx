@@ -3,7 +3,7 @@ import StatusBar from "../components/statusBar";
 import Head from "next/head";
 import { useUser } from "../src/hooks/useUser";
 import Loading from "../components/loading";
-import NavbarLoggedIn from "../components/navbarLoggedIn";
+import Navbar from "../components/navbar";
 import styles from "../styles/home.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -83,6 +83,7 @@ export default function Home(): ReactElement {
             .trim();
         const payload = {
             content: content,
+            contentLength: composePostRef.current.textContent.length,
             author: user,
             attachments: attachments,
         };
@@ -112,7 +113,10 @@ export default function Home(): ReactElement {
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLElement>) => {
-        if (window.innerWidth <= 800 && e.targetTouches[0]?.clientY - touchY > 0) {
+        if (
+            window.innerWidth <= 800 &&
+            e.targetTouches[0]?.clientY - touchY > 0
+        ) {
             e.currentTarget.style.transform = `translate(0, ${
                 e.targetTouches[0]?.clientY - touchY
             }px)`;
@@ -136,10 +140,8 @@ export default function Home(): ReactElement {
     const closeMobileComposeSmoothly = () => {
         inputContainerMobileRef.current.style.transform = `translate(0, ${window.innerHeight}px)`;
         setTimeout(() => {
-            inputContainerMobileRef.current.style.transform =
-                "translate(0, 0)";
-            inputContainerMobileRef.current.style.transitionDuration =
-                "0ms";
+            inputContainerMobileRef.current.style.transform = "translate(0, 0)";
+            inputContainerMobileRef.current.style.transitionDuration = "0ms";
             setMobileCompose(false);
         }, 300);
     };
@@ -157,33 +159,38 @@ export default function Home(): ReactElement {
 
     const handleDeletePost = useCallback(
         (postId) => {
-            if (posts.some((post) => {
-                return post._id == postId;
-            })) {
+            if (
+                posts.some((post) => {
+                    return post._id == postId;
+                })
+            ) {
                 setPosts(posts?.filter((post) => post._id != postId));
             } else {
-                setPosts(posts.map((post) => {
-                    post.comments.map((comment) => {
-                        if (comment._id == postId) {
-                            post.comments = post.comments.filter((comment) => comment._id != postId);
-                            post.numberOfComments--;
+                setPosts(
+                    posts.map((post) => {
+                        post.comments.map((comment) => {
+                            if (comment == postId) {
+                                post.numberOfComments--;
+                                return comment;
+                            }
                             return comment;
-                        }
-                        return comment;
-                    });
-                    return post;
-                }));
+                        });
+                        return post;
+                    })
+                );
             }
         },
         [posts]
     );
 
+    // this is for the mediamodal
     const handleComment = useCallback(
         (comment) => {
             setPosts(
                 posts.map((post) => {
                     if (post._id == comment.replyingTo) {
-                        post.comments.length < 4 && post.comments.push(comment);
+                        console.log(comment);
+                        post.comments.push(comment._id);
                         post.numberOfComments++;
                         return post;
                     }
@@ -196,26 +203,32 @@ export default function Home(): ReactElement {
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            setPosts(posts.map((post) => {
-                if (post._id == payload.postId) {
-                    if (payload.likeType == "LIKE") {
-                        post.likeUsers = post.likeUsers.concat(user._id);
-                    } else if (payload.likeType == "UNLIKE") {
-                        post.likeUsers = post.likeUsers.filter((_user) => _user != user._id);
+            setPosts(
+                posts.map((post) => {
+                    if (post._id == payload.postId) {
+                        if (payload.likeType == "LIKE") {
+                            post.likeUsers = post.likeUsers.concat(user._id);
+                        } else if (payload.likeType == "UNLIKE") {
+                            post.likeUsers = post.likeUsers.filter(
+                                (_user) => _user != user._id
+                            );
+                        }
+                        return post;
                     }
                     return post;
-                }
-                return post;
-            }));
+                })
+            );
         },
-        [posts]
+        [posts, user?._id]
     );
 
     const getPosts = (): Promise<any> => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
         return axiosInstance
-            .get(`posts/getPosts/${pageRef.current}`, { cancelToken: tokenSource.token })
+            .get(`posts/getPosts/${pageRef.current}`, {
+                cancelToken: tokenSource.token,
+            })
             .then((res) => {
                 return res.data.posts;
             })
@@ -231,7 +244,7 @@ export default function Home(): ReactElement {
 
     const loadMorePosts = () => {
         setPage(pageRef.current + 1);
-        getPosts().then(newPosts => {
+        getPosts().then((newPosts) => {
             if (!newPosts.length) {
                 setReachedEnd(true);
                 return;
@@ -259,7 +272,7 @@ export default function Home(): ReactElement {
     }, [handlePost, handleDeletePost, handleComment, handleLike]);
 
     useEffect(() => {
-        getPosts().then(posts => {
+        getPosts().then((posts) => {
             if (posts?.length < 50) {
                 setReachedEnd(true);
             }
@@ -304,277 +317,319 @@ export default function Home(): ReactElement {
         <>
             <Head>
                 <title>Home - Twatter</title>
-                {/* TODO: write meta tags and other important head tags */}
             </Head>
             {user && user.finished_setup ? (
                 <>
-                    <NavbarLoggedIn
-                        setMediaModal={setMediaModal}
+                    <Navbar
                         user={user}
-                    ></NavbarLoggedIn>
-                    <div className="feed">
+                    ></Navbar>
+                    <div>
                         <StatusBar title="Home" user={user}></StatusBar>
-                        <div
-                            className={
-                                mobileCompose ? styles.inputContainer : ""
-                            }
-                        >
-                            <div
-                                className={styles.inputContainerMobile}
-                                ref={inputContainerMobileRef}
-                                onTouchStart={handleTouchStart}
-                                onTouchMove={handleTouchMove}
-                                onTouchEnd={handleTouchEnd}
-                            >
-                                {/* 75px is the height of the navbar on mobile */}
+                        <div className={styles.content}>
+                            <div className={styles.leftSide}>
+                                friends
+                            </div>
+                            <div className={styles.center}>
                                 <div
-                                    style={{ minHeight: "calc(50% - 75px)" }}
-                                    onClick={() => closeMobileComposeSmoothly()}
-                                ></div>
-                                <div
-                                    className={`flex mx-auto my-2Percent ${
-                                        styles.composePost
-                                    } ${
+                                    className={
                                         mobileCompose
-                                            ? styles.composePostMobile
+                                            ? styles.inputContainer
                                             : ""
-                                    }`}
+                                    }
                                 >
                                     <div
-                                        className={`${styles.postDivContainer}`}
+                                        className={styles.inputContainerMobile}
+                                        ref={inputContainerMobileRef}
+                                        onTouchStart={handleTouchStart}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
                                     >
-                                        <span
-                                            ref={composePostRef}
-                                            className={`${styles.composePostDiv}`}
-                                            contentEditable="true"
-                                            data-placeholder="What's on your mind?"
-                                            onInput={(e) =>
-                                                handleInput(
-                                                    e,
-                                                    postCharLimit,
-                                                    attachments,
-                                                    setPostingAllowed,
-                                                    setCharsLeft
-                                                )
-                                            }
-                                            onPaste={(e) =>
-                                                handlePaste(
-                                                    e,
-                                                    postCharLimit,
-                                                    charsLeft,
-                                                    setCharsLeft,
-                                                    setPostingAllowed,
-                                                    previewImages,
-                                                    setPreviewImages,
-                                                    attachments,
-                                                    setAttachments,
-                                                    toast
-                                                )
-                                            }
-                                            onKeyDown={(e) =>
-                                                handleKeyDown(
-                                                    e,
-                                                    composePostRef,
-                                                    handleClick
-                                                )
-                                            }
-                                        ></span>
+                                        {/* 75px is the height of the navbar on mobile */}
                                         <div
-                                            className={`flex ${styles.composePostOptions}`}
+                                            style={{
+                                                minHeight: "calc(50% - 75px)",
+                                            }}
+                                            onClick={() =>
+                                                closeMobileComposeSmoothly()
+                                            }
+                                        ></div>
+                                        <div
+                                            className={`flex ${
+                                                styles.composePost
+                                            } ${
+                                                mobileCompose
+                                                    ? styles.composePostMobile
+                                                    : ""
+                                            }`}
                                         >
-                                            <div className={`${styles.button}`}>
-                                                <ImageSquare size="30"></ImageSquare>
-                                                <input
-                                                    className={styles.fileInput}
-                                                    onChange={(e) =>
-                                                        handleChange(
+                                            <div
+                                                className={`${styles.postDivContainer}`}
+                                            >
+                                                <span
+                                                    ref={composePostRef}
+                                                    className={`${styles.composePostDiv}`}
+                                                    contentEditable="true"
+                                                    data-placeholder="What's on your mind?"
+                                                    onInput={(e) =>
+                                                        handleInput(
                                                             e,
+                                                            postCharLimit,
                                                             attachments,
-                                                            setAttachments,
+                                                            setPostingAllowed,
+                                                            setCharsLeft
+                                                        )
+                                                    }
+                                                    onPaste={(e) =>
+                                                        handlePaste(
+                                                            e,
+                                                            postCharLimit,
+                                                            charsLeft,
+                                                            setCharsLeft,
+                                                            setPostingAllowed,
                                                             previewImages,
                                                             setPreviewImages,
-                                                            setPostingAllowed,
+                                                            attachments,
+                                                            setAttachments,
                                                             toast
                                                         )
                                                     }
-                                                    onClick={(e) => {
-                                                        e.currentTarget.value = null;
-                                                    }}
-                                                    type="file"
-                                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                                    multiple
-                                                />
-                                            </div>
-                                            <button
-                                                className={styles.button}
-                                                disabled={
-                                                    postingAllowed
-                                                        ? false
-                                                        : true
-                                                }
-                                                onClick={handleClick}
-                                            >
-                                                <ArrowElbowRightDown
-                                                    size="30"
-                                                    opacity={
-                                                        postingAllowed
-                                                            ? "1"
-                                                            : "0.3"
+                                                    onKeyDown={(e) =>
+                                                        handleKeyDown(
+                                                            e,
+                                                            composePostRef,
+                                                            handleClick
+                                                        )
                                                     }
-                                                ></ArrowElbowRightDown>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {previewImages.length != 0 && (
-                                        <div
-                                            className={
-                                                styles.attachmentsPreview
-                                            }
-                                        >
-                                            {previewImages.map(
-                                                (_attachment, i) => {
-                                                    return (
-                                                        <div
-                                                            key={i}
+                                                ></span>
+                                                <div
+                                                    className={`flex ${styles.composePostOptions}`}
+                                                >
+                                                    <div
+                                                        className={`${styles.button}`}
+                                                    >
+                                                        <ImageSquare size="30"></ImageSquare>
+                                                        <input
                                                             className={
-                                                                styles.imageAttachment
+                                                                styles.fileInput
                                                             }
-                                                            style={{
-                                                                backgroundImage: `url('${previewImages[i]}')`,
+                                                            onChange={(e) =>
+                                                                handleChange(
+                                                                    e,
+                                                                    attachments,
+                                                                    setAttachments,
+                                                                    previewImages,
+                                                                    setPreviewImages,
+                                                                    setPostingAllowed,
+                                                                    toast
+                                                                )
+                                                            }
+                                                            onClick={(e) => {
+                                                                e.currentTarget.value = null;
                                                             }}
-                                                        >
-                                                            <div
-                                                                className={`${styles.imageAttachmentOverlay}`}
-                                                            ></div>
-                                                            <div
-                                                                className={`${styles.imageAttachmentClose}`}
-                                                                onClick={(e) =>
-                                                                    handlePreviewImageClose(
-                                                                        e,
-                                                                        i,
-                                                                        previewImages,
-                                                                        setPreviewImages,
-                                                                        attachments,
-                                                                        setAttachments,
-                                                                        composePostRef,
-                                                                        setPostingAllowed
-                                                                    )
-                                                                }
-                                                            >
-                                                                <X
-                                                                    size="16"
-                                                                    weight="bold"
-                                                                ></X>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-                                            )}
-                                        </div>
-                                    )}
-                                    <div
-                                        className={`${styles.charLimit} ${
-                                            charsLeft < 0
-                                                ? styles.charLimitReached
-                                                : ""
-                                        }`}
-                                        style={{
-                                            width: `${
-                                                ((postCharLimit - charsLeft) *
-                                                    100) /
-                                                postCharLimit
-                                            }%`,
-                                        }}
-                                    ></div>
-                                    <div
-                                        className={`${styles.progressBar} ${
-                                            nowPosting
-                                                ? styles.progressBarInProgress
-                                                : ""
-                                        }`}
-                                    ></div>
-                                </div>
-                                {mobileCompose ? (
-                                    <div
-                                        className={
-                                            styles.composePostButtonsMobile
-                                        }
-                                    >
-                                        <div className={styles.buttonMobile}>
-                                            <ImageSquare size="36"></ImageSquare>
-                                            <input
-                                                className={
-                                                    styles.fileInputMobile
-                                                }
-                                                onChange={(e) =>
-                                                    handleChange(
-                                                        e,
-                                                        attachments,
-                                                        setAttachments,
-                                                        previewImages,
-                                                        setPreviewImages,
-                                                        setPostingAllowed,
-                                                        toast
-                                                    )
-                                                }
-                                                onClick={(e) =>
-                                                    (e.currentTarget.value = null)
-                                                }
-                                                type="file"
-                                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                                multiple
-                                            />
-                                        </div>
-                                        <button
-                                            className={styles.buttonMobile}
-                                            disabled={
-                                                postingAllowed ? false : true
-                                            }
-                                            onClick={handleClick}
-                                        >
-                                            <PaperPlaneRight
-                                                size="36"
-                                                opacity={
-                                                    postingAllowed ? "1" : "0.3"
-                                                }
-                                            ></PaperPlaneRight>
-                                        </button>
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
-                        <div className={`text-white ${styles.posts}`}>
-                            <Virtuoso
-                                totalCount={posts.length}
-                                data={posts}
-                                endReached={loadMorePosts}
-                                useWindowScroll
-                                overscan={{ main: 500, reverse: 500 }}
-                                // eslint-disable-next-line react/display-name
-                                components={{Footer: () => {
-                                    return (
-                                        <>
-                                            {!reachedEnd && (
-                                                <div className={styles.loadingContainer}>
-                                                    <Loading
-                                                        height="50"
-                                                        width="50"
-                                                    ></Loading>
+                                                            type="file"
+                                                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                                            multiple
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        className={
+                                                            styles.button
+                                                        }
+                                                        disabled={
+                                                            postingAllowed
+                                                                ? false
+                                                                : true
+                                                        }
+                                                        onClick={handleClick}
+                                                    >
+                                                        <ArrowElbowRightDown
+                                                            size="30"
+                                                            opacity={
+                                                                postingAllowed
+                                                                    ? "1"
+                                                                    : "0.3"
+                                                            }
+                                                        ></ArrowElbowRightDown>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {previewImages.length != 0 && (
+                                                <div
+                                                    className={
+                                                        styles.attachmentsPreview
+                                                    }
+                                                >
+                                                    {previewImages.map(
+                                                        (_attachment, i) => {
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    className={
+                                                                        styles.imageAttachment
+                                                                    }
+                                                                    style={{
+                                                                        backgroundImage: `url('${previewImages[i]}')`,
+                                                                    }}
+                                                                >
+                                                                    <div
+                                                                        className={`${styles.imageAttachmentOverlay}`}
+                                                                    ></div>
+                                                                    <div
+                                                                        className={`${styles.imageAttachmentClose}`}
+                                                                        onClick={(
+                                                                            e
+                                                                        ) =>
+                                                                            handlePreviewImageClose(
+                                                                                e,
+                                                                                i,
+                                                                                previewImages,
+                                                                                setPreviewImages,
+                                                                                attachments,
+                                                                                setAttachments,
+                                                                                composePostRef,
+                                                                                setPostingAllowed
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <X
+                                                                            size="16"
+                                                                            weight="bold"
+                                                                        ></X>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
+                                                    )}
                                                 </div>
                                             )}
-                                        </>
-                                    );
-                                },
-                                }}
-                                itemContent={(_index, post) => (
-                                    <Post
-                                        key={post._id}
-                                        post={post}
-                                        currentUser={user}
-                                        handleMediaClick={handleMediaClick}
-                                    ></Post>
-                                )}
-                            ></Virtuoso>
+                                            <div
+                                                className={`${
+                                                    styles.charLimit
+                                                } ${
+                                                    charsLeft < 0
+                                                        ? styles.charLimitReached
+                                                        : ""
+                                                }`}
+                                                style={{
+                                                    width: `${
+                                                        ((postCharLimit -
+                                                            charsLeft) *
+                                                            100) /
+                                                        postCharLimit
+                                                    }%`,
+                                                }}
+                                            ></div>
+                                            <div
+                                                className={`${
+                                                    styles.progressBar
+                                                } ${
+                                                    nowPosting
+                                                        ? styles.progressBarInProgress
+                                                        : ""
+                                                }`}
+                                            ></div>
+                                        </div>
+                                        {mobileCompose ? (
+                                            <div
+                                                className={
+                                                    styles.composePostButtonsMobile
+                                                }
+                                            >
+                                                <div
+                                                    className={
+                                                        styles.buttonMobile
+                                                    }
+                                                >
+                                                    <ImageSquare size="36"></ImageSquare>
+                                                    <input
+                                                        className={
+                                                            styles.fileInputMobile
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                e,
+                                                                attachments,
+                                                                setAttachments,
+                                                                previewImages,
+                                                                setPreviewImages,
+                                                                setPostingAllowed,
+                                                                toast
+                                                            )
+                                                        }
+                                                        onClick={(e) =>
+                                                            (e.currentTarget.value = null)
+                                                        }
+                                                        type="file"
+                                                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                                        multiple
+                                                    />
+                                                </div>
+                                                <button
+                                                    className={
+                                                        styles.buttonMobile
+                                                    }
+                                                    disabled={
+                                                        postingAllowed
+                                                            ? false
+                                                            : true
+                                                    }
+                                                    onClick={handleClick}
+                                                >
+                                                    <PaperPlaneRight
+                                                        size="36"
+                                                        opacity={
+                                                            postingAllowed
+                                                                ? "1"
+                                                                : "0.3"
+                                                        }
+                                                    ></PaperPlaneRight>
+                                                </button>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                </div>
+                                <div className={`text-white ${styles.posts}`}>
+                                    <Virtuoso
+                                        totalCount={posts.length}
+                                        data={posts}
+                                        endReached={loadMorePosts}
+                                        useWindowScroll
+                                        overscan={{ main: 500, reverse: 500 }}
+                                        components={{
+                                            // eslint-disable-next-line react/display-name
+                                            Footer: () => {
+                                                return (
+                                                    <>
+                                                        {!reachedEnd && (
+                                                            <div
+                                                                className={
+                                                                    styles.loadingContainer
+                                                                }
+                                                            >
+                                                                <Loading
+                                                                    height="50"
+                                                                    width="50"
+                                                                ></Loading>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            },
+                                        }}
+                                        itemContent={(_index, post) => (
+                                            <Post
+                                                key={post._id}
+                                                post={post}
+                                                currentUser={user}
+                                                handleMediaClick={handleMediaClick}
+                                            ></Post>
+                                        )}
+                                    ></Virtuoso>
+                                </div>
+                            </div>
+                            <div className={styles.rightSide}>
+                                trending
+                            </div>
                         </div>
                     </div>
                     <div
@@ -591,8 +646,8 @@ export default function Home(): ReactElement {
                         <PenNib size="30"></PenNib>
                     </div>
                     {mediaModal && (
-                        <MediaModal 
-                            modalData={modalData} 
+                        <MediaModal
+                            modalData={modalData}
                             handleMediaClick={handleMediaClick}
                         ></MediaModal>
                     )}

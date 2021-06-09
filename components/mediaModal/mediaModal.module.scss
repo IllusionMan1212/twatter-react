@@ -4,21 +4,17 @@
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 1;
+    left: 0;
+    z-index: 10;
     display: flex;
     min-height: 100vh;
     max-height: 100vh;
     background-color: rgba(0, 0, 0, 0.9);
-
-    @media (max-width: 1024px) {
-        left: 0 !important;
-        z-index: 10;
-    }
 }
 
 .modalPost {
     width: 28.5%;
-    background-color: #303030;
+    background-color: variables.$bg-color-secondary;
     display: flex;
     flex-direction: column;
 
@@ -78,7 +74,7 @@
 }
 
 .modalPostComments {
-    background-color: #1a1a1a;
+    background-color: variables.$bg-color-primary;
     flex-grow: 1;
     overflow-y: scroll;
 }

@@ -1,5 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction } from "react";
-import { IPost, IUser } from "./general";
+import { IExpandedPost, IPost, IUser } from "./general";
 import { LikePayload } from "./utils";
 
 export interface ToastProps {
@@ -12,7 +12,6 @@ export interface LoadingProps {
 }
 
 export interface NavbarLoggedInProps {
-    setMediaModal?: (active: boolean) => void;
     user: IUser;
 }
 
@@ -38,6 +37,7 @@ export interface MessageProps {
 
 export interface MessageListItemProps {
     lastMessage: string;
+    lastUpdated: string;
     receivers: Array<IUser>;
     onClick: () => void;
     isActive: boolean;
@@ -62,7 +62,8 @@ export interface PostProps {
     parentContainerRef?: MutableRefObject<HTMLElement>;
 }
 
-export interface ExpandedPostProps extends PostProps {
+export interface ExpandedPostProps extends Omit<PostProps, "post"> {
+    post: IExpandedPost;
     callback?: <T extends unknown[]>(...args: T) => void;
     nowCommenting: boolean;
     setNowCommenting: (value: SetStateAction<boolean>) => void;
@@ -129,7 +130,7 @@ export interface ProfileProps {
 }
 
 export interface UserPostProps {
-    post: IPost;
+    post: IExpandedPost;
 }
 
 export enum ButtonType {

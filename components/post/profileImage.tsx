@@ -8,7 +8,6 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
     const placeholderRef = useRef<HTMLDivElement>(null);
 
     const handleImageLoad = () => {
-        console.log("img finished loading");
         placeholderRef.current.style.visibility = "hidden";
     };
 

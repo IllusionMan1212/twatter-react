@@ -13,11 +13,31 @@ html,
 body {
     padding: 0;
     margin: 0;
-    background-color: #151515;
+    background-color: variables.$base-bg-color;
     font-family: "Sora", sans-serif;
 
     @media (min-width: 801px) {
         overflow: unset;
+    }
+}
+
+body {
+    margin: 0 10%;
+
+    @media (max-width: 1600px) {
+        margin: 0 7%;
+    }
+
+    @media (max-width: 1200px) {
+        margin: 0 5%;
+    }
+
+    @media (max-width: 1000px) {
+        margin: 0 3%;
+    }
+
+    @media (max-width: 800px) {
+        margin: 0;
     }
 }
 
@@ -34,7 +54,7 @@ a {
     text-decoration: none;
 
     &:hover {
-        color: #62929e;
+        color: variables.$accent-color;
         cursor: pointer;
     }
 }
@@ -45,10 +65,10 @@ p {
 
 * {
     box-sizing: border-box;
-    scrollbar-color: variables.$accent-color #151515;
+    scrollbar-color: variables.$accent-color variables.$base-bg-color;
 
     &::selection {
-        background-color: khaki;
+        // background-color: khaki;
     }
 
     &::-webkit-scrollbar {
@@ -499,14 +519,6 @@ h6 {
     cursor: initial;
 }
 
-.feed {
-    margin-left: 116px;
-
-    @media (max-width: 800px) {
-        margin-left: 0;
-    }
-}
-
 .pointer {
     cursor: pointer;
 }
@@ -529,7 +541,7 @@ h6 {
 }
 
 .dangerRed {
-    color: #ec4646;
+    color: variables.$danger-color;
 }
 
 .toasts {

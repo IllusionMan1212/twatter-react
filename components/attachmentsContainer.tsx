@@ -1,4 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
+import { Gif } from "phosphor-react";
 import { ReactElement } from "react";
 import { ImageContainerProps } from "src/types/props";
 import styles from "./attachmentsContainer.module.scss";
@@ -14,7 +15,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment} ${styles.halfImageGrid2Images}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[0]}')`,
+                                        backgroundImage: `url('${props.post.attachments[0].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -31,13 +32,19 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[0].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className={styles.halfImageGrid}>
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment} ${styles.halfImageGrid2Images}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[1]}')`,
+                                        backgroundImage: `url('${props.post.attachments[1].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -54,7 +61,13 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[1].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </>
                     ) : props.post.attachments.length == 3 ? (
@@ -63,7 +76,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[0]}')`,
+                                        backgroundImage: `url('${props.post.attachments[0].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -80,13 +93,19 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[0].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className={styles.halfImageGrid}>
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[1]}')`,
+                                        backgroundImage: `url('${props.post.attachments[1].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -103,11 +122,17 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[1].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[2]}')`,
+                                        backgroundImage: `url('${props.post.attachments[2].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -124,7 +149,13 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[2].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </>
                     ) : props.post.attachments.length == 4 ? (
@@ -133,7 +164,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[0]}')`,
+                                        backgroundImage: `url('${props.post.attachments[0].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -150,11 +181,17 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[0].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[2]}')`,
+                                        backgroundImage: `url('${props.post.attachments[2].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -171,13 +208,19 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[2].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className={styles.halfImageGrid}>
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[1]}')`,
+                                        backgroundImage: `url('${props.post.attachments[1].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -194,11 +237,17 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[1].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                                 <div
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[3]}')`,
+                                        backgroundImage: `url('${props.post.attachments[3].url}')`,
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -215,7 +264,13 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             );
                                         }
                                     }}
-                                ></div>
+                                >
+                                    {props.post.attachments[3].type == "gif" && (
+                                        <div className={styles.gif}>
+                                            <Gif size={20}/>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </>
                     ) : (
@@ -223,7 +278,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                             <div
                                 className={`max-w-100 ${styles.imageAttachment}`}
                                 style={{
-                                    backgroundImage: `url('${props.post.attachments[0]}')`,
+                                    backgroundImage: `url('${props.post.attachments[0].url}')`,
                                 }}
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -240,7 +295,13 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                         );
                                     }
                                 }}
-                            ></div>
+                            >
+                                {props.post.attachments[0].type == "gif" && (
+                                    <div className={styles.gif}>
+                                        <Gif size={20}/>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

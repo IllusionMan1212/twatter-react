@@ -2,6 +2,10 @@
 
 .navbarItem {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: variables.$icon-color;
 
     &:hover {
         cursor: pointer;
@@ -9,45 +13,22 @@
 }
 
 .navbar {
-    display: flex;
+    display: none;
     position: fixed;
-    z-index: 2;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background-color: variables.$accent-color;
-    flex-direction: column;
-    justify-content: space-evenly;
+    z-index: 7;
+    background-color: variables.$base-bg-color;
     align-items: center;
-    padding: 15px;
+    padding: 10px 15px;
+    border-top: 1px solid variables.$divider-color;
 
     @media (max-width: 800px) {
+        display: flex;
         top: unset;
         bottom: 0;
         height: unset;
         width: 100%;
         flex-direction: row;
         justify-content: space-around;
-
-        p {
-            display: none;
-        }
-    }
-}
-
-.navbarItemMobile {
-    display: flex;
-
-    @media (min-width: 801px) {
-        display: none;
-    }
-}
-
-.navbarItemDesktop {
-    display: flex;
-
-    @media (max-width: 800px) {
-        display: none;
     }
 }
 

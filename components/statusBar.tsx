@@ -2,9 +2,9 @@
 import styles from "./statusBar.module.scss";
 import Router from "next/router";
 import Search from "./search";
-import { ChatsTeardrop, ArrowLeft } from "phosphor-react";
+import { ChatsTeardrop, ArrowLeft, Bell } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
-import { ReactElement, useState, useCallback, useEffect } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import { StatusBarProps } from "../src/types/props";
 import { socket } from "src/hooks/useSocket";
 import { useToastContext } from "../src/contexts/toastContext";
@@ -18,6 +18,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
     const toast = useToastContext();
 
     const [unreadMessages, setUnreadMessages] = useState(0);
+    const [unreadNotifications, _] = useState(0);
 
     const handleClickBack = () => {
         history.back();
@@ -42,28 +43,25 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
     useEffect(() => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
-        // only make a request if we're on mobile
-        if (window.innerWidth <= 800) {
-            axiosInstance
-                .get("/messaging/getUnreadMessages", {
-                    cancelToken: tokenSource.token,
-                })
-                .then((res) => {
-                    setUnreadMessages(res.data.unreadMessages);
-                })
-                .catch((err) => {
-                    if (axios.isCancel(err)) {
-                        console.log("request canceled");
-                    } else {
-                        err?.response?.data?.status != 404 &&
-                            toast(
-                                err?.response?.data?.message ??
-                                    "An error has occurred while fetching unread messages",
-                                4000
-                            );
-                    }
-                });
-        }
+        axiosInstance
+            .get("/messaging/getUnreadMessages", {
+                cancelToken: tokenSource.token,
+            })
+            .then((res) => {
+                setUnreadMessages(res.data.unreadMessages);
+            })
+            .catch((err) => {
+                if (axios.isCancel(err)) {
+                    console.log("request canceled");
+                } else {
+                    err?.response?.data?.status != 404 &&
+                        toast(
+                            err?.response?.data?.message ??
+                                "An error has occurred while fetching unread messages",
+                            4000
+                        );
+                }
+            });
         return () => {
             tokenSource.cancel();
         };
@@ -85,7 +83,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
 
     return (
         <div
-            className={`flex text-white align-items-center mr-1Percent ${styles.statusBar}`}
+            className={`flex text-white align-items-center ${styles.statusBar}`}
         >
             {props.backButton && (
                 <div
@@ -96,23 +94,24 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                 </div>
             )}
             <div
-                className={`mx-3Percent mt-1Percent flex align-items-center ${styles.title}`}
+                className={`flex align-items-center ${styles.title}`}
             >
                 <p className="text-bold ellipsis">{props.title}</p>
             </div>
-            <div className={`ml-3Percent mt-1Percent ${styles.search}`}>
+            <div className={styles.search}>
                 <Search></Search>
             </div>
-            <div className="ml-auto flex align-items-center flex-shrink-0">
-                <div className={styles.messagesButtonMobile}>
+            <div className={`ml-auto flex align-items-center ${styles.messagesAndNotifs}`}>
+                <div className={styles.messages}>
                     <ChatsTeardrop
-                        className={"mr-1"}
-                        size="30"
+                        className={`mr-1 ${styles.icon}`}
+                        size="25"
                         onClick={() => {
                             Router.push("/messages", null, {
                                 shallow: true,
                             });
                         }}
+                        weight="fill"
                     ></ChatsTeardrop>
                     {unreadMessages != 0 && (
                         <div className={styles.unreadBubble}>
@@ -120,20 +119,34 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                         </div>
                     )}
                 </div>
+                <div className={styles.notifs}>
+                    <Bell
+                        className={`mr-1 ${styles.icon}`}
+                        size="25"
+                        onClick={() => {
+                            Router.push("/notifications", null, {
+                                shallow: true,
+                            });
+                        }}
+                        weight="fill"
+                    ></Bell>
+                    {unreadNotifications != 0 && (
+                        <div className={styles.unreadBubble}>
+                            {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                        </div>
+                    )}
+                </div>
                 <div
-                    className={`py-1 flex align-items-center ${styles.user}`}
+                    className={`flex align-items-center ${styles.user}`}
                     onClick={() => {
                         setUserMenu(!userMenu);
                     }}
                 >
                     <ProfileImage
-                        width={50}
-                        height={50}
+                        width={38}
+                        height={38}
                         src={props.user.profile_image}
                     />
-                    <p className={`text-bold ${styles.username}`}>
-                        {props.user.display_name}
-                    </p>
                     {userMenu && (
                         <UserContextMenu
                             currentUser={props.user}

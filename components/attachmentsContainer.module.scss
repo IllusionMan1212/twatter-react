@@ -1,14 +1,18 @@
+@use "../styles/variables";
+
 .imagesContainer {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
     grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
-    row-gap: 7px;
-    column-gap: 7px;
+    row-gap: 3px;
+    column-gap: 3px;
+    border: 1px solid variables.$divider-color;
+    border-radius: 10px;
 }
 
 .halfImageGrid {
     display: grid;
-    row-gap: 7px;
+    row-gap: 3px;
     div {
         height: auto;
     }
@@ -19,6 +23,7 @@
 }
 
 .imageAttachment {
+    position: relative;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -37,4 +42,15 @@
     @media (min-width: 801px) {
         height: 45vh;
     }
+}
+
+.gif {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    padding: 0 5px;
+    background-color: variables.$divider-color;
 }

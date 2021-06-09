@@ -14,7 +14,7 @@ const handleComments = (io, socket) => {
             socket.emit("error", "An error has occurred");
             return;
         }
-        if (comment.content.length > postCharLimit) {
+        if (comment.contentLength > postCharLimit) {
             socket.emit("error", "Comment content exceeds limit");
             return;
         }
@@ -62,9 +62,30 @@ const handleComments = (io, socket) => {
                     `cdn/posts/${commentId}/${i + 1}${fileExtension}`,
                     imageData
                 );
-                newComment.attachments.push(`${process.env.DOMAIN_URL}/cdn/posts/${commentId}/${
-                    i + 1
-                }${fileExtension}`);
+                let attachmentType = "";
+                switch (comment.attachments[i].mimetype.substring(0, comment.attachments[i].mimetype.indexOf("/"))) {
+                case "image":
+                    switch (comment.attachments[i].mimetype.substring(comment.attachments[i].mimetype.length, comment.attachments[i].mimetype.indexOf("/") + 1)) {
+                    case "gif":
+                        attachmentType = "gif";
+                        break;
+                    default:
+                        attachmentType = "image";
+                        break;
+                    }
+                    break;
+                case "video":
+                    attachmentType = "video";
+                    break;
+                default:
+                    socket.emit("error", "Unknown attachment type");
+                    return;
+                }
+                const attachment = {
+                    type: attachmentType,
+                    url: `${process.env.DOMAIN_URL}/cdn/posts/${commentId}/${i + 1}${fileExtension}`,
+                };
+                newComment.attachments.push(attachment);
             }
         }
 

@@ -1,5 +1,7 @@
+@use "../../styles/variables.scss";
+
 .container {
-    background-color: #202020;
+    background-color: variables.$bg-color-primary;
     border-radius: 16px;
     position: sticky;
     top: 20px;
@@ -9,7 +11,7 @@
 }
 
 .header {
-    border-bottom: 4px solid #151515;
+    border-bottom: 1px solid variables.$divider-color;
     padding: 15px;
 }
 

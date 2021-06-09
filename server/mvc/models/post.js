@@ -1,9 +1,18 @@
 const { Schema, model } = require("mongoose");
 
-const Post = new Schema({
-    attachments: {
-        type: [String]
+const Attachment = new Schema({
+    type: {
+        required: true,
+        type: String,
     },
+    url: {
+        required: true,
+        type: String,
+    }
+});
+
+const Post = new Schema({
+    attachments: [Attachment],
     author: {
         ref: "User",
         required: true,
@@ -17,7 +26,7 @@ const Post = new Schema({
         }
     ],
     content: {
-        maxlength: 128,
+        // Note: no maxlength because the db counts linebreaks as chars
         type: String
     },
     createdAt: {

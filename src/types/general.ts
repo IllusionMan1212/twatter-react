@@ -23,14 +23,23 @@ export interface IPost {
     _id: string;
     author: IUser;
     content: string;
-    attachments: Array<string>;
+    attachments: Array<PostAttachment>;
     createdAt: string;
     likeUsers: Array<string>;
-    comments: Array<IPost>;
+    comments: Array<string>;
     replyingTo: Array<IPost>;
 
     // not real db values
     numberOfComments?: number;
+}
+
+export interface IExpandedPost extends Omit<IPost, "comments"> {
+    comments: Array<IPost>;
+}
+
+interface PostAttachment {
+    url: string,
+    type: "image" | "gif" | "video",
 }
 
 export interface IAttachment {
