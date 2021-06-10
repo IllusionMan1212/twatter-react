@@ -255,6 +255,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <PostOptionsMenuButton
                             postId={props.modalData.post._id}
                             postAuthorId={props.modalData.post.author._id}
+                            postAuthorUsername={props.modalData.post.author.username}
                             currentUserId={props.modalData.currentUser?._id}
                             callback={() => {
                                 props.goBackTwice

@@ -178,6 +178,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     <PostOptionsMenuButton
                         postId={props.post._id}
                         postAuthorId={props.post.author._id}
+                        postAuthorUsername={props.post.author.username}
                         currentUserId={props.currentUser?._id}
                         callback={props.callback}
                     ></PostOptionsMenuButton>

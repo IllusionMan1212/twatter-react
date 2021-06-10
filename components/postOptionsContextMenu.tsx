@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./postOptionsContextMenu.module.scss";
-import { Flag, Share, Eraser } from "phosphor-react";
+import { Flag, Share, Eraser, Link } from "phosphor-react";
 import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { PostOptionsMenuProps } from "../src/types/props";
@@ -58,9 +58,51 @@ export default function PostOptionsMenu(
                     Report Post
                 </div>
                 <hr />
-                <div>
+                <div
+                    onClick={() => {
+                        if (navigator.share) {
+                            navigator.share({
+                                url: `${process.env.NEXT_PUBLIC_DOMAIN_URL}/u/${props.postAuthorUsername}/${props.postId}`,
+                                title: `${props.postAuthorUsername}'s post - Twatter`,
+                            }).then(() => {
+                                console.log("shared successfully");
+                            }).catch(() => {
+                                console.log("error while sharing");
+                            });
+                        } else {
+                            // TODO: fallback share popup
+                            console.log("cant share");
+                        }
+                    }}
+                >
                     <Share size="20"></Share>
                     Share Post
+                </div>
+                <hr />
+                <div
+                    onClick={() => {
+                        const link = `${process.env.NEXT_PUBLIC_DOMAIN_URL}/u/${props.postAuthorUsername}/${props.postId}`;
+                        const tempInput = document.createElement("input");
+                        tempInput.value = link;
+                        tempInput.style.position = "fixed";
+                        tempInput.style.top = "0";
+                        document.body.appendChild(tempInput);
+                        tempInput.focus();
+                        tempInput.select();
+                        tempInput.setSelectionRange(0, 99999);
+                        try {
+                            document.execCommand("copy");
+                            toast("Copied Successfully", 3000);
+                        } catch (err) {
+                            toast("Error while copying link", 3000);
+                        }
+                        finally {
+                            document.body.removeChild(tempInput);
+                        }
+                    }}
+                >
+                    <Link size="20"></Link>
+                    Copy Link
                 </div>
                 {props.postAuthorId == props.currentUserId ? (
                     <>

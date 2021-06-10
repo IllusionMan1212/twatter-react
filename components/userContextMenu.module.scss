@@ -1,40 +1,73 @@
 @use "../styles/variables";
 
+.menuContainer {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0px;
+    bottom: 0px;
+    right: -100vw;
+    z-index: 8;
+    color: variables.$text-color-primary;
+    transition: right 0.25s;
+    display: flex;
+}
+
 .menu {
     background-color: variables.$bg-color-primary;
-    width: 200px;
-    position: absolute;
-    top: 60px;
-    right: 10px;
-    z-index: 6;
+    width: 20%;
+    height: 100%;
+    border-left: 1px solid variables.$divider-color;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: initial;
+
+    @media (max-width: 800px) {
+        width: 60%;
+    }
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    column-gap: 10px;
     border-radius: 16px;
-    border: 1px solid variables.$divider-color;
-    color: variables.$text-color-primary;
+    animation: menuItem 0.5s forwards;
+    cursor: pointer;
 
-    div {
-        padding: 15px;
-        border-radius: 16px;
-        animation: menuItem 0.5s forwards;
-
+    @media (hover: hover) {
         &:hover {
             background-color: variables.$bg-color-secondary;
         }
     }
 
-    hr {
-        margin: 1% auto;
-        color: variables.$accent-color;
-        background: variables.$accent-color;
-        width: 90%;
-        border: none;
-        height: 1px;
+    &:active {
+        background-color: variables.$bg-color-secondary;
     }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+    border-bottom: 1px solid variables.$divider-color;
+    padding: 15px 20px;
+}
+
+.menuOverlay {
+    width: 80%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
 
     @media (max-width: 800px) {
-        bottom: 0px;
-        right: 0px;
-        top: unset;
+        width: 40%;
     }
+}
+
+.menuOpen {
+    right: 0;
 }
 
 @keyframes menuItem {

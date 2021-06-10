@@ -41,7 +41,7 @@
     "nodemailer": "^6.4.17",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "phosphor-react": "^1.1.2",
+    "phosphor-react": "^1.2.1",
     "piexifjs": "^1.0.6",
     "react": "17.0.1",
     "react-dom": "17.0.1",

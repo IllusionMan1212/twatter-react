@@ -18,7 +18,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
     const toast = useToastContext();
 
     const [unreadMessages, setUnreadMessages] = useState(0);
-    const [unreadNotifications, _] = useState(0);
+    const [unreadNotifications] = useState(0);
 
     const handleClickBack = () => {
         history.back();
@@ -147,11 +147,10 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                         height={38}
                         src={props.user.profile_image}
                     />
-                    {userMenu && (
-                        <UserContextMenu
-                            currentUser={props.user}
-                        ></UserContextMenu>
-                    )}
+                    <UserContextMenu
+                        currentUser={props.user}
+                        open={userMenu}
+                    ></UserContextMenu>
                 </div>
             </div>
         </div>

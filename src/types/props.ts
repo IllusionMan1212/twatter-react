@@ -23,6 +23,7 @@ export interface StatusBarProps {
 
 export interface UserContextMenuProps {
     currentUser: IUser;
+    open: boolean;
 }
 
 export interface MessageProps {
@@ -71,6 +72,7 @@ export interface ExpandedPostProps extends Omit<PostProps, "post"> {
 
 interface PostOptionsMenuBaseProps {
     postAuthorId: string;
+    postAuthorUsername: string;
     currentUserId: string;
     postId: string;
     callback?: <T extends unknown[]>(...args: T) => void;

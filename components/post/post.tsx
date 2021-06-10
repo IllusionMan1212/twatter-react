@@ -114,6 +114,7 @@ export default function Post(props: PostProps): ReactElement {
                 <PostOptionsMenuButton
                     postId={props.post._id}
                     postAuthorId={props.post.author?._id}
+                    postAuthorUsername={props.post.author?.username}
                     currentUserId={props.currentUser?._id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>

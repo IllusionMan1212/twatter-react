@@ -52,7 +52,7 @@ export default function Navbar(
                 <Users size="30" weight="fill"/>
             </div>
             <div
-                className={`${styles.navbarItem} text-white`}
+                className={styles.navbarItem}
                 onClick={() => {
                     setUserMenu(!userMenu);
                 }}
@@ -62,11 +62,10 @@ export default function Navbar(
                     height={30}
                     src={props.user.profile_image}
                 />
-                {userMenu && (
-                    <UserContextMenu
-                        currentUser={props.user}
-                    ></UserContextMenu>
-                )}
+                <UserContextMenu
+                    currentUser={props.user}
+                    open={userMenu}
+                ></UserContextMenu>
             </div>
         </div>
     );

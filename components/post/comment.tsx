@@ -79,6 +79,7 @@ export default function Comment(props: CommentProps): ReactElement {
                 <PostOptionsMenuButton
                     postId={props.comment._id}
                     postAuthorId={props.comment.author?._id}
+                    postAuthorUsername={props.comment.author?.username}
                     currentUserId={props.currentUser?._id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>

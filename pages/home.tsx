@@ -10,7 +10,7 @@ import {
     ArrowElbowRightDown,
     ImageSquare,
     PaperPlaneRight,
-    PenNib,
+    PenNibStraight,
     X,
 } from "phosphor-react";
 import Post from "../components/post/post";
@@ -643,7 +643,7 @@ export default function Home(): ReactElement {
                             setMobileCompose(!mobileCompose);
                         }}
                     >
-                        <PenNib size="30"></PenNib>
+                        <PenNibStraight size="30"></PenNibStraight>
                     </div>
                     {mediaModal && (
                         <MediaModal
