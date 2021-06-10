@@ -7,7 +7,8 @@ const handleUserData = (socket) => {
     socket.on("removeBirthday", (userId) => {
         User.findByIdAndUpdate(userId, { birthday: null }, null, (err) => {
             if (err) {
-                socket.emit("error");
+                socket.emit("error", "An error has occurred");
+                return;
             }
             socket.emit("birthdayRemoved", userId);
         });
@@ -39,7 +40,7 @@ const handleUserData = (socket) => {
                 payload.profileImage.mimetype.toString() !== "image/webp"
             ) {
                 // Unsupported file error
-                socket.emit("error");
+                socket.emit("error", "Unsupported file format");
                 return;
             }
             let imageData = "";
@@ -63,7 +64,8 @@ const handleUserData = (socket) => {
 
         User.findByIdAndUpdate(payload.userId, data, null, (err) => {
             if (err) {
-                socket.emit("error");
+                socket.emit("error", "An error has occurred");
+                return;
             }
             socket.emit("updatedProfile", payload);
         });
