@@ -34,6 +34,7 @@ import Link from "next/link";
 import CommentButton from "../buttons/commentButton";
 import { LikePayload } from "src/types/utils";
 import ProfileImage from "../post/profileImage";
+import { NavigationMethods } from "swiper/types/components/navigation";
 
 SwiperCore.use([Navigation]);
 
@@ -450,14 +451,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                     slidesPerView={1}
                     initialSlide={props.modalData.imageIndex}
                     onInit={(swiper) => {
-                        swiper.navigation.init();
+                        (swiper.navigation as NavigationMethods).init();
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         swiper.params.navigation.prevEl = prevRef.current;
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         swiper.params.navigation.nextEl = nextRef.current;
-                        swiper.navigation.update();
+                        (swiper.navigation as NavigationMethods).update();
                     }}
                 >
                     {props.modalData.post.attachments.length > 1 && (
