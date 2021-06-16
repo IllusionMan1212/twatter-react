@@ -163,6 +163,10 @@ export default function UserPost(props: UserPostProps): ReactElement {
             document.body.classList.remove("overflow-hidden");
             document.body.classList.add("overflow-unset");
         }
+        return () => {
+            document.body.classList.remove("overflow-hidden");
+            document.body.classList.add("overflow-unset");
+        };
     }, [mediaModal]);
 
     // TODO: move this into _app.tsx, and refactor it for multiple open modals

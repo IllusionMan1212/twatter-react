@@ -311,6 +311,10 @@ export default function Home(): ReactElement {
             document.body.classList.remove("overflow-hidden");
             document.body.classList.add("overflow-unset");
         }
+        return () => {
+            document.body.classList.remove("overflow-hidden");
+            document.body.classList.add("overflow-unset");
+        };
     }, [mobileCompose, mediaModal]);
 
     return (
