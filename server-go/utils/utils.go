@@ -1,6 +1,8 @@
 package utils
 
-import "net/http"
+import (
+	"encoding/json"
+)
 
 func CheckError(err error) {
 	if err != nil {
@@ -8,8 +10,8 @@ func CheckError(err error) {
 	}
 }
 
-func CheckErrorAndRespond(err error, w http.ResponseWriter, status int) {
-	if err != nil {
-		w.WriteHeader(status)
-	}
+func MarshalJSON(v interface{}) string {
+	b, err := json.Marshal(v)
+	CheckError(err)
+	return string(b)
 }
