@@ -10,7 +10,7 @@ func RegisterUsersRoutes(router *mux.Router) {
 	userRouter.HandleFunc("/validatePasswordResetToken", validatePasswordResetToken).Methods("GET")
 
 	userRouter.HandleFunc("/create", Create).Methods("POST", "OPTIONS")
-	userRouter.HandleFunc("/login", Login).Methods("POST")
+	userRouter.HandleFunc("/login", Login).Methods("POST", "OPTIONS")
 	userRouter.HandleFunc("/initialSetup", InitialSetup).Methods("POST")
 	userRouter.HandleFunc("/forgotPassword", ForgotPassword).Methods("POST")
 	userRouter.HandleFunc("/resetPassword", ResetPassword).Methods("POST")

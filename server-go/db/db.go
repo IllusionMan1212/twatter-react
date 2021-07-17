@@ -22,7 +22,7 @@ const users_table = `CREATE TABLE IF NOT EXISTS users(
 	email_verification_token varchar DEFAULT NULL,
 	finished_setup boolean NOT NULL DEFAULT false,
 	password varchar NOT NULL,
-	profile_image varchar NOT NULL DEFAULT 'default_profile.svg',
+	avatar_url varchar NOT NULL DEFAULT 'default_profile.svg',
 	reset_password_token varchar DEFAULT NULL,
 	reset_password_token_expiration timestamp DEFAULT NULL
 );`
