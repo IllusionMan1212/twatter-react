@@ -26,7 +26,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
 
     const handleMessageFromServer = useCallback(
         (msg) => {
-            if (props.user._id != msg.sender) {
+            if (props.user.id != msg.sender) {
                 setUnreadMessages(unreadMessages + 1);
             }
         },
@@ -145,7 +145,7 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                     <ProfileImage
                         width={38}
                         height={38}
-                        src={props.user.profile_image}
+                        src={props.user.avatar_url}
                     />
                     <UserContextMenu
                         currentUser={props.user}

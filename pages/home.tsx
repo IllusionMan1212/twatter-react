@@ -31,9 +31,10 @@ import axios from "axios";
 import { LikePayload } from "src/types/utils";
 import { socket } from "src/hooks/useSocket";
 import { Virtuoso } from "react-virtuoso";
+import Router from "next/router";
 
 export default function Home(): ReactElement {
-    const user = useUser("/login", null);
+    // const user = useUser("/login", null);
 
     const composePostRef = useRef<HTMLSpanElement>(null);
     const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
@@ -58,6 +59,7 @@ export default function Home(): ReactElement {
     const [touchY, setTouchY] = useState(null);
     const [reachedEnd, setReachedEnd] = useState(false);
     const [page, setPage] = useState(0);
+    const [user, setUser] = useState(null as IUser);
 
     pageRef.current = page;
 
@@ -207,10 +209,10 @@ export default function Home(): ReactElement {
                 posts.map((post) => {
                     if (post._id == payload.postId) {
                         if (payload.likeType == "LIKE") {
-                            post.likeUsers = post.likeUsers.concat(user._id);
+                            post.likeUsers = post.likeUsers.concat(user.id);
                         } else if (payload.likeType == "UNLIKE") {
                             post.likeUsers = post.likeUsers.filter(
-                                (_user) => _user != user._id
+                                (_user) => _user != user.id
                             );
                         }
                         return post;
@@ -219,7 +221,7 @@ export default function Home(): ReactElement {
                 })
             );
         },
-        [posts, user?._id]
+        [posts, user?.id]
     );
 
     const getPosts = (): Promise<any> => {
@@ -278,6 +280,30 @@ export default function Home(): ReactElement {
             }
             setPosts(posts);
         });
+    }, []);
+
+    useEffect(() => {
+        axios
+            .get(
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
+                { withCredentials: true }
+            )
+            .then((res) => {
+                if (res.data.user) {
+                    if (!res.data.user.finished_setup) {
+                        Router.push("/register/setting-up");
+                        return;
+                    }
+                    setUser(res.data.user);
+                }
+            })
+            .catch((err) => {
+                toast(
+                    err?.response?.data?.message ?? "An error has occurred",
+                    4000
+                );
+                Router.push("/login");
+            });
     }, []);
 
     useEffect(() => {
@@ -594,7 +620,7 @@ export default function Home(): ReactElement {
                                 </div>
                                 <div className={`text-white ${styles.posts}`}>
                                     <Virtuoso
-                                        totalCount={posts.length}
+                                        totalCount={posts?.length}
                                         data={posts}
                                         endReached={loadMorePosts}
                                         useWindowScroll
