@@ -12,7 +12,7 @@ import { useSocket, socket } from "src/hooks/useSocket";
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
 
-    useSocket();
+    // useSocket();
 
     const handleError = useCallback(
         (message) => {

@@ -18,13 +18,14 @@ const users_table = `CREATE TABLE IF NOT EXISTS users(
 	bio varchar(150) DEFAULT '',
 	verified_email boolean NOT NULL DEFAULT false,
 	birthday date,
-	createdAt timestamp NOT NULL DEFAULT now(),
+	created_at timestamp NOT NULL DEFAULT now(),
 	email_verification_token varchar DEFAULT NULL,
 	finished_setup boolean NOT NULL DEFAULT false,
 	password varchar NOT NULL,
 	avatar_url varchar NOT NULL DEFAULT 'default_profile.svg',
 	reset_password_token varchar DEFAULT NULL,
-	reset_password_token_expiration timestamp DEFAULT NULL
+	reset_password_token_expiration timestamp DEFAULT NULL,
+	token_hash varchar(16) NOT NULL
 );`
 
 // TODO: there's still more field to add to the messages table

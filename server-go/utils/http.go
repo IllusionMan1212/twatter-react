@@ -32,6 +32,13 @@ func ConflictWithJSON(w http.ResponseWriter, json string) {
 	w.Write([]byte(json))
 }
 
+// HTTP 413
+func PayloadTooLargeWithJSON(w http.ResponseWriter, json string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusRequestEntityTooLarge)
+	w.Write([]byte(json))
+}
+
 // HTTP 500
 func InternalServerErrorWithJSON(w http.ResponseWriter, json string) {
 	w.Header().Set("Content-Type", "application/json")

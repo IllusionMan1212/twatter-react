@@ -1,11 +1,16 @@
+interface DateAndTime {
+    Time: Date;
+    Valid: boolean;
+}
+
 export interface IUser {
-    _id: string;
+    id: string;
     username: string;
     display_name: string;
-    profile_image: string;
+    avatar_url: string;
     bio: string;
-    birthday: string;
-    createdAt: string;
+    birthday: DateAndTime;
+    createdAt: DateAndTime;
     finished_setup: boolean;
 }
 
