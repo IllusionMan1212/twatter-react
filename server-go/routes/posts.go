@@ -8,7 +8,7 @@ func RegisterPostsRoutes(router *mux.Router) {
 	postRouter.HandleFunc("/deletePost", DeletePost).Methods("POST") // validations required
 	postRouter.HandleFunc("/likePost", LikePost).Methods("POST")     // validations required
 
-	postRouter.HandleFunc("/getPosts/{userId}", GetPosts).Methods("GET", "OPTIONS") // no validation
-	postRouter.HandleFunc("/getPost", GetPost).Methods("GET")                       // no validation
-	postRouter.HandleFunc("/getComments/{postId}", GetComments).Methods("GET")      // no validation
+	postRouter.HandleFunc("/getPosts/{userId}", GetPosts).Methods("GET")       // no validation
+	postRouter.HandleFunc("/getPost", GetPost).Methods("GET")                  // no validation
+	postRouter.HandleFunc("/getComments/{postId}", GetComments).Methods("GET") // no validation
 }
