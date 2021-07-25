@@ -15,15 +15,6 @@ type LoginCreds struct {
 	StayLoggedIn bool   `json:"stayLoggedIn"`
 }
 
-type InitialSetupData struct {
-	Bio           string `json:"bio"`
-	UserID        int64  `json:"userID"`
-	BirthdayYear  int    `json:"birthdayYear"`
-	BirthdayMonth int    `json:"birthdayMonth"`
-	BirthdayDay   int    `json:"birthdayDay"`
-	ProfileImage  string `json:"profileImage"`
-}
-
 type User struct {
 	ID            int64        `json:"id" db:"id"`
 	Username      string       `json:"username" db:"username"`

@@ -18,7 +18,7 @@ export default function UserContextMenu(
         axios
             .delete("/users/logout")
             .then(() => {
-                socket.close();
+                //socket.close();
                 Router.push("/login");
                 toast("Logged out", 3000);
             })
@@ -53,7 +53,7 @@ export default function UserContextMenu(
                     <ProfileImage
                         width={35}
                         height={35}
-                        src={props.currentUser.profile_image}
+                        src={props.currentUser.avatar_url}
                     />{" "}
                     {props.currentUser.display_name}
                 </div>

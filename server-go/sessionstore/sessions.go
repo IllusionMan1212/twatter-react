@@ -30,3 +30,13 @@ func SetSession(key string, value interface{}, req *http.Request, w http.Respons
 	err := session.Save(req, w)
 	return err
 }
+
+func SetSessionWithOptions(key string, value interface{}, req *http.Request, w http.ResponseWriter, options *sessions.Options) error {
+	session, _ := store.Get(req, cookie_name)
+
+	session.Values[key] = value
+	session.Options = options
+
+	err := session.Save(req, w)
+	return err
+}

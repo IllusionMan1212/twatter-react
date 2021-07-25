@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/sessions"
 	exifremove "github.com/scottleedavis/go-exif-remove"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -176,11 +177,16 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	// TODO: use stayLoggedIn to set the cookie options for the session
-
 	// set the session
-	// sessionId := utils.GenerateRandomBytes(32)
-	err = sessionstore.SetSession("user", user, req, w)
+	options := sessions.Options{
+		Path:     "/",
+		Domain:   os.Getenv("DOMAIN"),
+		MaxAge:   0,
+		Secure:   false, // TODO: change this in production
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	err = sessionstore.SetSessionWithOptions("user", user, req, w, &options)
 	if err != nil {
 		panic(err)
 	}
@@ -251,17 +257,35 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: use stayLoggedIn to set the cookie options for the session
-
 	// NOTE: ideally we'd want a session id to keep track of all the sessions on the server-
 	// -when using a redis store. but for smaller stuff like this, a cookie store is fine
 	// the cookie store basically maps out every device to a map of connected users.
-	// generate a new random session_id that keeps track of the user data
-	// and then save it in the response(cookie header) and send that to the user
-	// sessionId := utils.GenerateRandomBytes(32)
-	err = sessionstore.SetSession("user", user, req, w)
-	if err != nil {
-		panic(err)
+	if stayLoggedIn {
+		options := sessions.Options{
+			Path:     "/",
+			Domain:   os.Getenv("DOMAIN"),
+			MaxAge:   int((time.Hour * 24 * 365).Seconds()), // 1 year
+			Secure:   false,                                 // TODO: change this in production
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		}
+		err = sessionstore.SetSessionWithOptions("user", user, req, w, &options)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		options := sessions.Options{
+			Path:     "/",
+			Domain:   os.Getenv("DOMAIN"),
+			MaxAge:   0,
+			Secure:   false, // TODO: change this in production
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		}
+		err = sessionstore.SetSessionWithOptions("user", user, req, w, &options)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// TODO: generate access token and refresh token
@@ -276,7 +300,6 @@ func Login(w http.ResponseWriter, req *http.Request) {
 }
 
 func InitialSetup(w http.ResponseWriter, req *http.Request) {
-	// data := &models.InitialSetupData{}
 	err := req.ParseMultipartForm(32 << 20) // 32 MB
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
@@ -402,7 +425,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 		file.Write(imageBytes)
 
-		avatar_url := fmt.Sprintf("%s/cdn/profile_images/%s/profile.%s", os.Getenv("DOMAIN_URL"), userID, extension)
+		avatar_url := fmt.Sprintf("%s/cdn/profile_images/%s/profile.%s", os.Getenv("API_DOMAIN_URL"), userID, extension)
 
 		// TODO: compress the image and have multiple sizes
 
@@ -427,5 +450,22 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, req *http.Request) {
+	options := sessions.Options{
+		Path:     "/",
+		Domain:   os.Getenv("DOMAIN"),
+		MaxAge:   -1,
+		Secure:   false, // TODO: change this in production
+		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
+	}
+	err := sessionstore.SetSessionWithOptions("user", nil, req, w, &options)
+	if err != nil {
+		panic(err)
+	}
 
+	utils.OkWithJSON(w, `{
+		"message": "Logged out",
+		"status": "200",
+		"success": true
+	}`)
 }
