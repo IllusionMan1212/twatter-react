@@ -58,7 +58,6 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
-		"message": "Logged in successfully",
 		"status": "200",
 		"success": "true",
 		"user": %v 
@@ -66,7 +65,45 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetUserData(w http.ResponseWriter, req *http.Request) {
+	username := strings.ToLower(req.URL.Query().Get("username"))
 
+	if username == "" {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": "400",
+			"success": false
+		}`)
+		return
+	}
+
+	user := &models.User{}
+
+	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE username = $1;`, username).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		if err == sql.ErrNoRows {
+			utils.NotFoundWithJSON(w, `{
+				"message": "User not found",
+				"status": "404",
+				"success": false
+			}`)
+		} else {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": "500",
+				"success": false
+			}`)
+			panic(err)
+		}
+	}
+
+	utils.OkWithJSON(w, fmt.Sprintf(`{
+		"message": "Retrieved user data successfully",
+		"status": "200",
+		"success": true,
+		"user": %v
+	}`, utils.MarshalJSON(user)))
 }
 
 func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {

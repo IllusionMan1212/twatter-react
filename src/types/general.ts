@@ -10,7 +10,7 @@ export interface IUser {
     avatar_url: string;
     bio: string;
     birthday: DateAndTime;
-    createdAt: DateAndTime;
+    created_at: DateAndTime;
     finished_setup: boolean;
 }
 

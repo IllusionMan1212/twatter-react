@@ -13,6 +13,10 @@ func LikePost(w http.ResponseWriter, req *http.Request) {
 
 }
 
+func GetPostsCount(w http.ResponseWriter, req *http.Request) {
+
+}
+
 func GetPosts(w http.ResponseWriter, req *http.Request) {
 	// TODO: fetch posts from the db
 

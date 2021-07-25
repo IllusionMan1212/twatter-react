@@ -94,12 +94,12 @@ export default function Profile(props: ProfileProps): ReactElement {
     };
 
     const handleMessageClick = () => {
-        if (!currentUser || currentUser._id == user._id) {
+        if (!currentUser || currentUser.id == user.id) {
             return;
         }
         const payload = {
-            senderId: currentUser._id,
-            receiverId: user._id,
+            senderId: currentUser.id,
+            receiverId: user.id,
         };
         axiosInstance
             .post("/messaging/startConversation", payload)
@@ -237,11 +237,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                 if (post._id == payload.postId) {
                     if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(
-                            currentUser._id
+                            currentUser.id
                         );
                     } else if (payload.likeType == "UNLIKE") {
                         post.likeUsers = post.likeUsers.filter(
-                            (_user) => _user != currentUser._id
+                            (_user) => _user != currentUser.id
                         );
                     }
                     return post;
@@ -252,11 +252,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                 if (post._id == payload.postId) {
                     if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(
-                            currentUser._id
+                            currentUser.id
                         );
                     } else if (payload.likeType == "UNLIKE") {
                         post.likeUsers = post.likeUsers.filter(
-                            (_user) => _user != currentUser._id
+                            (_user) => _user != currentUser.id
                         );
                     }
                     return post;
@@ -267,11 +267,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                 if (post._id == payload.postId) {
                     if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(
-                            currentUser._id
+                            currentUser.id
                         );
                     } else if (payload.likeType == "UNLIKE") {
                         post.likeUsers = post.likeUsers.filter(
-                            (_user) => _user != currentUser._id
+                            (_user) => _user != currentUser.id
                         );
                     }
                     return post;
@@ -279,37 +279,37 @@ export default function Profile(props: ProfileProps): ReactElement {
                 return post;
             }));
         },
-        [currentUser?._id, mediaPosts, posts, postsAndComments, setMediaPosts, setPosts, setPostsAndComments]
+        [currentUser?.id, mediaPosts, posts, postsAndComments, setMediaPosts, setPosts, setPostsAndComments]
     );
 
     const handleBirthdayRemoved = useCallback(
         (userId) => {
-            if (currentUser?._id == userId && userId == user._id) {
+            if (currentUser?.id == userId && userId == user.id) {
                 setUser({ ...user, birthday: null });
             }
         },
-        [currentUser?._id, user]
+        [currentUser?.id, user]
     );
 
     // this also needs proper change
     const handleUpdatedProfile = useCallback(
         (payload) => {
-            if (currentUser?._id == payload.userId && payload.userId == user._id) {
+            if (currentUser?.id == payload.userId && payload.userId == user.id) {
                 let profile_image: string = null;
                 if (payload.profileImage) {
                     profile_image = payload.profileImage;
                     getActiveTabPosts().map((post) => {
-                        post.author.profile_image = profile_image;
+                        post.author.avatar_url = profile_image;
                         return post;
                     });
-                    currentUser.profile_image = profile_image;
+                    currentUser.avatar_url = profile_image;
                 }
                 setUser({
                     ...user,
                     display_name: payload.displayName,
                     bio: payload.bio,
                     birthday: payload.birthday ?? user.birthday,
-                    profile_image: profile_image ?? user.profile_image
+                    avatar_url: profile_image ?? user.avatar_url
                 });
             }
         },
@@ -319,24 +319,24 @@ export default function Profile(props: ProfileProps): ReactElement {
     const getPosts = useCallback((page: number, postsType: string): Promise<any> => {
         return axios
             .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user._id}?type=${postsType}`,
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
                 { withCredentials: true }
             )
             .then((res) => {
                 return res.data.posts;
             });
-    }, [props.user._id]);
+    }, [props.user.id]);
 
     const getPostsCount = useCallback((): Promise<any> => {
         return axios
             .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPostsCount/${props.user._id}`,
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPostsCount/${props.user.id}`,
                 { withCredentials: true }
             )
             .then((res) => {
                 return res.data.postsCount;
             });
-    }, [props.user._id]);
+    }, [props.user.id]);
 
     const loadMorePosts = (lastItemIndex: number) => {
         
@@ -427,7 +427,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, []);
 
     useEffect(() => {
-        if (props.user && user?._id != props.user._id) {
+        if (props.user && user?.id != props.user.id) {
             setPostsCount(0);
             setActiveTab(Tabs.Posts);
             activeTabRef.current = Tabs.Posts;
@@ -505,7 +505,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                     },
                     images: [
                         {
-                            url: props.user?.profile_image,
+                            url: props.user?.avatar_url,
                         },
                     ],
                 }}
@@ -537,12 +537,12 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             className={`round ${styles.userImage}`}
                                                             style={{
                                                                 backgroundImage: `url("${
-                                                                    user.profile_image ==
+                                                                    user.avatar_url ==
                                                             "default_profile.svg"
                                                                         ? "/"
                                                                         : ""
                                                                 }${
-                                                                    user.profile_image
+                                                                    user.avatar_url
                                                                 }")`,
                                                             }}
                                                         ></div>
@@ -560,8 +560,8 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         </div>
                                                     </div>
                                                     <div className={styles.userStats}>
-                                                        {currentUser?._id !=
-                                                user._id ? (
+                                                        {currentUser?.id !=
+                                                user.id ? (
                                                                 <div
                                                                     className={
                                                                         styles.userButtons
@@ -658,7 +658,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             ></Gift>
                                                             <p className="mt-1Percent">
                                                                 {formatBirthday(
-                                                                    user.birthday
+                                                                    user.birthday.Time.toString() // TODO: needs a revisit
                                                                 )}
                                                             </p>
                                                         </div>
@@ -671,7 +671,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         <p className="mt-1Percent">
                                                     Member since{" "}
                                                             {formatJoinDate(
-                                                                user.createdAt
+                                                                user.created_at.Time.toString() // TODO: needs a revisit
                                                             )}
                                                         </p>
                                                     </div>
