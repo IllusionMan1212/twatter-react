@@ -33,7 +33,7 @@ const messages_table = `CREATE TABLE IF NOT EXISTS messages(
 	id BIGSERIAL PRIMARY KEY UNIQUE,
 	user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	content varchar(1000) NOT NULL,
-	createdAt timestamp NOT NULL DEFAULT now(),
+	created_at timestamp NOT NULL DEFAULT now(),
 	deleted boolean NOT NULL DEFAULT false,
 	deleted_at timestamp DEFAULT NULL
 );`
@@ -43,7 +43,7 @@ const posts_table = `CREATE TABLE IF NOT EXISTS posts(
 	id BIGSERIAL PRIMARY KEY UNIQUE,
 	user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	content varchar(128) NOT NULL,
-	createdAt timestamp NOT NULL DEFAULT now(),
+	created_at timestamp NOT NULL DEFAULT now(),
 	deleted boolean NOT NULL DEFAULT false,
 	deleted_at timestamp DEFAULT NULL
 );`
