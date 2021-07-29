@@ -30,9 +30,9 @@ export default function Comment(props: CommentProps): ReactElement {
             const newLikes = [...likes];
             if (payload.postId == props.comment._id) {
                 if (payload.likeType == "LIKE") {
-                    setLikes(newLikes.concat(props.currentUser?._id));
+                    setLikes(newLikes.concat(props.currentUser?.id));
                 } else if (payload.likeType == "UNLIKE") {
-                    setLikes(newLikes.filter((user) => user != props.currentUser?._id));
+                    setLikes(newLikes.filter((user) => user != props.currentUser?.id));
                 }
             }
         },
@@ -64,7 +64,7 @@ export default function Comment(props: CommentProps): ReactElement {
                 <ProfileImage
                     width={30}
                     height={30}
-                    src={props.comment.author.profile_image}
+                    src={props.comment.author.avatar_url}
                     hyperlink={props.comment.author.username}
                 />
                 <div
@@ -78,9 +78,9 @@ export default function Comment(props: CommentProps): ReactElement {
                 </div>
                 <PostOptionsMenuButton
                     postId={props.comment._id}
-                    postAuthorId={props.comment.author?._id}
+                    postAuthorId={props.comment.author?.id}
                     postAuthorUsername={props.comment.author?.username}
-                    currentUserId={props.currentUser?._id}
+                    currentUserId={props.currentUser?.id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
             </div>
@@ -110,7 +110,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     ></CommentButton>
                     <LikeButton
                         post={props.comment}
-                        currentUserId={props.currentUser?._id}
+                        currentUserId={props.currentUser?.id}
                         likeUsers={likes}
                     ></LikeButton>
                 </div>

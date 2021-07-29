@@ -117,11 +117,11 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         (payload: LikePayload) => {
             if (payload.postId == props.modalData.post._id) {
                 if (payload.likeType == "LIKE") {
-                    setLikes(likes.concat(props.modalData.currentUser?._id));
+                    setLikes(likes.concat(props.modalData.currentUser?.id));
                 } else if (payload.likeType == "UNLIKE") {
                     setLikes(
                         likes.filter(
-                            (user) => user != props.modalData.currentUser?._id
+                            (user) => user != props.modalData.currentUser?.id
                         )
                     );
                 }
@@ -134,9 +134,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setComments(comments.map((comment => {
             if (payload.postId == comment._id) {
                 if (payload.likeType == "LIKE") {
-                    comment.likeUsers = comment.likeUsers.concat(props.modalData.currentUser?._id);
+                    comment.likeUsers = comment.likeUsers.concat(props.modalData.currentUser?.id);
                 } else if (payload.likeType == "UNLIKE") {
-                    comment.likeUsers = comment.likeUsers.filter((user) => user != props.modalData.currentUser?._id);
+                    comment.likeUsers = comment.likeUsers.filter((user) => user != props.modalData.currentUser?.id);
                 }
                 return comment;
             }
@@ -236,7 +236,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                 <ProfileImage
                                     width={50}
                                     height={50}
-                                    src={props.modalData.post.author.profile_image}
+                                    src={props.modalData.post.author.avatar_url}
                                 />
                                 <div className="flex flex-column">
                                     <p
@@ -255,9 +255,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         </Link>
                         <PostOptionsMenuButton
                             postId={props.modalData.post._id}
-                            postAuthorId={props.modalData.post.author._id}
+                            postAuthorId={props.modalData.post.author.id}
                             postAuthorUsername={props.modalData.post.author.username}
-                            currentUserId={props.modalData.currentUser?._id}
+                            currentUserId={props.modalData.currentUser?.id}
                             callback={() => {
                                 props.goBackTwice
                                     ? window.history.go(-2)
@@ -278,7 +278,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         ></CommentButton>
                         <LikeButton
                             post={props.modalData.post}
-                            currentUserId={props.modalData.currentUser?._id}
+                            currentUserId={props.modalData.currentUser?.id}
                             likeUsers={likes}
                         ></LikeButton>
                     </div>

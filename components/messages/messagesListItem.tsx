@@ -19,7 +19,7 @@ export default function MessagesListItem(
                     <ProfileImage
                         width={45}
                         height={45}
-                        src={props.receivers[0].profile_image}
+                        src={props.receivers[0].avatar_url}
                         hyperlink={`${props.receivers[0].username}`}
                     />
                 ) : (

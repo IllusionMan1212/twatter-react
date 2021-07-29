@@ -46,7 +46,7 @@ export default function Post(props: PostProps): ReactElement {
                                     <ProfileImage
                                         width={25}
                                         height={25}
-                                        src={props.post.replyingTo[0].author.profile_image}
+                                        src={props.post.replyingTo[0].author.avatar_url}
                                     />
                                     <span
                                         className="text-bold"
@@ -80,7 +80,7 @@ export default function Post(props: PostProps): ReactElement {
                         width={40}
                         height={40}
                         hyperlink={props.post.author.username}
-                        src={props.post.author.profile_image}
+                        src={props.post.author.avatar_url}
                     />
                 ) : (
                     <ProfileImage
@@ -113,9 +113,9 @@ export default function Post(props: PostProps): ReactElement {
                 </div>
                 <PostOptionsMenuButton
                     postId={props.post._id}
-                    postAuthorId={props.post.author?._id}
+                    postAuthorId={props.post.author?.id}
                     postAuthorUsername={props.post.author?.username}
-                    currentUserId={props.currentUser?._id}
+                    currentUserId={props.currentUser?.id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
                 <div className={`ml-1 ${styles.postText}`}>
@@ -139,7 +139,7 @@ export default function Post(props: PostProps): ReactElement {
                         ></CommentButton>
                         <LikeButton
                             post={props.post}
-                            currentUserId={props.currentUser?._id}
+                            currentUserId={props.currentUser?.id}
                             likeUsers={props.post.likeUsers}
                         ></LikeButton>
                     </div>

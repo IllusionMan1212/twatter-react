@@ -112,13 +112,13 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                             className="round"
                                             src={`${
                                                 props.post.replyingTo[0].author
-                                                    .profile_image ==
+                                                    .avatar_url ==
                                                 "default_profile.svg"
                                                     ? "/"
                                                     : ""
                                             }${
                                                 props.post.replyingTo[0].author
-                                                    .profile_image
+                                                    .avatar_url
                                             }`}
                                             width={25}
                                             height={25}
@@ -153,7 +153,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     <ProfileImage
                         width={50}
                         height={50}
-                        src={props.post.author.profile_image}
+                        src={props.post.author.avatar_url}
                         hyperlink={props.post.author.username}
                     />
                     <div className={styles.user}>
@@ -177,9 +177,9 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     </div>
                     <PostOptionsMenuButton
                         postId={props.post._id}
-                        postAuthorId={props.post.author._id}
+                        postAuthorId={props.post.author.id}
                         postAuthorUsername={props.post.author.username}
-                        currentUserId={props.currentUser?._id}
+                        currentUserId={props.currentUser?.id}
                         callback={props.callback}
                     ></PostOptionsMenuButton>
                     <div
@@ -206,7 +206,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         ></CommentButton>
                         <LikeButton
                             post={props.post as unknown as IPost}
-                            currentUserId={props.currentUser?._id}
+                            currentUserId={props.currentUser?.id}
                             likeUsers={props.post.likeUsers}
                         ></LikeButton>
                     </div>
