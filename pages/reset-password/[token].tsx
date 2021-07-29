@@ -10,6 +10,8 @@ import StatusBarLoggedOut from "../../components/statusBarLoggedOut";
 import { EyeClosed, Eye } from "phosphor-react";
 import { useToastContext } from "../../src/contexts/toastContext";
 import Loading from "../../components/loading";
+import { IUser } from "src/types/general";
+import ProfileImage from "components/post/profileImage";
 
 export default function ResetPassword(): ReactElement {
     const toast = useToastContext();
@@ -20,7 +22,7 @@ export default function ResetPassword(): ReactElement {
         password: "",
         confirm_password: "",
     });
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<IUser>(null);
     const [resetAllowed, setResetAllowed] = useState(true);
 
     const router = useRouter();
@@ -50,7 +52,7 @@ export default function ResetPassword(): ReactElement {
             setResetAllowed(false);
             if (validateFields()) {
                 const payload = {
-                    newPassword: newPassword.password,
+                    password: newPassword.password,
                     confirm_password: newPassword.confirm_password,
                     token: router.query.token,
                 };
@@ -66,6 +68,7 @@ export default function ResetPassword(): ReactElement {
                     .catch((err) => {
                         setResetAllowed(true);
                         toast(err?.response?.data?.message ?? "An error has occurred", 5000);
+                        router.push("/forgot-password");
                     });
             }
         }
@@ -114,12 +117,10 @@ export default function ResetPassword(): ReactElement {
                     <div className="flex flex-column align-items-center justify-content-center">
                         {user && (
                             <div className="text-white flex gap-1 justify-content-center align-items-center mb-2">
-                                <img
-                                    className="round"
-                                    src={`${user.profile_image == "default_profile.svg" ? "/" : ""}${user.profile_image}`}
-                                    width="60"
-                                    height="60"
-                                    alt="User profile picture"
+                                <ProfileImage
+                                    height={60}
+                                    width={60}
+                                    src={user.avatar_url}
                                 />
                                 <div>
                                     <p>{user.display_name}</p>

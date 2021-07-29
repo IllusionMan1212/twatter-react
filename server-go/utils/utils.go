@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"math/rand"
+	"time"
 )
 
 func CheckError(err error) {
@@ -20,6 +21,7 @@ func MarshalJSON(v interface{}) string {
 
 func GenerateRandomBytes(n int) string {
 	b := make([]byte, n/2)
+	rand.Seed(time.Now().UnixNano())
 	rand.Read(b)
 	return hex.EncodeToString(b)
 }
