@@ -58,7 +58,7 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
                     }}
                 >
                     <img
-                        className="pointer profileImage"
+                        className="profileImage"
                         src={`${props.src == "default_profile.svg" ? "/" : ""}${
                             props.src
                         }`}

@@ -295,21 +295,21 @@ export default function Profile(props: ProfileProps): ReactElement {
     const handleUpdatedProfile = useCallback(
         (payload) => {
             if (currentUser?.id == payload.userId && payload.userId == user.id) {
-                let profile_image: string = null;
+                let avatar_url: string = null;
                 if (payload.profileImage) {
-                    profile_image = payload.profileImage;
+                    avatar_url = payload.profileImage;
                     getActiveTabPosts().map((post) => {
-                        post.author.avatar_url = profile_image;
+                        post.author.avatar_url = avatar_url;
                         return post;
                     });
-                    currentUser.avatar_url = profile_image;
+                    currentUser.avatar_url = avatar_url;
                 }
                 setUser({
                     ...user,
                     display_name: payload.displayName,
                     bio: payload.bio,
                     birthday: payload.birthday ?? user.birthday,
-                    avatar_url: profile_image ?? user.avatar_url
+                    avatar_url: avatar_url ?? user.avatar_url
                 });
             }
         },
@@ -334,7 +334,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 { withCredentials: true }
             )
             .then((res) => {
-                return res.data.postsCount;
+                return res.data.count;
             });
     }, [props.user.id]);
 
@@ -650,7 +650,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             </p>
                                                         </div>
                                                     )}
-                                                    {user.birthday && (
+                                                    {user.birthday.Valid && (
                                                         <div className="flex gap-1">
                                                             <Gift
                                                                 className={styles.icon}
@@ -658,7 +658,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             ></Gift>
                                                             <p className="mt-1Percent">
                                                                 {formatBirthday(
-                                                                    user.birthday.Time.toString() // TODO: needs a revisit
+                                                                    user.birthday.Time.toString()
                                                                 )}
                                                             </p>
                                                         </div>
@@ -671,7 +671,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         <p className="mt-1Percent">
                                                     Member since{" "}
                                                             {formatJoinDate(
-                                                                user.created_at.Time.toString() // TODO: needs a revisit
+                                                                user.created_at.Time.toString()
                                                             )}
                                                         </p>
                                                     </div>

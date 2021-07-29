@@ -47,6 +47,11 @@
 
         &:focus {
             border: 1px solid variables.$text-color-primary;
+
+            &::after {
+                left: 0.25rem;
+                top: 0.45rem;
+            }
         }
 
         &[disabled] {

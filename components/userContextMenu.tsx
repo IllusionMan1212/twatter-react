@@ -42,6 +42,13 @@ export default function UserContextMenu(
         };
     }, [props.open]);
 
+    useEffect(() => {
+        return () => {
+            document.body.classList.remove("overflow-hidden");
+            document.body.classList.add("overflow-unset");
+        };
+    }, []);
+
     return (
         <div className={`${styles.menuContainer} ${props.open ? styles.menuOpen : null}`}>
             <div className={styles.menuOverlay}></div>
