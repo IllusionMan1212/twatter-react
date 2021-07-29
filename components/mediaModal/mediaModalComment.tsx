@@ -29,9 +29,9 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
         (payload: LikePayload) => {
             if (payload.postId == props.comment._id) {
                 if (payload.likeType == "LIKE") {
-                    setLikes(likes.concat(props.currentUser?._id));
+                    setLikes(likes.concat(props.currentUser?.id));
                 } else if (payload.likeType == "UNLIKE") {
-                    setLikes(likes.filter((user) => user != props.currentUser?._id));
+                    setLikes(likes.filter((user) => user != props.currentUser?.id));
                 }
                 props.updateModalCommentLikes(payload);
             }
@@ -65,7 +65,7 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                     <ProfileImage
                         width={30}
                         height={30}
-                        src={props.comment.author.profile_image}
+                        src={props.comment.author.avatar_url}
                         hyperlink={props.comment.author.username}
                     />
                     <div
@@ -80,9 +80,9 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                 </div>
                 <PostOptionsMenuButton
                     postId={props.comment._id}
-                    postAuthorId={props.comment.author?._id}
+                    postAuthorId={props.comment.author?.id}
                     postAuthorUsername={props.comment.author?.username}
-                    currentUserId={props.currentUser?._id}
+                    currentUserId={props.currentUser?.id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
             </div>
@@ -112,7 +112,7 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                     ></CommentButton>
                     <LikeButton
                         post={props.comment}
-                        currentUserId={props.currentUser?._id}
+                        currentUserId={props.currentUser?.id}
                         likeUsers={likes}
                     ></LikeButton>
                 </div>

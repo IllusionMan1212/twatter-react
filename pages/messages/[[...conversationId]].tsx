@@ -90,7 +90,7 @@ export default function Messages(): ReactElement {
         clearTimeout(timeoutId);
         const payload = {
             receiverId: activeConversation.receiverId,
-            senderId: user._id,
+            senderId: user.id,
             conversationId: activeConversation._id,
         };
         socket.emit("typing", payload);
@@ -205,8 +205,8 @@ export default function Messages(): ReactElement {
                 }
                 const payload = {
                     conversationId: msg.conversationId,
-                    userId: user._id,
-                    unreadMessages: msg.sender == user._id ? 0 : 1,
+                    userId: user.id,
+                    unreadMessages: msg.sender == user.id ? 0 : 1,
                 };
 
                 // conversation is active, so the user has read the message
@@ -218,14 +218,14 @@ export default function Messages(): ReactElement {
                         ...conversation,
                         lastMessage: msg.content ? 
                             msg.content : 
-                            msg.sender == user._id ?
+                            msg.sender == user.id ?
                                 `${user.display_name} sent an image` :
                                 `${conversation.receivers[0].display_name} sent an image`,
                         lastUpdated: msg.sentTime,
                         unreadMessages:
                               activeConversation?._id == msg.conversationId
                                   ? 0
-                                  : msg.sender == user._id
+                                  : msg.sender == user.id
                                       ? 0
                                       : conversation.unreadMessages + 1,
                     }
@@ -294,7 +294,7 @@ export default function Messages(): ReactElement {
         const payload = {
             conversationId: activeConversation._id,
             receiverId: activeConversation.receiverId,
-            senderId: user._id,
+            senderId: user.id,
             messageContent: messageContent,
             attachment: attachment,
         };
@@ -364,7 +364,7 @@ export default function Messages(): ReactElement {
         }
         const payload = {
             conversationId: conversation._id,
-            userId: user._id,
+            userId: user.id,
             unreadMessages: conversation.unreadMessages,
         };
 
@@ -684,7 +684,7 @@ export default function Messages(): ReactElement {
                                                 <Message
                                                     key={index}
                                                     sender={
-                                                        user._id ==
+                                                        user.id ==
                                                         message.ownerId
                                                     }
                                                     sentTime={

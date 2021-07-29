@@ -17,10 +17,10 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                             objectFit: "cover",
                         }}
                         src={`${
-                            props.user.profile_image == "default_profile.svg"
+                            props.user.avatar_url == "default_profile.svg"
                                 ? "/"
                                 : ""
-                        }${props.user.profile_image}`}
+                        }${props.user.avatar_url}`}
                     />
                 </div>
                 <div className="ellipsis">

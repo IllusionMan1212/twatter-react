@@ -98,11 +98,11 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 };
                 if (payload.likeType == "LIKE") {
                     newPost.likeUsers = newPost.likeUsers.concat(
-                        currentUser?._id
+                        currentUser?.id
                     );
                 } else if (payload.likeType == "UNLIKE") {
                     newPost.likeUsers = post.likeUsers.filter(
-                        (user) => user != currentUser?._id
+                        (user) => user != currentUser?.id
                     );
                 }
                 setPost(newPost);
@@ -193,7 +193,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     },
                     images: [
                         {
-                            url: props.post?.author.profile_image,
+                            url: props.post?.author.avatar_url,
                         },
                         {
                             url: props.post?.attachments?.[0]?.url,

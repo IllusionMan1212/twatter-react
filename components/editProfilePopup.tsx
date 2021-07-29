@@ -32,7 +32,7 @@ export default function EditProfilePopup(
         }
 
         const payload: {[k: string]: unknown} = {
-            userId: props.userData._id,
+            userId: props.userData.id,
             displayName: displayName,
             profileImage: profileImage,
             bio: bio,
@@ -70,15 +70,15 @@ export default function EditProfilePopup(
     };
 
     const handleRemoveBirthday = () => {
-        socket.emit("removeBirthday", props.userData._id);
+        socket.emit("removeBirthday", props.userData.id);
     };
 
     useEffect(() => {
         if (props.userData.birthday) {
             setBirthday({
-                year: new Date(props.userData.birthday).getUTCFullYear(),
-                month: new Date(props.userData.birthday).getUTCMonth() + 1,
-                day: new Date(props.userData.birthday).getUTCDate()
+                year: new Date(props.userData.birthday.Time.toString()).getUTCFullYear(),
+                month: new Date(props.userData.birthday.Time.toString()).getUTCMonth() + 1,
+                day: new Date(props.userData.birthday.Time.toString()).getUTCDate()
             });
         }
     }, []);
@@ -97,12 +97,12 @@ export default function EditProfilePopup(
                         <div className={styles.profileImageContainer}>
                             <img
                                 src={`${
-                                    props.userData.profile_image ==
+                                    props.userData.avatar_url ==
                                     "default_profile.svg"
                                         ? "/"
                                         : ""
                                 }${
-                                    previewImage ?? props.userData.profile_image
+                                    previewImage ?? props.userData.avatar_url
                                 }`}
                                 className={`round ${styles.profileImage}`}
                             />
@@ -159,9 +159,9 @@ export default function EditProfilePopup(
                                 }
                             >
                                 <p>
-                                    {props.userData.birthday
+                                    {props.userData.birthday.Valid
                                         ? formatBirthday(
-                                            props.userData.birthday
+                                            props.userData.birthday.Time.toString()
                                         )
                                         : "No birthday set yet"}
                                 </p>

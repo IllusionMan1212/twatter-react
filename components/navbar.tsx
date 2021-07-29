@@ -60,7 +60,7 @@ export default function Navbar(
                 <ProfileImage
                     width={30}
                     height={30}
-                    src={props.user.profile_image}
+                    src={props.user.avatar_url}
                 />
                 <UserContextMenu
                     currentUser={props.user}
