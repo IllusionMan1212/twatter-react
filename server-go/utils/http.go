@@ -25,6 +25,12 @@ func UnauthorizedWithJSON(w http.ResponseWriter, json string) {
 	w.Write([]byte(json))
 }
 
+func ForbiddenWithJSON(w http.ResponseWriter, json string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusForbidden)
+	w.Write([]byte(json))
+}
+
 // HTTP 404
 func NotFoundWithJSON(w http.ResponseWriter, json string) {
 	w.Header().Set("Content-Type", "application/json")

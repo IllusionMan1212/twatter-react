@@ -15,6 +15,16 @@ type LoginCreds struct {
 	StayLoggedIn bool   `json:"stayLoggedIn"`
 }
 
+type ForgotPasswordCreds struct {
+	Email string `json:"email"`
+}
+
+type ResetPasswordCreds struct {
+	Token           string `json:"token"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
+
 type User struct {
 	ID            int64        `json:"id" db:"id"`
 	Username      string       `json:"username" db:"username"`

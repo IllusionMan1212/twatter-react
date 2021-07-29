@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"illusionman1212/twatter-go/db"
@@ -11,11 +12,14 @@ import (
 	"illusionman1212/twatter-go/utils"
 	"io/ioutil"
 	"net/http"
+	"net/mail"
+	"net/smtp"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/jackc/pgx/v4"
 	exifremove "github.com/scottleedavis/go-exif-remove"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -107,7 +111,44 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 }
 
 func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
+	token := req.URL.Query().Get("token")
 
+	if token == "" {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": "400",
+			"success": false
+		}`)
+		return
+	}
+
+	user := &models.User{}
+
+	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, avatar_url FROM users WHERE reset_password_token = $1 AND reset_password_token_expiration > now();`, token).Scan(&user.ID, &user.Username, &user.DisplayName, &user.AvatarURL)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			utils.ForbiddenWithJSON(w, `{
+				"message": "Invalid or expired token",
+				"status": "403",
+				"success": false
+			}`)
+			return
+		} else {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": "500",
+				"success": false
+			}`)
+			panic(err)
+		}
+	}
+
+	utils.OkWithJSON(w, fmt.Sprintf(`{
+		"message": "Token validated",
+		"status": "200",
+		"success": true,
+		"user": %v
+	}`, utils.MarshalJSON(user)))
 }
 
 func Create(w http.ResponseWriter, req *http.Request) {
@@ -479,11 +520,192 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 }
 
 func ForgotPassword(w http.ResponseWriter, req *http.Request) {
+	creds := &models.ForgotPasswordCreds{}
+	err := json.NewDecoder(req.Body).Decode(&creds)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": "500",
+			"success": false
+		}`)
+		panic(err)
+	}
 
+	email := strings.ToLower(strings.TrimSpace(creds.Email))
+
+	if email == "" {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": "400",
+			"success": false
+		}`)
+		return
+	}
+
+	reset_token := utils.GenerateRandomBytes(32)
+
+	user := models.User{}
+
+	err = db.DBPool.QueryRow(context.Background(), `SELECT id FROM users WHERE email = $1`, email).Scan(&user.ID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// respond with a 200 to prevent malicious parties from finding out which emails exist
+			utils.OkWithJSON(w, `{
+				"message": "An email containing instructions on how to reset your password has been sent to you",
+				"status": "200",
+				"success": true
+			}`)
+			return
+		} else {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": "500",
+				"success": false
+			}`)
+			panic(err)
+		}
+	}
+
+	_, err = db.DBPool.Exec(context.Background(), `UPDATE users SET reset_password_token = $1, reset_password_token_expiration = $2 WHERE email = $3;`, reset_token, time.Now().Add(time.Hour), email)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": "500",
+			"success": false
+		}`)
+		panic(err)
+	}
+
+	// send an email to the user with the reset token
+	// Sender data.
+	from := mail.Address{"Twatter Support", os.Getenv("SUPPORT_EMAIL")}
+	password := os.Getenv("SUPPORT_EMAIL_PASSWORD")
+
+	// Receiver email address.
+	to := []string{
+		email,
+	}
+
+	// smtp server configuration.
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+
+	body := `<p>The password reset link you requested is ready. Please click on the link below to reset your password</p>
+	<a href="https://` + os.Getenv("DOMAIN") + `/reset-password/` + reset_token + `">https://` + os.Getenv("DOMAIN") + `/reset-password/` + reset_token + `</a>
+	<p><b>Note: This link expires in 1 hour</b></p>
+	<p>If you did not request this link, ignore this email and your password will remain unchanged</p>`
+
+	header := make(map[string]string)
+	header["From"] = from.String()
+	header["To"] = to[0]
+	header["Subject"] = "Reset Password"
+	header["MIME-Version"] = "1.0"
+	header["Content-Type"] = "text/html; charset=UTF-8"
+	header["Content-Transfer-Encoding"] = "base64"
+
+	// Message.
+	message := ""
+	for k, v := range header {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(body))
+
+	// Authentication.
+	auth := smtp.PlainAuth("", from.Address, password, smtpHost)
+
+	// Sending email.
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from.Address, to, []byte(message))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	utils.OkWithJSON(w, `{
+		"message": "An email containing instructions on how to reset your password has been sent to you",
+		"status": "200",
+		"success": true
+	}`)
 }
 
 func ResetPassword(w http.ResponseWriter, req *http.Request) {
+	creds := &models.ResetPasswordCreds{}
+	err := json.NewDecoder(req.Body).Decode(&creds)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": "500",
+			"success": false
+		}`)
+		panic(err)
+	}
 
+	reset_token := strings.ToLower(strings.TrimSpace(creds.Token))
+	password := strings.TrimSpace(creds.Password)
+	password_confirmation := strings.TrimSpace(creds.ConfirmPassword)
+
+	if reset_token == "" || password == "" || password_confirmation == "" {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": "400",
+			"success": false
+		}`)
+		return
+	}
+
+	if password != password_confirmation {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Passwords do not match",
+			"status": "400",
+			"success": false
+		}`)
+		return
+	}
+
+	if len(password) < 8 {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Password must be at least 8 characters",
+			"status": "400",
+			"success": false
+		}`)
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": "500",
+			"success": false
+		}`)
+		panic(err)
+	}
+
+	user := models.User{}
+
+	err = db.DBPool.QueryRow(context.Background(), `UPDATE users SET password = $1 WHERE reset_password_token = $2 AND reset_password_token_expiration > now()`, string(hash), reset_token).Scan(&user.ID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			utils.BadRequestWithJSON(w, `{
+				"message": "Invalid or expired token",
+				"status": "400",
+				"success": false
+			}`)
+			return
+		} else {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": "500",
+				"success": false
+			}`)
+			panic(err)
+		}
+	}
+
+	utils.OkWithJSON(w, `{
+		"message": "Password has been successfully reset",
+		"status": "200",
+		"success": true
+	}`)
 }
 
 func Logout(w http.ResponseWriter, req *http.Request) {
