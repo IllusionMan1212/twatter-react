@@ -61,7 +61,7 @@ export function UserWrapper({ children }: any): ReactElement {
 
         if (hasUser) {
             if (!socket.current) {
-                socket.current = new WebSocket(`ws://${process.env.DOMAIN}/ws`);
+                socket.current = new WebSocket(`ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`);
 
                 socket.current.onopen = function() {
                     console.log("WebSocket opened");
