@@ -13,13 +13,12 @@ export default function UserContextMenu(
     props: UserContextMenuProps
 ): ReactElement {
     const toast = useToastContext();
-    const { user, logout } = useUserContext();
+    const { logout } = useUserContext();
 
     const _logout = () => {
         axios
             .delete("/users/logout")
             .then(() => {
-                user?.socket?.close(1000); // 1000 is normal termination
                 logout();
                 Router.push("/login");
                 toast("Logged out", 3000);

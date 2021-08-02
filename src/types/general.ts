@@ -12,8 +12,6 @@ export interface IUser {
     birthday: DateAndTime;
     created_at: DateAndTime;
     finished_setup: boolean;
-
-    socket?: WebSocket;
 }
 
 export interface IConversation {

@@ -11,6 +11,7 @@ import (
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/mail"
 	"net/smtp"
@@ -358,7 +359,11 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	birthdayYear := req.MultipartForm.Value["birthday_year"][0]
 	birthdayMonth := req.MultipartForm.Value["birthday_month"][0]
 	birthdayDay := req.MultipartForm.Value["birthday_day"][0]
-	image := req.MultipartForm.File["profileImage"][0]
+
+	var image *multipart.FileHeader
+	if req.MultipartForm.File["profileImage"] != nil {
+		image = req.MultipartForm.File["profileImage"][0]
+	}
 
 	if userID == "null" {
 		utils.BadRequestWithJSON(w, `{
