@@ -11,7 +11,7 @@ import "swiper/components/navigation/navigation.scss";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
-    const { user } = useUserContext();
+    const { socket } = useUserContext();
 
     const handleError = useCallback(
         (message) => {
@@ -21,12 +21,12 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
     );
 
     useEffect(() => {
-        if (user?.socket) {
-            user.socket.onerror = (event) => {
+        if (socket) {
+            socket.onerror = (event) => {
                 handleError(event);
             };
         }
-    }, [user?.socket, handleError]);
+    }, [socket, handleError]);
 
     return (
         <>

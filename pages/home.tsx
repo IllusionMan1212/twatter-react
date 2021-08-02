@@ -32,7 +32,7 @@ import { Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
 
 export default function Home(): ReactElement {
-    const { user } = useUserContext();
+    const { user, socket } = useUserContext();
 
     const composePostRef = useRef<HTMLSpanElement>(null);
     const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
@@ -91,7 +91,7 @@ export default function Home(): ReactElement {
         setPreviewImages([]);
         setPostingAllowed(false);
         setCharsLeft(postCharLimit);
-        user.socket.send("posting a post");
+        socket.send("posting a post");
         // socket?.emit("post", payload);
     };
 
@@ -323,7 +323,6 @@ export default function Home(): ReactElement {
             <Head>
                 <title>Home - Twatter</title>
             </Head>
-            {/* TODO: check if the user finished the setup and if they didn't tell them they need to with a link to redirect them */}
             {user ? (
                 <>
                     <Navbar

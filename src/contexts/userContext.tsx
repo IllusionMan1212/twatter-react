@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react";
+import { createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { IUser } from "src/types/general";
 import Router from "next/router";
 import useSWR from "swr";
@@ -9,12 +9,14 @@ interface UserContextType {
     user: IUser;
     login: (user: IUser) => void;
     logout: () => void;
+    socket: WebSocket;
 }
 
 const UserContextDefaultValues : UserContextType = {
     user: null,
     login: () => {return;},
     logout: () => {return;},
+    socket: null,
 };
 
 const UserContext = createContext<UserContextType>(UserContextDefaultValues);
@@ -41,6 +43,7 @@ const fetcher = (url: string) =>
 
 export function UserWrapper({ children }: any): ReactElement {
     const [user, setUser] = useState<IUser>(null);
+    const [socket, setSocket] = useState<WebSocket>(null);
     const [loading, setLoading] = useState(true);
 
     // TODO: do we even care about the error here?
@@ -52,7 +55,24 @@ export function UserWrapper({ children }: any): ReactElement {
     const finished = Boolean(data);
     const hasUser = Boolean(_user);
 
-    const socket = useRef<WebSocket>(null);
+    const openSocket = useCallback(() => {
+        const _socket = new WebSocket(`ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`);
+
+        _socket.onopen = function() {
+            console.log("WebSocket opened");
+        };
+
+        _socket.onclose = function() {
+            console.log("WebSocket closed");
+        };
+
+        _socket.onmessage = function(e) {
+            console.log("WebSocket message received: " + e.data);
+        };
+
+        setSocket(_socket);
+
+    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -60,22 +80,8 @@ export function UserWrapper({ children }: any): ReactElement {
         if (!finished) return;
 
         if (hasUser) {
-            if (!socket.current) {
-                socket.current = new WebSocket(`ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`);
-
-                socket.current.onopen = function() {
-                    console.log("WebSocket opened");
-                };
-
-                socket.current.onclose = function() {
-                    console.log("WebSocket closed");
-                };
-
-                socket.current.onmessage = function(e) {
-                    console.log("WebSocket message received: " + e.data);
-                };
-
-                _user.socket = socket.current;
+            if (!socket) {
+                openSocket();
             }
 
             if (unprotectedRoutes.includes(Router.route)) {
@@ -96,7 +102,13 @@ export function UserWrapper({ children }: any): ReactElement {
             }
         }
         setLoading(false);
-    }, [finished, hasUser, setLoading, _user]);
+    }, [finished, hasUser, setLoading, _user, openSocket]);
+
+    useEffect(() => {
+        if (user && !socket) {
+            openSocket();
+        }
+    }, [openSocket, user]);
 
     const login = (user: IUser) => {
         setUser(user);
@@ -104,11 +116,13 @@ export function UserWrapper({ children }: any): ReactElement {
 
     const logout = () => {
         setUser(null);
+        socket.close(1000); // 1000 is normal termination
+        setSocket(null);
     };
 
     return (
         <>
-            <UserContext.Provider value={{user, login, logout}}>
+            <UserContext.Provider value={{user, login, logout, socket}}>
                 {loading ? (
                     <Loading width="100" height="100" />
                 ) : (
