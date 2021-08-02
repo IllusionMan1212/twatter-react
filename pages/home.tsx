@@ -1,7 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import StatusBar from "../components/statusBar";
 import Head from "next/head";
-import { useUser } from "../src/hooks/useUser";
 import Loading from "../components/loading";
 import Navbar from "../components/navbar";
 import styles from "../styles/home.module.scss";
@@ -29,12 +28,11 @@ import {
 import { postCharLimit } from "src/utils/variables";
 import axios from "axios";
 import { LikePayload } from "src/types/utils";
-import { socket } from "src/hooks/useSocket";
 import { Virtuoso } from "react-virtuoso";
-import Router from "next/router";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Home(): ReactElement {
-    // const user = useUser("/login", null);
+    const { user } = useUserContext();
 
     const composePostRef = useRef<HTMLSpanElement>(null);
     const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
@@ -59,7 +57,6 @@ export default function Home(): ReactElement {
     const [touchY, setTouchY] = useState(null);
     const [reachedEnd, setReachedEnd] = useState(false);
     const [page, setPage] = useState(0);
-    const [user, setUser] = useState(null as IUser);
 
     pageRef.current = page;
 
@@ -94,7 +91,8 @@ export default function Home(): ReactElement {
         setPreviewImages([]);
         setPostingAllowed(false);
         setCharsLeft(postCharLimit);
-        socket?.emit("post", payload);
+        user.socket.send("posting a post");
+        // socket?.emit("post", payload);
     };
 
     const handleMediaClick = (
@@ -255,23 +253,23 @@ export default function Home(): ReactElement {
         });
     };
 
-    useEffect(() => {
-        if (socket?.connected) {
-            socket.on("post", handlePost);
-            socket.on("deletePost", handleDeletePost);
-            socket.on("commentToClient", handleComment);
-            socket.on("likeToClient", handleLike);
-        }
+    // useEffect(() => {
+    //     if (socket?.connected) {
+    //         socket.on("post", handlePost);
+    //         socket.on("deletePost", handleDeletePost);
+    //         socket.on("commentToClient", handleComment);
+    //         socket.on("likeToClient", handleLike);
+    //     }
 
-        return () => {
-            if (socket?.connected) {
-                socket.off("post", handlePost);
-                socket.off("deletePost", handleDeletePost);
-                socket.off("commentToClient", handleComment);
-                socket.off("likeToClient", handleLike);
-            }
-        };
-    }, [handlePost, handleDeletePost, handleComment, handleLike]);
+    //     return () => {
+    //         if (socket?.connected) {
+    //             socket.off("post", handlePost);
+    //             socket.off("deletePost", handleDeletePost);
+    //             socket.off("commentToClient", handleComment);
+    //             socket.off("likeToClient", handleLike);
+    //         }
+    //     };
+    // }, [handlePost, handleDeletePost, handleComment, handleLike]);
 
     useEffect(() => {
         getPosts().then((posts) => {
@@ -280,30 +278,7 @@ export default function Home(): ReactElement {
             }
             setPosts(posts);
         });
-    }, []);
-
-    useEffect(() => {
-        axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
-                { withCredentials: true }
-            )
-            .then((res) => {
-                if (res.data.user) {
-                    if (!res.data.user.finished_setup) {
-                        Router.push("/register/setting-up");
-                        return;
-                    }
-                    setUser(res.data.user);
-                }
-            })
-            .catch((err) => {
-                toast(
-                    err?.response?.data?.message ?? "An error has occurred",
-                    4000
-                );
-                Router.push("/login");
-            });
+        // TODO: cancel api call on return
     }, []);
 
     useEffect(() => {
@@ -348,7 +323,8 @@ export default function Home(): ReactElement {
             <Head>
                 <title>Home - Twatter</title>
             </Head>
-            {user && user.finished_setup ? (
+            {/* TODO: check if the user finished the setup and if they didn't tell them they need to with a link to redirect them */}
+            {user ? (
                 <>
                     <Navbar
                         user={user}
@@ -682,11 +658,7 @@ export default function Home(): ReactElement {
                         ></MediaModal>
                     )}
                 </>
-            ) : (
-                <>
-                    <Loading height="100" width="100"></Loading>
-                </>
-            )}
+            ) : null}
         </>
     );
 }

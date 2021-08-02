@@ -53,7 +53,6 @@ export default function ForgotPassword(): ReactElement {
         <>
             <Head>
                 <title>Forgot password - Twatter</title>
-                {/* TODO: other meta tags and SEO shit */}
             </Head>
             <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>

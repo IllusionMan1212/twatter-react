@@ -4,17 +4,14 @@ import styles from "../../styles/register-login.module.scss";
 import indexStyles from "../../styles/index.module.scss";
 import Link from "next/link";
 import Head from "next/head";
-import React, { FormEvent, ReactElement, useEffect, useState } from "react";
+import React, { FormEvent, ReactElement, useState } from "react";
 import { Eye, EyeClosed } from "phosphor-react";
 import axios from "axios";
 import Router from "next/router";
-import Loading from "../../components/loading";
 import { useToastContext } from "../../src/contexts/toastContext";
 
 export default function Register(): ReactElement {
     const toast = useToastContext();
-
-    const [loading, setLoading] = useState(true);
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [form, setForm] = useState({
         username: "",
@@ -23,24 +20,6 @@ export default function Register(): ReactElement {
         confirm_password: "",
     });
     const [registerAllowed, setRegisterAllowed] = useState(true);
-
-    useEffect(() => {
-        axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
-                { withCredentials: true }
-            )
-            .then((res) => {
-                if (res.data.user) {
-                    Router.push("/home");
-                } else {
-                    setLoading(false);
-                }
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.name;
@@ -112,11 +91,10 @@ export default function Register(): ReactElement {
         return true;
     };
 
-    return !loading ? (
+    return (
         <>
             <Head>
                 <title>Create an account - Twatter</title>
-                {/* TODO: write meta tags and other important head tags */}
             </Head>
             <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
@@ -198,7 +176,5 @@ export default function Register(): ReactElement {
                 </div>
             </LayoutRegular>
         </>
-    ) : (
-        <Loading height="100" width="100"></Loading>
     );
 }

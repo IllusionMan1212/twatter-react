@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"illusionman1212/twatter-go/db"
 	"illusionman1212/twatter-go/models"
-	"illusionman1212/twatter-go/sessionstore"
+	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
 	"io/ioutil"
 	"net/http"
@@ -18,7 +18,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v4"
 	exifremove "github.com/scottleedavis/go-exif-remove"
 	"golang.org/x/crypto/bcrypt"
@@ -27,7 +26,7 @@ import (
 const dateLayout = "2006-01-02"
 
 func ValidateToken(w http.ResponseWriter, req *http.Request) {
-	session := sessionstore.GetSession(req)
+	session := redissession.GetSession(req)
 
 	if session.IsNew {
 		utils.UnauthorizedWithJSON(w, `{
@@ -85,13 +84,13 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE username = $1;`, username).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		if err == sql.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			utils.NotFoundWithJSON(w, `{
 				"message": "User not found",
 				"status": "404",
 				"success": false
 			}`)
+			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
@@ -256,15 +255,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// set the session
-	options := sessions.Options{
-		Path:     "/",
-		Domain:   os.Getenv("DOMAIN"),
-		MaxAge:   0,
-		Secure:   false, // TODO: change this in production
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	}
-	err = sessionstore.SetSessionWithOptions("user", user, req, w, &options)
+	err = redissession.SetSession("user", user, req, w)
 	if err != nil {
 		panic(err)
 	}
@@ -335,35 +326,9 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// NOTE: ideally we'd want a session id to keep track of all the sessions on the server-
-	// -when using a redis store. but for smaller stuff like this, a cookie store is fine
-	// the cookie store basically maps out every device to a map of connected users.
-	if stayLoggedIn {
-		options := sessions.Options{
-			Path:     "/",
-			Domain:   os.Getenv("DOMAIN"),
-			MaxAge:   int((time.Hour * 24 * 365).Seconds()), // 1 year
-			Secure:   false,                                 // TODO: change this in production
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		}
-		err = sessionstore.SetSessionWithOptions("user", user, req, w, &options)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		options := sessions.Options{
-			Path:     "/",
-			Domain:   os.Getenv("DOMAIN"),
-			MaxAge:   0,
-			Secure:   false, // TODO: change this in production
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		}
-		err = sessionstore.SetSessionWithOptions("user", user, req, w, &options)
-		if err != nil {
-			panic(err)
-		}
+	err = redissession.SetSession("user", user, req, w)
+	if err != nil {
+		panic(err)
 	}
 
 	// TODO: generate access token and refresh token
@@ -709,16 +674,24 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, req *http.Request) {
-	options := sessions.Options{
-		Path:     "/",
-		Domain:   os.Getenv("DOMAIN"),
-		MaxAge:   -1,
-		Secure:   false, // TODO: change this in production
-		SameSite: http.SameSiteStrictMode,
-		HttpOnly: true,
+	session := redissession.GetSession(req)
+	if session.IsNew {
+		utils.ForbiddenWithJSON(w, `{
+			"message": "Invalid or expired token",
+			"status": "403",
+			"success": false
+		}`)
+		return
 	}
-	err := sessionstore.SetSessionWithOptions("user", nil, req, w, &options)
+
+	session.Options.MaxAge = -1
+	err := session.Save(req, w)
 	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": "500",
+			"success": false
+		}`)
 		panic(err)
 	}
 

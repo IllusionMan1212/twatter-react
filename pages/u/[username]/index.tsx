@@ -6,7 +6,6 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Loading from "../../../components/loading";
 import Navbar from "../../../components/navbar";
 import StatusBarLoggedOut from "../../../components/statusBarLoggedOut";
-import { useUser } from "../../../src/hooks/useUser";
 import StatusBar from "../../../components/statusBar";
 import styles from "../../../styles/profilePage.module.scss";
 import Post from "../../../components/post/post";
@@ -18,10 +17,9 @@ import {
 import MediaModal from "../../../components/mediaModal/mediaModal";
 import { Calendar, ChatTeardropText, Gift, Note } from "phosphor-react";
 import { useToastContext } from "../../../src/contexts/toastContext";
-import { socket } from "src/hooks/useSocket";
 import { IUser, IPost } from "../../../src/types/general";
 import { LikePayload } from "src/types/utils";
-import { GetServerSidePropsContext } from "next";
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { ButtonType, ProfileProps } from "src/types/props";
 import { NextSeo } from "next-seo";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
@@ -30,6 +28,7 @@ import Button from "components/buttons/button";
 import EditProfilePopup from "components/editProfilePopup";
 import { Virtuoso } from "react-virtuoso";
 import useLatestState from "src/hooks/useLatestState";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -42,6 +41,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     useScrollRestoration(router);
 
     const toast = useToastContext();
+    const { user: currentUser } = useUserContext();
 
     const parentContainerRef = useRef(null);
     const postsPageRef = useRef(null);
@@ -76,9 +76,6 @@ export default function Profile(props: ProfileProps): ReactElement {
     commentsPageRef.current = commentsPage;
     mediaPageRef.current = mediaPage;
     activeTabRef.current = activeTab;
-
-    let currentUser: IUser = null;
-    currentUser = useUser();
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
@@ -316,7 +313,7 @@ export default function Profile(props: ProfileProps): ReactElement {
         [currentUser, user, getActiveTabPosts]
     );
 
-    const getPosts = useCallback((page: number, postsType: string): Promise<any> => {
+    const getPosts = useCallback((page: number, postsType: string): Promise<IPost[]> => {
         return axios
             .get(
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
@@ -325,9 +322,9 @@ export default function Profile(props: ProfileProps): ReactElement {
             .then((res) => {
                 return res.data.posts;
             });
-    }, [props.user.id]);
+    }, [props.user?.id]);
 
-    const getPostsCount = useCallback((): Promise<any> => {
+    const getPostsCount = useCallback((): Promise<number> => {
         return axios
             .get(
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPostsCount/${props.user.id}`,
@@ -336,10 +333,9 @@ export default function Profile(props: ProfileProps): ReactElement {
             .then((res) => {
                 return res.data.count;
             });
-    }, [props.user.id]);
+    }, [props.user?.id]);
 
     const loadMorePosts = (lastItemIndex: number) => {
-        
         switch (activeTab) {
         case Tabs.Posts:
             // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
@@ -389,25 +385,25 @@ export default function Profile(props: ProfileProps): ReactElement {
         }
     };
 
-    useEffect(() => {
-        if (socket?.connected) {
-            socket.on("commentToClient", handleComment);
-            socket.on("deletePost", handleCommentDelete);
-            socket.on("likeToClient", handleLike);
-            socket.on("birthdayRemoved", handleBirthdayRemoved);
-            socket.on("updatedProfile", handleUpdatedProfile);
-        }
+    // useEffect(() => {
+    //     if (socket?.connected) {
+    //         socket.on("commentToClient", handleComment);
+    //         socket.on("deletePost", handleCommentDelete);
+    //         socket.on("likeToClient", handleLike);
+    //         socket.on("birthdayRemoved", handleBirthdayRemoved);
+    //         socket.on("updatedProfile", handleUpdatedProfile);
+    //     }
 
-        return () => {
-            if (socket?.connected) {
-                socket.off("commentToClient", handleComment);
-                socket.off("deletePost", handleCommentDelete);
-                socket.off("likeToClient", handleLike);
-                socket.off("birthdayRemoved", handleBirthdayRemoved);
-                socket.off("updatedProfile", handleUpdatedProfile);
-            }
-        };
-    }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile]);
+    //     return () => {
+    //         if (socket?.connected) {
+    //             socket.off("commentToClient", handleComment);
+    //             socket.off("deletePost", handleCommentDelete);
+    //             socket.off("likeToClient", handleLike);
+    //             socket.off("birthdayRemoved", handleBirthdayRemoved);
+    //             socket.off("updatedProfile", handleUpdatedProfile);
+    //         }
+    //     };
+    // }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile]);
 
     useEffect(() => {
         if (props.user) {
@@ -872,12 +868,11 @@ export default function Profile(props: ProfileProps): ReactElement {
 
 export async function getServerSideProps(
     context: GetServerSidePropsContext
-): Promise<any> {
-    let res = null;
-    let user = null;
+): Promise<GetServerSidePropsResult<{ user: IUser }>> {
+    let user : IUser = null;
 
     try {
-        res = await axios.get(
+        const res = await axios.get(
             `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/getUserData?username=${context.params.username}`,
             { withCredentials: true }
         );

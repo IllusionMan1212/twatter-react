@@ -6,7 +6,6 @@ import { ChatsTeardrop, ArrowLeft, Bell } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { StatusBarProps } from "../src/types/props";
-import { socket } from "src/hooks/useSocket";
 import { useToastContext } from "../src/contexts/toastContext";
 import axiosInstance from "../src/axios";
 import axios from "axios";
@@ -65,21 +64,21 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
         return () => {
             tokenSource.cancel();
         };
-    }, []);
+    }, [toast]);
 
-    useEffect(() => {
-        if (socket?.connected) {
-            socket.on("messageFromServer", handleMessageFromServer);
-            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
-        }
+    // useEffect(() => {
+    //     if (socket?.connected) {
+    //         socket.on("messageFromServer", handleMessageFromServer);
+    //         socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+    //     }
 
-        return () => {
-            if (socket?.connected) {
-                socket.off("messageFromServer", handleMessageFromServer);
-                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
-            }
-        };
-    }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
+    //     return () => {
+    //         if (socket?.connected) {
+    //             socket.off("messageFromServer", handleMessageFromServer);
+    //             socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+    //         }
+    //     };
+    // }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
 
     return (
         <div

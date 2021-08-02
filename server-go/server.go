@@ -7,8 +7,9 @@ import (
 	"os"
 
 	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/routes"
-	"illusionman1212/twatter-go/sessionstore"
+	"illusionman1212/twatter-go/sockets"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -21,7 +22,11 @@ func main() {
 		log.Fatal(err)
 	}
 	db.InitializeDB()
-	sessionstore.InitializeTypes()
+	redissession.InitializeTypes()
+	redissession.Initialize()
+
+	hub := sockets.NewHub()
+	go hub.Run()
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://192.168.119.4:3000"},
@@ -38,6 +43,9 @@ func main() {
 	routes.RegisterMessagingRoutes(apiSubrouter) // all routes need to validate the user/token
 	routes.RegisterPostsRoutes(apiSubrouter)     // only some routes need to validate the user/token
 	routes.RegisterCdnRoutes(cdnSubrouter)       // no validation required
+	router.HandleFunc("/ws", func(w http.ResponseWriter, req *http.Request) {
+		sockets.ServeWs(hub, w, req)
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" {

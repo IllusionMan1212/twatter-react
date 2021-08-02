@@ -6,42 +6,22 @@ import indexStyles from "../styles/index.module.scss";
 import Link from "next/link";
 import Head from "next/head";
 import { Eye, EyeClosed } from "phosphor-react";
-import React, { FormEvent, ReactElement, useEffect, useState } from "react";
+import React, { FormEvent, ReactElement, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
-import Loading from "../components/loading";
 import { useToastContext } from "../src/contexts/toastContext";
-import { Checkbox } from "components/checkbox/checkbox";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Login(): ReactElement {
     const toast = useToastContext();
+    const { login } = useUserContext();
 
-    const [loading, setLoading] = useState(true);
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [form, setForm] = useState({
         username: "",
         password: "",
-        stayLoggedIn: false
     });
     const [loginAllowed, setLoginAllowed] = useState(true);
-
-    useEffect(() => {
-        axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
-                { withCredentials: true }
-            ) // TODO: ditto
-            .then((res) => {
-                if (res.data.user) {
-                    Router.push("/home");
-                } else {
-                    setLoading(false);
-                }
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.name;
@@ -49,13 +29,6 @@ export default function Login(): ReactElement {
         setForm({
             ...form,
             [name]: value,
-        });
-    };
-
-    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({
-            ...form,
-            stayLoggedIn: e.target.checked
         });
     };
 
@@ -73,6 +46,7 @@ export default function Login(): ReactElement {
                     .then((response) => {
                         toast("Successfully logged in", 5000);
                         if (response.data.success) {
+                            login(response.data.user);
                             Router.push("/home");
                         }
                     })
@@ -93,11 +67,10 @@ export default function Login(): ReactElement {
         return true;
     };
 
-    return !loading ? (
+    return (
         <>
             <Head>
                 <title>Log in - Twatter</title>
-                {/* TODO: write meta tags and other important head tags */}
             </Head>
             <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
@@ -145,11 +118,6 @@ export default function Login(): ReactElement {
                                 ></Eye>
                             )}
                         </div>
-                        <Checkbox
-                            style={{ marginTop: "0.5em" }}
-                            label="Keep me logged in"
-                            handleChange={handleCheckboxChange}
-                        />
                         <button
                             className={`text-medium mt-1 mx-5Percent ${styles.button} ${indexStyles.filledButton}`}
                         >
@@ -170,7 +138,5 @@ export default function Login(): ReactElement {
                 </div>
             </LayoutRegular>
         </>
-    ) : (
-        <Loading height="100" width="100"></Loading>
     );
 }

@@ -18,7 +18,6 @@ import SwiperCore, { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "../loading";
 import axios from "axios";
-import { socket } from "src/hooks/useSocket";
 import { IAttachment, IPost } from "src/types/general";
 import {
     handleChange,
@@ -185,21 +184,21 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         };
     }, [props.modalData.post]);
 
-    useEffect(() => {
-        if (socket?.connected) {
-            socket.on("commentToClient", handleComment);
-            socket.on("deletePost", handleCommentDelete);
-            socket.on("likeToClient", handleLike);
-        }
+    // useEffect(() => {
+    //     if (socket?.connected) {
+    //         socket.on("commentToClient", handleComment);
+    //         socket.on("deletePost", handleCommentDelete);
+    //         socket.on("likeToClient", handleLike);
+    //     }
 
-        return () => {
-            if (socket?.connected) {
-                socket.off("commentToClient", handleComment);
-                socket.off("deletePost", handleCommentDelete);
-                socket.off("likeToClient", handleLike);
-            }
-        };
-    }, [handleComment, handleCommentDelete, handleLike]);
+    //     return () => {
+    //         if (socket?.connected) {
+    //             socket.off("commentToClient", handleComment);
+    //             socket.off("deletePost", handleCommentDelete);
+    //             socket.off("likeToClient", handleLike);
+    //         }
+    //     };
+    // }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
         if (commentBoxRef?.current) {

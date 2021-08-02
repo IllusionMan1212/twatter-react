@@ -5,7 +5,6 @@ import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { PostOptionsMenuProps } from "../src/types/props";
 import { ReactElement, useEffect, useRef, useState } from "react";
-import { socket } from "src/hooks/useSocket";
 
 export default function PostOptionsMenu(
     props: PostOptionsMenuProps
@@ -31,7 +30,7 @@ export default function PostOptionsMenu(
         axios
             .post("posts/deletePost", payload)
             .then((res) => {
-                socket.emit("deletePost", socketPayload);
+                // socket.emit("deletePost", socketPayload);
                 toast(res.data.message, 3000);
             })
             .catch((err) => {
