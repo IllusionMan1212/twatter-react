@@ -2,17 +2,16 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import React, { ReactElement, useCallback, useEffect } from "react";
 import { ToastWrapper, useToastContext } from "../src/contexts/toastContext";
+import { NextSeo } from "next-seo";
+import { UserWrapper, useUserContext } from "src/contexts/userContext";
 import "../styles/globals.scss";
 
 import "swiper/swiper.scss";
 import "swiper/components/navigation/navigation.scss";
-import { NextSeo } from "next-seo";
-import { useSocket, socket } from "src/hooks/useSocket";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
-
-    // useSocket();
+    const { user } = useUserContext();
 
     const handleError = useCallback(
         (message) => {
@@ -22,12 +21,12 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
     );
 
     useEffect(() => {
-        socket?.on("error", handleError);
-
-        return () => {
-            socket?.off("error", handleError);
-        };
-    }, [socket, handleError]);
+        if (user?.socket) {
+            user.socket.onerror = (event) => {
+                handleError(event);
+            };
+        }
+    }, [user?.socket, handleError]);
 
     return (
         <>
@@ -104,9 +103,11 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                 <meta name="msapplication-TileColor" content="#151515" />
                 <meta name="theme-color" content="#6067fe" />
             </Head>
-            <ToastWrapper>
-                <Component {...pageProps} />
-            </ToastWrapper>
+            <UserWrapper>
+                <ToastWrapper>
+                    <Component {...pageProps} />
+                </ToastWrapper>
+            </UserWrapper>
         </>
     );
 }

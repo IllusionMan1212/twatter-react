@@ -5,20 +5,22 @@ import { ReactElement, useEffect } from "react";
 import { useToastContext } from "../src/contexts/toastContext";
 import { UserContextMenuProps } from "../src/types/props";
 import styles from "./userContextMenu.module.scss";
-import { socket } from "../src/hooks/useSocket";
 import { Gear, SignOut, UserCircle, Bug } from "phosphor-react";
 import ProfileImage from "./post/profileImage";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function UserContextMenu(
     props: UserContextMenuProps
 ): ReactElement {
     const toast = useToastContext();
+    const { user, logout } = useUserContext();
 
-    const logout = () => {
+    const _logout = () => {
         axios
             .delete("/users/logout")
             .then(() => {
-                //socket.close();
+                user?.socket?.close(1000); // 1000 is normal termination
+                logout();
                 Router.push("/login");
                 toast("Logged out", 3000);
             })
@@ -92,7 +94,7 @@ export default function UserContextMenu(
                     </div>
                     <div
                         className={styles.menuItem}
-                        onClick={() => logout()}
+                        onClick={() => _logout()}
                     >
                         <SignOut size={25}/>
                         <p>Logout</p>

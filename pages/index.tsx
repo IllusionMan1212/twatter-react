@@ -4,33 +4,10 @@ import LayoutRegular from "../components/layouts/layoutRegular";
 import StatusBarLoggedOut from "../components/statusBarLoggedOut";
 import indexStyles from "../styles/index.module.scss";
 import { CurrencyCircleDollar, Fingerprint } from "phosphor-react";
-import axios from "axios";
-import Router from "next/router";
-import { useState, useEffect, ReactElement } from "react";
-import Loading from "../components/loading";
+import { ReactElement } from "react";
 
 export default function Index(): ReactElement {
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
-                { withCredentials: true }
-            )
-            .then((res) => {
-                if (res.data.user) {
-                    Router.push("/home");
-                } else {
-                    setLoading(false);
-                }
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    }, []);
-
-    return !loading ? (
+    return (
         <>
             <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
@@ -112,8 +89,8 @@ export default function Index(): ReactElement {
                                 <h2 className="my-1">Contact</h2>
                                 <p className="my-1 text-medium">
                                     Reach us at{" "}
-                                    <a href="mailto:Contact@twatter.com">
-                                        Contact@twatter.com
+                                    <a href="mailto:twatter@illusionman1212.me">
+                                        twatter@illusionman1212.me
                                     </a>
                                 </p>
                             </div>
@@ -140,7 +117,5 @@ export default function Index(): ReactElement {
                 </div>
             </div>
         </>
-    ) : (
-        <Loading height="100" width="100"></Loading>
     );
 }

@@ -5,7 +5,6 @@ import { useToastContext } from "../../src/contexts/toastContext";
 import axios from "../../src/axios";
 import { LikeButtonProps } from "../../src/types/props";
 import { formatBigNumbers } from "../../src/utils/functions";
-import { socket } from "src/hooks/useSocket";
 import { LikePayload } from "src/types/utils";
 
 export default function LikeButton(props: LikeButtonProps): ReactElement {
@@ -29,7 +28,7 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
             likeType: props.likeUsers.includes(props.currentUserId) ? "UNLIKE" : "LIKE",
         };
 
-        socket.emit("likeToServer", payload);
+        // socket.emit("likeToServer", payload);
         axios.post("posts/likePost", payload).catch((err) => {
             toast(err?.response?.data?.message ?? "An error has occurred", 3000);
         });

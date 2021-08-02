@@ -8,7 +8,6 @@ import styles from "./editProfilePopup.module.scss";
 import homeStyles from "../styles/home.module.scss";
 import { useToastContext } from "src/contexts/toastContext";
 import { IAttachment, IBirthday } from "src/types/general";
-import { socket } from "src/hooks/useSocket";
 
 export default function EditProfilePopup(
     props: EditProfilePopupProps
@@ -41,7 +40,7 @@ export default function EditProfilePopup(
         if (birthday?.day && birthday?.month && birthday?.year) {
             payload.birthday = birthday;
         }
-        socket.emit("updateProfile", payload);
+        // socket.emit("updateProfile", payload);
         props.setEditProfilePopup(false);
     };
 
@@ -70,7 +69,7 @@ export default function EditProfilePopup(
     };
 
     const handleRemoveBirthday = () => {
-        socket.emit("removeBirthday", props.userData.id);
+        // socket.emit("removeBirthday", props.userData.id);
     };
 
     useEffect(() => {

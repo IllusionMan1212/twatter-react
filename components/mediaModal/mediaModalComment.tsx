@@ -11,7 +11,6 @@ import styles from "./mediaModalComment.module.scss";
 import postStyles from "../post/post.module.scss";
 import { ModalCommentProps } from "src/types/props";
 import AttachmentsContainer from "components/attachmentsContainer";
-import { socket } from "src/hooks/useSocket";
 import { LikePayload } from "src/types/utils";
 import ProfileImage from "components/post/profileImage";
 
@@ -39,17 +38,17 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
         [likes]
     );
 
-    useEffect(() => {
-        if (socket?.connected) {
-            socket.on("likeToClient", handleLike);
-        }
+    // useEffect(() => {
+    //     if (socket?.connected) {
+    //         socket.on("likeToClient", handleLike);
+    //     }
 
-        return () => {
-            if (socket?.connected) {
-                socket.off("likeToClient", handleLike);
-            }
-        };
-    }, [handleLike]);
+    //     return () => {
+    //         if (socket?.connected) {
+    //             socket.off("likeToClient", handleLike);
+    //         }
+    //     };
+    // }, [handleLike]);
 
     return (
         <div
