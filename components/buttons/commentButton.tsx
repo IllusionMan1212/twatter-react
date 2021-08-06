@@ -20,8 +20,8 @@ export default function CommentButton(props: CommentButtonProps): ReactElement {
                     <ChatCircle size="30" color="#6067fe"></ChatCircle>
                 </div>
             </div>
-            {props.post.comments.length != 0 && (
-                <p>{formatBigNumbers(props.numberOfComments)}</p>
+            {props.post.comments != 0 && (
+                <p>{formatBigNumbers(props.post.comments)}</p>
             )}
         </div>
     );

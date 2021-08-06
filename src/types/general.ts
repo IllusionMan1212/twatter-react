@@ -1,6 +1,42 @@
+interface NullableInt32 {
+    Int32: number;
+    Valid: boolean;
+}
+
+interface NullableInt64 {
+    Int64: number;
+    Valid: boolean;
+}
+
+interface NullableString {
+    String: string;
+    Valid: boolean;
+}
+
+interface NullableBoolean {
+    Bool: boolean;
+    Valid: boolean;
+}
+
+interface NullableArray<T> {
+    Array: Array<T>;
+    Valid: boolean;
+}
+
 interface DateAndTime {
     Time: Date;
     Valid: boolean;
+}
+
+interface IParentUser {
+    id: NullableInt64;
+    username: NullableString;
+    display_name: NullableString;
+    avatar_url: NullableString;
+    bio: NullableString;
+    birthday: DateAndTime;
+    created_at: DateAndTime;
+    finished_setup: NullableBoolean;
 }
 
 export interface IUser {
@@ -15,7 +51,7 @@ export interface IUser {
 }
 
 export interface IConversation {
-    _id: string;
+    id: string;
     members: Array<IUser>;
     participants: Array<IUser>;
     receivers: Array<IUser>;
@@ -24,18 +60,26 @@ export interface IConversation {
     lastMessage: string;
 }
 
+// TODO: gotta check if the attachments even need to be a nullable array
+interface IParentPost {
+    id: NullableInt64;
+    author: IParentUser;
+    content: NullableString;
+    attachments: NullableArray<PostAttachment>;
+    likes: NullableInt32;
+    comments: NullableInt32;
+    replying_to: IParentPost;
+}
+
 export interface IPost {
-    _id: string;
+    id: string;
     author: IUser;
     content: string;
     attachments: Array<PostAttachment>;
-    createdAt: string;
-    likeUsers: Array<string>;
-    comments: Array<string>;
-    replyingTo: Array<IPost>;
-
-    // not real db values
-    numberOfComments?: number;
+    created_at: DateAndTime;
+    likes: number;
+    comments: number;
+    replying_to: IParentPost;
 }
 
 export interface IExpandedPost extends Omit<IPost, "comments"> {

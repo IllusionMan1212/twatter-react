@@ -17,15 +17,15 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
             toast("You must be logged in to like this post", 4000);
             return;
         }
-        if (!props.likeUsers.includes(props.currentUserId)) {
+        if (!props.likes.includes(props.currentUserId)) {
             likeRef?.current?.classList.add(styles.isAnimating);
             setTimeout(() => {
                 likeRef?.current?.classList.remove(styles.isAnimating);
             }, 800);
         }
         const payload: LikePayload = {
-            postId: props.post._id,
-            likeType: props.likeUsers.includes(props.currentUserId) ? "UNLIKE" : "LIKE",
+            postId: props.post.id,
+            likeType: props.likes.includes(props.currentUserId) ? "UNLIKE" : "LIKE",
         };
 
         // socket.emit("likeToServer", payload);
@@ -47,11 +47,11 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
                     <div
                         ref={likeRef}
                         className={styles.like}
-                        style={{ backgroundPosition: props.likeUsers.includes(props.currentUserId) ? "right" : "left" }}
+                        style={{ backgroundPosition: "left" }}
                     ></div>
                 </div>
             </div>
-            {props.likeUsers.length != 0 && <p>{formatBigNumbers(props.likeUsers.length)}</p>}
+            {props.likes != 0 && <p>{formatBigNumbers(props.likes)}</p>}
         </div>
     );
 }

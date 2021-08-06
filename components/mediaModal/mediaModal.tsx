@@ -79,14 +79,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             contentLength: commentBoxRef.current.textContent.length,
             author: props.modalData.currentUser,
             attachments: attachments,
-            replyingTo: props.modalData.post._id,
+            replyingTo: props.modalData.post.id,
         };
         commentBoxRef.current.textContent = "";
         setAttachments([]);
         setPreviewImages([]);
         setCommentingAllowed(false);
         setCharsLeft(postCharLimit);
-        socket.emit("commentToServer", payload);
+        //socket.emit("commentToServer", payload);
     };
 
     const handleWindowKeyDown = (e: KeyboardEvent) => {
@@ -107,14 +107,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const handleCommentDelete = useCallback(
         (commentId) => {
-            setComments(comments.filter((comment) => comment._id != commentId));
+            setComments(comments.filter((comment) => comment.id != commentId));
         },
         [comments]
     );
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            if (payload.postId == props.modalData.post._id) {
+            if (payload.postId == props.modalData.post.id) {
                 if (payload.likeType == "LIKE") {
                     setLikes(likes.concat(props.modalData.currentUser?.id));
                 } else if (payload.likeType == "UNLIKE") {
@@ -131,9 +131,9 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const updateModalCommentLikes = (payload: LikePayload) => {
         setComments(comments.map((comment => {
-            if (payload.postId == comment._id) {
+            if (payload.postId == comment.id) {
                 if (payload.likeType == "LIKE") {
-                    comment.likeUsers = comment.likeUsers.concat(props.modalData.currentUser?.id);
+                    comment.likes = comment.likes.concat(props.modalData.currentUser?.id);
                 } else if (payload.likeType == "UNLIKE") {
                     comment.likeUsers = comment.likeUsers.filter((user) => user != props.modalData.currentUser?.id);
                 }
@@ -151,14 +151,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setAttachments([]);
         setPreviewImages([]);
         setNowCommenting(false);
-        setLikes(props.modalData.post.likeUsers);
+        setLikes(props.modalData.post.likes);
 
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
 
         axios
             .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.modalData.post._id}`,
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.modalData.post.id}`,
                 { cancelToken: tokenSource.token }
             )
             .then((res) => {
@@ -253,7 +253,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             </a>
                         </Link>
                         <PostOptionsMenuButton
-                            postId={props.modalData.post._id}
+                            postId={props.modalData.post.id}
                             postAuthorId={props.modalData.post.author.id}
                             postAuthorUsername={props.modalData.post.author.username}
                             currentUserId={props.modalData.currentUser?.id}
@@ -273,16 +273,15 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <CommentButton
                             post={props.modalData.post}
                             handleClick={handleCommentClick}
-                            numberOfComments={comments.length}
                         ></CommentButton>
                         <LikeButton
                             post={props.modalData.post}
                             currentUserId={props.modalData.currentUser?.id}
-                            likeUsers={likes}
+                            likes={likes}
                         ></LikeButton>
                     </div>
                     <p className={styles.date}>
-                        {formatDate(props.modalData.post.createdAt)}
+                        {formatDate(props.modalData.post.created_at.Time.toString())}
                     </p>
                 </div>
                 <div ref={parentContainerRef} className={styles.modalPostComments}>
@@ -291,7 +290,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             {comments.map((comment) => {
                                 return (
                                     <MediaModalComment
-                                        key={comment._id}
+                                        key={comment.id}
                                         comment={comment}
                                         currentUser={
                                             props.modalData.currentUser

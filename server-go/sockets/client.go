@@ -2,6 +2,7 @@ package sockets
 
 import (
 	"bytes"
+	"illusionman1212/twatter-go/redissession"
 	"log"
 	"net/http"
 	"time"
@@ -124,6 +125,15 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+
+	// check if the user is logged in and authenticated with a valid session
+	session := redissession.GetSession(r)
+
+	if session.IsNew {
+		conn.Close()
+		return
+	}
+
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 

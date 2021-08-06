@@ -29,6 +29,7 @@ import EditProfilePopup from "components/editProfilePopup";
 import { Virtuoso } from "react-virtuoso";
 import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
+import { handleSocketEvent } from "src/socketHandler";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -41,7 +42,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     useScrollRestoration(router);
 
     const toast = useToastContext();
-    const { user: currentUser } = useUserContext();
+    const { user: currentUser, socket } = useUserContext();
 
     const parentContainerRef = useRef(null);
     const postsPageRef = useRef(null);
@@ -188,7 +189,7 @@ export default function Profile(props: ProfileProps): ReactElement {
         (comment) => {
             setPostsCount(postsCount + 1);
             getActiveTabPosts().map((post) => {
-                if (post._id == comment.replyingTo) {
+                if (post.id == comment.replyingTo) {
                     post.comments.push(comment._id);
                     post.numberOfComments++;
                     return post;
@@ -207,10 +208,10 @@ export default function Profile(props: ProfileProps): ReactElement {
             // check if the id is a post id and remove the post
             if (
                 getActiveTabPosts().some((post) => {
-                    return post._id == commentId;
+                    return post.id == commentId;
                 })
             ) {
-                setActiveTabPosts(getActiveTabPosts().filter((post) => post._id != commentId));
+                setActiveTabPosts(getActiveTabPosts().filter((post) => post.id != commentId));
             // check if the id is a comment id and decrement the comment counter
             } else {
                 setActiveTabPosts(getActiveTabPosts().map((post) => {
@@ -231,7 +232,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     const handleLike = useCallback(
         (payload: LikePayload) => {
             setPosts(posts.current.map((post) => {
-                if (post._id == payload.postId) {
+                if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(
                             currentUser.id
@@ -246,7 +247,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 return post;
             }));
             setPostsAndComments(postsAndComments.current.map((post) => {
-                if (post._id == payload.postId) {
+                if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(
                             currentUser.id
@@ -261,7 +262,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 return post;
             }));
             setMediaPosts(mediaPosts.current.map((post) => {
-                if (post._id == payload.postId) {
+                if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
                         post.likeUsers = post.likeUsers.concat(
                             currentUser.id
@@ -280,9 +281,10 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     const handleBirthdayRemoved = useCallback(
-        (userId) => {
-            if (currentUser?.id == userId && userId == user.id) {
-                setUser({ ...user, birthday: null });
+        (data) => {
+            console.log("userId: " + data.id);
+            if (currentUser?.id == data.id && data.id == user.id) {
+                setUser({ ...user, birthday: { Time: new Date("0001-01-01T00:00:00Z"), Valid: false } });
             }
         },
         [currentUser?.id, user]
@@ -385,25 +387,30 @@ export default function Profile(props: ProfileProps): ReactElement {
         }
     };
 
-    // useEffect(() => {
-    //     if (socket?.connected) {
-    //         socket.on("commentToClient", handleComment);
-    //         socket.on("deletePost", handleCommentDelete);
-    //         socket.on("likeToClient", handleLike);
-    //         socket.on("birthdayRemoved", handleBirthdayRemoved);
-    //         socket.on("updatedProfile", handleUpdatedProfile);
-    //     }
+    useEffect(() => {
+        if (socket) {
+            socket.onmessage = (event) => {
+                console.log(event);
+            };
 
-    //     return () => {
-    //         if (socket?.connected) {
-    //             socket.off("commentToClient", handleComment);
-    //             socket.off("deletePost", handleCommentDelete);
-    //             socket.off("likeToClient", handleLike);
-    //             socket.off("birthdayRemoved", handleBirthdayRemoved);
-    //             socket.off("updatedProfile", handleUpdatedProfile);
-    //         }
-    //     };
-    // }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile]);
+            handleSocketEvent(socket, "birthdayRemoved", handleBirthdayRemoved);
+            // socket.on("commentToClient", handleComment);
+            // socket.on("deletePost", handleCommentDelete);
+            // socket.on("likeToClient", handleLike);
+            // socket.on("birthdayRemoved", handleBirthdayRemoved);
+            // socket.on("updatedProfile", handleUpdatedProfile);
+        }
+
+        return () => {
+            if (socket) {
+                // socket.off("commentToClient", handleComment);
+                // socket.off("deletePost", handleCommentDelete);
+                // socket.off("likeToClient", handleLike);
+                // socket.off("birthdayRemoved", handleBirthdayRemoved);
+                // socket.off("updatedProfile", handleUpdatedProfile);
+            }
+        };
+    }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile, socket]);
 
     useEffect(() => {
         if (props.user) {
@@ -752,7 +759,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 }}
                                                                 itemContent={(_index, post) => (
                                                                     <Post
-                                                                        key={post._id}
+                                                                        key={post.id}
                                                                         currentUser={
                                                                             currentUser
                                                                         }

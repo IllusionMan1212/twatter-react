@@ -15,7 +15,7 @@ import ProfileImage from "./profileImage";
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
         // TODO: open a modal where you can comment on the post
-        Router.push(`/u/${props.post.author.username}/${props.post._id}`);
+        Router.push(`/u/${props.post.author.username}/${props.post.id}`);
     };
 
     return (
@@ -24,14 +24,14 @@ export default function Post(props: PostProps): ReactElement {
             onClick={() =>
                 props.post.author &&
                 Router.push(
-                    `/u/${props.post.author.username}/${props.post._id}`
+                    `/u/${props.post.author.username}/${props.post.id}`
                 )
             }
         >
             <div className={styles.postContent}>
-                {props.post.replyingTo?.[0] && (
+                {props.post.replying_to?.id.Valid && (
                     <Link
-                        href={`/u/${props.post.replyingTo[0].author.username}/${props.post.replyingTo[0]._id}`}
+                        href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.Int64}`}
                     >
                         <a
                             className={`flex mb-1Percent text-small ${styles.replyingTo}`}
@@ -46,26 +46,26 @@ export default function Post(props: PostProps): ReactElement {
                                     <ProfileImage
                                         width={25}
                                         height={25}
-                                        src={props.post.replyingTo[0].author.avatar_url}
+                                        src={props.post.replying_to.author.avatar_url.String}
                                     />
                                     <span
                                         className="text-bold"
                                         style={{ paddingLeft: "0.5em" }}
                                     >
                                         {
-                                            props.post.replyingTo[0].author
-                                                .display_name
+                                            props.post.replying_to.author
+                                                .display_name.String
                                         }
                                         {"'s post: "}
                                     </span>
-                                    {props.post.replyingTo[0].content && (
+                                    {props.post.replying_to.content.Valid && (
                                         <span
                                             style={{ paddingLeft: "0.5em" }}
                                         >
                                             &quot;
                                             {
-                                                props.post.replyingTo[0]
-                                                    .content
+                                                props.post.replying_to
+                                                    .content.String
                                             }
                                             &quot;
                                         </span>
@@ -112,7 +112,7 @@ export default function Post(props: PostProps): ReactElement {
                     )}
                 </div>
                 <PostOptionsMenuButton
-                    postId={props.post._id}
+                    postId={props.post.id}
                     postAuthorId={props.post.author?.id}
                     postAuthorUsername={props.post.author?.username}
                     currentUserId={props.currentUser?.id}
@@ -129,18 +129,17 @@ export default function Post(props: PostProps): ReactElement {
                     <div
                         className={`flex align-items-end text-small ${styles.postDate}`}
                     >
-                        {timeSince(props.post.createdAt)}
+                        {timeSince(props.post.created_at.Time.toString())}
                     </div>
                     <div className="flex gap-1 justify-content-end">
                         <CommentButton
                             post={props.post}
-                            numberOfComments={props.post.numberOfComments}
                             handleClick={handleCommentButtonClick}
                         ></CommentButton>
                         <LikeButton
                             post={props.post}
                             currentUserId={props.currentUser?.id}
-                            likeUsers={props.post.likeUsers}
+                            likes={props.post.likes}
                         ></LikeButton>
                     </div>
                 </div>

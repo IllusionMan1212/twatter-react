@@ -30,6 +30,7 @@ import axios from "axios";
 import { LikePayload } from "src/types/utils";
 import { Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
+import { handleSocketEvent } from "src/socketHandler";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
@@ -81,18 +82,20 @@ export default function Home(): ReactElement {
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
         const payload = {
-            content: content,
-            contentLength: composePostRef.current.textContent.length,
-            author: user,
-            attachments: attachments,
+            eventType: "post",
+            data: {
+                content: content,
+                contentLength: composePostRef.current.textContent.length,
+                author: user,
+                attachments: attachments,            
+            }
         };
         composePostRef.current.textContent = "";
         setAttachments([]);
         setPreviewImages([]);
         setPostingAllowed(false);
         setCharsLeft(postCharLimit);
-        socket.send("posting a post");
-        // socket?.emit("post", payload);
+        socket.send(JSON.stringify(payload));
     };
 
     const handleMediaClick = (
@@ -148,6 +151,7 @@ export default function Home(): ReactElement {
 
     const handlePost = useCallback(
         (post) => {
+            console.log(post);
             toast("Posted Successfully", 3000);
             setNowPosting(false);
             setMobileCompose(false);
@@ -161,16 +165,17 @@ export default function Home(): ReactElement {
         (postId) => {
             if (
                 posts.some((post) => {
-                    return post._id == postId;
+                    return post.id == postId;
                 })
             ) {
-                setPosts(posts?.filter((post) => post._id != postId));
+                setPosts(posts?.filter((post) => post.id != postId));
             } else {
+                // if the post is a comment (used when deleting from mediaModal)
                 setPosts(
                     posts.map((post) => {
                         post.comments.map((comment) => {
                             if (comment == postId) {
-                                post.numberOfComments--;
+                                post.comments--;
                                 return comment;
                             }
                             return comment;
@@ -188,10 +193,10 @@ export default function Home(): ReactElement {
         (comment) => {
             setPosts(
                 posts.map((post) => {
-                    if (post._id == comment.replyingTo) {
+                    if (post.id == comment.replyingTo) {
                         console.log(comment);
                         post.comments.push(comment._id);
-                        post.numberOfComments++;
+                        post.comments++;
                         return post;
                     }
                     return post;
@@ -205,11 +210,11 @@ export default function Home(): ReactElement {
         (payload: LikePayload) => {
             setPosts(
                 posts.map((post) => {
-                    if (post._id == payload.postId) {
+                    if (post.id == payload.postId) {
                         if (payload.likeType == "LIKE") {
-                            post.likeUsers = post.likeUsers.concat(user.id);
+                            post.likes = post.likes.concat(user.id);
                         } else if (payload.likeType == "UNLIKE") {
-                            post.likeUsers = post.likeUsers.filter(
+                            post.likes = post.likes.filter(
                                 (_user) => _user != user.id
                             );
                         }
@@ -230,6 +235,7 @@ export default function Home(): ReactElement {
                 cancelToken: tokenSource.token,
             })
             .then((res) => {
+                console.log(res.data);
                 return res.data.posts;
             })
             .catch((err) => {
@@ -253,23 +259,24 @@ export default function Home(): ReactElement {
         });
     };
 
-    // useEffect(() => {
-    //     if (socket?.connected) {
-    //         socket.on("post", handlePost);
-    //         socket.on("deletePost", handleDeletePost);
-    //         socket.on("commentToClient", handleComment);
-    //         socket.on("likeToClient", handleLike);
-    //     }
+    useEffect(() => {
+        if (socket) {
+            // socket.on("post", handlePost);
+            // socket.on("deletePost", handleDeletePost);
+            // socket.on("commentToClient", handleComment);
+            // socket.on("likeToClient", handleLike);
+            handleSocketEvent(socket, "post", handlePost);
+        }
 
-    //     return () => {
-    //         if (socket?.connected) {
-    //             socket.off("post", handlePost);
-    //             socket.off("deletePost", handleDeletePost);
-    //             socket.off("commentToClient", handleComment);
-    //             socket.off("likeToClient", handleLike);
-    //         }
-    //     };
-    // }, [handlePost, handleDeletePost, handleComment, handleLike]);
+        return () => {
+            if (socket) {
+                // socket.off("post", handlePost);
+                // socket.off("deletePost", handleDeletePost);
+                // socket.off("commentToClient", handleComment);
+                // socket.off("likeToClient", handleLike);
+            }
+        };
+    }, [handlePost, handleDeletePost, handleComment, handleLike, socket]);
 
     useEffect(() => {
         getPosts().then((posts) => {
@@ -623,7 +630,7 @@ export default function Home(): ReactElement {
                                         }}
                                         itemContent={(_index, post) => (
                                             <Post
-                                                key={post._id}
+                                                key={post.id}
                                                 post={post}
                                                 currentUser={user}
                                                 handleMediaClick={handleMediaClick}

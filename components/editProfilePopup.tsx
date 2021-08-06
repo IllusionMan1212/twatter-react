@@ -8,11 +8,24 @@ import styles from "./editProfilePopup.module.scss";
 import homeStyles from "../styles/home.module.scss";
 import { useToastContext } from "src/contexts/toastContext";
 import { IAttachment, IBirthday } from "src/types/general";
+import { useUserContext } from "src/contexts/userContext";
+
+interface UpdateProfilePayload {
+    eventType: string;
+    data: {
+        userId: string;
+        displayName: string;
+        profileImage: IAttachment;
+        bio: string;
+        birthday?: IBirthday;
+    };
+}
 
 export default function EditProfilePopup(
     props: EditProfilePopupProps
 ): ReactElement {
     const toast = useToastContext();
+    const { socket } = useUserContext();
 
     const [maxDays, setMaxDays] = useState(31);
     const [previewImage, setPreviewImage] = useState<string>(null);
@@ -30,17 +43,20 @@ export default function EditProfilePopup(
             return;
         }
 
-        const payload: {[k: string]: unknown} = {
-            userId: props.userData.id,
-            displayName: displayName,
-            profileImage: profileImage,
-            bio: bio,
+        const payload: UpdateProfilePayload = {
+            eventType: "updateProfile",
+            data: {
+                userId: props.userData.id,
+                displayName: displayName,
+                profileImage: profileImage,
+                bio: bio,
+            }
         };
 
         if (birthday?.day && birthday?.month && birthday?.year) {
-            payload.birthday = birthday;
+            payload.data.birthday = birthday;
         }
-        // socket.emit("updateProfile", payload);
+        socket.send(JSON.stringify(payload));
         props.setEditProfilePopup(false);
     };
 
@@ -69,7 +85,13 @@ export default function EditProfilePopup(
     };
 
     const handleRemoveBirthday = () => {
-        // socket.emit("removeBirthday", props.userData.id);
+        const payload = {
+            eventType: "removeBirthday",
+            data: {
+                id: props.userData.id,
+            },
+        };
+        socket.send(JSON.stringify(payload));
     };
 
     useEffect(() => {
@@ -316,7 +338,7 @@ export default function EditProfilePopup(
                                                 })}
                                         </select>
                                     </div>
-                                    {props.userData.birthday && (
+                                    {props.userData.birthday.Valid && (
                                         <Button
                                             text="Remove Birthday"
                                             size={10}
