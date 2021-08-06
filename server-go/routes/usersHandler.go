@@ -21,6 +21,7 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	exifremove "github.com/scottleedavis/go-exif-remove"
+	"github.com/sony/sonyflake"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -51,7 +52,8 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	user := &models.User{}
 
 	// query the db for the user
-	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE id = $1;`, sessionUser.ID).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
+	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE id = $1;`,
+		sessionUser.ID).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
@@ -63,7 +65,7 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"status": "200",
-		"success": "true",
+		"success": true,
 		"user": %v 
 	}`, utils.MarshalJSON(user)))
 }
@@ -224,12 +226,21 @@ func Create(w http.ResponseWriter, req *http.Request) {
 
 	user := &models.User{}
 
-	insertQuery := `INSERT INTO users (username, password, email, display_name)
-	VALUES ($1, $2, $3, $1, $4)
+	snowflake := sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC),
+	})
+	id, err := snowflake.NextID()
+	if err != nil {
+		// TOOD: return 500 here
+		panic(err)
+	}
+
+	insertQuery := `INSERT INTO users (id, username, password, email, display_name)
+	VALUES ($1, $2, $3, $4, $2)
 	RETURNING id, username, display_name, bio, avatar_url, birthday, created_at, finished_setup;`
 
 	// insert into the DB and scan the result into user
-	err = db.DBPool.QueryRow(context.Background(), insertQuery, username, hashedPassword, email).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.AvatarURL, &user.Birthday, &user.CreatedAt, &user.FinishedSetup)
+	err = db.DBPool.QueryRow(context.Background(), insertQuery, id, username, hashedPassword, email).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.AvatarURL, &user.Birthday, &user.CreatedAt, &user.FinishedSetup)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_username_key\"") {
 			utils.ConflictWithJSON(w, `{
@@ -482,6 +493,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 	db.DBPool.QueryRow(context.Background(), `UPDATE users SET finished_setup = true WHERE id = $1;`, userID)
 
+	// TODO: return the user as well to use the frontend login() funcion so that the home page loads correctly
 	utils.OkWithJSON(w, `{
 		"message": "Setup has been completed",
 		"status": "200",

@@ -19,6 +19,10 @@ func MarshalJSON(v interface{}) string {
 	return string(b)
 }
 
+func UnmarshalJSON(data []byte, v interface{}) error {
+	return json.Unmarshal(data, v)
+}
+
 func GenerateRandomBytes(n int) string {
 	b := make([]byte, n/2)
 	rand.Seed(time.Now().UnixNano())

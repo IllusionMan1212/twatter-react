@@ -77,6 +77,7 @@ export default function UserSetup(): ReactElement {
             .post("users/initialSetup", payload)
             .then((res) => {
                 toast(res.data.message, 4000);
+                // TODO: login() here
                 Router.push("/home");
             })
             .catch((err) => {

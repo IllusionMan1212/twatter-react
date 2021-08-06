@@ -100,13 +100,12 @@ export interface MediaModalProps {
 export interface LikeButtonProps {
     post: IPost;
     currentUserId?: string;
-    likeUsers: Array<string>;
+    likes: number;
 }
 
 export interface CommentButtonProps {
     post: IPost;
     handleClick: () => void;
-    numberOfComments: number;
 }
 
 export interface CommentProps {

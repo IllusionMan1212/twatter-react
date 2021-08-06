@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { createContext, ReactElement, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import { IUser } from "src/types/general";
 import Router from "next/router";
 import useSWR from "swr";
@@ -46,8 +46,7 @@ export function UserWrapper({ children }: any): ReactElement {
     const [socket, setSocket] = useState<WebSocket>(null);
     const [loading, setLoading] = useState(true);
 
-    // TODO: do we even care about the error here?
-    const { data, error } = useSWR(
+    const { data } = useSWR(
         `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
         fetcher
     );
@@ -64,10 +63,6 @@ export function UserWrapper({ children }: any): ReactElement {
 
         _socket.onclose = function() {
             console.log("WebSocket closed");
-        };
-
-        _socket.onmessage = function(e) {
-            console.log("WebSocket message received: " + e.data);
         };
 
         setSocket(_socket);

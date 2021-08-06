@@ -11,12 +11,11 @@ import styles from "./comment.module.scss";
 import postStyles from "./post.module.scss";
 import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "../attachmentsContainer";
-import { socket } from "src/hooks/useSocket";
 import { LikePayload } from "src/types/utils";
 import ProfileImage from "./profileImage";
 
 export default function Comment(props: CommentProps): ReactElement {
-    const [likes, setLikes] = useState<Array<string>>(props.comment.likeUsers);
+    const [likes, setLikes] = useState<number>(props.comment.likes);
 
     const handleCommentButtonClickOnComment = (
         commentId: string,
@@ -28,7 +27,7 @@ export default function Comment(props: CommentProps): ReactElement {
     const handleLike = useCallback(
         (payload: LikePayload) => {
             const newLikes = [...likes];
-            if (payload.postId == props.comment._id) {
+            if (payload.postId == props.comment.id) {
                 if (payload.likeType == "LIKE") {
                     setLikes(newLikes.concat(props.currentUser?.id));
                 } else if (payload.likeType == "UNLIKE") {
@@ -40,6 +39,7 @@ export default function Comment(props: CommentProps): ReactElement {
     );
 
     useEffect(() => {
+        /*
         if (socket?.connected) {
             socket.on("likeToClient", handleLike);
         }
@@ -49,6 +49,7 @@ export default function Comment(props: CommentProps): ReactElement {
                 socket.off("likeToClient", handleLike);
             }
         };
+        */
     }, [handleLike]);
 
     return (
@@ -56,7 +57,7 @@ export default function Comment(props: CommentProps): ReactElement {
             className={`${styles.comment} pointer`}
             onClick={() =>
                 Router.push(
-                    `/u/${props.comment.author.username}/${props.comment._id}`
+                    `/u/${props.comment.author.username}/${props.comment.id}`
                 )
             }
         >
@@ -77,7 +78,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     </Link>
                 </div>
                 <PostOptionsMenuButton
-                    postId={props.comment._id}
+                    postId={props.comment.id}
                     postAuthorId={props.comment.author?.id}
                     postAuthorUsername={props.comment.author?.username}
                     currentUserId={props.currentUser?.id}
@@ -95,15 +96,14 @@ export default function Comment(props: CommentProps): ReactElement {
                 <div
                     className={`flex align-items-end text-small ${styles.commentDate}`}
                 >
-                    {timeSince(props.comment.createdAt)}
+                    {timeSince(props.comment.created_at.Time.toString())}
                 </div>
                 <div className="flex gap-1 justify-content-end">
                     <CommentButton
                         post={props.comment}
-                        numberOfComments={props.comment.comments.length}
                         handleClick={() =>
                             handleCommentButtonClickOnComment(
-                                props.comment._id,
+                                props.comment.id,
                                 props.comment.author
                             )
                         }
@@ -111,7 +111,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     <LikeButton
                         post={props.comment}
                         currentUserId={props.currentUser?.id}
-                        likeUsers={likes}
+                        likes={likes}
                     ></LikeButton>
                 </div>
             </div>
