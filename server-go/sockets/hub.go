@@ -53,25 +53,40 @@ func (h *Hub) Run() {
 					socketMessage := &models.SocketMessage{}
 					utils.UnmarshalJSON(message, socketMessage)
 
-					handleSocketEvent(socketMessage, client)
+					handleSocketEvent(socketMessage, client, message)
 				}
 			}
 		}
 	}
 }
 
-func handleSocketEvent(socketMessage *models.SocketMessage, client *Client) {
+func handleSocketEvent(socketMessage *models.SocketMessage, client *Client, message []byte) {
 	// TODO: handle more events
 	switch socketMessage.EventType {
 	case "post":
 		fmt.Print("Received post\n")
 		Post(socketMessage, client)
+	case "commentToServer":
+		fmt.Print("Received comment\n")
+		Comment(socketMessage, client)
+	case "deletePost":
+		fmt.Print("Received delete post\n")
+		client.send <- message
+	case "like":
+		fmt.Print("Recieved like post\n")
+		client.send <- message
 	case "updateProfile":
 		fmt.Print("Received edit profile\n")
 		UpdateProfile(socketMessage, client)
 	case "removeBirthday":
 		fmt.Print("Received remove birthday\n")
 		RemoveBirthday(socketMessage, client)
+	case "typing":
+		fmt.Print("Received typing\n")
+		// TODO:
+	case "stopTyping":
+		fmt.Print("Received stop typing")
+		// TODO:
 	default:
 		fmt.Print("Received unknown")
 	}
