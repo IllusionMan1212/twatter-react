@@ -20,8 +20,8 @@ const (
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	// Maximum message size allowed from peer. (100 MB)
+	maxMessageSize = 100 << 20
 )
 
 var (
@@ -134,7 +134,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 524288)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

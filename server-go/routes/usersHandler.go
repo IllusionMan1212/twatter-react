@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/base64"
@@ -19,9 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-oss/image/imageutil"
 	"github.com/jackc/pgx/v4"
-	exifremove "github.com/scottleedavis/go-exif-remove"
-	"github.com/sony/sonyflake"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -158,9 +158,9 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(req.Body).Decode(&creds)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
-			"message": "Internal server error, please try again later",
+			"message": "An error has occurred, please try again later",
 			"status": "500",
-			"success": "false"
+			"success": false
 		}`)
 		panic(err)
 	}
@@ -176,7 +176,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
 			"status": "400",
-			"success": "false"
+			"success": false
 		}`)
 		return
 	}
@@ -186,7 +186,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Username must be between 3 and 16 characters",
 			"status": "400",
-			"success": "false"
+			"success": false
 		}`)
 		return
 	}
@@ -196,7 +196,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Password must be at least 8 characters",
 			"status": "400",
-			"success": "false"
+			"success": false
 		}`)
 		return
 	}
@@ -206,7 +206,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Passwords do not match",
 			"status": "400",
-			"success": "false"
+			"success": false
 		}`)
 		return
 	}
@@ -217,7 +217,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "Internal server error, please try again later",
 			"status": "500",
-			"success": "false"
+			"success": false
 		}`)
 		panic(err)
 	}
@@ -226,10 +226,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 
 	user := &models.User{}
 
-	snowflake := sonyflake.NewSonyflake(sonyflake.Settings{
-		StartTime: time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC),
-	})
-	id, err := snowflake.NextID()
+	id, err := db.Snowflake.NextID()
 	if err != nil {
 		// TOOD: return 500 here
 		panic(err)
@@ -246,14 +243,14 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			utils.ConflictWithJSON(w, `{
 				"message": "Username already taken",
 				"status": "409",
-				"success": "false"
+				"success": false
 			}`)
 			return
 		} else if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_email_key\"") {
 			utils.ConflictWithJSON(w, `{
 				"message": "Email already taken",
 				"status": "409",
-				"success": "false"
+				"success": false
 			}`)
 			return
 		}
@@ -261,7 +258,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error occurred while creating your account, please try again later",
 			"status": "500",
-			"success": "false"
+			"success": false
 		}`)
 		panic(err)
 	}
@@ -287,7 +284,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "Internal server error, please try again later",
 			"status": "500",
-			"success": "false"
+			"success": false
 		}`)
 		panic(err)
 	}
@@ -300,7 +297,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
 			"status": "400",
-			"success": "false"
+			"success": false
 		}`)
 		return
 	}
@@ -319,7 +316,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 			utils.UnauthorizedWithJSON(w, `{
 				"message": "Incorrect credentials",
 				"status": "401",
-				"success": "false"
+				"success": false
 			}`)
 		} else {
 			panic(err)
@@ -333,7 +330,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		utils.UnauthorizedWithJSON(w, `{
 			"message": "Incorrect credentials",
 			"status": "401",
-			"success": "false"
+			"success": false
 		}`)
 		return
 	}
@@ -355,12 +352,12 @@ func Login(w http.ResponseWriter, req *http.Request) {
 }
 
 func InitialSetup(w http.ResponseWriter, req *http.Request) {
-	err := req.ParseMultipartForm(32 << 20) // 32 MB
+	err := req.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
 			"status": "500",
-			"success": "false"
+			"success": false
 		}`)
 		panic(err)
 	}
@@ -424,6 +421,8 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		// TODO: limit image to 8MB
+
 		imageContent, err := image.Open()
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -433,7 +432,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			}`)
 			panic(err)
 		}
-		bytes, err := ioutil.ReadAll(imageContent)
+		buf, err := ioutil.ReadAll(imageContent)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
@@ -443,11 +442,12 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			panic(err)
 		}
 
-		imageBytes := bytes
+		imageBytes := buf
 
 		// remove exif data from jpeg and jpg images
 		if mimetype == "image/jpg" || mimetype == "image/jpeg" {
-			imageBytes, err = exifremove.Remove(bytes)
+			r := bytes.NewReader(buf)
+			reader, err := imageutil.RemoveExif(r)
 			if err != nil {
 				utils.InternalServerErrorWithJSON(w, `{
 					"message": "An error has occurred, please try again later",
@@ -456,7 +456,17 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				}`)
 				panic(err)
 			}
-
+			tempBuf := new(bytes.Buffer)
+			_, err = tempBuf.ReadFrom(reader)
+			if err != nil {
+				utils.InternalServerErrorWithJSON(w, `{
+					"message": "An error has occurred, please try again later",
+					"status": "500",
+					"success": false
+				}`)
+				panic(err)
+			}
+			imageBytes = tempBuf.Bytes()
 		}
 		extension := strings.Split(mimetype, "/")[1]
 		fileDirectory := fmt.Sprintf("../cdn/profile_images/%s/", userID)
