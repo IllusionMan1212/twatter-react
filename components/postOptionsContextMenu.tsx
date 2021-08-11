@@ -5,11 +5,13 @@ import axios from "../src/axios";
 import { useToastContext } from "../src/contexts/toastContext";
 import { PostOptionsMenuProps } from "../src/types/props";
 import { ReactElement, useEffect, useRef, useState } from "react";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function PostOptionsMenu(
     props: PostOptionsMenuProps
 ): ReactElement {
     const toast = useToastContext();
+    const { socket } = useUserContext();
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -19,22 +21,25 @@ export default function PostOptionsMenu(
         if (props.postAuthorId != props.currentUserId) {
             return;
         }
-        props.callback?.();
         const payload = {
-            postAuthor: props.postAuthorId,
+            postAuthorId: props.postAuthorId,
             postId: props.postId,
         };
         const socketPayload = {
-            postId: props.postId,
+            eventType: "deletePost",
+            data: {
+                postId: props.postId,
+            }
         };
         axios
             .post("posts/deletePost", payload)
             .then((res) => {
-                // socket.emit("deletePost", socketPayload);
+                props.callback?.();
+                socket.send(JSON.stringify(socketPayload));
                 toast(res.data.message, 3000);
             })
             .catch((err) => {
-                toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                toast(err?.response?.data?.message ?? "An error has occurred while deleting your post", 3000);
             });
     };
 
@@ -70,7 +75,7 @@ export default function PostOptionsMenu(
                             });
                         } else {
                             // TODO: fallback share popup
-                            console.log("cant share");
+                            console.log("cant share, fallback sharing windows soon");
                         }
                     }}
                 >

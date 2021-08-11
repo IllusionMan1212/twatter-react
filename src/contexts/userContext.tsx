@@ -4,12 +4,13 @@ import { IUser } from "src/types/general";
 import Router from "next/router";
 import useSWR from "swr";
 import Loading from "components/loading";
+import { TwatWebSocket } from "../customSocket";
 
 interface UserContextType {
     user: IUser;
     login: (user: IUser) => void;
     logout: () => void;
-    socket: WebSocket;
+    socket: TwatWebSocket;
 }
 
 const UserContextDefaultValues : UserContextType = {
@@ -43,7 +44,7 @@ const fetcher = (url: string) =>
 
 export function UserWrapper({ children }: any): ReactElement {
     const [user, setUser] = useState<IUser>(null);
-    const [socket, setSocket] = useState<WebSocket>(null);
+    const [socket, setSocket] = useState<TwatWebSocket>(null);
     const [loading, setLoading] = useState(true);
 
     const { data } = useSWR(
@@ -55,18 +56,9 @@ export function UserWrapper({ children }: any): ReactElement {
     const hasUser = Boolean(_user);
 
     const openSocket = useCallback(() => {
-        const _socket = new WebSocket(`ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`);
-
-        _socket.onopen = function() {
-            console.log("WebSocket opened");
-        };
-
-        _socket.onclose = function() {
-            console.log("WebSocket closed");
-        };
+        const _socket = new TwatWebSocket(`ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`);
 
         setSocket(_socket);
-
     }, []);
 
     useEffect(() => {

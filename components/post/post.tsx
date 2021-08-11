@@ -140,6 +140,7 @@ export default function Post(props: PostProps): ReactElement {
                             post={props.post}
                             currentUserId={props.currentUser?.id}
                             likes={props.post.likes}
+                            liked={props.post.liked}
                         ></LikeButton>
                     </div>
                 </div>

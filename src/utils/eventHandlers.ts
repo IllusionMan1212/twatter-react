@@ -15,20 +15,10 @@ export const handlePaste = (
     toast: (text: string, length: number) => void
 ): void => {
     e.preventDefault();
-    // handle pasting strings as plain text
-    if (e.clipboardData.items?.[0].kind == "string") {
-        const text = e.clipboardData.getData("text/plain");
-        e.currentTarget.textContent += text;
+    // handle pasting clipboard images
+    if (e.clipboardData.files?.item(0)) {
+        const file = e.clipboardData.files.item(0);
 
-        if (e.currentTarget.textContent.length > charLimit) {
-            setPostingAllowed(false);
-        } else if (e.currentTarget.textContent.length) {
-            setPostingAllowed(true);
-        }
-        setCharsLeft(charLimit - e.currentTarget.textContent.length);
-        // handle pasting images
-    } else if (e.clipboardData.items?.[0].kind == "file") {
-        const file = e.clipboardData.items[0].getAsFile();
         if (!supportedFileTypes.includes(file.type)) {
             return;
         }
@@ -49,6 +39,17 @@ export const handlePaste = (
         if (charsLeft >= 0) {
             setPostingAllowed(true);
         }
+    // handle pasting strings as plain text
+    } else if (e.clipboardData.items?.[0].kind == "string") {
+        const text = e.clipboardData.getData("text/plain");
+        e.currentTarget.textContent += text;
+
+        if (e.currentTarget.textContent.length > charLimit) {
+            setPostingAllowed(false);
+        } else if (e.currentTarget.textContent.length) {
+            setPostingAllowed(true);
+        }
+        setCharsLeft(charLimit - e.currentTarget.textContent.length);
     }
 };
 

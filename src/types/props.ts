@@ -1,5 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction } from "react";
-import { IExpandedPost, IPost, IUser } from "./general";
+import { IPost, IUser } from "./general";
 import { LikePayload } from "./utils";
 
 export interface ToastProps {
@@ -64,10 +64,12 @@ export interface PostProps {
 }
 
 export interface ExpandedPostProps extends Omit<PostProps, "post"> {
-    post: IExpandedPost;
+    post: IPost;
     callback?: <T extends unknown[]>(...args: T) => void;
     nowCommenting: boolean;
     setNowCommenting: (value: SetStateAction<boolean>) => void;
+    comments: Array<IPost>;
+    loadingComments: Boolean;
 }
 
 interface PostOptionsMenuBaseProps {
@@ -101,6 +103,7 @@ export interface LikeButtonProps {
     post: IPost;
     currentUserId?: string;
     likes: number;
+    liked: boolean;
 }
 
 export interface CommentButtonProps {
@@ -131,7 +134,7 @@ export interface ProfileProps {
 }
 
 export interface UserPostProps {
-    post: IExpandedPost;
+    post: IPost;
 }
 
 export enum ButtonType {

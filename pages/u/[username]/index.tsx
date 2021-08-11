@@ -29,7 +29,6 @@ import EditProfilePopup from "components/editProfilePopup";
 import { Virtuoso } from "react-virtuoso";
 import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
-import { handleSocketEvent } from "src/socketHandler";
 
 export default function Profile(props: ProfileProps): ReactElement {
     enum Tabs {
@@ -189,9 +188,9 @@ export default function Profile(props: ProfileProps): ReactElement {
         (comment) => {
             setPostsCount(postsCount + 1);
             getActiveTabPosts().map((post) => {
+                // TODO: change this replyingTo to appropriate name
                 if (post.id == comment.replyingTo) {
-                    post.comments.push(comment._id);
-                    post.numberOfComments++;
+                    post.comments++;
                     return post;
                 }
                 return post;
@@ -217,7 +216,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setActiveTabPosts(getActiveTabPosts().map((post) => {
                     post.comments.map((comment) => {
                         if (comment == commentId) {
-                            post.numberOfComments--;
+                            post.comments--;
                             return comment;
                         }
                         return comment;
@@ -234,13 +233,9 @@ export default function Profile(props: ProfileProps): ReactElement {
             setPosts(posts.current.map((post) => {
                 if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
-                        post.likeUsers = post.likeUsers.concat(
-                            currentUser.id
-                        );
+                        post.likes++;
                     } else if (payload.likeType == "UNLIKE") {
-                        post.likeUsers = post.likeUsers.filter(
-                            (_user) => _user != currentUser.id
-                        );
+                        post.likes--; 
                     }
                     return post;
                 }
@@ -249,13 +244,9 @@ export default function Profile(props: ProfileProps): ReactElement {
             setPostsAndComments(postsAndComments.current.map((post) => {
                 if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
-                        post.likeUsers = post.likeUsers.concat(
-                            currentUser.id
-                        );
+                        post.likes++;
                     } else if (payload.likeType == "UNLIKE") {
-                        post.likeUsers = post.likeUsers.filter(
-                            (_user) => _user != currentUser.id
-                        );
+                        post.likes--;
                     }
                     return post;
                 }
@@ -264,13 +255,9 @@ export default function Profile(props: ProfileProps): ReactElement {
             setMediaPosts(mediaPosts.current.map((post) => {
                 if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
-                        post.likeUsers = post.likeUsers.concat(
-                            currentUser.id
-                        );
+                        post.likes++;
                     } else if (payload.likeType == "UNLIKE") {
-                        post.likeUsers = post.likeUsers.filter(
-                            (_user) => _user != currentUser.id
-                        );
+                        post.likes--;
                     }
                     return post;
                 }
@@ -281,9 +268,8 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     const handleBirthdayRemoved = useCallback(
-        (data) => {
-            console.log("userId: " + data.id);
-            if (currentUser?.id == data.id && data.id == user.id) {
+        (userId) => {
+            if (currentUser?.id == userId && userId == user.id) {
                 setUser({ ...user, birthday: { Time: new Date("0001-01-01T00:00:00Z"), Valid: false } });
             }
         },
@@ -322,7 +308,13 @@ export default function Profile(props: ProfileProps): ReactElement {
                 { withCredentials: true }
             )
             .then((res) => {
+                if (res.data.posts.length < 50) {
+                    setPostsReachedEnd(true);
+                }
                 return res.data.posts;
+            })
+            .catch((err) => {
+                toast(err?.response?.data?.message || "An error has occurred", 3000);
             });
     }, [props.user?.id]);
 
@@ -389,11 +381,7 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (socket) {
-            socket.onmessage = (event) => {
-                console.log(event);
-            };
-
-            handleSocketEvent(socket, "birthdayRemoved", handleBirthdayRemoved);
+            socket.on("birthdayRemoved", handleBirthdayRemoved);
             // socket.on("commentToClient", handleComment);
             // socket.on("deletePost", handleCommentDelete);
             // socket.on("likeToClient", handleLike);
