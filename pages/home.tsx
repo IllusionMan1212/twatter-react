@@ -30,7 +30,7 @@ import axios from "axios";
 import { LikePayload } from "src/types/utils";
 import { Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
-import { handleSocketEvent } from "src/socketHandler";
+import useLatestState from "src/hooks/useLatestState";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
@@ -38,14 +38,13 @@ export default function Home(): ReactElement {
     const composePostRef = useRef<HTMLSpanElement>(null);
     const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
     const inputContainerMobileRef = useRef<HTMLDivElement>(null);
-    const pageRef = useRef(null);
 
     const toast = useToastContext();
 
     const [postingAllowed, setPostingAllowed] = useState(false);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
     const [mobileCompose, setMobileCompose] = useState(false);
-    const [posts, setPosts] = useState<Array<IPost>>([]);
+    const [posts, setPosts] = useLatestState<Array<IPost>>([]);
     const [attachments, setAttachments] = useState<Array<IAttachment>>([]);
     const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [nowPosting, setNowPosting] = useState(false);
@@ -57,11 +56,11 @@ export default function Home(): ReactElement {
     });
     const [touchY, setTouchY] = useState(null);
     const [reachedEnd, setReachedEnd] = useState(false);
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useLatestState(0);
 
-    pageRef.current = page;
-
-    const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const handleClick = async (
+        e: React.MouseEvent<HTMLElement, MouseEvent>
+    ) => {
         if (!postingAllowed) {
             e.preventDefault();
             return;
@@ -81,14 +80,26 @@ export default function Home(): ReactElement {
         const content = composePostRef.current.innerText
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
+        const attachmentsToSend = [];
+        for (let i = 0; i < attachments.length; i++) {
+            const attachmentArrayBuffer =
+                await attachments[i].data.arrayBuffer();
+            const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
+            const data = Buffer.from(attachmentBuffer).toString("base64");
+            const attachment = {
+                mimetype: attachments[0].mimetype,
+                data: data
+            }
+            attachmentsToSend.push(attachment);
+        }
         const payload = {
             eventType: "post",
             data: {
                 content: content,
                 contentLength: composePostRef.current.textContent.length,
                 author: user,
-                attachments: attachments,            
-            }
+                attachments: attachmentsToSend 
+            },
         };
         composePostRef.current.textContent = "";
         setAttachments([]);
@@ -151,51 +162,35 @@ export default function Home(): ReactElement {
 
     const handlePost = useCallback(
         (post) => {
-            console.log(post);
             toast("Posted Successfully", 3000);
             setNowPosting(false);
             setMobileCompose(false);
 
-            setPosts([post].concat(posts));
+            setPosts([post].concat(posts.current));
         },
         [posts]
     );
 
     const handleDeletePost = useCallback(
-        (postId) => {
-            if (
-                posts.some((post) => {
-                    return post.id == postId;
-                })
-            ) {
-                setPosts(posts?.filter((post) => post.id != postId));
+        (postIdObj) => {
+            const postId = postIdObj.postId;
+            if (posts.current.some((post) => {
+                return post.id == postId;
+            })) {
+                setPosts(posts.current.filter((post) => post.id != postId));
             } else {
-                // if the post is a comment (used when deleting from mediaModal)
-                setPosts(
-                    posts.map((post) => {
-                        post.comments.map((comment) => {
-                            if (comment == postId) {
-                                post.comments--;
-                                return comment;
-                            }
-                            return comment;
-                        });
-                        return post;
-                    })
-                );
+                // TODO: handle comment deletion. (needed when deleting comments when mediamodal is open)
             }
-        },
-        [posts]
-    );
+        }, [posts]);
 
     // this is for the mediamodal
     const handleComment = useCallback(
         (comment) => {
             setPosts(
-                posts.map((post) => {
-                    if (post.id == comment.replyingTo) {
+                posts.current.map((post) => {
+                    if (post.id == comment.replying_to.id.Int64) {
                         console.log(comment);
-                        post.comments.push(comment._id);
+                        // post.comments.push(comment._id);
                         post.comments++;
                         return post;
                     }
@@ -209,14 +204,14 @@ export default function Home(): ReactElement {
     const handleLike = useCallback(
         (payload: LikePayload) => {
             setPosts(
-                posts.map((post) => {
+                posts.current.map((post) => {
                     if (post.id == payload.postId) {
                         if (payload.likeType == "LIKE") {
-                            post.likes = post.likes.concat(user.id);
+                            post.liked = true;
+                            post.likes++;
                         } else if (payload.likeType == "UNLIKE") {
-                            post.likes = post.likes.filter(
-                                (_user) => _user != user.id
-                            );
+                            post.liked = false;
+                            post.likes--;
                         }
                         return post;
                     }
@@ -231,11 +226,10 @@ export default function Home(): ReactElement {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
         return axiosInstance
-            .get(`posts/getPosts/${pageRef.current}`, {
+            .get(`posts/getPosts/${page.current}`, {
                 cancelToken: tokenSource.token,
             })
             .then((res) => {
-                console.log(res.data);
                 return res.data.posts;
             })
             .catch((err) => {
@@ -249,31 +243,30 @@ export default function Home(): ReactElement {
     };
 
     const loadMorePosts = () => {
-        setPage(pageRef.current + 1);
+        setPage(page.current + 1);
         getPosts().then((newPosts) => {
             if (!newPosts.length) {
                 setReachedEnd(true);
                 return;
             }
-            setPosts(posts.concat(newPosts));
+            setPosts(posts.current.concat(newPosts));
         });
     };
 
     useEffect(() => {
         if (socket) {
-            // socket.on("post", handlePost);
-            // socket.on("deletePost", handleDeletePost);
             // socket.on("commentToClient", handleComment);
-            // socket.on("likeToClient", handleLike);
-            handleSocketEvent(socket, "post", handlePost);
+            socket.on("like", handleLike);
+            socket.on("post", handlePost);
+            socket.on("deletePost", handleDeletePost);
         }
 
         return () => {
             if (socket) {
-                // socket.off("post", handlePost);
-                // socket.off("deletePost", handleDeletePost);
+                socket.off("post", handlePost);
+                socket.off("deletePost", handleDeletePost);
                 // socket.off("commentToClient", handleComment);
-                // socket.off("likeToClient", handleLike);
+                socket.off("like", handleLike);
             }
         };
     }, [handlePost, handleDeletePost, handleComment, handleLike, socket]);
@@ -332,15 +325,11 @@ export default function Home(): ReactElement {
             </Head>
             {user ? (
                 <>
-                    <Navbar
-                        user={user}
-                    ></Navbar>
+                    <Navbar user={user}></Navbar>
                     <div>
                         <StatusBar title="Home" user={user}></StatusBar>
                         <div className={styles.content}>
-                            <div className={styles.leftSide}>
-                                friends
-                            </div>
+                            <div className={styles.leftSide}>friends</div>
                             <div className={styles.center}>
                                 <div
                                     className={
@@ -436,7 +425,8 @@ export default function Home(): ReactElement {
                                                                 )
                                                             }
                                                             onClick={(e) => {
-                                                                e.currentTarget.value = null;
+                                                                e.currentTarget.value =
+                                                                    null;
                                                             }}
                                                             type="file"
                                                             accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
@@ -569,7 +559,8 @@ export default function Home(): ReactElement {
                                                             )
                                                         }
                                                         onClick={(e) =>
-                                                            (e.currentTarget.value = null)
+                                                            (e.currentTarget.value =
+                                                                null)
                                                         }
                                                         type="file"
                                                         accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
@@ -602,8 +593,8 @@ export default function Home(): ReactElement {
                                 </div>
                                 <div className={`text-white ${styles.posts}`}>
                                     <Virtuoso
-                                        totalCount={posts?.length}
-                                        data={posts}
+                                        totalCount={posts?.current.length}
+                                        data={posts.current}
                                         endReached={loadMorePosts}
                                         useWindowScroll
                                         overscan={{ main: 500, reverse: 500 }}
@@ -633,15 +624,15 @@ export default function Home(): ReactElement {
                                                 key={post.id}
                                                 post={post}
                                                 currentUser={user}
-                                                handleMediaClick={handleMediaClick}
+                                                handleMediaClick={
+                                                    handleMediaClick
+                                                }
                                             ></Post>
                                         )}
                                     ></Virtuoso>
                                 </div>
                             </div>
-                            <div className={styles.rightSide}>
-                                trending
-                            </div>
+                            <div className={styles.rightSide}>trending</div>
                         </div>
                     </div>
                     <div

@@ -23,7 +23,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -52,7 +52,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -84,7 +84,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -113,7 +113,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -140,7 +140,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -172,7 +172,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -199,7 +199,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -228,7 +228,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -255,7 +255,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                             window.history.pushState(
                                                 null,
                                                 null,
-                                                `/u/${props.post.author.username}/${props.post._id}/media`
+                                                `/u/${props.post.author.username}/${props.post.id}/media`
                                             );
                                             props.handleMediaClick(
                                                 e,
@@ -286,7 +286,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                         window.history.pushState(
                                             null,
                                             null,
-                                            `/u/${props.post.author.username}/${props.post._id}/media`
+                                            `/u/${props.post.author.username}/${props.post.id}/media`
                                         );
                                         props.handleMediaClick(
                                             e,

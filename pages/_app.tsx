@@ -22,9 +22,13 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
 
     useEffect(() => {
         if (socket) {
-            socket.onerror = (event) => {
-                handleError(event);
-            };
+            socket.on("error", handleError);
+        }
+
+        return () => {
+            if (socket) {
+                socket.off("error", handleError);
+            }
         }
     }, [socket, handleError]);
 

@@ -2,7 +2,6 @@
 import StatusBar from "../../components/statusBar";
 import Navbar from "../../components/navbar";
 import Loading from "../../components/loading";
-import { useUser } from "../../src/hooks/useUser";
 import Head from "next/head";
 import styles from "../../styles/messages.module.scss";
 import MessagesListItem from "../../components/messages/messagesListItem";
@@ -19,8 +18,7 @@ import Message from "../../components/messages/message";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axiosInstance from "../../src/axios";
 import { useRouter } from "next/router";
-import { IAttachment, IConversation, IUser } from "../../src/types/general";
-import { socket } from "src/hooks/useSocket";
+import { IAttachment, IConversation } from "../../src/types/general";
 import Link from "next/link";
 import MessageMediaModal from "../../components/messages/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
@@ -29,13 +27,14 @@ import {
     messageCharLimit,
     supportedFileTypes,
 } from "src/utils/variables";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
 
     const toast = useToastContext();
 
-    const user: IUser = useUser("/login", null);
+    const { user, socket } = useUserContext();
 
     const messageInputRef = useRef<HTMLSpanElement>(null);
     const virtuosoRef = useRef(null);
@@ -51,7 +50,7 @@ export default function Messages(): ReactElement {
     const [messagesListLoading, setMessagesListLoading] = useState(true);
     const [activeConversation, setActiveConversation] = useState({
         // TODO: turn this into a type
-        _id: "",
+        id: "",
         receiverId: "",
         display_name: "",
         username: "",
@@ -89,11 +88,14 @@ export default function Messages(): ReactElement {
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
         clearTimeout(timeoutId);
         const payload = {
-            receiverId: activeConversation.receiverId,
-            senderId: user.id,
-            conversationId: activeConversation._id,
+            eventType: "typing",
+            data: {
+                receiverId: activeConversation.receiverId,
+                senderId: user.id,
+                conversationId: activeConversation.id,
+            },
         };
-        socket.emit("typing", payload);
+        socket.send(JSON.stringify(payload));
 
         if (e.currentTarget.textContent.trim().length > messageCharLimit) {
             setSendingAllowed(false);
@@ -108,9 +110,19 @@ export default function Messages(): ReactElement {
         setCharsLeft(
             messageCharLimit - e.currentTarget.textContent.trim().length
         );
-        setTimeoutId(setTimeout(() => {
-            socket.emit("stopTyping", payload);
-        }, 4000));
+        setTimeoutId(
+            setTimeout(() => {
+                const payload = {
+                    eventType: "stopTyping",
+                    data: {
+                        receiverId: activeConversation.receiverId,
+                        senderId: user.id,
+                        conversationId: activeConversation.id,
+                    },
+                };
+                socket.send(JSON.stringify(payload));
+            }, 4000)
+        );
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
@@ -126,7 +138,7 @@ export default function Messages(): ReactElement {
             if (window.innerWidth > 800) {
                 !e.shiftKey &&
                     handleClickSend(
-                        (e as unknown) as React.MouseEvent<
+                        e as unknown as React.MouseEvent<
                             HTMLElement,
                             MouseEvent
                         >
@@ -145,16 +157,12 @@ export default function Messages(): ReactElement {
             const text = e.clipboardData.getData("text/plain");
             e.currentTarget.textContent += text;
 
-            if (
-                e.currentTarget.textContent.length > messageCharLimit
-            ) {
+            if (e.currentTarget.textContent.length > messageCharLimit) {
                 setSendingAllowed(false);
             } else if (e.currentTarget.textContent.length) {
                 setSendingAllowed(true);
             }
-            setCharsLeft(
-                messageCharLimit - e.currentTarget.textContent.length
-            );
+            setCharsLeft(messageCharLimit - e.currentTarget.textContent.length);
             // handle pasting images
         } else if (e.clipboardData.items?.[0].kind == "file") {
             const file = e.clipboardData.items[0].getAsFile();
@@ -189,7 +197,7 @@ export default function Messages(): ReactElement {
 
             // check if the client's active conversation is the one the message was received in
             // this basically ensures that convos that dont have the same id as the receiving message arent updated
-            if (activeConversation?._id == msg.conversationId) {
+            if (activeConversation?.id == msg.conversationId) {
                 setTyping(false);
                 const newMessages = messages.concat({
                     content: msg.content,
@@ -212,25 +220,27 @@ export default function Messages(): ReactElement {
                 // conversation is active, so the user has read the message
                 socket.emit("markMessagesAsRead", payload);
             }
-            const newConversations = conversations.map((conversation: IConversation) => {
-                return conversation._id == msg.conversationId
-                    ? {
-                        ...conversation,
-                        lastMessage: msg.content ? 
-                            msg.content : 
-                            msg.sender == user.id ?
-                                `${user.display_name} sent an image` :
-                                `${conversation.receivers[0].display_name} sent an image`,
-                        lastUpdated: msg.sentTime,
-                        unreadMessages:
-                              activeConversation?._id == msg.conversationId
-                                  ? 0
+            const newConversations = conversations.map(
+                (conversation: IConversation) => {
+                    return conversation.id == msg.conversationId
+                        ? {
+                              ...conversation,
+                              lastMessage: msg.content
+                                  ? msg.content
                                   : msg.sender == user.id
+                                  ? `${user.display_name} sent an image`
+                                  : `${conversation.receivers[0].display_name} sent an image`,
+                              lastUpdated: msg.sentTime,
+                              unreadMessages:
+                                  activeConversation?.id == msg.conversationId
+                                      ? 0
+                                      : msg.sender == user.id
                                       ? 0
                                       : conversation.unreadMessages + 1,
-                    }
-                    : conversation;
-            });
+                          }
+                        : conversation;
+                }
+            );
             // sort conversations by latest updated conversation
             newConversations.sort(
                 (a, b) =>
@@ -247,9 +257,9 @@ export default function Messages(): ReactElement {
             const newConversations = conversations.map((conversation) => {
                 return conversation._id == payload.conversationId
                     ? {
-                        ...conversation,
-                        unreadMessages: 0,
-                    }
+                          ...conversation,
+                          unreadMessages: 0,
+                      }
                     : conversation;
             });
             setConversations(newConversations);
@@ -258,13 +268,13 @@ export default function Messages(): ReactElement {
     );
 
     const handleTyping = (conversationId: string) => {
-        if (activeConversation?._id == conversationId) {
+        if (activeConversation?.id == conversationId) {
             setTyping(true);
         }
     };
 
     const handleStopTyping = (conversationId: string) => {
-        if (activeConversation?._id == conversationId) {
+        if (activeConversation?.id == conversationId) {
             setTyping(false);
         }
     };
@@ -292,7 +302,7 @@ export default function Messages(): ReactElement {
             .trim();
         setNowSending(true);
         const payload = {
-            conversationId: activeConversation._id,
+            conversationId: activeConversation.id,
             receiverId: activeConversation.receiverId,
             senderId: user.id,
             messageContent: messageContent,
@@ -352,7 +362,7 @@ export default function Messages(): ReactElement {
     };
 
     const handleConversationClick = (conversation: IConversation) => {
-        if (conversation._id == activeConversation?._id) {
+        if (conversation.id == activeConversation?.id) {
             return;
         }
         if (messageInputRef && messageInputRef.current) {
@@ -363,18 +373,20 @@ export default function Messages(): ReactElement {
             setPreviewImage(null);
         }
         const payload = {
-            conversationId: conversation._id,
+            conversationId: conversation.id,
             userId: user.id,
             unreadMessages: conversation.unreadMessages,
         };
 
         // when a conversation is opened, we mark its messages as read
         socket.emit("markMessagesAsRead", payload);
-        if (router.query?.conversationId?.[0] != conversation._id) {
+        if (router.query?.conversationId?.[0] != conversation.id) {
             // HACK: this works around virutoso not calling the loadMoreMessages function
             // when changing conversations
             router.push("/messages", null, { scroll: false });
-            router.push(`/messages/${conversation._id}`, null, { scroll: false });
+            router.push(`/messages/${conversation.id}`, null, {
+                scroll: false,
+            });
         }
     };
 
@@ -395,7 +407,7 @@ export default function Messages(): ReactElement {
     const loadMoreMessages = useCallback(() => {
         console.log("loading more messages");
         setPage(pageRef.current + 1);
-        getMessages(activeConversation._id).then((newMessages) => {
+        getMessages(activeConversation.id).then((newMessages) => {
             if (!newMessages.length) {
                 setReachedStart(true);
                 return true;
@@ -442,11 +454,11 @@ export default function Messages(): ReactElement {
         }
         // dont fetch messages if current convo id is equal to new convo id
         // this is to prevent state update from happening when updating convo's last message on socket event
-        if (activeConversation?._id == router.query.conversationId[0]) {
+        if (activeConversation?.id == router.query.conversationId[0]) {
             return;
         }
         setActiveConversation({
-            _id: router.query.conversationId[0],
+            id: router.query.conversationId[0],
             username: newActiveConversation.receivers[0]?.username,
             display_name: newActiveConversation.receivers[0]?.display_name,
             receiverId: newActiveConversation.receivers[0]?._id,
@@ -494,6 +506,7 @@ export default function Messages(): ReactElement {
     }, [user]);
 
     useEffect(() => {
+        /*
         if (socket?.connected) {
             socket.on("messageFromServer", handleMessageRecieved);
             socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
@@ -509,7 +522,13 @@ export default function Messages(): ReactElement {
                 socket.off("stopTyping", handleStopTyping);
             }
         };
-    }, [handleMessageRecieved, handleMarkedMessagesAsRead, handleTyping, handleStopTyping]);
+        */
+    }, [
+        handleMessageRecieved,
+        handleMarkedMessagesAsRead,
+        handleTyping,
+        handleStopTyping,
+    ]);
 
     return (
         <>
@@ -563,7 +582,7 @@ export default function Messages(): ReactElement {
                                                             }
                                                             isActive={
                                                                 conversation._id ==
-                                                                activeConversation?._id
+                                                                activeConversation?.id
                                                             }
                                                             unreadMessages={
                                                                 conversation.unreadMessages
@@ -646,7 +665,9 @@ export default function Messages(): ReactElement {
                                             className={styles.messagesArea}
                                             totalCount={messages.length}
                                             initialTopMostItemIndex={
-                                                messages.length > 0 ? messages.length - 1 : 0
+                                                messages.length > 0
+                                                    ? messages.length - 1
+                                                    : 0
                                             }
                                             data={messages}
                                             firstItemIndex={firstItemIndex}
@@ -661,24 +682,32 @@ export default function Messages(): ReactElement {
                                             }}
                                             startReached={loadMoreMessages}
                                             // eslint-disable-next-line react/display-name
-                                            components={{Header: () => {
-                                                return (
-                                                    <>
-                                                        {reachedStart ? (
-                                                            <div className="usernameGrey text-center text-bold py-3">
-                                                                <p>You have reached the beginning of this conversation</p>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="py-3">
-                                                                <Loading
-                                                                    height="50"
-                                                                    width="50"
-                                                                ></Loading>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                );
-                                            },
+                                            components={{
+                                                Header: () => {
+                                                    return (
+                                                        <>
+                                                            {reachedStart ? (
+                                                                <div className="usernameGrey text-center text-bold py-3">
+                                                                    <p>
+                                                                        You have
+                                                                        reached
+                                                                        the
+                                                                        beginning
+                                                                        of this
+                                                                        conversation
+                                                                    </p>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="py-3">
+                                                                    <Loading
+                                                                        height="50"
+                                                                        width="50"
+                                                                    ></Loading>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    );
+                                                },
                                             }}
                                             itemContent={(index, message) => (
                                                 <Message
@@ -687,14 +716,12 @@ export default function Messages(): ReactElement {
                                                         user.id ==
                                                         message.ownerId
                                                     }
-                                                    sentTime={
-                                                        message.sentTime
-                                                    }
+                                                    sentTime={message.sentTime}
                                                     attachment={
                                                         message.attachment
                                                     }
                                                     conversationId={
-                                                        activeConversation?._id
+                                                        activeConversation?.id
                                                     }
                                                     setImageModal={
                                                         setImageModal
@@ -721,19 +748,16 @@ export default function Messages(): ReactElement {
                                         )}
                                     </div>
                                     {typing && (
-                                        <div
-                                            className={styles.typing}
-                                        >
-                                            {activeConversation.display_name} is typing...
+                                        <div className={styles.typing}>
+                                            {activeConversation.display_name} is
+                                            typing...
                                         </div>
                                     )}
                                     <div
                                         className={styles.messageInputContainer}
                                     >
                                         <div
-                                            className={`${
-                                                styles.charLimit
-                                            } ${
+                                            className={`${styles.charLimit} ${
                                                 charsLeft < 0
                                                     ? styles.charLimitReached
                                                     : ""
@@ -807,7 +831,8 @@ export default function Messages(): ReactElement {
                                                         }
                                                         onChange={handleChange}
                                                         onClick={(e) => {
-                                                            e.currentTarget.value = null;
+                                                            e.currentTarget.value =
+                                                                null;
                                                         }}
                                                         type="file"
                                                         accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"

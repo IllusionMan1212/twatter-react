@@ -4,13 +4,11 @@ import Loading from "../../../components/loading";
 import { useRouter } from "next/router";
 import StatusBarLoggedOut from "../../../components/statusBarLoggedOut";
 import StatusBar from "../../../components/statusBar";
-import { useUser } from "../../../src/hooks/useUser";
 import axios from "axios";
 import ExpandedPost from "../../../components/post/expandedPost";
 import styles from "../../../components/post/expandedPost.module.scss";
 import MediaModal from "../../../components/mediaModal/mediaModal";
-import { IUser, IPost, IExpandedPost } from "../../../src/types/general";
-import { socket } from "src/hooks/useSocket";
+import { IUser, IPost } from "../../../src/types/general";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
@@ -18,16 +16,19 @@ import { GetServerSidePropsContext } from "next";
 import { UserPostProps } from "src/types/props";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
 import { ArrowLeft } from "phosphor-react";
+import { useUserContext } from "src/contexts/userContext";
+import Router from "next/router";
 
 export default function UserPost(props: UserPostProps): ReactElement {
     const router = useRouter();
     useScrollRestoration(router);
 
     const toast = useToastContext();
+    const { user: currentUser, socket } = useUserContext();
 
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [post, setPost] = useState<IExpandedPost>(null);
+    const [post, setPost] = useState<IPost>(null);
     const [modalData, setModalData] = useState({
         post: null as IPost,
         imageIndex: 0,
@@ -35,9 +36,8 @@ export default function UserPost(props: UserPostProps): ReactElement {
     });
     const [mediaModal, setMediaModal] = useState(false);
     const [nowCommenting, setNowCommenting] = useState(false);
-
-    let currentUser: IUser = null;
-    currentUser = useUser();
+    const [comments, setComments] = useState<Array<IPost>>([]);
+    const [loadingComments, setLoadingComments] = useState(true);
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
@@ -62,48 +62,56 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         backButton={true}
                     ></StatusBar>
                 ) : (
-                    <StatusBarLoggedOut></StatusBarLoggedOut>
+                    <StatusBarLoggedOut />
                 )}
             </>
         );
     };
 
     const handleComment = useCallback(
-        (payload: IPost) => {
-            const newPost = post;
-            newPost.comments = newPost.comments.concat(payload);
-            setPost(newPost);
+        (comment: IPost) => {
+            setPost((post) => {
+                post.comments++;
+                return post;
+            });
+            setComments((comments) => {
+                comments.unshift(comment);
+                return comments;
+            });
             setNowCommenting(false);
             toast("Commented Successfully", 2000);
         },
-        [post]
+        [comments]
     );
 
     const handleCommentDelete = useCallback(
-        (commentId) => {
-            const newPost = post;
-            newPost.comments = post.comments.filter(
-                (comment) => comment._id != commentId
-            );
-            setPost(newPost);
+        (commentIdObj) => {
+            const commentId = commentIdObj.postId;
+            setPost((post) => {
+                post.comments--;
+                return post;
+            })
+            setComments(comments => {
+                return comments.filter(
+                    (comment) => comment.id != commentId
+                );
+            })
         },
-        [post]
+        [comments]
     );
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            if (payload.postId == post._id) {
+            if (payload.postId == post.id) {
                 const newPost = {
                     ...post,
                 };
                 if (payload.likeType == "LIKE") {
-                    newPost.likeUsers = newPost.likeUsers.concat(
-                        currentUser?.id
-                    );
+                    newPost.liked = true;
+                    newPost.likes++;
                 } else if (payload.likeType == "UNLIKE") {
-                    newPost.likeUsers = post.likeUsers.filter(
-                        (user) => user != currentUser?.id
-                    );
+                    newPost.liked = false;
+                    newPost.likes--;
                 }
                 setPost(newPost);
             }
@@ -112,17 +120,39 @@ export default function UserPost(props: UserPostProps): ReactElement {
     );
 
     useEffect(() => {
-        if (socket?.connected) {
+        setComments([]);
+        setLoadingComments(true);
+        if (props.post) {
+            axios
+                .get(
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.post.id}`,
+                    { withCredentials: true }
+                )
+                .then((response) => {
+                    setComments(response.data.comments);
+                    setLoadingComments(false);
+                })
+                .catch((err) => {
+                    toast(
+                        err?.response?.data?.message || "An error has occurred",
+                        3000
+                    );
+                });
+        }
+    }, [post]);
+
+    useEffect(() => {
+        if (socket) {
+            socket.on("like", handleLike);
             socket.on("deletePost", handleCommentDelete);
             socket.on("commentToClient", handleComment);
-            socket.on("likeToClient", handleLike);
         }
 
         return () => {
-            if (socket?.connected) {
+            if (socket) {
                 socket.off("deletePost", handleCommentDelete);
                 socket.off("commentToClient", handleComment);
-                socket.off("likeToClient", handleLike);
+                socket.off("like", handleLike);
             }
         };
     }, [handleComment, handleCommentDelete, handleLike]);
@@ -180,16 +210,20 @@ export default function UserPost(props: UserPostProps): ReactElement {
     return (
         <>
             <NextSeo
-                title={props.post ? `${props.post.author.display_name}'s Post - Twatter` : "Post not found - Twatter"}
+                title={
+                    props.post
+                        ? `${props.post.author.display_name}'s Post - Twatter`
+                        : "Post not found - Twatter"
+                }
                 description={props.post?.content}
                 openGraph={{
                     title: `${props.post?.author.display_name}'s Post - Twatter`,
                     description: props.post?.content,
-                    url: `https://twatter.illusionman1212.me/u/${props.post?.author.username}/${props.post?._id}`,
+                    url: `https://twatter.illusionman1212.me/u/${props.post?.author.username}/${props.post?.id}`,
                     type: "article",
                     article: {
                         authors: [props.post?.author.display_name],
-                        publishedTime: props.post?.createdAt,
+                        publishedTime: props.post?.created_at.Time.toString(),
                     },
                     images: [
                         {
@@ -207,7 +241,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         {
                             url: props.post?.attachments?.[3]?.url,
                         },
-                    ]
+                    ],
                 }}
             />
             {!loading ? (
@@ -225,16 +259,21 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                         >
                                             <ArrowLeft size="30"></ArrowLeft>
                                         </div>
-                                        <p>{post.author.display_name}&apos;s post</p>
+                                        <p>
+                                            {post.author.display_name}&apos;s
+                                            post
+                                        </p>
                                     </div>
                                     <ExpandedPost
-                                        key={post._id}
+                                        key={post.id}
                                         currentUser={currentUser}
                                         post={post}
                                         handleMediaClick={handleMediaClick}
-                                        callback={() => window.history.back()}
+                                        callback={() => Router.back()}
                                         nowCommenting={nowCommenting}
                                         setNowCommenting={setNowCommenting}
+                                        comments={comments}
+                                        loadingComments={loadingComments}
                                     ></ExpandedPost>
                                 </div>
                                 <div className={styles.rightSide}>trending</div>
@@ -274,22 +313,29 @@ export default function UserPost(props: UserPostProps): ReactElement {
     );
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext): Promise<any> {
+export async function getServerSideProps(
+    context: GetServerSidePropsContext
+): Promise<any> {
     let res = null;
     let post: IPost = null;
 
     try {
-        res = await axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
-                { withCredentials: true }
-            );
+        res = await axios.get(
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
+            {
+                withCredentials: true,
+                // cookies aren't being sent automatically here for some reason
+                headers: {
+                    Cookie: `session=${context.req.cookies.session}`
+                }
+            }
+        );
         post = res.data.post;
     } catch (err) {
         console.error(err);
     }
 
     return {
-        props: { post: post }
+        props: { post: post },
     };
 }

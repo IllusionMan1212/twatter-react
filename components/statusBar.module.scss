@@ -79,7 +79,7 @@
     flex-basis: 0;
     flex-grow: 0;
     flex-shrink: 0;
-    min-width: 30%;
+    width: 100%;
 
     @media (max-width: 800px) {
         flex-basis: 30%;

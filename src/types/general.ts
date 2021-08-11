@@ -18,11 +18,6 @@ interface NullableBoolean {
     Valid: boolean;
 }
 
-interface NullableArray<T> {
-    Array: Array<T>;
-    Valid: boolean;
-}
-
 interface DateAndTime {
     Time: Date;
     Valid: boolean;
@@ -60,12 +55,10 @@ export interface IConversation {
     lastMessage: string;
 }
 
-// TODO: gotta check if the attachments even need to be a nullable array
 interface IParentPost {
     id: NullableInt64;
     author: IParentUser;
     content: NullableString;
-    attachments: NullableArray<PostAttachment>;
     likes: NullableInt32;
     comments: NullableInt32;
     replying_to: IParentPost;
@@ -80,10 +73,8 @@ export interface IPost {
     likes: number;
     comments: number;
     replying_to: IParentPost;
-}
 
-export interface IExpandedPost extends Omit<IPost, "comments"> {
-    comments: Array<IPost>;
+    liked?: boolean;
 }
 
 interface PostAttachment {

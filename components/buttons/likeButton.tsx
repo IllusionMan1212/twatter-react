@@ -1,23 +1,30 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./likeButton.module.scss";
-import { ReactElement, useRef } from "react";
+import { ReactElement, useRef, useState } from "react";
 import { useToastContext } from "../../src/contexts/toastContext";
 import axios from "../../src/axios";
 import { LikeButtonProps } from "../../src/types/props";
 import { formatBigNumbers } from "../../src/utils/functions";
 import { LikePayload } from "src/types/utils";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function LikeButton(props: LikeButtonProps): ReactElement {
     const likeRef = useRef(null);
+    const [canLike, setCanLike] = useState(true);
 
     const toast = useToastContext();
+    const { socket } = useUserContext();
 
     const handleClick = () => {
         if (!props.currentUserId) {
             toast("You must be logged in to like this post", 4000);
             return;
         }
-        if (!props.likes.includes(props.currentUserId)) {
+        if (!canLike) {
+            return;
+        }
+        setCanLike(false);
+        if (!props.liked) {
             likeRef?.current?.classList.add(styles.isAnimating);
             setTimeout(() => {
                 likeRef?.current?.classList.remove(styles.isAnimating);
@@ -25,13 +32,26 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
         }
         const payload: LikePayload = {
             postId: props.post.id,
-            likeType: props.likes.includes(props.currentUserId) ? "UNLIKE" : "LIKE",
+            likeType: props.liked ? "UNLIKE" : "LIKE",
         };
 
-        // socket.emit("likeToServer", payload);
-        axios.post("posts/likePost", payload).catch((err) => {
-            toast(err?.response?.data?.message ?? "An error has occurred", 3000);
-        });
+        const socketPayload = {
+            eventType: "like",
+            data: {
+                postId: props.post.id,
+                likeType: props.liked ? "UNLIKE" : "LIKE"
+            }
+        }
+
+        axios.post("posts/likePost", payload)
+            .then(() => {
+                socket.send(JSON.stringify(socketPayload));
+                setCanLike(true);
+            })
+            .catch((err) => {
+                toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                setCanLike(true);
+            });
     };
 
     return (
@@ -47,7 +67,7 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
                     <div
                         ref={likeRef}
                         className={styles.like}
-                        style={{ backgroundPosition: "left" }}
+                        style={{ backgroundPosition: props.liked ? "right" : "left" }}
                     ></div>
                 </div>
             </div>

@@ -112,6 +112,7 @@ export default function Comment(props: CommentProps): ReactElement {
                         post={props.comment}
                         currentUserId={props.currentUser?.id}
                         likes={likes}
+                        liked={props.comment.liked}
                     ></LikeButton>
                 </div>
             </div>
