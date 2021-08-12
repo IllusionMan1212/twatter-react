@@ -189,8 +189,6 @@ export default function Home(): ReactElement {
             setPosts(
                 posts.current.map((post) => {
                     if (post.id == comment.replying_to.id.Int64) {
-                        console.log(comment);
-                        // post.comments.push(comment._id);
                         post.comments++;
                         return post;
                     }
@@ -255,7 +253,7 @@ export default function Home(): ReactElement {
 
     useEffect(() => {
         if (socket) {
-            // socket.on("commentToClient", handleComment);
+            socket.on("commentToClient", handleComment);
             socket.on("like", handleLike);
             socket.on("post", handlePost);
             socket.on("deletePost", handleDeletePost);
@@ -265,7 +263,7 @@ export default function Home(): ReactElement {
             if (socket) {
                 socket.off("post", handlePost);
                 socket.off("deletePost", handleDeletePost);
-                // socket.off("commentToClient", handleComment);
+                socket.off("commentToClient", handleComment);
                 socket.off("like", handleLike);
             }
         };

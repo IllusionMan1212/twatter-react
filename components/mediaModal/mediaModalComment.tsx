@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement } from "react";
 import LikeButton from "../buttons/likeButton";
 import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
 import CommentButton from "../buttons/commentButton";
@@ -9,13 +9,11 @@ import { timeSince } from "../../src/utils/functions";
 import { IUser } from "src/types/general";
 import styles from "./mediaModalComment.module.scss";
 import postStyles from "../post/post.module.scss";
-import { ModalCommentProps } from "src/types/props";
+import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "components/attachmentsContainer";
-import { LikePayload } from "src/types/utils";
 import ProfileImage from "components/post/profileImage";
 
-export default function MediaModalComment(props: ModalCommentProps): ReactElement {
-    const [likes, setLikes] = useState<Array<string>>(props.comment.likeUsers);
+export default function MediaModalComment(props: CommentProps): ReactElement {
 
     const handleCommentButtonClickOnComment = (
         commentId: string,
@@ -24,38 +22,12 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
         Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
 
-    const handleLike = useCallback(
-        (payload: LikePayload) => {
-            if (payload.postId == props.comment._id) {
-                if (payload.likeType == "LIKE") {
-                    setLikes(likes.concat(props.currentUser?.id));
-                } else if (payload.likeType == "UNLIKE") {
-                    setLikes(likes.filter((user) => user != props.currentUser?.id));
-                }
-                props.updateModalCommentLikes(payload);
-            }
-        },
-        [likes]
-    );
-
-    // useEffect(() => {
-    //     if (socket?.connected) {
-    //         socket.on("likeToClient", handleLike);
-    //     }
-
-    //     return () => {
-    //         if (socket?.connected) {
-    //             socket.off("likeToClient", handleLike);
-    //         }
-    //     };
-    // }, [handleLike]);
-
     return (
         <div
             className={`${styles.comment} pointer`}
             onClick={() =>
                 Router.push(
-                    `/u/${props.comment.author.username}/${props.comment._id}`
+                    `/u/${props.comment.author.username}/${props.comment.id}`
                 )
             }
         >
@@ -78,7 +50,7 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                     </div>
                 </div>
                 <PostOptionsMenuButton
-                    postId={props.comment._id}
+                    postId={props.comment.id}
                     postAuthorId={props.comment.author?.id}
                     postAuthorUsername={props.comment.author?.username}
                     currentUserId={props.currentUser?.id}
@@ -96,15 +68,14 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                 <div
                     className={`flex align-items-end text-small ${styles.commentDate}`}
                 >
-                    {timeSince(props.comment.createdAt)}
+                    {timeSince(props.comment.created_at.Time.toString())}
                 </div>
                 <div className="flex gap-1 justify-content-end">
                     <CommentButton
                         post={props.comment}
-                        numberOfComments={props.comment.comments.length}
                         handleClick={() =>
                             handleCommentButtonClickOnComment(
-                                props.comment._id,
+                                props.comment.id,
                                 props.comment.author
                             )
                         }
@@ -112,7 +83,8 @@ export default function MediaModalComment(props: ModalCommentProps): ReactElemen
                     <LikeButton
                         post={props.comment}
                         currentUserId={props.currentUser?.id}
-                        likeUsers={likes}
+                        likes={props.comment.likes}
+                        liked={props.comment.liked}
                     ></LikeButton>
                 </div>
             </div>
