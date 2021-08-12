@@ -199,7 +199,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         postAuthorId={props.post.author.id}
                         postAuthorUsername={props.post.author.username}
                         currentUserId={props.currentUser?.id}
-                        callback={props.callback}
+                        deleteCallback={props.callback}
                     ></PostOptionsMenuButton>
                     <div
                         className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}

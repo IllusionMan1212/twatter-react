@@ -1,6 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction } from "react";
 import { IPost, IUser } from "./general";
-import { LikePayload } from "./utils";
 
 export interface ToastProps {
     text: string;
@@ -77,7 +76,7 @@ interface PostOptionsMenuBaseProps {
     postAuthorUsername: string;
     currentUserId: string;
     postId: string;
-    callback?: <T extends unknown[]>(...args: T) => void;
+    deleteCallback?: <T extends unknown[]>(...args: T) => void;
 }
 
 export interface PostOptionsMenuProps extends PostOptionsMenuBaseProps {
@@ -118,10 +117,6 @@ export interface CommentProps {
 
     // ref of container that the menu shouldn't pop out of
     parentContainerRef?: MutableRefObject<HTMLElement>;
-}
-
-export interface ModalCommentProps extends CommentProps {
-    updateModalCommentLikes: (payload: LikePayload) => void;
 }
 
 export interface ImageContainerProps {

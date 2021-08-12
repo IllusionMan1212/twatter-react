@@ -34,11 +34,13 @@ import CommentButton from "../buttons/commentButton";
 import { LikePayload } from "src/types/utils";
 import ProfileImage from "../post/profileImage";
 import { NavigationMethods } from "swiper/types/components/navigation";
+import { useUserContext } from "src/contexts/userContext";
 
 SwiperCore.use([Navigation]);
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
     const toast = useToastContext();
+    const { socket } = useUserContext();
 
     const commentBoxRef = useRef<HTMLSpanElement>(null);
     const prevRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [comments, setComments] = useState<Array<IPost>>([]);
     const [nowCommenting, setNowCommenting] = useState(false);
-    const [likes, setLikes] = useState<Array<string>>([]);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!commentingAllowed) {
@@ -75,18 +76,22 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
         const payload = {
-            content: content,
-            contentLength: commentBoxRef.current.textContent.length,
-            author: props.modalData.currentUser,
-            attachments: attachments,
-            replyingTo: props.modalData.post.id,
+            eventType: "commentToServer",
+            data: {
+                content: content,
+                contentLength: commentBoxRef.current.textContent.length,
+                author: props.modalData.currentUser,
+                attachments: attachments,
+                replying_to: props.modalData.post.id,
+            }
         };
         commentBoxRef.current.textContent = "";
         setAttachments([]);
         setPreviewImages([]);
         setCommentingAllowed(false);
         setCharsLeft(postCharLimit);
-        //socket.emit("commentToServer", payload);
+
+        socket.send(JSON.stringify(payload));
     };
 
     const handleWindowKeyDown = (e: KeyboardEvent) => {
@@ -101,12 +106,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         (payload) => {
             setNowCommenting(false);
             setComments([payload].concat(comments));
+            toast("Commented Successfully", 2000);
         },
         [comments]
     );
 
     const handleCommentDelete = useCallback(
-        (commentId) => {
+        (commentIdObj) => {
+            const commentId = commentIdObj.postId;
             setComments(comments.filter((comment) => comment.id != commentId));
         },
         [comments]
@@ -114,34 +121,24 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            if (payload.postId == props.modalData.post.id) {
-                if (payload.likeType == "LIKE") {
-                    setLikes(likes.concat(props.modalData.currentUser?.id));
-                } else if (payload.likeType == "UNLIKE") {
-                    setLikes(
-                        likes.filter(
-                            (user) => user != props.modalData.currentUser?.id
-                        )
-                    );
-                }
-            }
+            setComments((comments) => {
+                return comments.map((comment) => {
+                    if (comment.id == payload.postId) {
+                        if (payload.likeType == "LIKE") {
+                            comment.likes++;
+                            comment.liked = true;
+                        } else if (payload.likeType == "UNLIKE") {
+                            comment.likes--;
+                            comment.liked = false;
+                        }
+                        return comment;
+                    }
+                    return comment;
+                });
+            });
         },
-        [likes]
+        [comments]
     );
-
-    const updateModalCommentLikes = (payload: LikePayload) => {
-        setComments(comments.map((comment => {
-            if (payload.postId == comment.id) {
-                if (payload.likeType == "LIKE") {
-                    comment.likes = comment.likes.concat(props.modalData.currentUser?.id);
-                } else if (payload.likeType == "UNLIKE") {
-                    comment.likeUsers = comment.likeUsers.filter((user) => user != props.modalData.currentUser?.id);
-                }
-                return comment;
-            }
-            return comment;
-        })));
-    };
 
     useEffect(() => {
         setCommentsLoading(true);
@@ -151,7 +148,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         setAttachments([]);
         setPreviewImages([]);
         setNowCommenting(false);
-        setLikes(props.modalData.post.likes);
 
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
@@ -159,7 +155,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         axios
             .get(
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.modalData.post.id}`,
-                { cancelToken: tokenSource.token }
+                { cancelToken: tokenSource.token, withCredentials: true }
             )
             .then((res) => {
                 setComments(res.data.comments);
@@ -184,21 +180,21 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         };
     }, [props.modalData.post]);
 
-    // useEffect(() => {
-    //     if (socket?.connected) {
-    //         socket.on("commentToClient", handleComment);
-    //         socket.on("deletePost", handleCommentDelete);
-    //         socket.on("likeToClient", handleLike);
-    //     }
+    useEffect(() => {
+        if (socket) {
+            socket.on("commentToClient", handleComment);
+            socket.on("deletePost", handleCommentDelete);
+            socket.on("like", handleLike);
+        }
 
-    //     return () => {
-    //         if (socket?.connected) {
-    //             socket.off("commentToClient", handleComment);
-    //             socket.off("deletePost", handleCommentDelete);
-    //             socket.off("likeToClient", handleLike);
-    //         }
-    //     };
-    // }, [handleComment, handleCommentDelete, handleLike]);
+        return () => {
+            if (socket) {
+                socket.off("commentToClient", handleComment);
+                socket.off("deletePost", handleCommentDelete);
+                socket.off("like", handleLike);
+            }
+        };
+    }, [handleComment, handleCommentDelete, handleLike]);
 
     useEffect(() => {
         if (commentBoxRef?.current) {
@@ -257,7 +253,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             postAuthorId={props.modalData.post.author.id}
                             postAuthorUsername={props.modalData.post.author.username}
                             currentUserId={props.modalData.currentUser?.id}
-                            callback={() => {
+                            deleteCallback={() => {
                                 props.goBackTwice
                                     ? window.history.go(-2)
                                     : window.history.back();
@@ -277,7 +273,8 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <LikeButton
                             post={props.modalData.post}
                             currentUserId={props.modalData.currentUser?.id}
-                            likes={likes}
+                            likes={props.modalData.post.likes}
+                            liked={props.modalData.post.liked}
                         ></LikeButton>
                     </div>
                     <p className={styles.date}>
@@ -297,9 +294,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                         }
                                         handleMediaClick={
                                             props.handleMediaClick
-                                        }
-                                        updateModalCommentLikes={
-                                            updateModalCommentLikes
                                         }
                                         parentContainerRef={parentContainerRef}
                                     ></MediaModalComment>

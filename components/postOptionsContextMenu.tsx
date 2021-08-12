@@ -34,7 +34,7 @@ export default function PostOptionsMenu(
         axios
             .post("posts/deletePost", payload)
             .then((res) => {
-                props.callback?.();
+                props.deleteCallback?.();
                 socket.send(JSON.stringify(socketPayload));
                 toast(res.data.message, 3000);
             })

@@ -170,7 +170,6 @@ func Comment(socketMessage *models.SocketMessage, client *Client) {
 		panic(err)
 	}
 
-	// TODO: implement attachments
 	// write the attachments to files
 	for i, attachment := range comment.Attachments {
 		buf, err := base64.StdEncoding.DecodeString(attachment.Data)
@@ -249,6 +248,9 @@ func Comment(socketMessage *models.SocketMessage, client *Client) {
 		returnedAttachments = append(returnedAttachments, *returnedAttachment)
 		file.Write(imageBytes)
 	}
+
+	returnedComment.ReplyingTo.ID.Int64 = int64(comment.ReplyingTo)
+	returnedComment.ReplyingTo.ID.Valid = true
 
 	dataToBeReturned := fmt.Sprintf(`{
 		"eventType": "commentToClient",

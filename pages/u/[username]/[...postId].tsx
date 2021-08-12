@@ -139,7 +139,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     );
                 });
         }
-    }, [post]);
+    }, [post?.id]);
 
     useEffect(() => {
         if (socket) {

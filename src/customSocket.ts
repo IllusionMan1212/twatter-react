@@ -24,8 +24,8 @@ export class TwatWebSocket {
 
     on(event: string, callback: (data: any) => void) {
         this.callbacks[event] = this.callbacks[event] || [];
-        if (!this.callbacks[event].find((_callback) => {
-            return _callback !== callback;
+        if (!this.callbacks[event].some((_callback) => {
+            return _callback === callback;
         })) {
             this.callbacks[event].push(callback);
             this.conn.onmessage = onMessageReceived.bind(this);

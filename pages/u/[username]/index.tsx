@@ -203,6 +203,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     // TODO: handle the edge case where a comment is also a regular post in the active tab
     const handleCommentDelete = useCallback(
         (commentId) => {
+            // TODO: this is not always true, sometimes a comment is made by another person
             setPostsCount(postsCount - 1);
             // check if the id is a post id and remove the post
             if (
@@ -233,8 +234,10 @@ export default function Profile(props: ProfileProps): ReactElement {
             setPosts(posts.current.map((post) => {
                 if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
+                        post.liked = true;
                         post.likes++;
                     } else if (payload.likeType == "UNLIKE") {
+                        post.liked = false;
                         post.likes--; 
                     }
                     return post;
@@ -244,8 +247,10 @@ export default function Profile(props: ProfileProps): ReactElement {
             setPostsAndComments(postsAndComments.current.map((post) => {
                 if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
+                        post.liked = true;
                         post.likes++;
                     } else if (payload.likeType == "UNLIKE") {
+                        post.liked = false;
                         post.likes--;
                     }
                     return post;
@@ -255,8 +260,10 @@ export default function Profile(props: ProfileProps): ReactElement {
             setMediaPosts(mediaPosts.current.map((post) => {
                 if (post.id == payload.postId) {
                     if (payload.likeType == "LIKE") {
+                        post.liked = true;
                         post.likes++;
                     } else if (payload.likeType == "UNLIKE") {
+                        post.liked = false;
                         post.likes--;
                     }
                     return post;
@@ -381,11 +388,10 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (socket) {
-            socket.on("birthdayRemoved", handleBirthdayRemoved);
             // socket.on("commentToClient", handleComment);
             // socket.on("deletePost", handleCommentDelete);
-            // socket.on("likeToClient", handleLike);
-            // socket.on("birthdayRemoved", handleBirthdayRemoved);
+            socket.on("like", handleLike);
+            socket.on("birthdayRemoved", handleBirthdayRemoved);
             // socket.on("updatedProfile", handleUpdatedProfile);
         }
 
@@ -393,8 +399,8 @@ export default function Profile(props: ProfileProps): ReactElement {
             if (socket) {
                 // socket.off("commentToClient", handleComment);
                 // socket.off("deletePost", handleCommentDelete);
-                // socket.off("likeToClient", handleLike);
-                // socket.off("birthdayRemoved", handleBirthdayRemoved);
+                socket.off("like", handleLike);
+                socket.off("birthdayRemoved", handleBirthdayRemoved);
                 // socket.off("updatedProfile", handleUpdatedProfile);
             }
         };

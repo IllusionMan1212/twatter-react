@@ -37,7 +37,7 @@ export default function PostOptionsMenuButton(
                     postAuthorId={props.postAuthorId}
                     postAuthorUsername={props.postAuthorUsername}
                     currentUserId={props.currentUserId}
-                    callback={props.callback}
+                    deleteCallback={props.deleteCallback}
                     topOffset={offset}
                 ></PostOptionsMenu>
             )}
