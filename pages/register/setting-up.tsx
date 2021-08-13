@@ -1,16 +1,17 @@
 /* eslint-disable react/react-in-jsx-scope */
-import LayoutWide from "../../components/layouts/layout_wide";
-import styles from "../../styles/setting-up.module.scss";
-import homeStyles from "../../styles/home.module.scss";
+import LayoutWide from "components/layouts/layout_wide";
+import styles from "styles/setting-up.module.scss";
+import homeStyles from "styles/home.module.scss";
 import Head from "next/head";
 import { Plus, X } from "phosphor-react";
 import { ReactElement, useEffect, useRef, useState } from "react";
-import Loading from "../../components/loading";
+import Loading from "components/loading";
 import Router from "next/router";
-import axios from "../../src/axios";
-import { useToastContext } from "../../src/contexts/toastContext";
+import axios from "src/axios";
+import { useToastContext } from "src/contexts/toastContext";
 import { IUser, IBirthday } from "src/types/general";
 import { handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
+import { allowedProfileImageMimetypes } from "src/utils/variables";
 
 export default function UserSetup(): ReactElement {
     const toast = useToastContext();
@@ -32,11 +33,7 @@ export default function UserSetup(): ReactElement {
         if (!file) {
             return;
         }
-        if (
-            file.type != "image/jpeg" &&
-            file.type != "image/jpg" &&
-            file.type != "image/png"
-        ) {
+        if (!allowedProfileImageMimetypes.includes(file.type)) {
             toast("This file format is not supported", 4000);
             return;
         }

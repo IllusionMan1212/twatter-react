@@ -412,7 +412,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 	if image != nil {
 		mimetype := image.Header.Get("Content-Type")
-		if mimetype != "image/jpg" && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/webp" {
+		if !utils.AllowedProfileImageMimetypes[mimetype] {
 			utils.BadRequestWithJSON(w, `{
 				"message": "Invalid image type, only .jpg, .jpeg, .png, .webp are accepted",
 				"status": "400",

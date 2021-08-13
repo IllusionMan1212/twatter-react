@@ -10,3 +10,9 @@ export const supportedFileTypes = [
     "image/gif",
     "image/webp",
 ];
+export const allowedProfileImageMimetypes = [
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "image/webp",
+];
