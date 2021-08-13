@@ -1,6 +1,8 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type RegisterCreds struct {
 	Username        string `json:"username"`
@@ -45,4 +47,18 @@ type ParentUser struct {
 	Birthday      sql.NullTime   `json:"birthday" db:"birthday"`
 	CreatedAt     sql.NullTime   `json:"created_at" db:"created_at"`
 	FinishedSetup sql.NullBool   `json:"finished_setup" db:"finished_setup"`
+}
+
+type Birthday struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
+}
+
+type ProfileValues struct {
+	UserID       uint64           `json:"userId"`
+	DisplayName  string           `json:"displayName"`
+	ProfileImage SocketAttachment `json:"profileImage"`
+	Bio          string           `json:"bio"`
+	Birthday     Birthday         `json:"birthday"`
 }

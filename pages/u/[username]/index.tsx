@@ -1,23 +1,23 @@
 /* eslint-disable react/react-in-jsx-scope */
 import axios from "axios";
-import axiosInstance from "../../../src/axios";
+import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import Loading from "../../../components/loading";
-import Navbar from "../../../components/navbar";
-import StatusBarLoggedOut from "../../../components/statusBarLoggedOut";
-import StatusBar from "../../../components/statusBar";
-import styles from "../../../styles/profilePage.module.scss";
-import Post from "../../../components/post/post";
+import Loading from "components/loading";
+import Navbar from "components/navbar";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import StatusBar from "components/statusBar";
+import styles from "styles/profilePage.module.scss";
+import Post from "components/post/post";
 import {
     formatBigNumbers,
     formatBirthday,
     formatJoinDate,
-} from "../../../src/utils/functions";
-import MediaModal from "../../../components/mediaModal/mediaModal";
+} from "src/utils/functions";
+import MediaModal from "components/mediaModal/mediaModal";
 import { Calendar, ChatTeardropText, Gift, Note } from "phosphor-react";
-import { useToastContext } from "../../../src/contexts/toastContext";
-import { IUser, IPost } from "../../../src/types/general";
+import { useToastContext } from "src/contexts/toastContext";
+import { IUser, IPost } from "src/types/general";
 import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { ButtonType, ProfileProps } from "src/types/props";
@@ -44,10 +44,6 @@ export default function Profile(props: ProfileProps): ReactElement {
     const { user: currentUser, socket } = useUserContext();
 
     const parentContainerRef = useRef(null);
-    const postsPageRef = useRef(null);
-    const commentsPageRef = useRef(null);
-    const mediaPageRef = useRef(null);
-    const activeTabRef = useRef(null);
 
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -61,21 +57,16 @@ export default function Profile(props: ProfileProps): ReactElement {
         currentUser: null as IUser,
     });
     const [mediaModal, setMediaModal] = useState(false);
-    const [activeTab, setActiveTab] = useState(Tabs.Posts);
+    const [activeTab, setActiveTab] = useLatestState(Tabs.Posts);
     const [user, setUser] = useState<IUser>(props.user);
     const [editProfilePopup, setEditProfilePopup] = useState(false);
     const [postsReachedEnd, setPostsReachedEnd] = useState(false);
     const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
     const [mediaReachedEnd, setMediaReachedEnd] = useState(false);
-    const [postsPage, setPostsPage] = useState(0);
-    const [commentsPage, setCommentsPage] = useState(0);
-    const [mediaPage, setMediaPage] = useState(0);
+    const [postsPage, setPostsPage] = useLatestState(0);
+    const [commentsPage, setCommentsPage] = useLatestState(0);
+    const [mediaPage, setMediaPage] = useLatestState(0);
     const [postsCount, setPostsCount] = useState(0);
-
-    postsPageRef.current = postsPage;
-    commentsPageRef.current = commentsPage;
-    mediaPageRef.current = mediaPage;
-    activeTabRef.current = activeTab;
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
@@ -117,14 +108,14 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const handlePostsTabClick = () => {
         setActiveTab(Tabs.Posts);
-        activeTabRef.current = Tabs.Posts;
+        activeTab.current = Tabs.Posts;
     };
 
     const handleAllTabClick = () => {
         setActiveTab(Tabs.PostsAndComments);
-        activeTabRef.current = Tabs.PostsAndComments;
+        activeTab.current = Tabs.PostsAndComments;
         if (!postsAndComments.current.length && !commentsReachedEnd) {
-            getPosts(commentsPageRef.current, "comments").then((newPosts) => {
+            getPosts(commentsPage.current, "comments").then((newPosts) => {
                 if (newPosts.length < 50) {
                     setCommentsReachedEnd(true);
                 }
@@ -135,9 +126,9 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const handleMediaTabClick = () => {
         setActiveTab(Tabs.MediaPosts);
-        activeTabRef.current = Tabs.MediaPosts;
+        activeTab.current = Tabs.MediaPosts;
         if (!mediaPosts.current.length && !mediaReachedEnd) {
-            getPosts(mediaPageRef.current, "media").then((newPosts) => {
+            getPosts(mediaPage.current, "media").then((newPosts) => {
                 if (newPosts.length < 50) {
                     setMediaReachedEnd(true);
                 }
@@ -147,7 +138,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     };
 
     const getActiveTabPosts = useCallback((): Array<IPost> => {
-        switch (activeTabRef.current) {
+        switch (activeTab.current) {
         case Tabs.Posts:
             return posts.current;
         case Tabs.PostsAndComments:
@@ -158,7 +149,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, [mediaPosts, posts, postsAndComments]);
 
     const setActiveTabPosts = useCallback((posts: Array<IPost>) => {
-        switch (activeTabRef.current) {
+        switch (activeTab.current) {
         case Tabs.Posts:
             setPosts(posts);
             break;
@@ -172,7 +163,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, [setMediaPosts, setPosts, setPostsAndComments]);
 
     const getActiveReachedEnd = (): boolean => {
-        switch (activeTabRef.current) {
+        switch (activeTab.current) {
         case Tabs.Posts:
             return postsReachedEnd;
         case Tabs.PostsAndComments:
@@ -183,13 +174,10 @@ export default function Profile(props: ProfileProps): ReactElement {
     };
 
     // this is for the mediamodal
-    // TODO: handle the edge case where a comment is also a regular post in the active tab
     const handleComment = useCallback(
-        (comment) => {
-            setPostsCount(postsCount + 1);
+        (comment: IPost) => {
             getActiveTabPosts().map((post) => {
-                // TODO: change this replyingTo to appropriate name
-                if (post.id == comment.replyingTo) {
+                if (post.id == comment.replying_to.id.Int64.toString()) {
                     post.comments++;
                     return post;
                 }
@@ -200,30 +188,22 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     // this is for the mediamodal
-    // TODO: handle the edge case where a comment is also a regular post in the active tab
     const handleCommentDelete = useCallback(
-        (commentId) => {
-            // TODO: this is not always true, sometimes a comment is made by another person
-            setPostsCount(postsCount - 1);
+        (commentIdObj) => {
             // check if the id is a post id and remove the post
+            const commentId = commentIdObj.postId;
             if (
                 getActiveTabPosts().some((post) => {
                     return post.id == commentId;
                 })
             ) {
+                setPostsCount(postsCount - 1);
                 setActiveTabPosts(getActiveTabPosts().filter((post) => post.id != commentId));
             // check if the id is a comment id and decrement the comment counter
             } else {
-                setActiveTabPosts(getActiveTabPosts().map((post) => {
-                    post.comments.map((comment) => {
-                        if (comment == commentId) {
-                            post.comments--;
-                            return comment;
-                        }
-                        return comment;
-                    });
-                    return post;
-                }));
+                // TODO: do we even need this???
+                // setActiveTabPosts(getActiveTabPosts().map((post) => {
+                // }));
             }
         },
         [getActiveTabPosts, postsCount, setActiveTabPosts]
@@ -275,7 +255,8 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     const handleBirthdayRemoved = useCallback(
-        (userId) => {
+        (userIdObj) => {
+            const userId = userIdObj.id;
             if (currentUser?.id == userId && userId == user.id) {
                 setUser({ ...user, birthday: { Time: new Date("0001-01-01T00:00:00Z"), Valid: false } });
             }
@@ -286,10 +267,12 @@ export default function Profile(props: ProfileProps): ReactElement {
     // this also needs proper change
     const handleUpdatedProfile = useCallback(
         (payload) => {
+            console.log(payload);
             if (currentUser?.id == payload.userId && payload.userId == user.id) {
                 let avatar_url: string = null;
                 if (payload.profileImage) {
-                    avatar_url = payload.profileImage;
+                    const base64Image = "data:image/png;base64,".concat(payload.profileImage);
+                    avatar_url = base64Image;
                     getActiveTabPosts().map((post) => {
                         post.author.avatar_url = avatar_url;
                         return post;
@@ -337,15 +320,15 @@ export default function Profile(props: ProfileProps): ReactElement {
     }, [props.user?.id]);
 
     const loadMorePosts = (lastItemIndex: number) => {
-        switch (activeTab) {
+        switch (activeTab.current) {
         case Tabs.Posts:
             // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
             if (lastItemIndex < 49) {
                 setPostsReachedEnd(true);
                 return;
             }
-            setPostsPage(postsPageRef.current + 1);
-            getPosts(postsPageRef.current, "posts").then((newPosts) => {
+            setPostsPage(postsPage.current + 1);
+            getPosts(postsPage.current, "posts").then((newPosts) => {
                 if (!newPosts.length) {
                     setPostsReachedEnd(true);
                     return;
@@ -359,8 +342,8 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setCommentsReachedEnd(true);
                 return;
             }
-            setCommentsPage(commentsPageRef.current + 1);
-            getPosts(commentsPageRef.current, "comments").then((newPosts) => {
+            setCommentsPage(commentsPage.current + 1);
+            getPosts(commentsPage.current, "comments").then((newPosts) => {
                 if (!newPosts.length) {
                     setCommentsReachedEnd(true);
                     return;
@@ -374,8 +357,8 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setMediaReachedEnd(true);
                 return;
             }
-            setMediaPage(mediaPageRef.current + 1);
-            getPosts(mediaPageRef.current, "media").then((newPosts) => {
+            setMediaPage(mediaPage.current + 1);
+            getPosts(mediaPage.current, "media").then((newPosts) => {
                 if (!newPosts.length) {
                     setMediaReachedEnd(true);
                     return;
@@ -388,20 +371,20 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (socket) {
-            // socket.on("commentToClient", handleComment);
-            // socket.on("deletePost", handleCommentDelete);
+            socket.on("commentToClient", handleComment);
+            socket.on("deletePost", handleCommentDelete);
             socket.on("like", handleLike);
             socket.on("birthdayRemoved", handleBirthdayRemoved);
-            // socket.on("updatedProfile", handleUpdatedProfile);
+            socket.on("updateProfile", handleUpdatedProfile);
         }
 
         return () => {
             if (socket) {
-                // socket.off("commentToClient", handleComment);
-                // socket.off("deletePost", handleCommentDelete);
+                socket.off("commentToClient", handleComment);
+                socket.off("deletePost", handleCommentDelete);
                 socket.off("like", handleLike);
                 socket.off("birthdayRemoved", handleBirthdayRemoved);
-                // socket.off("updatedProfile", handleUpdatedProfile);
+                socket.off("updateProfile", handleUpdatedProfile);
             }
         };
     }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile, socket]);
@@ -413,7 +396,7 @@ export default function Profile(props: ProfileProps): ReactElement {
             getPostsCount().then(postsCount => {
                 setPostsCount(postsCount);
             });
-            getPosts(postsPageRef.current, "posts").then(posts => {
+            getPosts(postsPage.current, "posts").then(posts => {
                 setPosts(posts);
                 setPostsLoading(false);
             });
@@ -427,7 +410,7 @@ export default function Profile(props: ProfileProps): ReactElement {
         if (props.user && user?.id != props.user.id) {
             setPostsCount(0);
             setActiveTab(Tabs.Posts);
-            activeTabRef.current = Tabs.Posts;
+            activeTab.current = Tabs.Posts;
             setUser(props.user);
             setPostsLoading(true);
             setPostsReachedEnd(false);
@@ -439,16 +422,16 @@ export default function Profile(props: ProfileProps): ReactElement {
             setPostsPage(0);
             setCommentsPage(0);
             setMediaPage(0);
-            postsPageRef.current = 0;
-            commentsPageRef.current = 0;
-            mediaPageRef.current = 0;
+            postsPage.current = 0;
+            commentsPage.current = 0;
+            mediaPage.current = 0;
             setLoading(false);
             setNotFound(false);
 
             getPostsCount().then(count => {
                 setPostsCount(count);
             });
-            getPosts(postsPageRef.current, "posts").then(posts => {
+            getPosts(postsPage.current, "posts").then(posts => {
                 setPosts(posts);
                 setPostsLoading(false);
             });
@@ -690,7 +673,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             className={`pointer ${
                                                                 styles.postsTab
                                                             } ${
-                                                                activeTab ==
+                                                                activeTab.current ==
                                                             Tabs.Posts &&
                                                         styles.activeTab
                                                             }`}
@@ -704,7 +687,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             className={`pointer ${
                                                                 styles.postsAndCommentsTab
                                                             } ${
-                                                                activeTab ==
+                                                                activeTab.current ==
                                                             Tabs.PostsAndComments &&
                                                         styles.activeTab
                                                             }`}
@@ -716,7 +699,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             className={`pointer ${
                                                                 styles.mediaTab
                                                             } ${
-                                                                activeTab ==
+                                                                activeTab.current ==
                                                             Tabs.MediaPosts &&
                                                         styles.activeTab
                                                             }`}

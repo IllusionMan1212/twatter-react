@@ -2,20 +2,29 @@
 import { PencilSimple, Repeat } from "phosphor-react";
 import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import { ButtonType, EditProfilePopupProps } from "src/types/props";
-import { formatBirthday, handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
+import {
+    formatBirthday,
+    handleBirthdayDayChange,
+    handleBirthdayMonthChange,
+    handleBirthdayYearChange,
+} from "src/utils/functions";
 import Button from "./buttons/button";
 import styles from "./editProfilePopup.module.scss";
 import homeStyles from "../styles/home.module.scss";
 import { useToastContext } from "src/contexts/toastContext";
 import { IAttachment, IBirthday } from "src/types/general";
 import { useUserContext } from "src/contexts/userContext";
+import { allowedProfileImageMimetypes } from "src/utils/variables";
 
 interface UpdateProfilePayload {
     eventType: string;
     data: {
         userId: string;
         displayName: string;
-        profileImage: IAttachment;
+        profileImage: {
+            mimetype: string;
+            data: string;
+        };
         bio: string;
         birthday?: IBirthday;
     };
@@ -37,20 +46,35 @@ export default function EditProfilePopup(
     const [showBirthdayFields, setShowBirthdayFields] = useState(false);
     const [birthday, setBirthday] = useState<IBirthday>(null);
 
-    const handleSaveButtonClick = () => {
+    const handleSaveButtonClick = async () => {
         if (!displayName) {
             toast("Display name cannot be empty", 3000);
             return;
         }
+
+        const profileImagePayload = {
+            mimetype: "",
+            data: ""
+        };
+
+        if (profileImage) {
+            const profileImageBuf = await profileImage.data.arrayBuffer();
+            const imageDataArr = new Uint8Array(profileImageBuf);
+            const profileImageData = Buffer.from(imageDataArr).toString("base64");
+
+            profileImagePayload.mimetype = profileImage.mimetype;
+            profileImagePayload.data = profileImageData;
+        }
+
 
         const payload: UpdateProfilePayload = {
             eventType: "updateProfile",
             data: {
                 userId: props.userData.id,
                 displayName: displayName,
-                profileImage: profileImage,
+                profileImage: profileImagePayload,
                 bio: bio,
-            }
+            },
         };
 
         if (birthday?.day && birthday?.month && birthday?.year) {
@@ -62,11 +86,7 @@ export default function EditProfilePopup(
 
     const handleProfileImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files[0];
-        if (
-            file.type != "image/jpeg" &&
-            file.type != "image/jpg" &&
-            file.type != "image/png"
-        ) {
+        if (!allowedProfileImageMimetypes.includes(file.type)) {
             toast("This file format is not supported", 4000);
             return;
         }
@@ -97,9 +117,16 @@ export default function EditProfilePopup(
     useEffect(() => {
         if (props.userData.birthday) {
             setBirthday({
-                year: new Date(props.userData.birthday.Time.toString()).getUTCFullYear(),
-                month: new Date(props.userData.birthday.Time.toString()).getUTCMonth() + 1,
-                day: new Date(props.userData.birthday.Time.toString()).getUTCDate()
+                year: new Date(
+                    props.userData.birthday.Time.toString()
+                ).getUTCFullYear(),
+                month:
+                    new Date(
+                        props.userData.birthday.Time.toString()
+                    ).getUTCMonth() + 1,
+                day: new Date(
+                    props.userData.birthday.Time.toString()
+                ).getUTCDate(),
             });
         }
     }, []);
@@ -119,12 +146,10 @@ export default function EditProfilePopup(
                             <img
                                 src={`${
                                     props.userData.avatar_url ==
-                                    "default_profile.svg"
+                                    "default_profile.svg" && !previewImage
                                         ? "/"
                                         : ""
-                                }${
-                                    previewImage ?? props.userData.avatar_url
-                                }`}
+                                }${previewImage ?? props.userData.avatar_url}`}
                                 className={`round ${styles.profileImage}`}
                             />
                             <div className={styles.imageOverlay}>
@@ -175,15 +200,13 @@ export default function EditProfilePopup(
                             </p>
                             <div
                                 className={styles.birthday}
-                                onClick={() =>
-                                    setShowBirthdayFields(true)
-                                }
+                                onClick={() => setShowBirthdayFields(true)}
                             >
                                 <p>
                                     {props.userData.birthday.Valid
                                         ? formatBirthday(
-                                            props.userData.birthday.Time.toString()
-                                        )
+                                              props.userData.birthday.Time.toString()
+                                          )
                                         : "No birthday set yet"}
                                 </p>
                                 <PencilSimple
@@ -197,7 +220,13 @@ export default function EditProfilePopup(
                                     <div className="flex justify-content-space-between">
                                         <select
                                             className={styles.birthdaySelector}
-                                            onChange={(e) => handleBirthdayDayChange(e, setBirthday, birthday)}
+                                            onChange={(e) =>
+                                                handleBirthdayDayChange(
+                                                    e,
+                                                    setBirthday,
+                                                    birthday
+                                                )
+                                            }
                                             defaultValue=""
                                         >
                                             <option
@@ -225,7 +254,14 @@ export default function EditProfilePopup(
                                         </select>
                                         <select
                                             className={styles.birthdaySelector}
-                                            onChange={(e) => handleBirthdayMonthChange(e, setBirthday, birthday, setMaxDays)}
+                                            onChange={(e) =>
+                                                handleBirthdayMonthChange(
+                                                    e,
+                                                    setBirthday,
+                                                    birthday,
+                                                    setMaxDays
+                                                )
+                                            }
                                             defaultValue=""
                                         >
                                             <option
@@ -310,7 +346,14 @@ export default function EditProfilePopup(
                                         </select>
                                         <select
                                             className={styles.birthdaySelector}
-                                            onChange={(e) => handleBirthdayYearChange(e, setBirthday, birthday, setMaxDays)}
+                                            onChange={(e) =>
+                                                handleBirthdayYearChange(
+                                                    e,
+                                                    setBirthday,
+                                                    birthday,
+                                                    setMaxDays
+                                                )
+                                            }
                                             defaultValue=""
                                         >
                                             <option
@@ -323,7 +366,8 @@ export default function EditProfilePopup(
                                             {new Array(100)
                                                 .fill(null)
                                                 .map((_year, i) => {
-                                                    const year = new Date().getUTCFullYear();
+                                                    const year =
+                                                        new Date().getUTCFullYear();
                                                     return (
                                                         <option
                                                             key={year - i}

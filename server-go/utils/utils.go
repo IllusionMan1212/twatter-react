@@ -29,3 +29,5 @@ func GenerateRandomBytes(n int) string {
 	rand.Read(b)
 	return hex.EncodeToString(b)
 }
+
+var AllowedProfileImageMimetypes = map[string]bool{"image/png": true, "image/jpeg": true, "image/jpg": true, "image/webp": true}
