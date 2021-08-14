@@ -17,28 +17,13 @@ import (
 )
 
 func DeletePost(w http.ResponseWriter, req *http.Request) {
-	session := redissession.GetSession(req)
-	if session.IsNew {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Not authorized to perform this action",
-			"status": 401,
-			"success": false
-		}`)
-		return
-	}
-
-	sessionUser, ok := session.Values["user"].(*models.User)
-	if !ok {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized user, please log in",
-			"status": "401",
-			"success": false
-		}`)
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
 		return
 	}
 
 	body := &models.DeletePostBody{}
-	err := json.NewDecoder(req.Body).Decode(&body)
+	err = json.NewDecoder(req.Body).Decode(&body)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
@@ -88,24 +73,8 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 }
 
 func LikePost(w http.ResponseWriter, req *http.Request) {
-	session := redissession.GetSession(req)
-
-	if session.IsNew {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "You need to be logged in to like this post",
-			"status": 401,
-			"succes": false
-		}`)
-		return
-	}
-
-	sessionUser, ok := session.Values["user"].(*models.User)
-	if !ok {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized user, please log in",
-			"status": "401",
-			"success": false
-		}`)
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
 		return
 	}
 
@@ -121,7 +90,7 @@ func LikePost(w http.ResponseWriter, req *http.Request) {
 		query = `DELETE FROM likes WHERE post_id = $1 AND user_id = $2`
 	}
 
-	_, err := db.DBPool.Exec(context.Background(), query, body.PostId, sessionUser.ID)
+	_, err = db.DBPool.Exec(context.Background(), query, body.PostId, sessionUser.ID)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
