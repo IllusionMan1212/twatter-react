@@ -2,7 +2,9 @@ package sockets
 
 import (
 	"bytes"
+	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/redissession"
+	"illusionman1212/twatter-go/utils"
 	"log"
 	"net/http"
 	"time"
@@ -51,9 +53,12 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *Client) readPump(userID uint64) {
 	defer func() {
-		c.hub.unregister <- c
+		payload := &UserClientPayload{}
+		payload.Client = c
+		payload.UserID = userID
+		c.hub.unregister <- *payload
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
@@ -68,7 +73,11 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+
+		payload := &UserMessagePayload{}
+		payload.UserID = userID
+		payload.Message = message
+		c.hub.broadcast <- *payload
 	}
 }
 
@@ -134,11 +143,27 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, ok := session.Values["user"].(*models.User)
+	if !ok {
+		utils.UnauthorizedWithJSON(w, `{
+			"message": "Unauthorized user, please log in",
+			"status": 401,
+			"success": false
+		}`)
+		return
+	}
+
+	payload := &UserClientPayload{}
+
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 524288)}
-	client.hub.register <- client
+
+	payload.Client = client
+	payload.UserID = user.ID
+
+	client.hub.register <- *payload
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.writePump()
-	go client.readPump()
+	go client.readPump(user.ID)
 }

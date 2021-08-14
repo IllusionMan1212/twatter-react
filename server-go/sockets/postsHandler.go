@@ -14,7 +14,7 @@ import (
 	"github.com/go-oss/image/imageutil"
 )
 
-func Post(socketMessage *models.SocketMessage, client *Client) {
+func Post(socketMessage *models.SocketMessage, clients []*Client) {
 	post := &models.SocketPost{}
 
 	// NOTE: this is still ugly af
@@ -143,10 +143,12 @@ func Post(socketMessage *models.SocketMessage, client *Client) {
 		utils.MarshalJSON(returnedAttachments),
 		utils.MarshalJSON(returnedPost.ReplyingTo))
 
-	client.send <- []byte(dataToBeReturned)
+	for _, client := range clients {
+		client.send <- []byte(dataToBeReturned)
+	}
 }
 
-func Comment(socketMessage *models.SocketMessage, client *Client) {
+func Comment(socketMessage *models.SocketMessage, clients []*Client) {
 	comment := &models.SocketComment{}
 	returnedAttachments := make([]models.Attachment, 0)
 
@@ -272,5 +274,7 @@ func Comment(socketMessage *models.SocketMessage, client *Client) {
 		utils.MarshalJSON(returnedAttachments),
 		utils.MarshalJSON(returnedComment.ReplyingTo))
 
-	client.send <- []byte(dataToBeReturned)
+	for _, client := range clients {
+		client.send <- []byte(dataToBeReturned)
+	}
 }
