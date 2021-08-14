@@ -373,6 +373,20 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		image = req.MultipartForm.File["profileImage"][0]
 	}
 
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
+		return
+	}
+
+	if userID != fmt.Sprintf("%v", sessionUser.ID) {
+		utils.UnauthorizedWithJSON(w, `{
+			"message": "Unauthorized to perform this action",
+			"status": 401,
+			"success": false
+		}`)
+		return
+	}
+
 	if userID == "null" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
