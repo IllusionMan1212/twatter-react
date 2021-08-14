@@ -10,7 +10,7 @@ import (
 	"illusionman1212/twatter-go/utils"
 )
 
-func UpdateProfile(socketMessage *models.SocketMessage, client *Client) {
+func UpdateProfile(socketMessage *models.SocketMessage, clients []*Client) {
 	profile := &models.ProfileValues{}
 
 	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketMessage.Data)), profile)
@@ -84,10 +84,12 @@ func UpdateProfile(socketMessage *models.SocketMessage, client *Client) {
 		profile.Birthday.Year, profile.Birthday.Month, profile.Birthday.Day,
 		isBirthdayValid)
 
-	client.send <- []byte(dataToBeReturned)
+	for _, client := range clients {
+		client.send <- []byte(dataToBeReturned)
+	}
 }
 
-func RemoveBirthday(socketMessage *models.SocketMessage, client *Client) {
+func RemoveBirthday(socketMessage *models.SocketMessage, clients []*Client) {
 	user := &models.User{}
 
 	// NOTE: this looks disgusting topkek
@@ -102,5 +104,7 @@ func RemoveBirthday(socketMessage *models.SocketMessage, client *Client) {
 		}
 	}`, user.ID)
 
-	client.send <- []byte(payload)
+	for _, client := range clients {
+		client.send <- []byte(payload)
+	}
 }
