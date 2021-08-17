@@ -48,7 +48,9 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [notFound, setNotFound] = useState(null);
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useLatestState<Array<IPost>>([]);
-    const [postsAndComments, setPostsAndComments] = useLatestState<Array<IPost>>([]);
+    const [postsAndComments, setPostsAndComments] = useLatestState<
+        Array<IPost>
+    >([]);
     const [mediaPosts, setMediaPosts] = useLatestState<Array<IPost>>([]);
     const [postsLoading, setPostsLoading] = useState(true);
     const [modalData, setModalData] = useState({
@@ -139,37 +141,40 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const getActiveTabPosts = useCallback((): Array<IPost> => {
         switch (activeTab.current) {
-        case Tabs.Posts:
-            return posts.current;
-        case Tabs.PostsAndComments:
-            return postsAndComments.current;
-        case Tabs.MediaPosts:
-            return mediaPosts.current;
+            case Tabs.Posts:
+                return posts.current;
+            case Tabs.PostsAndComments:
+                return postsAndComments.current;
+            case Tabs.MediaPosts:
+                return mediaPosts.current;
         }
     }, [mediaPosts, posts, postsAndComments]);
 
-    const setActiveTabPosts = useCallback((posts: Array<IPost>) => {
-        switch (activeTab.current) {
-        case Tabs.Posts:
-            setPosts(posts);
-            break;
-        case Tabs.PostsAndComments:
-            setPostsAndComments(posts);
-            break;
-        case Tabs.MediaPosts:
-            setMediaPosts(posts);
-            break;
-        }
-    }, [setMediaPosts, setPosts, setPostsAndComments]);
+    const setActiveTabPosts = useCallback(
+        (posts: Array<IPost>) => {
+            switch (activeTab.current) {
+                case Tabs.Posts:
+                    setPosts(posts);
+                    break;
+                case Tabs.PostsAndComments:
+                    setPostsAndComments(posts);
+                    break;
+                case Tabs.MediaPosts:
+                    setMediaPosts(posts);
+                    break;
+            }
+        },
+        [setMediaPosts, setPosts, setPostsAndComments]
+    );
 
     const getActiveReachedEnd = (): boolean => {
         switch (activeTab.current) {
-        case Tabs.Posts:
-            return postsReachedEnd;
-        case Tabs.PostsAndComments:
-            return commentsReachedEnd;
-        case Tabs.MediaPosts:
-            return mediaReachedEnd;
+            case Tabs.Posts:
+                return postsReachedEnd;
+            case Tabs.PostsAndComments:
+                return commentsReachedEnd;
+            case Tabs.MediaPosts:
+                return mediaReachedEnd;
         }
     };
 
@@ -198,8 +203,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                 })
             ) {
                 setPostsCount(postsCount - 1);
-                setActiveTabPosts(getActiveTabPosts().filter((post) => post.id != commentId));
-            // check if the id is a comment id and decrement the comment counter
+                setActiveTabPosts(
+                    getActiveTabPosts().filter((post) => post.id != commentId)
+                );
+                // check if the id is a comment id and decrement the comment counter
             } else {
                 // TODO: do we even need this???
                 // setActiveTabPosts(getActiveTabPosts().map((post) => {
@@ -211,54 +218,74 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            setPosts(posts.current.map((post) => {
-                if (post.id == payload.postId) {
-                    if (payload.likeType == "LIKE") {
-                        post.liked = true;
-                        post.likes++;
-                    } else if (payload.likeType == "UNLIKE") {
-                        post.liked = false;
-                        post.likes--; 
+            setPosts(
+                posts.current.map((post) => {
+                    if (post.id == payload.postId) {
+                        if (payload.likeType == "LIKE") {
+                            post.liked = true;
+                            post.likes++;
+                        } else if (payload.likeType == "UNLIKE") {
+                            post.liked = false;
+                            post.likes--;
+                        }
+                        return post;
                     }
                     return post;
-                }
-                return post;
-            }));
-            setPostsAndComments(postsAndComments.current.map((post) => {
-                if (post.id == payload.postId) {
-                    if (payload.likeType == "LIKE") {
-                        post.liked = true;
-                        post.likes++;
-                    } else if (payload.likeType == "UNLIKE") {
-                        post.liked = false;
-                        post.likes--;
+                })
+            );
+            setPostsAndComments(
+                postsAndComments.current.map((post) => {
+                    if (post.id == payload.postId) {
+                        if (payload.likeType == "LIKE") {
+                            post.liked = true;
+                            post.likes++;
+                        } else if (payload.likeType == "UNLIKE") {
+                            post.liked = false;
+                            post.likes--;
+                        }
+                        return post;
                     }
                     return post;
-                }
-                return post;
-            }));
-            setMediaPosts(mediaPosts.current.map((post) => {
-                if (post.id == payload.postId) {
-                    if (payload.likeType == "LIKE") {
-                        post.liked = true;
-                        post.likes++;
-                    } else if (payload.likeType == "UNLIKE") {
-                        post.liked = false;
-                        post.likes--;
+                })
+            );
+            setMediaPosts(
+                mediaPosts.current.map((post) => {
+                    if (post.id == payload.postId) {
+                        if (payload.likeType == "LIKE") {
+                            post.liked = true;
+                            post.likes++;
+                        } else if (payload.likeType == "UNLIKE") {
+                            post.liked = false;
+                            post.likes--;
+                        }
+                        return post;
                     }
                     return post;
-                }
-                return post;
-            }));
+                })
+            );
         },
-        [currentUser?.id, mediaPosts, posts, postsAndComments, setMediaPosts, setPosts, setPostsAndComments]
+        [
+            currentUser?.id,
+            mediaPosts,
+            posts,
+            postsAndComments,
+            setMediaPosts,
+            setPosts,
+            setPostsAndComments,
+        ]
     );
 
     const handleBirthdayRemoved = useCallback(
         (userIdObj) => {
             const userId = userIdObj.id;
             if (currentUser?.id == userId && userId == user.id) {
-                setUser({ ...user, birthday: { Time: new Date("0001-01-01T00:00:00Z"), Valid: false } });
+                setUser({
+                    ...user,
+                    birthday: {
+                        Time: new Date("0001-01-01T00:00:00Z"),
+                        Valid: false,
+                    },
+                });
             }
         },
         [currentUser?.id, user]
@@ -268,10 +295,15 @@ export default function Profile(props: ProfileProps): ReactElement {
     const handleUpdatedProfile = useCallback(
         (payload) => {
             console.log(payload);
-            if (currentUser?.id == payload.userId && payload.userId == user.id) {
+            if (
+                currentUser?.id == payload.userId &&
+                payload.userId == user.id
+            ) {
                 let avatar_url: string = null;
                 if (payload.profileImage) {
-                    const base64Image = "data:image/png;base64,".concat(payload.profileImage);
+                    const base64Image = "data:image/png;base64,".concat(
+                        payload.profileImage
+                    );
                     avatar_url = base64Image;
                     getActiveTabPosts().map((post) => {
                         post.author.avatar_url = avatar_url;
@@ -284,29 +316,35 @@ export default function Profile(props: ProfileProps): ReactElement {
                     display_name: payload.displayName,
                     bio: payload.bio,
                     birthday: payload.birthday ?? user.birthday,
-                    avatar_url: avatar_url ?? user.avatar_url
+                    avatar_url: avatar_url ?? user.avatar_url,
                 });
             }
         },
         [currentUser, user, getActiveTabPosts]
     );
 
-    const getPosts = useCallback((page: number, postsType: string): Promise<IPost[]> => {
-        return axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
-                { withCredentials: true }
-            )
-            .then((res) => {
-                if (res.data.posts.length < 50) {
-                    setPostsReachedEnd(true);
-                }
-                return res.data.posts;
-            })
-            .catch((err) => {
-                toast(err?.response?.data?.message || "An error has occurred", 3000);
-            });
-    }, [props.user?.id]);
+    const getPosts = useCallback(
+        (page: number, postsType: string): Promise<IPost[]> => {
+            return axios
+                .get(
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
+                    { withCredentials: true }
+                )
+                .then((res) => {
+                    if (res.data.posts.length < 50) {
+                        setPostsReachedEnd(true);
+                    }
+                    return res.data.posts;
+                })
+                .catch((err) => {
+                    toast(
+                        err?.response?.data?.message || "An error has occurred",
+                        3000
+                    );
+                });
+        },
+        [props.user?.id, toast]
+    );
 
     const getPostsCount = useCallback((): Promise<number> => {
         return axios
@@ -321,51 +359,53 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const loadMorePosts = (lastItemIndex: number) => {
         switch (activeTab.current) {
-        case Tabs.Posts:
-            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-            if (lastItemIndex < 49) {
-                setPostsReachedEnd(true);
-                return;
-            }
-            setPostsPage(postsPage.current + 1);
-            getPosts(postsPage.current, "posts").then((newPosts) => {
-                if (!newPosts.length) {
+            case Tabs.Posts:
+                // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+                if (lastItemIndex < 49) {
                     setPostsReachedEnd(true);
                     return;
                 }
-                setPosts(posts.current.concat(newPosts));
-            });
-            break;
-        case Tabs.PostsAndComments:
-            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-            if (lastItemIndex < 49) {
-                setCommentsReachedEnd(true);
-                return;
-            }
-            setCommentsPage(commentsPage.current + 1);
-            getPosts(commentsPage.current, "comments").then((newPosts) => {
-                if (!newPosts.length) {
+                setPostsPage(postsPage.current + 1);
+                getPosts(postsPage.current, "posts").then((newPosts) => {
+                    if (!newPosts.length) {
+                        setPostsReachedEnd(true);
+                        return;
+                    }
+                    setPosts(posts.current.concat(newPosts));
+                });
+                break;
+            case Tabs.PostsAndComments:
+                // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+                if (lastItemIndex < 49) {
                     setCommentsReachedEnd(true);
                     return;
                 }
-                setPostsAndComments(postsAndComments.current.concat(newPosts));
-            });
-            break;
-        case Tabs.MediaPosts:
-            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-            if (lastItemIndex < 49) {
-                setMediaReachedEnd(true);
-                return;
-            }
-            setMediaPage(mediaPage.current + 1);
-            getPosts(mediaPage.current, "media").then((newPosts) => {
-                if (!newPosts.length) {
+                setCommentsPage(commentsPage.current + 1);
+                getPosts(commentsPage.current, "comments").then((newPosts) => {
+                    if (!newPosts.length) {
+                        setCommentsReachedEnd(true);
+                        return;
+                    }
+                    setPostsAndComments(
+                        postsAndComments.current.concat(newPosts)
+                    );
+                });
+                break;
+            case Tabs.MediaPosts:
+                // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+                if (lastItemIndex < 49) {
                     setMediaReachedEnd(true);
                     return;
                 }
-                setMediaPosts(mediaPosts.current.concat(newPosts));
-            });
-            break;
+                setMediaPage(mediaPage.current + 1);
+                getPosts(mediaPage.current, "media").then((newPosts) => {
+                    if (!newPosts.length) {
+                        setMediaReachedEnd(true);
+                        return;
+                    }
+                    setMediaPosts(mediaPosts.current.concat(newPosts));
+                });
+                break;
         }
     };
 
@@ -387,16 +427,23 @@ export default function Profile(props: ProfileProps): ReactElement {
                 socket.off("updateProfile", handleUpdatedProfile);
             }
         };
-    }, [handleComment, handleCommentDelete, handleLike, handleBirthdayRemoved, handleUpdatedProfile, socket]);
+    }, [
+        handleComment,
+        handleCommentDelete,
+        handleLike,
+        handleBirthdayRemoved,
+        handleUpdatedProfile,
+        socket,
+    ]);
 
     useEffect(() => {
         if (props.user) {
             setNotFound(false);
             setLoading(false);
-            getPostsCount().then(postsCount => {
+            getPostsCount().then((postsCount) => {
                 setPostsCount(postsCount);
             });
-            getPosts(postsPage.current, "posts").then(posts => {
+            getPosts(postsPage.current, "posts").then((posts) => {
                 setPosts(posts);
                 setPostsLoading(false);
             });
@@ -428,10 +475,10 @@ export default function Profile(props: ProfileProps): ReactElement {
             setLoading(false);
             setNotFound(false);
 
-            getPostsCount().then(count => {
+            getPostsCount().then((count) => {
                 setPostsCount(count);
             });
-            getPosts(postsPage.current, "posts").then(posts => {
+            getPosts(postsPage.current, "posts").then((posts) => {
                 setPosts(posts);
                 setPostsLoading(false);
             });
@@ -510,15 +557,23 @@ export default function Profile(props: ProfileProps): ReactElement {
                                             ref={parentContainerRef}
                                             className={`${styles.container}`}
                                         >
-                                            <div className={styles.scrollableArea}>
+                                            <div
+                                                className={
+                                                    styles.scrollableArea
+                                                }
+                                            >
                                                 <div className={styles.user}>
-                                                    <div className={styles.userInfo}>
+                                                    <div
+                                                        className={
+                                                            styles.userInfo
+                                                        }
+                                                    >
                                                         <div
                                                             className={`round ${styles.userImage}`}
                                                             style={{
                                                                 backgroundImage: `url("${
                                                                     user.avatar_url ==
-                                                            "default_profile.svg"
+                                                                    "default_profile.svg"
                                                                         ? "/"
                                                                         : ""
                                                                 }${
@@ -530,62 +585,68 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             <p
                                                                 className={`${styles.display_name} text-bold`}
                                                             >
-                                                                {user.display_name}
+                                                                {
+                                                                    user.display_name
+                                                                }
                                                             </p>
                                                             <p
                                                                 className={`usernameGrey ${styles.username}`}
                                                             >
-                                                        @{user.username}
+                                                                @{user.username}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className={styles.userStats}>
+                                                    <div
+                                                        className={
+                                                            styles.userStats
+                                                        }
+                                                    >
                                                         {currentUser?.id !=
-                                                user.id ? (
-                                                                <div
-                                                                    className={
-                                                                        styles.userButtons
-                                                                    }
-                                                                >
-                                                                    {currentUser && (
-                                                                        <div
-                                                                            className="pointer"
-                                                                            onClick={
-                                                                                handleMessageClick
-                                                                            }
-                                                                        >
-                                                                            <ChatTeardropText
-                                                                                color="#6067FE"
-                                                                                size="40"
-                                                                                weight="fill"
-                                                                            ></ChatTeardropText>
-                                                                        </div>
-                                                                    )}
-                                                                    <Button
-                                                                        text="Follow"
-                                                                        size={10}
-                                                                        type={
-                                                                            ButtonType.Regular
+                                                        user.id ? (
+                                                            <div
+                                                                className={
+                                                                    styles.userButtons
+                                                                }
+                                                            >
+                                                                {currentUser && (
+                                                                    <div
+                                                                        className="pointer"
+                                                                        onClick={
+                                                                            handleMessageClick
                                                                         }
-                                                                        handleClick={
-                                                                            handleFollowClick
-                                                                        }
-                                                                    ></Button>
-                                                                </div>
-                                                            ) : (
+                                                                    >
+                                                                        <ChatTeardropText
+                                                                            color="#6067FE"
+                                                                            size="40"
+                                                                            weight="fill"
+                                                                        ></ChatTeardropText>
+                                                                    </div>
+                                                                )}
                                                                 <Button
-                                                                    text="Edit Profile"
+                                                                    text="Follow"
                                                                     size={10}
                                                                     type={
                                                                         ButtonType.Regular
                                                                     }
-                                                                    handleClick={() =>
-                                                                        setEditProfilePopup(
-                                                                            true
-                                                                        )
+                                                                    handleClick={
+                                                                        handleFollowClick
                                                                     }
                                                                 ></Button>
-                                                            )}
+                                                            </div>
+                                                        ) : (
+                                                            <Button
+                                                                text="Edit Profile"
+                                                                size={10}
+                                                                type={
+                                                                    ButtonType.Regular
+                                                                }
+                                                                handleClick={() =>
+                                                                    setEditProfilePopup(
+                                                                        true
+                                                                    )
+                                                                }
+                                                            ></Button>
+                                                        )}
                                                         <div
                                                             className={
                                                                 styles.statsContainer
@@ -597,7 +658,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                         postsCount
                                                                     )}
                                                                 </span>{" "}
-                                                        Posts
+                                                                Posts
                                                             </span>{" "}
                                                             <span>
                                                                 <span className="text-bold">
@@ -605,7 +666,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                         0
                                                                     )}
                                                                 </span>{" "}
-                                                        Following
+                                                                Following
                                                             </span>{" "}
                                                             <span>
                                                                 <span className="text-bold">
@@ -613,16 +674,22 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                         0
                                                                     )}
                                                                 </span>{" "}
-                                                        Followers
+                                                                Followers
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className={styles.userExtraInfo}>
+                                                <div
+                                                    className={
+                                                        styles.userExtraInfo
+                                                    }
+                                                >
                                                     {user.bio && (
                                                         <div className="flex gap-1">
                                                             <Note
-                                                                className={styles.icon}
+                                                                className={
+                                                                    styles.icon
+                                                                }
                                                                 size="32"
                                                             ></Note>
                                                             <p className="mt-1Percent">
@@ -633,7 +700,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     {user.birthday.Valid && (
                                                         <div className="flex gap-1">
                                                             <Gift
-                                                                className={styles.icon}
+                                                                className={
+                                                                    styles.icon
+                                                                }
                                                                 size="32"
                                                             ></Gift>
                                                             <p className="mt-1Percent">
@@ -645,11 +714,13 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     )}
                                                     <div className="flex gap-1">
                                                         <Calendar
-                                                            className={styles.icon}
+                                                            className={
+                                                                styles.icon
+                                                            }
                                                             size="32"
                                                         ></Calendar>
                                                         <p className="mt-1Percent">
-                                                    Member since{" "}
+                                                            Member since{" "}
                                                             {formatJoinDate(
                                                                 user.created_at.Time.toString()
                                                             )}
@@ -662,109 +733,145 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     }
                                                 >
                                                     <SuggestedUsers
-                                                        users={new Array(3).fill(
-                                                            props.user
-                                                        )}
+                                                        users={new Array(
+                                                            3
+                                                        ).fill(props.user)}
                                                     ></SuggestedUsers>
                                                 </div>
-                                                <div className={styles.userPosts}>
-                                                    <div className={styles.tabs}>
+                                                <div
+                                                    className={styles.userPosts}
+                                                >
+                                                    <div
+                                                        className={styles.tabs}
+                                                    >
                                                         <div
                                                             className={`pointer ${
                                                                 styles.postsTab
                                                             } ${
                                                                 activeTab.current ==
-                                                            Tabs.Posts &&
-                                                        styles.activeTab
+                                                                    Tabs.Posts &&
+                                                                styles.activeTab
                                                             }`}
                                                             onClick={
                                                                 handlePostsTabClick
                                                             }
                                                         >
-                                                    Posts
+                                                            Posts
                                                         </div>
                                                         <div
                                                             className={`pointer ${
                                                                 styles.postsAndCommentsTab
                                                             } ${
                                                                 activeTab.current ==
-                                                            Tabs.PostsAndComments &&
-                                                        styles.activeTab
+                                                                    Tabs.PostsAndComments &&
+                                                                styles.activeTab
                                                             }`}
-                                                            onClick={handleAllTabClick}
+                                                            onClick={
+                                                                handleAllTabClick
+                                                            }
                                                         >
-                                                    Posts &amp; Comments
+                                                            Posts &amp; Comments
                                                         </div>
                                                         <div
                                                             className={`pointer ${
                                                                 styles.mediaTab
                                                             } ${
                                                                 activeTab.current ==
-                                                            Tabs.MediaPosts &&
-                                                        styles.activeTab
+                                                                    Tabs.MediaPosts &&
+                                                                styles.activeTab
                                                             }`}
                                                             onClick={
                                                                 handleMediaTabClick
                                                             }
                                                         >
-                                                    Media
+                                                            Media
                                                         </div>
                                                     </div>
                                                     {!postsLoading ? (
                                                         <>
                                                             <Virtuoso
-                                                                totalCount={getActiveTabPosts().length}
+                                                                totalCount={
+                                                                    getActiveTabPosts()
+                                                                        .length
+                                                                }
                                                                 data={getActiveTabPosts()}
-                                                                endReached={loadMorePosts}
+                                                                endReached={
+                                                                    loadMorePosts
+                                                                }
                                                                 useWindowScroll
-                                                                overscan={{ main: 500, reverse: 500 }}
-                                                                // eslint-disable-next-line react/display-name
-                                                                components={{Footer: () => {
-                                                                    return (
-                                                                        <>
-                                                                            {!getActiveReachedEnd() && (
-                                                                                <div className={styles.loadingContainer}>
-                                                                                    <Loading
-                                                                                        height="50"
-                                                                                        width="50"
-                                                                                    ></Loading>
-                                                                                </div>
-                                                                            )}
-                                                                        </>
-                                                                    );
-                                                                },
+                                                                overscan={{
+                                                                    main: 500,
+                                                                    reverse: 500,
                                                                 }}
-                                                                itemContent={(_index, post) => (
+                                                                // eslint-disable-next-line react/display-name
+                                                                components={{
+                                                                    Footer: () => {
+                                                                        return (
+                                                                            <>
+                                                                                {!getActiveReachedEnd() && (
+                                                                                    <div
+                                                                                        className={
+                                                                                            styles.loadingContainer
+                                                                                        }
+                                                                                    >
+                                                                                        <Loading
+                                                                                            height="50"
+                                                                                            width="50"
+                                                                                        ></Loading>
+                                                                                    </div>
+                                                                                )}
+                                                                            </>
+                                                                        );
+                                                                    },
+                                                                }}
+                                                                itemContent={(
+                                                                    _index,
+                                                                    post
+                                                                ) => (
                                                                     <Post
-                                                                        key={post.id}
+                                                                        key={
+                                                                            post.id
+                                                                        }
                                                                         currentUser={
                                                                             currentUser
                                                                         }
                                                                         handleMediaClick={
                                                                             handleMediaClick
                                                                         }
-                                                                        post={post}
+                                                                        post={
+                                                                            post
+                                                                        }
                                                                         parentContainerRef={
                                                                             parentContainerRef
                                                                         }
                                                                     ></Post>
                                                                 )}
                                                             ></Virtuoso>
-                                                            {getActiveTabPosts().length == 0 && getActiveReachedEnd() && (
-                                                                <div
-                                                                    className="flex justify-content-center"
-                                                                    style={{
-                                                                        padding: "20px",
-                                                                    }}
-                                                                >
-                                                                    <p>
-                                                                @{user.username}{" "}
-                                                                doesn&apos;t
-                                                                have any posts
-                                                                under this tab.
-                                                                    </p>
-                                                                </div>
-                                                            )}
+                                                            {getActiveTabPosts()
+                                                                .length == 0 &&
+                                                                getActiveReachedEnd() && (
+                                                                    <div
+                                                                        className="flex justify-content-center"
+                                                                        style={{
+                                                                            padding:
+                                                                                "20px",
+                                                                        }}
+                                                                    >
+                                                                        <p>
+                                                                            @
+                                                                            {
+                                                                                user.username
+                                                                            }{" "}
+                                                                            doesn&apos;t
+                                                                            have
+                                                                            any
+                                                                            posts
+                                                                            under
+                                                                            this
+                                                                            tab.
+                                                                        </p>
+                                                                    </div>
+                                                                )}
                                                         </>
                                                     ) : (
                                                         <Loading
@@ -788,9 +895,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                 </div>
                             </div>
                             {currentUser && (
-                                <Navbar
-                                    user={currentUser}
-                                ></Navbar>
+                                <Navbar user={currentUser}></Navbar>
                             )}
                             {mediaModal && (
                                 <MediaModal
@@ -809,9 +914,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                         <>
                             {currentUser ? (
                                 <div>
-                                    <Navbar
-                                        user={currentUser}
-                                    ></Navbar>
+                                    <Navbar user={currentUser}></Navbar>
                                     <StatusBar
                                         title="Not Found"
                                         user={currentUser}
@@ -853,7 +956,7 @@ export default function Profile(props: ProfileProps): ReactElement {
 export async function getServerSideProps(
     context: GetServerSidePropsContext
 ): Promise<GetServerSidePropsResult<{ user: IUser }>> {
-    let user : IUser = null;
+    let user: IUser = null;
 
     try {
         const res = await axios.get(

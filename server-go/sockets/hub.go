@@ -82,26 +82,20 @@ func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, m
 	// TODO: handle more events
 	switch socketMessage.EventType {
 	case "post":
-		fmt.Print("Received post\n")
 		Post(socketMessage, clients)
 	case "commentToServer":
-		fmt.Print("Received comment\n")
 		Comment(socketMessage, clients)
 	case "deletePost":
-		fmt.Print("Received delete post\n")
 		for _, client := range clients {
 			client.send <- message
 		}
 	case "like":
-		fmt.Print("Recieved like post\n")
 		for _, client := range clients {
 			client.send <- message
 		}
 	case "updateProfile":
-		fmt.Print("Received edit profile\n")
 		UpdateProfile(socketMessage, clients)
 	case "removeBirthday":
-		fmt.Print("Received remove birthday\n")
 		RemoveBirthday(socketMessage, clients)
 	case "typing":
 		fmt.Print("Received typing\n")

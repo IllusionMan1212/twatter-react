@@ -103,7 +103,7 @@ export const handleTextInput = (e: InputEvent): void => {
     }
 };
 
-export const handleChange = (
+export const handleAttachmentChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     attachments: Array<IAttachment>,
     setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,

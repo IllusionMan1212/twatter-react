@@ -1,14 +1,14 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import Loading from "../../../components/loading";
+import Loading from "components/loading";
 import { useRouter } from "next/router";
-import StatusBarLoggedOut from "../../../components/statusBarLoggedOut";
-import StatusBar from "../../../components/statusBar";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import StatusBar from "components/statusBar";
 import axios from "axios";
-import ExpandedPost from "../../../components/post/expandedPost";
-import styles from "../../../components/post/expandedPost.module.scss";
-import MediaModal from "../../../components/mediaModal/mediaModal";
-import { IUser, IPost } from "../../../src/types/general";
+import ExpandedPost from "components/post/expandedPost";
+import styles from "components/post/expandedPost.module.scss";
+import MediaModal from "components/mediaModal/mediaModal";
+import { IUser, IPost } from "src/types/general";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
@@ -81,7 +81,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
             setNowCommenting(false);
             toast("Commented Successfully", 2000);
         },
-        [comments]
+        [comments, post]
     );
 
     const handleCommentDelete = useCallback(
@@ -97,26 +97,44 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 );
             })
         },
-        [comments]
+        [comments, post]
     );
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
             if (payload.postId == post.id) {
-                const newPost = {
-                    ...post,
-                };
                 if (payload.likeType == "LIKE") {
-                    newPost.liked = true;
-                    newPost.likes++;
+                    setPost({
+                        ...post,
+                        likes: post.likes + 1,
+                        liked: true
+                    })
                 } else if (payload.likeType == "UNLIKE") {
-                    newPost.liked = false;
-                    newPost.likes--;
+                    setPost({
+                        ...post,
+                        likes: post.likes - 1,
+                        liked: false
+                    });
                 }
-                setPost(newPost);
+            } else {
+                setComments((comments) => {
+                    return comments.map((comment) => {
+                        if (comment.id == payload.postId) {
+                            if (payload.likeType == "LIKE") {
+                                comment.liked = true;
+                                comment.likes++;
+                            } else if (payload.likeType == "UNLIKE") {
+                                comment.liked = false;
+                                comment.likes--;
+                            }
+                            return comment;
+                        }
+                        return comment;
+                    })
+                });        
             }
         },
-        [post]
+        [post, comments]
     );
 
     useEffect(() => {

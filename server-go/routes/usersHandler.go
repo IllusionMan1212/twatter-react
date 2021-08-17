@@ -33,7 +33,7 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	if session.IsNew {
 		utils.UnauthorizedWithJSON(w, `{
 			"message": "Unauthorized user, please log in",
-			"status": "401",
+			"status": 401,
 			"success": false
 		}`)
 		return
@@ -43,7 +43,7 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	if !ok {
 		utils.UnauthorizedWithJSON(w, `{
 			"message": "Unauthorized user, please log in",
-			"status": "401",
+			"status": 401,
 			"success": false
 		}`)
 		return
@@ -57,14 +57,14 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
-		"status": "200",
+		"status": 200,
 		"success": true,
 		"user": %v 
 	}`, utils.MarshalJSON(user)))
@@ -76,7 +76,7 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 	if username == "" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -90,23 +90,23 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 		if err == pgx.ErrNoRows {
 			utils.NotFoundWithJSON(w, `{
 				"message": "User not found",
-				"status": "404",
+				"status": 404,
 				"success": false
 			}`)
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Retrieved user data successfully",
-		"status": "200",
+		"status": 200,
 		"success": true,
 		"user": %v
 	}`, utils.MarshalJSON(user)))
@@ -118,7 +118,7 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 	if token == "" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -131,23 +131,23 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 		if err == pgx.ErrNoRows {
 			utils.ForbiddenWithJSON(w, `{
 				"message": "Invalid or expired token",
-				"status": "403",
+				"status": 403,
 				"success": false
 			}`)
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Token validated",
-		"status": "200",
+		"status": 200,
 		"success": true,
 		"user": %v
 	}`, utils.MarshalJSON(user)))
@@ -159,10 +159,10 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	// lowercase email and username. and trim spaces from all
@@ -175,7 +175,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	if email == "" || username == "" || password == "" || confirmPassword == "" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -185,7 +185,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	if len(username) < 3 || len(username) > 16 {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Username must be between 3 and 16 characters",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -195,7 +195,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	if len(password) < 8 {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Password must be at least 8 characters",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -205,7 +205,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	if password != confirmPassword {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Passwords do not match",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -216,20 +216,22 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "Internal server error, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
-
-	// TODO: should i generate my own id for users or let the db incremental stuff do it?
 
 	user := &models.User{}
 
 	id, err := db.Snowflake.NextID()
 	if err != nil {
-		// TOOD: return 500 here
-		panic(err)
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		return
 	}
 
 	insertQuery := `INSERT INTO users (id, username, password, email, display_name)
@@ -242,14 +244,14 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_username_key\"") {
 			utils.ConflictWithJSON(w, `{
 				"message": "Username already taken",
-				"status": "409",
+				"status": 409,
 				"success": false
 			}`)
 			return
 		} else if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_email_key\"") {
 			utils.ConflictWithJSON(w, `{
-				"message": "Email already taken",
-				"status": "409",
+				"message": "This email address is already associated with an account",
+				"status": 409,
 				"success": false
 			}`)
 			return
@@ -257,22 +259,27 @@ func Create(w http.ResponseWriter, req *http.Request) {
 
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error occurred while creating your account, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	// set the session
 	err = redissession.SetSession("user", user, req, w)
 	if err != nil {
-		panic(err)
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		return
 	}
 
 	// marshal the user interface to a JSON and send the OK response
 	utils.OkWithJSON(w, `{
 		"message": "Created an account successfully",
-		"status": "200",
+		"status": 200,
 		"success": "true"
 	}`)
 }
@@ -283,10 +290,10 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "Internal server error, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	credsUsername := strings.ToLower(strings.TrimSpace(creds.Username))
@@ -296,7 +303,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	if credsUsername == "" || credsPassword == "" || (stayLoggedIn && !stayLoggedIn) {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -315,11 +322,15 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		if strings.Contains(err.Error(), "no rows") {
 			utils.UnauthorizedWithJSON(w, `{
 				"message": "Incorrect credentials",
-				"status": "401",
+				"status": 401,
 				"success": false
 			}`)
 		} else {
-			panic(err)
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
 		}
 		return
 	}
@@ -329,7 +340,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.UnauthorizedWithJSON(w, `{
 			"message": "Incorrect credentials",
-			"status": "401",
+			"status": 401,
 			"success": false
 		}`)
 		return
@@ -337,7 +348,12 @@ func Login(w http.ResponseWriter, req *http.Request) {
 
 	err = redissession.SetSession("user", user, req, w)
 	if err != nil {
-		panic(err)
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		return
 	}
 
 	// TODO: generate access token and refresh token
@@ -345,7 +361,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	// marshal the user interface to a JSON and send the OK response
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Logged in successfully",
-		"status": "200",
+		"status": 200,
 		"success": "true",
 		"user": %v 
 	}`, utils.MarshalJSON(user)))
@@ -356,10 +372,10 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	bio := req.MultipartForm.Value["bio"][0]
@@ -390,7 +406,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	if userID == "null" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -399,7 +415,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	if len(bio) > 150 {
 		utils.PayloadTooLargeWithJSON(w, `{
 			"message": "Bio is too long, it cannot be longer than 150 characters",
-			"status": "413",
+			"status": 413,
 			"success": false
 		}`)
 		return
@@ -414,10 +430,10 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 		birthday := sql.NullTime{Time: birthdayTime, Valid: true}
 
@@ -429,31 +445,38 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		if !utils.AllowedProfileImageMimetypes[mimetype] {
 			utils.BadRequestWithJSON(w, `{
 				"message": "Invalid image type, only .jpg, .jpeg, .png, .webp are accepted",
-				"status": "400",
+				"status": 400,
 				"success": false
 			}`)
 			return
 		}
 
-		// TODO: limit image to 8MB
+		if image.Size > utils.MaxFileSize {
+			utils.BadRequestWithJSON(w, `{
+				"message": "File size cannot exceed 8 MB",
+				"status": 400,
+				"success": false
+			}`)
+			return
+		}
 
 		imageContent, err := image.Open()
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 		buf, err := ioutil.ReadAll(imageContent)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 
 		imageBytes := buf
@@ -465,20 +488,20 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			if err != nil {
 				utils.InternalServerErrorWithJSON(w, `{
 					"message": "An error has occurred, please try again later",
-					"status": "500",
+					"status": 500,
 					"success": false
 				}`)
-				panic(err)
+				return
 			}
 			tempBuf := new(bytes.Buffer)
 			_, err = tempBuf.ReadFrom(reader)
 			if err != nil {
 				utils.InternalServerErrorWithJSON(w, `{
 					"message": "An error has occurred, please try again later",
-					"status": "500",
+					"status": 500,
 					"success": false
 				}`)
-				panic(err)
+				return
 			}
 			imageBytes = tempBuf.Bytes()
 		}
@@ -488,10 +511,10 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 
 		filePath := fmt.Sprintf("%s/profile.%s", fileDirectory, extension)
@@ -500,10 +523,10 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 
 		file.Write(imageBytes)
@@ -520,7 +543,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	// TODO: return the user as well to use the frontend login() funcion so that the home page loads correctly
 	utils.OkWithJSON(w, `{
 		"message": "Setup has been completed",
-		"status": "200",
+		"status": 200,
 		"success": true
 	}`)
 }
@@ -531,10 +554,10 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	email := strings.ToLower(strings.TrimSpace(creds.Email))
@@ -542,7 +565,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 	if email == "" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -556,19 +579,20 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			// respond with a 200 to prevent malicious parties from finding out which emails exist
+			// NOTE: above comment means nothing since users can try to create accounts with emails that dont belong to them
 			utils.OkWithJSON(w, `{
 				"message": "An email containing instructions on how to reset your password has been sent to you",
-				"status": "200",
+				"status": 200,
 				"success": true
 			}`)
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 	}
 
@@ -576,10 +600,10 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	// send an email to the user with the reset token
@@ -628,7 +652,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 
 	utils.OkWithJSON(w, `{
 		"message": "An email containing instructions on how to reset your password has been sent to you",
-		"status": "200",
+		"status": 200,
 		"success": true
 	}`)
 }
@@ -639,10 +663,10 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	reset_token := strings.ToLower(strings.TrimSpace(creds.Token))
@@ -652,7 +676,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 	if reset_token == "" || password == "" || password_confirmation == "" {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Invalid or incomplete request",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -661,7 +685,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 	if password != password_confirmation {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Passwords do not match",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -670,7 +694,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 	if len(password) < 8 {
 		utils.BadRequestWithJSON(w, `{
 			"message": "Password must be at least 8 characters",
-			"status": "400",
+			"status": 400,
 			"success": false
 		}`)
 		return
@@ -680,10 +704,10 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	user := models.User{}
@@ -693,23 +717,23 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 		if err == pgx.ErrNoRows {
 			utils.BadRequestWithJSON(w, `{
 				"message": "Invalid or expired token",
-				"status": "400",
+				"status": 400,
 				"success": false
 			}`)
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
-				"status": "500",
+				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 	}
 
 	utils.OkWithJSON(w, `{
 		"message": "Password has been successfully reset",
-		"status": "200",
+		"status": 200,
 		"success": true
 	}`)
 }
@@ -719,7 +743,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 	if session.IsNew {
 		utils.ForbiddenWithJSON(w, `{
 			"message": "Invalid or expired token",
-			"status": "403",
+			"status": 403,
 			"success": false
 		}`)
 		return
@@ -730,15 +754,15 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
-			"status": "500",
+			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, `{
 		"message": "Logged out",
-		"status": "200",
+		"status": 200,
 		"success": true
 	}`)
 }

@@ -1,26 +1,22 @@
 /* eslint-disable react/react-in-jsx-scope */
 import Navbar from "components/navbar";
 import { ReactElement } from "react";
-import { useUser } from "src/hooks/useUser";
-import Loading from "components/loading";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Trending(): ReactElement {
-    const currentUser = useUser("/login", null);
+    const { user } = useUserContext();
 
     return (
         <>
-            {currentUser ? (
                 <div>
                     <Navbar
-                        user={currentUser}
+                        user={user}
                     />
                     <div className="text-white">
                         trending uwu owo
                     </div>
                 </div>
-            ) : (
-                <Loading height="100" width="100"/>
-            )}
+            )
         </>
     );
 }

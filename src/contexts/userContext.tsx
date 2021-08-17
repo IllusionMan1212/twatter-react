@@ -22,17 +22,21 @@ const UserContextDefaultValues : UserContextType = {
 
 const UserContext = createContext<UserContextType>(UserContextDefaultValues);
 
-// TODO: add more routes
 const protectedRoutes = [
     "/home",
     "/messages",
+    "/settings",
+    "/friends",
+    "/notifications"
 ];
 
 const unprotectedRoutes = [
     "/",
     "/login",
     "/register",
-    "/register/setting-up"
+    "/register/setting-up",
+    "/forgot-password",
+    "/reset-password",
 ];
 
 const fetcher = (url: string) =>

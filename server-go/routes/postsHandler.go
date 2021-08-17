@@ -30,7 +30,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "500",
 			"success": "false"
 		}`)
-		panic(err)
+		return
 	}
 
 	if sessionUser.ID != body.PostAuthorId {
@@ -51,7 +51,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "500",
 			"success": "false"
 		}`)
-		panic(err)
+		return
 	}
 
 	// remove attachment if any
@@ -62,7 +62,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "500",
 			"success": "false"
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, `{
@@ -92,12 +92,13 @@ func LikePost(w http.ResponseWriter, req *http.Request) {
 
 	_, err = db.DBPool.Exec(context.Background(), query, body.PostId, sessionUser.ID)
 	if err != nil {
+		fmt.Printf("%v\n", err.Error())
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
 			"status": 500,
 			"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, `{
@@ -241,7 +242,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 	} else {
 		selectQuery = `SELECT post.id as post_id,
@@ -275,7 +276,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 	}
 
@@ -298,7 +299,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 		postAttachments := make([]models.Attachment, 0)
 		for i := range attachments.Urls.Elements {
@@ -323,7 +324,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
@@ -409,7 +410,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 				"status": 500,
 				"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
@@ -459,7 +460,7 @@ GROUP BY comment.id, author.id;`
 				"status": 500,
 				"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	comments := make([]models.DBPost, 0)
@@ -480,7 +481,7 @@ GROUP BY comment.id, author.id;`
 				"status": 500,
 				"success": false
 			}`)
-			panic(err)
+			return
 		}
 
 		commentAttachments := make([]models.Attachment, 0)
@@ -506,7 +507,7 @@ GROUP BY comment.id, author.id;`
 				"status": 500,
 				"success": false
 		}`)
-		panic(err)
+		return
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
