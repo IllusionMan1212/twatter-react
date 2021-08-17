@@ -57,7 +57,7 @@ export default function PostOptionsMenu(
     return (
         <>
             <div ref={containerRef} className={`pointer ${styles.menu}`} style={{top: top != -1 ? top : "30px"}}>
-                <div>
+                <div data-cy="reportPostBtn">
                     <Flag size="20"></Flag>
                     Report Post
                 </div>
@@ -66,7 +66,7 @@ export default function PostOptionsMenu(
                     onClick={() => {
                         if (navigator.share) {
                             navigator.share({
-                                url: `${process.env.NEXT_PUBLIC_DOMAIN_URL}/u/${props.postAuthorUsername}/${props.postId}`,
+                                url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`,
                                 title: `${props.postAuthorUsername}'s post - Twatter`,
                             }).then(() => {
                                 console.log("shared successfully");
@@ -78,6 +78,7 @@ export default function PostOptionsMenu(
                             console.log("cant share, fallback sharing windows soon");
                         }
                     }}
+                    data-cy="shareBtn"
                 >
                     <Share size="20"></Share>
                     Share Post
@@ -85,7 +86,7 @@ export default function PostOptionsMenu(
                 <hr />
                 <div
                     onClick={() => {
-                        const link = `${process.env.NEXT_PUBLIC_DOMAIN_URL}/u/${props.postAuthorUsername}/${props.postId}`;
+                        const link = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`;
                         const tempInput = document.createElement("input");
                         tempInput.value = link;
                         tempInput.style.position = "fixed";
@@ -104,6 +105,7 @@ export default function PostOptionsMenu(
                             document.body.removeChild(tempInput);
                         }
                     }}
+                    data-cy="copyLinkBtn"
                 >
                     <Link size="20"></Link>
                     Copy Link
@@ -114,9 +116,10 @@ export default function PostOptionsMenu(
                         <div
                             className="dangerRed"
                             onClick={handleOnClick}
+                            data-cy="deletePostBtn"
                         >
-                            <Eraser size="20"></Eraser>
-                        Delete Post
+                            <Eraser size="20" />
+                            Delete Post
                         </div>
                     </>
                 ) : null}

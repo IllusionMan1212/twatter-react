@@ -22,6 +22,7 @@ export default function PostOptionsMenuButton(
                 }
             }}
             className={styles.optionsButton}
+            data-cy="postOptionsBtn"
         >
             <DotsThree
                 className="pointer"

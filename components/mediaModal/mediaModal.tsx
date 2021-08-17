@@ -20,7 +20,7 @@ import Loading from "../loading";
 import axios from "axios";
 import { IAttachment, IPost } from "src/types/general";
 import {
-    handleChange,
+    handleAttachmentChange,
     handleInput,
     handleKeyDown,
     handlePaste,
@@ -54,6 +54,8 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [comments, setComments] = useState<Array<IPost>>([]);
     const [nowCommenting, setNowCommenting] = useState(false);
+    const [postLikes, setPostLikes] = useState(props.modalData.post.likes);
+    const [postLiked, setPostLiked] = useState(props.modalData.post.liked);
 
     const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!commentingAllowed) {
@@ -121,24 +123,39 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            setComments((comments) => {
-                return comments.map((comment) => {
-                    if (comment.id == payload.postId) {
-                        if (payload.likeType == "LIKE") {
-                            comment.likes++;
-                            comment.liked = true;
-                        } else if (payload.likeType == "UNLIKE") {
-                            comment.likes--;
-                            comment.liked = false;
+            if (payload.postId == props.modalData.post.id) {
+                if (payload.likeType == "LIKE") {
+                    setPostLikes(likes => likes + 1);
+                    setPostLiked(true);
+                } else if (payload.likeType == "UNLIKE") {
+                    setPostLikes(likes => likes - 1);
+                    setPostLiked(false);
+                }
+            } else {
+                setComments((comments) => {
+                    return comments.map((comment) => {
+                        if (comment.id == payload.postId) {
+                            if (payload.likeType == "LIKE") {
+                                comment.likes++;
+                                comment.liked = true;
+                            } else if (payload.likeType == "UNLIKE") {
+                                comment.likes--;
+                                comment.liked = false;
+                            }
+                            return comment;
                         }
                         return comment;
-                    }
-                    return comment;
-                });
-            });
+                    });
+                });    
+            }
         },
         [comments]
     );
+
+    useEffect(() => {
+        setPostLikes(props.modalData.post.likes);
+        setPostLiked(props.modalData.post.liked);
+    }, [props.modalData.post.likes, props.modalData.post.liked]);
 
     useEffect(() => {
         setCommentsLoading(true);
@@ -178,7 +195,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         return () => {
             tokenSource.cancel();
         };
-    }, [props.modalData.post]);
+    }, [props.modalData.post.id]);
 
     useEffect(() => {
         if (socket) {
@@ -273,8 +290,8 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <LikeButton
                             post={props.modalData.post}
                             currentUserId={props.modalData.currentUser?.id}
-                            likes={props.modalData.post.likes}
-                            liked={props.modalData.post.liked}
+                            likes={postLikes}
+                            liked={postLiked}
                         ></LikeButton>
                     </div>
                     <p className={styles.date}>
@@ -402,7 +419,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     <input
                                         className={messagesStyles.fileInput}
                                         onChange={(e) =>
-                                            handleChange(
+                                            handleAttachmentChange(
                                                 e,
                                                 attachments,
                                                 setAttachments,

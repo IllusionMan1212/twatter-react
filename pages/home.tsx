@@ -18,7 +18,7 @@ import { useToastContext } from "../src/contexts/toastContext";
 import MediaModal from "../components/mediaModal/mediaModal";
 import { IAttachment, IPost, IUser } from "src/types/general";
 import {
-    handleChange,
+    handleAttachmentChange,
     handleInput,
     handleKeyDown,
     handlePaste,
@@ -180,6 +180,7 @@ export default function Home(): ReactElement {
                 setPosts(posts.current.filter((post) => post.id != postId));
             } else {
                 // TODO: handle comment deletion. (needed when deleting comments when mediamodal is open)
+                // should we even do this ???
             }
         }, [posts]);
 
@@ -220,6 +221,14 @@ export default function Home(): ReactElement {
         [posts, user?.id]
     );
 
+    const handleError = useCallback(
+        (payload) => {
+            setNowPosting(false);
+            toast(payload.message, 3000)
+        },
+        [nowPosting]
+    )
+
     const getPosts = (): Promise<any> => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
@@ -257,6 +266,7 @@ export default function Home(): ReactElement {
             socket.on("like", handleLike);
             socket.on("post", handlePost);
             socket.on("deletePost", handleDeletePost);
+            socket.on("postError", handleError);
         }
 
         return () => {
@@ -265,6 +275,7 @@ export default function Home(): ReactElement {
                 socket.off("deletePost", handleDeletePost);
                 socket.off("commentToClient", handleComment);
                 socket.off("like", handleLike);
+                socket.off("postError", handleError);
             }
         };
     }, [handlePost, handleDeletePost, handleComment, handleLike, socket]);
@@ -369,6 +380,7 @@ export default function Home(): ReactElement {
                                                     className={`${styles.composePostDiv}`}
                                                     contentEditable="true"
                                                     data-placeholder="What's on your mind?"
+                                                    data-cy="composePostDiv"
                                                     onInput={(e) =>
                                                         handleInput(
                                                             e,
@@ -408,11 +420,12 @@ export default function Home(): ReactElement {
                                                     >
                                                         <ImageSquare size="30"></ImageSquare>
                                                         <input
+                                                            data-cy="attachmentBtn"
                                                             className={
                                                                 styles.fileInput
                                                             }
                                                             onChange={(e) =>
-                                                                handleChange(
+                                                                handleAttachmentChange(
                                                                     e,
                                                                     attachments,
                                                                     setAttachments,
@@ -432,6 +445,7 @@ export default function Home(): ReactElement {
                                                         />
                                                     </div>
                                                     <button
+                                                        data-cy="sendBtn"
                                                         className={
                                                             styles.button
                                                         }
@@ -546,7 +560,7 @@ export default function Home(): ReactElement {
                                                             styles.fileInputMobile
                                                         }
                                                         onChange={(e) =>
-                                                            handleChange(
+                                                            handleAttachmentChange(
                                                                 e,
                                                                 attachments,
                                                                 setAttachments,
@@ -589,7 +603,7 @@ export default function Home(): ReactElement {
                                         ) : null}
                                     </div>
                                 </div>
-                                <div className={`text-white ${styles.posts}`}>
+                                <div data-cy="postsList" className={`text-white ${styles.posts}`}>
                                     <Virtuoso
                                         totalCount={posts?.current.length}
                                         data={posts.current}

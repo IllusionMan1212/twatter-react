@@ -51,8 +51,7 @@ export default function UserContextMenu(
     }, []);
 
     return (
-        <div className={`${styles.menuContainer} ${props.open ? styles.menuOpen : null}`}>
-            <div className={styles.menuOverlay}></div>
+        <div className={`${styles.menuContainer} ${props.open ? styles.menuOpen : ""}`}>
             <div
                 className={`${styles.menu}`}
                 onClick={(e) => e.stopPropagation()}

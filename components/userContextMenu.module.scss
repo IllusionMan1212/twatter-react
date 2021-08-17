@@ -1,20 +1,27 @@
 @use "../styles/variables";
 
 .menuContainer {
+    background-color: rgba(0, 0, 0, 0.5);
     width: 100vw;
     height: 100vh;
     position: fixed;
     top: 0px;
     bottom: 0px;
-    right: -100vw;
     z-index: 8;
     color: variables.$text-color-primary;
-    transition: right 0.25s;
+    opacity: 0;
+    transition: opacity 0.2s;
+    visibility: hidden;
+    cursor: initial;
     display: flex;
 }
 
 .menu {
     background-color: variables.$bg-color-primary;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
     width: 20%;
     height: 100%;
     border-left: 1px solid variables.$divider-color;
@@ -22,8 +29,23 @@
     flex-direction: column;
     justify-content: space-between;
     cursor: initial;
+    z-index: 9;
+    transform: translateX(100%);
+    transition: transform 0.35s;
+
+    @media (max-width: 1200px) {
+        width: 25%;
+    }
+
+    @media (max-width: 1000px) {
+        width: 30%;
+    }
 
     @media (max-width: 800px) {
+        width: 40%;
+    }
+
+    @media (max-width: 599px) {
         width: 60%;
     }
 }
@@ -60,14 +82,34 @@
     width: 80%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    cursor: initial;
+
+    @media (max-width: 1200px) {
+        width: 75%;
+    }
+
+    @media (max-width: 1000px) {
+        width: 70%;
+    }
 
     @media (max-width: 800px) {
+        width: 60%;
+    }
+
+    @media (max-width: 599px) {
         width: 40%;
     }
 }
 
 .menuOpen {
+    visibility: visible;
+    opacity: 1;
     right: 0;
+    justify-content: flex-end;
+
+    & > .menu {
+        transform: translate(0);
+    }
 }
 
 @keyframes menuItem {
@@ -78,3 +120,4 @@
         transform: rotateX(0deg);
     }
 }
+

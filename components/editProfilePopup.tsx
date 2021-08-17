@@ -111,6 +111,7 @@ export default function EditProfilePopup(
                 id: props.userData.id,
             },
         };
+        setBirthday(null);
         socket.send(JSON.stringify(payload));
     };
 

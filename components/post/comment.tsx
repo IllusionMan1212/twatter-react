@@ -1,56 +1,25 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useCallback, useEffect, useState } from "react";
-import LikeButton from "../buttons/likeButton";
-import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
-import CommentButton from "../buttons/commentButton";
+import { ReactElement } from "react";
+import LikeButton from "components/buttons/likeButton";
+import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
+import CommentButton from "components/buttons/commentButton";
 import Router from "next/router";
 import Link from "next/link";
-import { timeSince } from "../../src/utils/functions";
+import { timeSince } from "src/utils/functions";
 import { IUser } from "src/types/general";
 import styles from "./comment.module.scss";
 import postStyles from "./post.module.scss";
 import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "../attachmentsContainer";
-import { LikePayload } from "src/types/utils";
 import ProfileImage from "./profileImage";
 
 export default function Comment(props: CommentProps): ReactElement {
-    const [likes, setLikes] = useState<number>(props.comment.likes);
-
     const handleCommentButtonClickOnComment = (
         commentId: string,
         commentAuthor: IUser
     ) => {
         Router.push(`/u/${commentAuthor.username}/${commentId}`);
     };
-
-    const handleLike = useCallback(
-        (payload: LikePayload) => {
-            const newLikes = [...likes];
-            if (payload.postId == props.comment.id) {
-                if (payload.likeType == "LIKE") {
-                    setLikes(newLikes.concat(props.currentUser?.id));
-                } else if (payload.likeType == "UNLIKE") {
-                    setLikes(newLikes.filter((user) => user != props.currentUser?.id));
-                }
-            }
-        },
-        [likes]
-    );
-
-    useEffect(() => {
-        /*
-        if (socket?.connected) {
-            socket.on("likeToClient", handleLike);
-        }
-
-        return () => {
-            if (socket?.connected) {
-                socket.off("likeToClient", handleLike);
-            }
-        };
-        */
-    }, [handleLike]);
 
     return (
         <div
@@ -111,7 +80,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     <LikeButton
                         post={props.comment}
                         currentUserId={props.currentUser?.id}
-                        likes={likes}
+                        likes={props.comment.likes}
                         liked={props.comment.liked}
                     ></LikeButton>
                 </div>

@@ -22,8 +22,8 @@ const (
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
-	// Maximum message size allowed from peer. (100 MB)
-	maxMessageSize = 100 << 20
+	// Maximum message size allowed from peer. (15 MB)
+	maxMessageSize = 15 << 20
 )
 
 var (
@@ -67,6 +67,9 @@ func (c *Client) readPump(userID uint64) {
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
+			if err == websocket.ErrReadLimit {
+				log.Printf("err: %v\n", err)
+			}
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
 			}
@@ -127,6 +130,10 @@ func (c *Client) writePump() {
 	}
 }
 
+func (c *Client) emitEvent(data []byte) {
+	c.send <- data
+}
+
 // serveWs handles websocket requests from the peer.
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -155,7 +162,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 	payload := &UserClientPayload{}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 524288)}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 1024)}
 
 	payload.Client = client
 	payload.UserID = user.ID

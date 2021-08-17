@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var AllowedProfileImageMimetypes = map[string]bool{"image/png": true, "image/jpeg": true, "image/jpg": true, "image/webp": true}
+
+const MaxFileSize = 8 * 1024 * 1024
+
 func CheckError(err error) {
 	if err != nil {
 		panic(err)
@@ -29,5 +33,3 @@ func GenerateRandomBytes(n int) string {
 	rand.Read(b)
 	return hex.EncodeToString(b)
 }
-
-var AllowedProfileImageMimetypes = map[string]bool{"image/png": true, "image/jpeg": true, "image/jpg": true, "image/webp": true}

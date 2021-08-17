@@ -5,16 +5,18 @@ import Search from "./search";
 import { ChatsTeardrop, ArrowLeft, Bell } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import { StatusBarProps } from "../src/types/props";
-import { useToastContext } from "../src/contexts/toastContext";
-import axiosInstance from "../src/axios";
+import { StatusBarProps } from "src/types/props";
+import { useToastContext } from "src/contexts/toastContext";
+import axiosInstance from "src/axios";
 import axios from "axios";
 import ProfileImage from "./post/profileImage";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
     const [userMenu, setUserMenu] = useState(false);
 
     const toast = useToastContext();
+    const { socket } = useUserContext();
 
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [unreadNotifications] = useState(0);
@@ -66,19 +68,19 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
         };
     }, [toast]);
 
-    // useEffect(() => {
-    //     if (socket?.connected) {
-    //         socket.on("messageFromServer", handleMessageFromServer);
-    //         socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
-    //     }
+    useEffect(() => {
+        if (socket) {
+            socket.on("messageFromServer", handleMessageFromServer);
+            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        }
 
-    //     return () => {
-    //         if (socket?.connected) {
-    //             socket.off("messageFromServer", handleMessageFromServer);
-    //             socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
-    //         }
-    //     };
-    // }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
+        return () => {
+            if (socket) {
+                socket.off("messageFromServer", handleMessageFromServer);
+                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            }
+        };
+    }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
 
     return (
         <div

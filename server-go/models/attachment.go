@@ -26,8 +26,4 @@ const (
 	Thumbnail = "thumbnail"
 )
 
-const (
-	Image = "image"
-	Gif   = "gif"
-	Video = "video"
-)
+var SupportedAttachmentTypes = map[string]bool{"image": true, "gif": true, "video": true}

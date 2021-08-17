@@ -11,9 +11,9 @@ import { ArrowArcLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import messagesStyles from "../../styles/messages.module.scss";
 import { useToastContext } from "../../src/contexts/toastContext";
 import mediaModalStyles from "../mediaModal/mediaModal.module.scss";
-import { IAttachment, IPost } from "src/types/general";
+import { IAttachment } from "src/types/general";
 import {
-    handleChange,
+    handleAttachmentChange,
     handleInput,
     handleKeyDown,
     handlePaste,
@@ -206,7 +206,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     >
                         <p>{props.post.content}</p>
                         <AttachmentsContainer
-                            post={props.post as unknown as IPost}
+                            post={props.post}
                             handleMediaClick={props.handleMediaClick}
                         ></AttachmentsContainer>
                     </div>
@@ -219,11 +219,11 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     </div>
                     <div className="flex gap-1">
                         <CommentButton
-                            post={props.post as unknown as IPost}
+                            post={props.post}
                             handleClick={handleCommentButtonClick}
                         ></CommentButton>
                         <LikeButton
-                            post={props.post as unknown as IPost}
+                            post={props.post}
                             currentUserId={props.currentUser?.id}
                             likes={props.post.likes}
                             liked={props.post.liked}
@@ -350,7 +350,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                 <input
                                     className={messagesStyles.fileInput}
                                     onChange={(e) =>
-                                        handleChange(
+                                        handleAttachmentChange(
                                             e,
                                             attachments,
                                             setAttachments,
