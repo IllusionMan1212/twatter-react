@@ -10,7 +10,13 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetConversations(w http.ResponseWriter, req *http.Request) {
-
+	// TODO: fetch from the db
+	utils.OkWithJSON(w, `{
+		"message": "Fetched conversations successfully",
+		"status": 200,
+		"success": true,
+		"conversations": []
+	}`)
 }
 
 func GetMessages(w http.ResponseWriter, req *http.Request) {
