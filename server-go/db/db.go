@@ -28,17 +28,31 @@ const users_table = `CREATE TABLE IF NOT EXISTS users(
 	reset_password_token_expiration timestamp DEFAULT NULL
 );`
 
-// TODO: there's still more field to add to the messages table
-const messages_table = `CREATE TABLE IF NOT EXISTS messages(
+const conversations_table = `CREATE TABLE IF NOT EXISTS conversations(
 	id BIGINT PRIMARY KEY UNIQUE,
-	user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	content varchar(1000) NOT NULL,
-	created_at timestamp NOT NULL DEFAULT (now() at time zone 'utc'),
-	deleted boolean NOT NULL DEFAULT false,
-	deleted_at timestamp DEFAULT NULL
+	last_updated timestamp NOT NULL DEFAULT (now() at time zone 'utc'),
+	members BIGINT[] NOT NULL,
+	participants BIGINT[] NOT NULL
 );`
 
-// TODO: there's still some more fields but idk how to implement them yet
+const messages_table = `CREATE TABLE IF NOT EXISTS messages(
+	id BIGINT PRIMARY KEY UNIQUE,
+	author_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	content varchar(1000) NOT NULL,
+	sent_time timestamp NOT NULL DEFAULT (now() at time zone 'utc'),
+	read_by BIGINT[] NOT NULL,
+	deleted boolean NOT NULL DEFAULT false
+);`
+
+const message_attachments_table = `CREATE TABLE IF NOT EXISTS message_attachments(
+	message_id BIGINT NOT NULL, FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+	url varchar NOT NULL UNIQUE,
+	type attachment_type NOT NULL,
+	size attachment_size NOT NULL
+);`
+
+// TODO: (maybe a deleted field ???)
 // NOTE: BIGSERIAL has a NOT NULL constraint by default, bigint is needed for the parent_id here
 const posts_table = `CREATE TABLE IF NOT EXISTS posts(
 	id BIGINT PRIMARY KEY UNIQUE,
@@ -69,11 +83,9 @@ const attachment_type_type = `DO $$ BEGIN
 const attachments_table = `CREATE TABLE IF NOT EXISTS attachments(
 	post_id BIGINT NOT NULL, FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
 	url varchar NOT NULL UNIQUE,
-	type varchar NOT NULL,
+	type attachment_type NOT NULL,
 	size attachment_size NOT NULL
 )`
-
-// TODO: not sure if i need a conversation table
 
 var DBPool *pgxpool.Pool
 var Snowflake = sonyflake.NewSonyflake(sonyflake.Settings{
@@ -91,17 +103,21 @@ func InitializeDB() {
 	}
 
 	_, err = DBPool.Exec(context.Background(), users_table)
-	utils.CheckError(err)
+	utils.FatalError(err)
+	_, err = DBPool.Exec(context.Background(), conversations_table)
+	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), messages_table)
-	utils.CheckError(err)
+	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), posts_table)
-	utils.CheckError(err)
+	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), likes_table)
-	utils.CheckError(err)
+	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), attachment_size_type)
-	utils.CheckError(err)
+	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), attachment_type_type)
-	utils.CheckError(err)
+	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), attachments_table)
-	utils.CheckError(err)
+	utils.FatalError(err)
+	_, err = DBPool.Exec(context.Background(), message_attachments_table)
+	utils.FatalError(err)
 }
