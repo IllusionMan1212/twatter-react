@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"time"
 )
 
 type RegisterCreds struct {
@@ -28,25 +29,25 @@ type ResetPasswordCreds struct {
 }
 
 type User struct {
-	ID            uint64       `json:"id" db:"id"`
-	Username      string       `json:"username" db:"username"`
-	DisplayName   string       `json:"display_name" db:"display_name"`
-	Bio           string       `json:"bio" db:"bio"`
-	AvatarURL     string       `json:"avatar_url" db:"avatar_url"`
-	Birthday      sql.NullTime `json:"birthday" db:"birthday"`
-	CreatedAt     sql.NullTime `json:"created_at" db:"created_at"`
-	FinishedSetup bool         `json:"finished_setup" db:"finished_setup"`
+	ID            uint64       `json:"id"`
+	Username      string       `json:"username"`
+	DisplayName   string       `json:"display_name"`
+	Bio           string       `json:"bio"`
+	AvatarURL     string       `json:"avatar_url"`
+	Birthday      sql.NullTime `json:"birthday"`
+	CreatedAt     time.Time    `json:"created_at"`
+	FinishedSetup bool         `json:"finished_setup"`
 }
 
 type ParentUser struct {
-	ID            sql.NullInt64  `json:"id" db:"id"`
-	Username      sql.NullString `json:"username" db:"username"`
-	DisplayName   sql.NullString `json:"display_name" db:"display_name"`
-	Bio           sql.NullString `json:"bio" db:"bio"`
-	AvatarURL     sql.NullString `json:"avatar_url" db:"avatar_url"`
-	Birthday      sql.NullTime   `json:"birthday" db:"birthday"`
-	CreatedAt     sql.NullTime   `json:"created_at" db:"created_at"`
-	FinishedSetup sql.NullBool   `json:"finished_setup" db:"finished_setup"`
+	ID            sql.NullInt64  `json:"id"`
+	Username      sql.NullString `json:"username"`
+	DisplayName   sql.NullString `json:"display_name"`
+	Bio           sql.NullString `json:"bio"`
+	AvatarURL     sql.NullString `json:"avatar_url"`
+	Birthday      sql.NullTime   `json:"birthday"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
+	FinishedSetup sql.NullBool   `json:"finished_setup"`
 }
 
 type Birthday struct {

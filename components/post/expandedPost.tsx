@@ -215,7 +215,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     <div
                         className={`flex align-items-end text-small ${postStyles.postDate}`}
                     >
-                        {formatDate(props.post.created_at.Time.toString())}
+                        {formatDate(props.post.created_at)}
                     </div>
                     <div className="flex gap-1">
                         <CommentButton

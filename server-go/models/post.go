@@ -1,6 +1,9 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 type SocketPost struct {
 	Content       string             `json:"content"`
@@ -21,7 +24,7 @@ type DBPost struct {
 	ID          uint64       `json:"id"`
 	Author      User         `json:"author"`
 	Content     string       `json:"content"`
-	CreatedAt   sql.NullTime `json:"created_at"`
+	CreatedAt   time.Time    `json:"created_at"`
 	ReplyingTo  ParentPost   `json:"replying_to"`
 	Attachments []Attachment `json:"attachments"`
 	Likes       int          `json:"likes"`

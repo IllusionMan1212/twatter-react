@@ -37,9 +37,9 @@ const conversations_table = `CREATE TABLE IF NOT EXISTS conversations(
 
 const messages_table = `CREATE TABLE IF NOT EXISTS messages(
 	id BIGINT PRIMARY KEY UNIQUE,
-	author_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	content varchar(1000) NOT NULL,
+	author_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	conversation_id BIGINT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	content varchar NOT NULL,
 	sent_time timestamp NOT NULL DEFAULT (now() at time zone 'utc'),
 	read_by BIGINT[] NOT NULL,
 	deleted boolean NOT NULL DEFAULT false

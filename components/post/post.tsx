@@ -129,7 +129,7 @@ export default function Post(props: PostProps): ReactElement {
                     <div
                         className={`flex align-items-end text-small ${styles.postDate}`}
                     >
-                        {timeSince(props.post.created_at.Time.toString())}
+                        {timeSince(props.post.created_at)}
                     </div>
                     <div className="flex gap-1 justify-content-end">
                         <CommentButton
