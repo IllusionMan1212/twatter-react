@@ -44,7 +44,8 @@ export default function EditProfilePopup(
     );
     const [bio, setBio] = useState<string>(props.userData.bio);
     const [showBirthdayFields, setShowBirthdayFields] = useState(false);
-    const [birthday, setBirthday] = useState<IBirthday>(null);
+    const [selectedBirthday, setSelectedBirthday] = useState<IBirthday>(null);
+    const [birthday, setBirthday] = useState(props.userData.birthday.Time.toString());
 
     const handleSaveButtonClick = async () => {
         if (!displayName) {
@@ -77,8 +78,8 @@ export default function EditProfilePopup(
             },
         };
 
-        if (birthday?.day && birthday?.month && birthday?.year) {
-            payload.data.birthday = birthday;
+        if (selectedBirthday?.day && selectedBirthday?.month && selectedBirthday?.year) {
+            payload.data.birthday = selectedBirthday;
         }
         socket.send(JSON.stringify(payload));
         props.setEditProfilePopup(false);
@@ -101,7 +102,7 @@ export default function EditProfilePopup(
 
     const handleCancelBirthday = () => {
         setShowBirthdayFields(false);
-        setBirthday(null);
+        setSelectedBirthday(null);
     };
 
     const handleRemoveBirthday = () => {
@@ -111,13 +112,19 @@ export default function EditProfilePopup(
                 id: props.userData.id,
             },
         };
-        setBirthday(null);
+        setSelectedBirthday(null);
         socket.send(JSON.stringify(payload));
     };
 
     useEffect(() => {
+        if (props.userData.birthday.Valid) {
+            setBirthday(formatBirthday(props.userData.birthday.Time.toString()));
+        }
+    }, [props.userData.birthday.Time])
+
+    useEffect(() => {
         if (props.userData.birthday) {
-            setBirthday({
+            setSelectedBirthday({
                 year: new Date(
                     props.userData.birthday.Time.toString()
                 ).getUTCFullYear(),
@@ -205,9 +212,7 @@ export default function EditProfilePopup(
                             >
                                 <p>
                                     {props.userData.birthday.Valid
-                                        ? formatBirthday(
-                                              props.userData.birthday.Time.toString()
-                                          )
+                                        ? birthday
                                         : "No birthday set yet"}
                                 </p>
                                 <PencilSimple
@@ -224,8 +229,8 @@ export default function EditProfilePopup(
                                             onChange={(e) =>
                                                 handleBirthdayDayChange(
                                                     e,
-                                                    setBirthday,
-                                                    birthday
+                                                    setSelectedBirthday,
+                                                    selectedBirthday
                                                 )
                                             }
                                             defaultValue=""
@@ -258,8 +263,8 @@ export default function EditProfilePopup(
                                             onChange={(e) =>
                                                 handleBirthdayMonthChange(
                                                     e,
-                                                    setBirthday,
-                                                    birthday,
+                                                    setSelectedBirthday,
+                                                    selectedBirthday,
                                                     setMaxDays
                                                 )
                                             }
@@ -350,8 +355,8 @@ export default function EditProfilePopup(
                                             onChange={(e) =>
                                                 handleBirthdayYearChange(
                                                     e,
-                                                    setBirthday,
-                                                    birthday,
+                                                    setSelectedBirthday,
+                                                    selectedBirthday,
                                                     setMaxDays
                                                 )
                                             }

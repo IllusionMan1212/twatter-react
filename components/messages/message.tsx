@@ -1,39 +1,37 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./message.module.scss";
-import { MessageProps } from "../../src/types/props";
-import { ReactElement } from "react";
-import { formatMessgeTime } from "../../src/utils/functions";
+import { MessageProps } from "src/types/props";
+import { ReactElement, useEffect, useState } from "react";
+import { formatMessageTime } from "src/utils/functions";
 
-export default function Message({
-    sender,
-    children,
-    sentTime,
-    attachment,
-    conversationId,
-    setImageModal,
-    setModalAttachment,
-}: MessageProps): ReactElement {
+export default function Message(props: MessageProps): ReactElement {
+
+    const [sentTime, setSentTime] = useState(props.sentTime);
 
     const handleClick = () => {
-        window.history.pushState(null, null, `${conversationId}/media`);
-        setImageModal(true);
-        setModalAttachment(attachment);
+        window.history.pushState(null, null, `${props.conversationId}/media`);
+        props.setImageModal(true);
+        props.setModalAttachment(props.attachment);
     };
+
+    useEffect(() => {
+        setSentTime(formatMessageTime(props.sentTime));
+    }, [props.sentTime])
 
     return (
         <div className={styles.messageContainer}>
             <div
                 className={`${
-                    sender ? styles.senderMessage : styles.recipientMessage
+                    props.sender ? styles.senderMessage : styles.recipientMessage
                 }`}
             >
-                {children && (
-                    <div className={styles.content}>{children}</div>
+                {props.children && (
+                    <div className={styles.content}>{props.children}</div>
                 )}
-                {attachment && (
+                {props.attachment && (
                     <img
                         className={styles.attachment}
-                        src={attachment}
+                        src={props.attachment}
                         height="auto"
                         width="auto"
                         onClick={handleClick}
@@ -43,10 +41,10 @@ export default function Message({
             </div>
             <div
                 className={`${
-                    sender ? styles.senderTime : styles.recipientTime
+                    props.sender ? styles.senderTime : styles.recipientTime
                 }`}
             >
-                {formatMessgeTime(sentTime)}
+                {sentTime}
             </div>
         </div>
     );

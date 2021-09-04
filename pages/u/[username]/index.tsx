@@ -70,6 +70,9 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [mediaPage, setMediaPage] = useLatestState(0);
     const [postsCount, setPostsCount] = useState(0);
 
+    const [creationDate, setCreationDate] = useState(user.created_at);
+    const [birthday, setBirthday] = useState(user.birthday.Time.toString());
+
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
         post: IPost,
@@ -138,6 +141,16 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
         }
     };
+
+    useEffect(() => {
+        setCreationDate(formatJoinDate(user.created_at));
+    }, [user.created_at])
+
+    useEffect(() => {
+        if (user.birthday.Valid) {
+            setBirthday(formatBirthday(user.birthday.Time.toString()));
+        }
+    }, [user.birthday.Time])
 
     const getActiveTabPosts = useCallback((): Array<IPost> => {
         switch (activeTab.current) {
@@ -294,7 +307,6 @@ export default function Profile(props: ProfileProps): ReactElement {
     // this also needs proper change
     const handleUpdatedProfile = useCallback(
         (payload) => {
-            console.log(payload);
             if (
                 currentUser?.id == payload.userId &&
                 payload.userId == user.id
@@ -706,9 +718,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 size="32"
                                                             ></Gift>
                                                             <p className="mt-1Percent">
-                                                                {formatBirthday(
-                                                                    user.birthday.Time.toString()
-                                                                )}
+                                                                {birthday}
                                                             </p>
                                                         </div>
                                                     )}
@@ -721,9 +731,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         ></Calendar>
                                                         <p className="mt-1Percent">
                                                             Member since{" "}
-                                                            {formatJoinDate(
-                                                                user.created_at.Time.toString()
-                                                            )}
+                                                            {creationDate}
                                                         </p>
                                                     </div>
                                                 </div>
