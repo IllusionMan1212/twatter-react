@@ -3,21 +3,21 @@ package utils
 import (
 	"encoding/hex"
 	"encoding/json"
-	"log"
+	"illusionman1212/twatter-go/logger"
 	"math/rand"
 	"time"
 )
 
 func FatalError(err error) {
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 }
 
 func MarshalJSON(v interface{}) string {
 	b, err := json.Marshal(v)
 	if err != nil {
-		log.Panicf("Failed to marshal JSON: %v", err)
+		logger.Errorf("Failed to marshal JSON: %v", err)
 	}
 	return string(b)
 }
@@ -25,7 +25,7 @@ func MarshalJSON(v interface{}) string {
 func UnmarshalJSON(data []byte, v interface{}) {
 	err := json.Unmarshal(data, v)
 	if err != nil {
-		log.Panicf("Failed to unmarshal JSON: %v", err)
+		logger.Errorf("Failed to unmarshal JSON: %s", err)
 	}
 }
 
