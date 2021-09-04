@@ -15,12 +15,12 @@ export default function MessagesListItem(
             onClick={props.onClick}
         >
             <div className={styles.profilePicutre}>
-                {props.receivers[0] ? (
+                {props.receiver ? (
                     <ProfileImage
                         width={45}
                         height={45}
-                        src={props.receivers[0].avatar_url}
-                        hyperlink={`${props.receivers[0].username}`}
+                        src={props.receiver.avatar_url}
+                        hyperlink={`${props.receiver.username}`}
                     />
                 ) : (
                     <ProfileImage
@@ -32,7 +32,7 @@ export default function MessagesListItem(
             </div>
             <div className={styles.text}>
                 <p className="text-medium text-bold">
-                    {props.receivers[0]?.display_name ?? "Deleted Account"}
+                    {props.receiver?.display_name ?? "Deleted Account"}
                 </p>
                 <div>
                     <p

@@ -1,26 +1,185 @@
 package routes
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/logger"
+	"illusionman1212/twatter-go/models"
+	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
 	"net/http"
 )
 
 func StartConversation(w http.ResponseWriter, req *http.Request) {
+	// TODO: limit to 20 conversations
 
+	body := &models.ConversationInitPayload{}
+	err := json.NewDecoder(req.Body).Decode(&body)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Errorf("Error while decoding request body: ", err)
+		return
+	}
+
+	session := redissession.GetSession(req)
+
+	if session.IsNew {
+		utils.UnauthorizedWithJSON(w, `{
+			"message": "Unauthorized user, please log in",
+			"status": 401,
+			"success": false
+		}`)
+		logger.Info("Unauthorized user attempted to fetch conversations")
+		return
+	}
+
+	sessionUser, ok := session.Values["user"].(*models.User)
+	if !ok {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Error("Error while extracting user info from session")
+		return
+	}
+
+	if sessionUser.ID != body.SenderId {
+		utils.UnauthorizedWithJSON(w, `{
+			"message": "Unauthorized user, please log in",
+			"status": 401,
+			"success": false
+		}`)
+		logger.Info("Mismatching cookie user and senderId")
+		return
+	}
+
+	if body.ReceiverId == body.SenderId {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": 400,
+			"success": false
+		}`)
+		logger.Infof("Attempt to start conversation with self. ID: %v", body.ReceiverId)
+		return
+	}
+
+	convoId, err := db.Snowflake.NextID()
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Errorf("Error while generating a new id: ", err)
+		return
+	}
+
+	members := []uint64{body.ReceiverId, body.SenderId}
+	participants := []uint64{body.SenderId}
+
+	insertQuery := `INSERT INTO conversations(id, members, participants)
+		VALUES($1, $2, $3)`
+
+	_, err = db.DBPool.Exec(context.Background(), insertQuery, convoId, members, participants)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Error("Error while inserting a new convo")
+		return
+	}
+
+	utils.OkWithJSON(w, fmt.Sprintf(`{
+		"message": "Conversation created",
+		"status": 200,
+		"success": true,
+		"conversationId": %v
+	}`, convoId))
 }
 
 func GetConversations(w http.ResponseWriter, req *http.Request) {
-	// TODO: fetch from the db
-	utils.OkWithJSON(w, `{
+	session := redissession.GetSession(req)
+
+	if session.IsNew {
+		utils.UnauthorizedWithJSON(w, `{
+			"message": "Unauthorized user, please log in",
+			"status": 401,
+			"success": false
+		}`)
+		logger.Info("Unauthorized user attempted to fetch conversations")
+		return
+	}
+
+	sessionUser, ok := session.Values["user"].(*models.User)
+	if !ok {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Error("Error while extracting user info from session")
+		return
+	}
+
+	// TODO: query for unread messages and last message
+	query := `SELECT convo.id, convo.last_updated,
+		receiver.id as receiver_id, receiver.username as receiver_username, receiver.display_name as receiver_display_name, receiver.avatar_url as receiver_avatar_url
+		FROM conversations convo
+		INNER JOIN users receiver
+		ON receiver.id <> $1 AND receiver.id = ANY(convo.members)
+		WHERE $1 = ANY(convo.participants);`
+
+	rows, err := db.DBPool.Query(context.Background(), query, sessionUser.ID)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Errorf("Error while fetching conversations: %s", err)
+		return
+	}
+
+	conversations := make([]models.Conversation, 0)
+
+	defer rows.Close()
+	for rows.Next() {
+		conversation := &models.Conversation{}
+
+		err := rows.Scan(&conversation.ID, &conversation.LastUpdated,
+			&conversation.Receiver.ID, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error scanning fields into conversation struct: %s", err)
+			return
+		}
+
+		conversations = append(conversations, *conversation)
+	}
+
+	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Fetched conversations successfully",
 		"status": 200,
 		"success": true,
-		"conversations": []
-	}`)
+		"conversations": %v
+	}`, utils.MarshalJSON(conversations)))
 }
 
 func GetMessages(w http.ResponseWriter, req *http.Request) {
-
+	// TODO: implement
 }
 
 func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {

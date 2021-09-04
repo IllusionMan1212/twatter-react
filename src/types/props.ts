@@ -38,7 +38,7 @@ export interface MessageProps {
 export interface MessageListItemProps {
     lastMessage: string;
     lastUpdated: string;
-    receivers: Array<IUser>;
+    receiver: IUser;
     onClick: () => void;
     isActive: boolean;
     unreadMessages: number;
