@@ -28,6 +28,7 @@ import {
     supportedFileTypes,
 } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
+import useLatestState from "src/hooks/useLatestState";
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
@@ -61,6 +62,7 @@ export default function Messages(): ReactElement {
     const [page, setPage] = useState(0);
     const [reachedStart, setReachedStart] = useState(false);
     const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX);
+    const [conversationsPage, _] = useLatestState(0);
 
     pageRef.current = page;
 
@@ -206,14 +208,16 @@ export default function Messages(): ReactElement {
                     scrollToBottom();
                 }
                 const payload = {
-                    conversationId: msg.conversationId,
-                    userId: user.id,
-                    unreadMessages: msg.sender == user.id ? 0 : 1,
+                    eventType: "markMessagesAsRead",
+                    data: {
+                        conversationId: msg.conversationId,
+                        userId: user.id,
+                        unreadMessages: msg.sender == user.id ? 0 : 1,
+                    }
                 };
 
                 // conversation is active, so the user has read the message
-                // TODO: socket events and change the payload
-                socket.send("markMessagesAsRead", payload);
+                socket.send(JSON.stringify(payload));
             }
             const newConversations = conversations.map(
                 (conversation: IConversation) => {
@@ -297,19 +301,21 @@ export default function Messages(): ReactElement {
             .trim();
         setNowSending(true);
         const payload = {
-            conversationId: activeConversation.id,
-            receiverId: activeConversation.receiver_id,
-            senderId: user.id,
-            messageContent: messageContent,
-            attachment: attachment,
+            eventType: "messageToServer",
+            data: {
+                conversationId: activeConversation.id,
+                receiverId: activeConversation.receiver_id,
+                senderId: user.id,
+                messageContent: messageContent,
+                attachment: attachment,
+            }
         };
         messageInputRef.current.textContent = "";
         setAttachment(null);
         setPreviewImage(null);
         setSendingAllowed(false);
         setCharsLeft(messageCharLimit);
-        socket.emit("messageToServer", payload);
-        // TODO: socket events and change payload
+        socket.send(JSON.stringify(payload));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -369,14 +375,16 @@ export default function Messages(): ReactElement {
             setPreviewImage(null);
         }
         const payload = {
-            conversationId: conversation.id,
-            userId: user.id,
-            unreadMessages: conversation.unread_messages,
+            eventType: "markMessagesAsRead",
+            data: {
+                conversationId: conversation.id,
+                userId: user.id,
+                unreadMessages: conversation.unread_messages,
+            }
         };
 
         // when a conversation is opened, we mark its messages as read
-        // TODO: ditto
-        socket.emit("markMessagesAsRead", payload);
+        socket.send(JSON.stringify(payload));
         if (router.query?.conversationId?.[0] != conversation.id) {
             // HACK: this works around virutoso not calling the loadMoreMessages function
             // when changing conversations
@@ -487,7 +495,7 @@ export default function Messages(): ReactElement {
 
     useEffect(() => {
         axiosInstance
-            .get("/messaging/getConversations")
+        .get(`/messaging/getConversations/${conversationsPage.current}`)
             .then((res) => {
                 setConversations(res.data.conversations);
                 setMessagesListLoading(false);

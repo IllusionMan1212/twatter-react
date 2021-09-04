@@ -7,7 +7,7 @@ func RegisterMessagingRoutes(router *mux.Router) {
 
 	messagingRouter.HandleFunc("/startConversation", StartConversation).Methods("POST")
 
-	messagingRouter.HandleFunc("/getConversations", GetConversations).Methods("GET")
+	messagingRouter.HandleFunc("/getConversations/{page}", GetConversations).Methods("GET")
 	messagingRouter.HandleFunc("/getMessages/{conversationId}", GetMessages).Methods("GET")
 	messagingRouter.HandleFunc("/getUnreadMessages", GetUnreadMessages).Methods("GET")
 }

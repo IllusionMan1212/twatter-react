@@ -10,11 +10,12 @@ import (
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func StartConversation(w http.ResponseWriter, req *http.Request) {
-	// TODO: limit to 20 conversations
-
 	body := &models.ConversationInitPayload{}
 	err := json.NewDecoder(req.Body).Decode(&body)
 	if err != nil {
@@ -107,6 +108,19 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetConversations(w http.ResponseWriter, req *http.Request) {
+	params := mux.Vars(req)
+	pageParam := params["page"]
+	page, err := strconv.Atoi(pageParam)
+	if err != nil {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": 400,
+			"success": false
+		}`)
+		logger.Errorf("Error while converting page param to string: %v", err)
+		return
+	}
+
 	session := redissession.GetSession(req)
 
 	if session.IsNew {
@@ -136,9 +150,10 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		FROM conversations convo
 		INNER JOIN users receiver
 		ON receiver.id <> $1 AND receiver.id = ANY(convo.members)
-		WHERE $1 = ANY(convo.participants);`
+		WHERE $1 = ANY(convo.participants)
+		LIMIT 20 OFFSET $2;`
 
-	rows, err := db.DBPool.Query(context.Background(), query, sessionUser.ID)
+	rows, err := db.DBPool.Query(context.Background(), query, sessionUser.ID, page*20)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
