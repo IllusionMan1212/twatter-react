@@ -103,6 +103,12 @@ func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, m
 	case "stopTyping":
 		fmt.Print("Received stop typing")
 		// TODO:
+	case "markMessagesAsRead":
+		fmt.Print("Received mark as read")
+		// TODO:
+	case "messageToServer":
+		fmt.Print("Received message")
+		// TODO:
 	default:
 		fmt.Print("Received unknown")
 	}

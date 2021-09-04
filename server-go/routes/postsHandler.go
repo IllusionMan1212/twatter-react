@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
@@ -130,6 +131,15 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 
 	pageParam := params["page"]
 	page, err := strconv.Atoi(pageParam)
+	if err != nil {
+		utils.BadRequestWithJSON(w, `{
+			"message": "Invalid or incomplete request",
+			"status": 400,
+			"success": false
+		}`)
+		logger.Errorf("Error while converting page param to string: %v", err)
+		return
+	}
 	authorId := params["userId"]
 	postType := req.URL.Query().Get("type")
 
