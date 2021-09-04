@@ -41,18 +41,23 @@ export interface IUser {
     avatar_url: string;
     bio: string;
     birthday: DateAndTime;
-    created_at: DateAndTime;
+    created_at: string;
     finished_setup: boolean;
 }
 
 export interface IConversation {
     id: string;
-    members: Array<IUser>;
-    participants: Array<IUser>;
-    receivers: Array<IUser>;
-    unreadMessages: number;
-    lastUpdated: string;
-    lastMessage: string;
+    receiver: IUser;
+    unread_messages: number;
+    last_updated: string;
+    last_message: string;
+}
+
+export interface IActiveConversation {
+    id: string;
+    receiver_id: string;
+    display_name: string;
+    username: string;
 }
 
 interface IParentPost {

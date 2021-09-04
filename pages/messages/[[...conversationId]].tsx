@@ -1,10 +1,10 @@
 /* eslint-disable react/react-in-jsx-scope */
-import StatusBar from "../../components/statusBar";
-import Navbar from "../../components/navbar";
-import Loading from "../../components/loading";
+import StatusBar from "components/statusBar";
+import Navbar from "components/navbar";
+import Loading from "components/loading";
 import Head from "next/head";
-import styles from "../../styles/messages.module.scss";
-import MessagesListItem from "../../components/messages/messagesListItem";
+import styles from "styles/messages.module.scss";
+import MessagesListItem from "components/messages/messagesListItem";
 import { ArrowLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import {
     FormEvent,
@@ -14,13 +14,13 @@ import {
     useRef,
     useState,
 } from "react";
-import Message from "../../components/messages/message";
-import { useToastContext } from "../../src/contexts/toastContext";
-import axiosInstance from "../../src/axios";
+import Message from "components/messages/message";
+import { useToastContext } from "src/contexts/toastContext";
+import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
-import { IAttachment, IConversation } from "../../src/types/general";
+import { IAttachment, IConversation, IActiveConversation } from "src/types/general";
 import Link from "next/link";
-import MessageMediaModal from "../../components/messages/messageMediaModal";
+import MessageMediaModal from "components/messages/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
 import {
     fileSizeLimit,
@@ -46,15 +46,9 @@ export default function Messages(): ReactElement {
     const [sendingAllowed, setSendingAllowed] = useState(false);
     const [attachment, setAttachment] = useState<IAttachment>(null);
     const [previewImage, setPreviewImage] = useState(null);
-    const [conversations, setConversations] = useState([]); // TODO: explicitly type this
+    const [conversations, setConversations] = useState<IConversation[]>([]);
     const [messagesListLoading, setMessagesListLoading] = useState(true);
-    const [activeConversation, setActiveConversation] = useState({
-        // TODO: turn this into a type
-        id: "",
-        receiverId: "",
-        display_name: "",
-        username: "",
-    });
+    const [activeConversation, setActiveConversation] = useState<IActiveConversation>();
     const [isConversationActive, setIsConversationActive] = useState(false);
     const [messages, setMessages] = useState([]); // TODO: explicitly type this
     const [nowSending, setNowSending] = useState(false);
@@ -90,7 +84,7 @@ export default function Messages(): ReactElement {
         const payload = {
             eventType: "typing",
             data: {
-                receiverId: activeConversation.receiverId,
+                receiverId: activeConversation.receiver_id,
                 senderId: user.id,
                 conversationId: activeConversation.id,
             },
@@ -115,7 +109,7 @@ export default function Messages(): ReactElement {
                 const payload = {
                     eventType: "stopTyping",
                     data: {
-                        receiverId: activeConversation.receiverId,
+                        receiverId: activeConversation.receiver_id,
                         senderId: user.id,
                         conversationId: activeConversation.id,
                     },
@@ -218,25 +212,26 @@ export default function Messages(): ReactElement {
                 };
 
                 // conversation is active, so the user has read the message
-                socket.emit("markMessagesAsRead", payload);
+                // TODO: socket events and change the payload
+                socket.send("markMessagesAsRead", payload);
             }
             const newConversations = conversations.map(
                 (conversation: IConversation) => {
                     return conversation.id == msg.conversationId
                         ? {
                               ...conversation,
-                              lastMessage: msg.content
+                              last_message: msg.content
                                   ? msg.content
                                   : msg.sender == user.id
                                   ? `${user.display_name} sent an image`
-                                  : `${conversation.receivers[0].display_name} sent an image`,
-                              lastUpdated: msg.sentTime,
+                                  : `${conversation.receiver.display_name} sent an image`,
+                              last_updated: msg.sentTime,
                               unreadMessages:
                                   activeConversation?.id == msg.conversationId
                                       ? 0
                                       : msg.sender == user.id
                                       ? 0
-                                      : conversation.unreadMessages + 1,
+                                      : conversation.unread_messages + 1,
                           }
                         : conversation;
                 }
@@ -244,8 +239,8 @@ export default function Messages(): ReactElement {
             // sort conversations by latest updated conversation
             newConversations.sort(
                 (a, b) =>
-                    new Date(b.lastUpdated).getTime() -
-                    new Date(a.lastUpdated).getTime()
+                    new Date(b.last_updated).getTime() -
+                    new Date(a.last_updated).getTime()
             );
             setConversations(newConversations);
         },
@@ -255,10 +250,10 @@ export default function Messages(): ReactElement {
     const handleMarkedMessagesAsRead = useCallback(
         (payload) => {
             const newConversations = conversations.map((conversation) => {
-                return conversation._id == payload.conversationId
+                return conversation.id == payload.conversationId
                     ? {
                           ...conversation,
-                          unreadMessages: 0,
+                          unread_messages: 0,
                       }
                     : conversation;
             });
@@ -303,7 +298,7 @@ export default function Messages(): ReactElement {
         setNowSending(true);
         const payload = {
             conversationId: activeConversation.id,
-            receiverId: activeConversation.receiverId,
+            receiverId: activeConversation.receiver_id,
             senderId: user.id,
             messageContent: messageContent,
             attachment: attachment,
@@ -314,6 +309,7 @@ export default function Messages(): ReactElement {
         setSendingAllowed(false);
         setCharsLeft(messageCharLimit);
         socket.emit("messageToServer", payload);
+        // TODO: socket events and change payload
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -375,10 +371,11 @@ export default function Messages(): ReactElement {
         const payload = {
             conversationId: conversation.id,
             userId: user.id,
-            unreadMessages: conversation.unreadMessages,
+            unreadMessages: conversation.unread_messages,
         };
 
         // when a conversation is opened, we mark its messages as read
+        // TODO: ditto
         socket.emit("markMessagesAsRead", payload);
         if (router.query?.conversationId?.[0] != conversation.id) {
             // HACK: this works around virutoso not calling the loadMoreMessages function
@@ -446,7 +443,7 @@ export default function Messages(): ReactElement {
         }
         // fetches current conversation based on the query in the url (works with back and forward buttons on browsers)
         const newActiveConversation = conversations.find(
-            (conversation) => conversation._id == router.query.conversationId[0]
+            (conversation) => conversation.id == router.query.conversationId[0]
         );
         // if we can't find the query string in our conversations, we just load the normal messages page
         if (!newActiveConversation) {
@@ -459,9 +456,9 @@ export default function Messages(): ReactElement {
         }
         setActiveConversation({
             id: router.query.conversationId[0],
-            username: newActiveConversation.receivers[0]?.username,
-            display_name: newActiveConversation.receivers[0]?.display_name,
-            receiverId: newActiveConversation.receivers[0]?._id,
+            username: newActiveConversation.receiver?.username,
+            display_name: newActiveConversation.receiver?.display_name,
+            receiver_id: newActiveConversation.receiver?.id,
         });
         setMessages([]);
         setIsConversationActive(true);
@@ -569,23 +566,23 @@ export default function Messages(): ReactElement {
                                                     return (
                                                         <MessagesListItem
                                                             key={
-                                                                conversation._id
+                                                                conversation.id
                                                             }
-                                                            receivers={
-                                                                conversation.receivers
+                                                            receiver={
+                                                                conversation.receiver
                                                             }
                                                             lastMessage={
-                                                                conversation.lastMessage
+                                                                conversation.last_message
                                                             }
                                                             lastUpdated={
-                                                                conversation.lastUpdated
+                                                                conversation.last_updated
                                                             }
                                                             isActive={
-                                                                conversation._id ==
+                                                                conversation.id ==
                                                                 activeConversation?.id
                                                             }
                                                             unreadMessages={
-                                                                conversation.unreadMessages
+                                                                conversation.unread_messages
                                                             }
                                                             onClick={() => {
                                                                 handleConversationClick(
