@@ -295,7 +295,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         ></LikeButton>
                     </div>
                     <p className={styles.date}>
-                        {formatDate(props.modalData.post.created_at.Time.toString())}
+                        {formatDate(props.modalData.post.created_at)}
                     </p>
                 </div>
                 <div ref={parentContainerRef} className={styles.modalPostComments}>

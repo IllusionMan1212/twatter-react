@@ -68,7 +68,7 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                 <div
                     className={`flex align-items-end text-small ${styles.commentDate}`}
                 >
-                    {timeSince(props.comment.created_at.Time.toString())}
+                    {timeSince(props.comment.created_at)}
                 </div>
                 <div className="flex gap-1 justify-content-end">
                     <CommentButton

@@ -241,7 +241,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     type: "article",
                     article: {
                         authors: [props.post?.author.display_name],
-                        publishedTime: props.post?.created_at.Time.toString(),
+                        publishedTime: props.post?.created_at,
                     },
                     images: [
                         {

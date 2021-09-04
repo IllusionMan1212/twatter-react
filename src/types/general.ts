@@ -69,7 +69,7 @@ export interface IPost {
     author: IUser;
     content: string;
     attachments: Array<PostAttachment>;
-    created_at: DateAndTime;
+    created_at: string;
     likes: number;
     comments: number;
     replying_to: IParentPost;

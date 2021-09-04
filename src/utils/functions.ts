@@ -69,7 +69,7 @@ export const formatJoinDate = (date: string): string => {
     })} ${_date.getFullYear()}`;
 };
 
-export const formatMessgeTime = (time: string): string => {
+export const formatMessageTime = (time: string): string => {
     const _time = new Date(time);
     const now = new Date();
     if (now.getFullYear() > _time.getFullYear()) {
