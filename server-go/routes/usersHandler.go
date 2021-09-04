@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
@@ -162,6 +163,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while decoding request body: ", err)
 		return
 	}
 
@@ -231,6 +233,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while generating a new id: ", err)
 		return
 	}
 

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/routes"
 	"illusionman1212/twatter-go/sockets"
@@ -21,6 +22,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	logger.Initialize()
+
 	db.InitializeDB()
 	redissession.InitializeTypes()
 	redissession.Initialize()
@@ -52,7 +56,7 @@ func main() {
 		port = "8080"
 	}
 
-	fmt.Printf("Listening on port %v\n", port)
+	logger.Infof("Listening on port %v", port)
 	http.ListenAndServe(fmt.Sprintf(":%v", port), cors.Handler(router))
 
 	defer db.DBPool.Close()
