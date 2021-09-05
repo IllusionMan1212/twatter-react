@@ -35,7 +35,7 @@ export interface MessageProps {
     setModalAttachment: (attachment: string) => void;
 }
 
-export interface MessageListItemProps {
+export interface ConversationsListItemProps {
     lastMessage: string;
     lastUpdated: string;
     receiver: IUser;

@@ -1,12 +1,12 @@
 /* eslint-disable react/react-in-jsx-scope */
-import styles from "./messagesListItem.module.scss";
-import { MessageListItemProps } from "../../src/types/props";
+import styles from "./conversationsListItem.module.scss";
+import { ConversationsListItemProps } from "src/types/props";
 import { ReactElement } from "react";
 import ProfileImage from "components/post/profileImage";
 import { timeSince } from "src/utils/functions";
 
-export default function MessagesListItem(
-    props: MessageListItemProps
+export default function ConversationsListItem(
+    props: ConversationsListItemProps
 ): ReactElement {
     return (
         <div

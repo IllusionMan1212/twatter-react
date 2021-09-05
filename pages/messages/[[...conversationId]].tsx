@@ -4,7 +4,7 @@ import Navbar from "components/navbar";
 import Loading from "components/loading";
 import Head from "next/head";
 import styles from "styles/messages.module.scss";
-import MessagesListItem from "components/messages/messagesListItem";
+import ConversationsListItem from "components/messages/conversationsListItem";
 import { ArrowLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
 import {
     FormEvent,
@@ -18,7 +18,11 @@ import Message from "components/messages/message";
 import { useToastContext } from "src/contexts/toastContext";
 import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
-import { IAttachment, IConversation, IActiveConversation } from "src/types/general";
+import {
+    IAttachment,
+    IConversation,
+    IActiveConversation,
+} from "src/types/general";
 import Link from "next/link";
 import MessageMediaModal from "components/messages/messageMediaModal";
 import { Virtuoso } from "react-virtuoso";
@@ -48,8 +52,9 @@ export default function Messages(): ReactElement {
     const [attachment, setAttachment] = useState<IAttachment>(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [conversations, setConversations] = useState<IConversation[]>([]);
-    const [messagesListLoading, setMessagesListLoading] = useState(true);
-    const [activeConversation, setActiveConversation] = useState<IActiveConversation>();
+    const [conversationsLoading, setConversationsLoading] = useState(true);
+    const [activeConversation, setActiveConversation] =
+        useState<IActiveConversation>();
     const [isConversationActive, setIsConversationActive] = useState(false);
     const [messages, setMessages] = useState([]); // TODO: explicitly type this
     const [nowSending, setNowSending] = useState(false);
@@ -60,9 +65,10 @@ export default function Messages(): ReactElement {
     const [typing, setTyping] = useState(false);
     const [timeoutId, setTimeoutId] = useState(null);
     const [page, setPage] = useState(0);
-    const [reachedStart, setReachedStart] = useState(false);
+    const [reachedStartOfMessages, setReachedStartOfMessages] = useState(false);
     const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX);
-    const [conversationsPage, _] = useLatestState(0);
+    const [conversationsPage, setConversationsPage] = useLatestState(0);
+    const [reachedEndOfConvos, setReachedEndOfConvos] = useState(false);
 
     pageRef.current = page;
 
@@ -213,7 +219,7 @@ export default function Messages(): ReactElement {
                         conversationId: msg.conversationId,
                         userId: user.id,
                         unreadMessages: msg.sender == user.id ? 0 : 1,
-                    }
+                    },
                 };
 
                 // conversation is active, so the user has read the message
@@ -301,14 +307,14 @@ export default function Messages(): ReactElement {
             .trim();
         setNowSending(true);
         const payload = {
-            eventType: "messageToServer",
+            eventType: "message",
             data: {
                 conversationId: activeConversation.id,
                 receiverId: activeConversation.receiver_id,
                 senderId: user.id,
                 messageContent: messageContent,
                 attachment: attachment,
-            }
+            },
         };
         messageInputRef.current.textContent = "";
         setAttachment(null);
@@ -380,7 +386,7 @@ export default function Messages(): ReactElement {
                 conversationId: conversation.id,
                 userId: user.id,
                 unreadMessages: conversation.unread_messages,
-            }
+            },
         };
 
         // when a conversation is opened, we mark its messages as read
@@ -409,12 +415,28 @@ export default function Messages(): ReactElement {
             });
     };
 
+    const getConversations = (): Promise<any> => {
+        return axiosInstance
+            .get(`/messaging/getConversations/${conversationsPage.current}`)
+            .then((res) => {
+                return res.data.conversations;
+            })
+            .catch((err) => {
+                err?.response?.data?.status != 404 &&
+                    toast(
+                        err?.response?.data?.message ?? "An error has occurred",
+                        5000
+                    );
+                setConversationsLoading(false);
+            });
+    };
+
     const loadMoreMessages = useCallback(() => {
         console.log("loading more messages");
         setPage(pageRef.current + 1);
         getMessages(activeConversation.id).then((newMessages) => {
             if (!newMessages.length) {
-                setReachedStart(true);
+                setReachedStartOfMessages(true);
                 return true;
             }
             const messagesToPrepend = newMessages.length;
@@ -424,7 +446,21 @@ export default function Messages(): ReactElement {
             setMessages((messages) => [...newMessages].concat(messages));
             return false;
         });
-    }, [setMessages, messages, page, pageRef, firstItemIndex, reachedStart]);
+    }, [setMessages, messages, page, pageRef, firstItemIndex, reachedStartOfMessages]);
+
+    const loadMoreConversations = useCallback(() => {
+        setConversationsPage(conversationsPage.current + 1);
+        getConversations()
+            .then((newConversations) => {
+                if (!newConversations.length) {
+                    setReachedEndOfConvos(true);
+                    return true;
+                }
+
+                setConversations(conversations.concat(newConversations));
+                return false;
+            });
+    }, [conversations, conversationsPage.current]);
 
     useEffect(() => {
         if (atBottom) {
@@ -435,7 +471,7 @@ export default function Messages(): ReactElement {
     useEffect(() => {
         setPage(0);
         pageRef.current = 0;
-        setReachedStart(false);
+        setReachedStartOfMessages(false);
         setFirstItemIndex(START_INDEX);
 
         if (!router.query?.conversationId?.[0]) {
@@ -474,7 +510,7 @@ export default function Messages(): ReactElement {
         getMessages(router.query.conversationId[0]).then((messages) => {
             setMessages(messages);
             if (messages.length < 50) {
-                setReachedStart(true);
+                setReachedStartOfMessages(true);
             }
         });
     }, [router.query?.conversationId, conversations.length]);
@@ -494,40 +530,29 @@ export default function Messages(): ReactElement {
     });
 
     useEffect(() => {
-        axiosInstance
-        .get(`/messaging/getConversations/${conversationsPage.current}`)
-            .then((res) => {
-                setConversations(res.data.conversations);
-                setMessagesListLoading(false);
-            })
-            .catch((err) => {
-                err?.response?.data?.status != 404 &&
-                    toast(
-                        err?.response?.data?.message ?? "An error has occurred",
-                        5000
-                    );
-                setMessagesListLoading(false);
+        getConversations()
+            .then((_conversations) => {
+                setConversations(_conversations);
+                setConversationsLoading(false);
             });
     }, [user]);
 
     useEffect(() => {
-        /*
-        if (socket?.connected) {
-            socket.on("messageFromServer", handleMessageRecieved);
-            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
+        if (socket) {
+            socket.on("message", handleMessageRecieved);
+            socket.on("markMessagesAsRead", handleMarkedMessagesAsRead);
             socket.on("typing", handleTyping);
             socket.on("stopTyping", handleStopTyping);
         }
 
         return () => {
-            if (socket?.connected) {
-                socket.off("messageFromServer", handleMessageRecieved);
-                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
+            if (socket) {
+                socket.off("message", handleMessageRecieved);
+                socket.off("markMessagesAsRead", handleMarkedMessagesAsRead);
                 socket.off("typing", handleTyping);
                 socket.off("stopTyping", handleStopTyping);
             }
         };
-        */
     }, [
         handleMessageRecieved,
         handleMarkedMessagesAsRead,
@@ -539,7 +564,6 @@ export default function Messages(): ReactElement {
         <>
             <Head>
                 <title>Messages - Twatter</title>
-                {/* TODO: write meta tags and other important head tags */}
             </Head>
             {user ? (
                 <>
@@ -566,13 +590,37 @@ export default function Messages(): ReactElement {
                                         : ""
                                 }`}
                             >
-                                {!messagesListLoading ? (
+                                {!conversationsLoading ? (
                                     <>
                                         {conversations.length ? (
-                                            conversations.map(
-                                                (conversation) => {
+                                            <Virtuoso
+                                                data={conversations}
+                                                style={{width: "100%"}}
+                                                totalCount={conversations.length}
+                                                // eslint-disable-next-line react/display-name
+                                                components={{
+                                                    Footer: () => {
+                                                        return (
+                                                            <>
+                                                                {!reachedEndOfConvos ? (
+                                                                    <div className="py-3">
+                                                                        <Loading
+                                                                            height="50"
+                                                                            width="50"
+                                                                        ></Loading>
+                                                                    </div>
+                                                                ) : null}
+                                                            </>
+                                                        );
+                                                    },
+                                                }}
+                                                endReached={loadMoreConversations}
+                                                itemContent={(
+                                                    _,
+                                                    conversation
+                                                ) => {
                                                     return (
-                                                        <MessagesListItem
+                                                        <ConversationsListItem
                                                             key={
                                                                 conversation.id
                                                             }
@@ -597,10 +645,10 @@ export default function Messages(): ReactElement {
                                                                     conversation
                                                                 );
                                                             }}
-                                                        ></MessagesListItem>
+                                                        ></ConversationsListItem>
                                                     );
-                                                }
-                                            )
+                                                }}
+                                            ></Virtuoso>
                                         ) : (
                                             <div className="text-bold text-large">
                                                 It&apos;s empty in here :(
@@ -691,7 +739,7 @@ export default function Messages(): ReactElement {
                                                 Header: () => {
                                                     return (
                                                         <>
-                                                            {reachedStart ? (
+                                                            {reachedStartOfMessages ? (
                                                                 <div className="usernameGrey text-center text-bold py-3">
                                                                     <p>
                                                                         You have
