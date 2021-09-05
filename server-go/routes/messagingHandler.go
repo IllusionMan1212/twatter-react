@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4"
 )
 
 func StartConversation(w http.ResponseWriter, req *http.Request) {
@@ -68,6 +69,36 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 			"success": false
 		}`)
 		logger.Infof("Attempt to start conversation with self. ID: %v", body.ReceiverId)
+		return
+	}
+
+	// checking if the conversation already exists (initiated by the other party but no messages were sent)
+	checkQuery := `SELECT id, participants FROM conversations WHERE ARRAY[$1::int8, $2::int8] = members;`
+	existingConvoId := uint64(0)
+	existingParticipants := make([]uint64, 0)
+
+	err = db.DBPool.QueryRow(context.Background(), checkQuery, body.ReceiverId, body.SenderId).Scan(&existingConvoId, &existingParticipants)
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while fetching conversation: %v", err)
+			return
+		}
+	}
+
+	if existingConvoId != 0 {
+		// TODO: check if the sender isn't in the participants and add them
+
+		utils.OkWithJSON(w, fmt.Sprintf(`{
+			"message": "Conversation found",
+			"status": 200,
+			"success": true,
+			"conversationId": %v
+		}`, existingConvoId))
 		return
 	}
 
@@ -151,6 +182,7 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		INNER JOIN users receiver
 		ON receiver.id <> $1 AND receiver.id = ANY(convo.members)
 		WHERE $1 = ANY(convo.participants)
+		ORDER BY convo.last_updated DESC
 		LIMIT 20 OFFSET $2;`
 
 	rows, err := db.DBPool.Query(context.Background(), query, sessionUser.ID, page*20)
@@ -195,6 +227,13 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 
 func GetMessages(w http.ResponseWriter, req *http.Request) {
 	// TODO: implement
+
+	utils.OkWithJSON(w, `{
+		"message": "Successfully fetched messages",
+		"status": 200,
+		"success": true,
+		"messages": []
+	}`)
 }
 
 func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {

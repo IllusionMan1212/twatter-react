@@ -79,7 +79,6 @@ func (h *Hub) Run() {
 }
 
 func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, message []byte) {
-	// TODO: handle more events
 	switch socketMessage.EventType {
 	case "post":
 		Post(socketMessage, clients)
@@ -101,13 +100,13 @@ func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, m
 		fmt.Print("Received typing\n")
 		// TODO:
 	case "stopTyping":
-		fmt.Print("Received stop typing")
+		fmt.Print("Received stop typing\n")
 		// TODO:
 	case "markMessagesAsRead":
-		fmt.Print("Received mark as read")
+		fmt.Print("Received mark as read\n")
 		// TODO:
-	case "messageToServer":
-		fmt.Print("Received message")
+	case "message":
+		fmt.Print("Received message\n")
 		// TODO:
 	default:
 		fmt.Print("Received unknown")
