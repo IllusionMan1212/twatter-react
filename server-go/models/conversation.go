@@ -16,3 +16,11 @@ type Conversation struct {
 	LastMessage    string    `json:"last_message"`
 	UnreadMessages int       `json:"unread_messages"`
 }
+
+type ReturnedConversation struct {
+	ID             string    `json:"id"`
+	LastUpdated    time.Time `json:"last_updated"`
+	Receiver       User      `json:"receiver"`
+	LastMessage    string    `json:"last_message"`
+	UnreadMessages int       `json:"unread_messages"`
+}

@@ -1,18 +1,7 @@
 package sockets
 
-// function to check if an element exists in a slice
-func contains(clients []*Client, client *Client) bool {
-	for _, v := range clients {
-		if v == client {
-			return true
-		}
-	}
-
-	return false
-}
-
-// function to remove from a slice
-func remove(clients []*Client, client *Client) []*Client {
+// function to removeClient from a slice
+func removeClient(clients []*Client, client *Client) []*Client {
 	for i, v := range clients {
 		if v == client {
 			return append(clients[:i], clients[i+1:]...)
@@ -20,4 +9,14 @@ func remove(clients []*Client, client *Client) []*Client {
 	}
 
 	return clients
+}
+
+func sendGenericSocketErr(client *Client) {
+	errPayload := `{
+		"eventType": "error",
+		"data": {
+			"message": "An error has occurred, please try again later"
+		}
+	}`
+	client.emitEvent([]byte(errPayload))
 }

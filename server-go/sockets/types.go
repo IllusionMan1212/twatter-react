@@ -6,6 +6,7 @@ type UserClientPayload struct {
 }
 
 type UserMessagePayload struct {
-	UserID  uint64
-	Message []byte
+	UserID         uint64
+	Message        []byte
+	InvokingClient *Client
 }

@@ -3,6 +3,8 @@ package redissession
 import (
 	"context"
 	"encoding/gob"
+	"errors"
+	"fmt"
 	"illusionman1212/twatter-go/models"
 	"net/http"
 	"os"
@@ -22,10 +24,10 @@ func InitializeTypes() {
 	gob.Register(&models.User{})
 }
 
-func Initialize() {
+func Initialize() error {
 	db_num, err := strconv.Atoi(os.Getenv("REDIS_DB_NUM"))
 	if err != nil {
-		panic(err)
+		return errors.New(fmt.Sprintf("Fatal error while converting the redis number to an integer: %v", err))
 	}
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST"), // e.g. localhost:6379
@@ -35,12 +37,12 @@ func Initialize() {
 
 	err = redisClient.Ping(context.Background()).Err()
 	if err != nil {
-		panic(err)
+		return errors.New(fmt.Sprintf("Fatal error while pinging redis cache: %v", err))
 	}
 
 	store, err := redisstore.NewRedisStore(context.Background(), redisClient)
 	if err != nil {
-		panic(err)
+		return errors.New(fmt.Sprintf("Fatal error while creating a new redis store: %v", err))
 	}
 
 	var secure bool
@@ -61,6 +63,8 @@ func Initialize() {
 	})
 
 	globalStore = *store
+
+	return nil
 }
 
 func GetSession(req *http.Request) *sessions.Session {

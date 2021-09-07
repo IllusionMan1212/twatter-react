@@ -2,10 +2,10 @@ package sockets
 
 import (
 	"bytes"
+	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
-	"log"
 	"net/http"
 	"time"
 
@@ -68,10 +68,10 @@ func (c *Client) readPump(userID uint64) {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if err == websocket.ErrReadLimit {
-				log.Printf("err: %v\n", err)
+				logger.Errorf("Error while reading websocket message: %v", err)
 			}
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				logger.Errorf("Unexpected websocket close: %v", err)
 			}
 			break
 		}
@@ -80,6 +80,7 @@ func (c *Client) readPump(userID uint64) {
 		payload := &UserMessagePayload{}
 		payload.UserID = userID
 		payload.Message = message
+		payload.InvokingClient = c
 		c.hub.broadcast <- *payload
 	}
 }
@@ -138,7 +139,7 @@ func (c *Client) emitEvent(data []byte) {
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		logger.Errorf("Error while upgrading http connection to ws: %v", err)
 		return
 	}
 
@@ -157,6 +158,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			"status": 401,
 			"success": false
 		}`)
+		logger.Error("Unauthorized user trying to initiate a websocket connection")
 		return
 	}
 

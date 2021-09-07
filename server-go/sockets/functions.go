@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
 	"os"
@@ -15,27 +16,19 @@ import (
 	"github.com/go-oss/image/imageutil"
 )
 
-func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64, clients []*Client) ([]models.Attachment, error) {
+func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64, invokingClient *Client) ([]models.Attachment, error) {
 	returnedAttachments := make([]models.Attachment, 0)
 
 	// write the attachments to files
 	for i, attachment := range attachments {
 		buf, err := base64.StdEncoding.DecodeString(attachment.Data)
 		if err != nil {
-			panic(err)
+			logger.Errorf("Error while decoding base64 string: %v", err)
+			return []models.Attachment{}, errors.New("An error has occurred, please try again later")
 		}
 
 		if len(buf) > utils.MaxFileSize {
-			errPayload := `{
-				"eventType": "postError",
-				"data": {
-						"message": "File size cannot exceed 8 mb"
-				}
-			}
-			`
-			for _, client := range clients {
-				client.emitEvent([]byte(errPayload))
-			}
+			logger.Error("File size cannot exceed 8mb")
 			return []models.Attachment{}, errors.New("File size cannot exceed 8mb")
 		}
 
@@ -59,15 +52,7 @@ func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64,
 		} else if attachmentMimetype == "video" {
 			attachmentType = "video"
 		} else {
-			errPayload := `{
-				"eventType": "postError",
-				"data": {
-					"message": "Unsupported file format"
-				}
-			}`
-			for _, client := range clients {
-				client.emitEvent([]byte(errPayload))
-			}
+			logger.Error("Unsupported file format")
 			return []models.Attachment{}, errors.New("Unsupported file format")
 		}
 
@@ -75,7 +60,8 @@ func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64,
 			r := bytes.NewReader(buf)
 			reader, err := imageutil.RemoveExif(r)
 			if err != nil {
-				panic(err)
+				logger.Errorf("Failed to remove exif data from image: %v", err)
+				return []models.Attachment{}, errors.New("An error has occurred, please try again")
 			}
 			tempBuf := new(bytes.Buffer)
 			tempBuf.ReadFrom(reader)
@@ -86,17 +72,8 @@ func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64,
 		if i == 0 {
 			err = os.Mkdir(fileDirectory, 0755)
 			if err != nil {
-				errPayload := `{
-					"eventType": "postError",
-					"data": {
-						"message": "An error has occurred"
-					}
-				}
-				`
-				for _, client := range clients {
-					client.emitEvent([]byte(errPayload))
-				}
-				return []models.Attachment{}, errors.New("An error has occurred")
+				logger.Errorf("Error while creating directory for post attachment(s): %v", err)
+				return []models.Attachment{}, errors.New("An error has occurred, please try again later")
 			}
 		}
 
@@ -104,17 +81,8 @@ func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64,
 
 		file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
-			errPayload := `{
-			"eventType": "postError",
-			"data": {
-				"message": "An error has occurred, please try again later"
-			}
-		}
-		`
-			for _, client := range clients {
-				client.emitEvent([]byte(errPayload))
-			}
-			return []models.Attachment{}, errors.New("An error has occurred")
+			logger.Errorf("Error while creating a new file for post attachment: %v", err)
+			return []models.Attachment{}, errors.New("An error has occurred, please try again later")
 		}
 
 		insertQuery := `INSERT INTO attachments(post_id, url, type, size)
@@ -128,16 +96,7 @@ func writeAttachmentsFiles(attachments []models.SocketAttachment, postId uint64,
 
 		_, err = db.DBPool.Exec(context.Background(), insertQuery, postId, attachmentUrl, attachmentType, models.Large)
 		if err != nil {
-			errPayload := `{
-			"eventType": "postError",
-			"data": {
-				"message": "An error has occurred, please try again later"
-			}
-		}
-		`
-			for _, client := range clients {
-				client.emitEvent([]byte(errPayload))
-			}
+			logger.Errorf("Error while inserting into attachments table: %v", err)
 			return []models.Attachment{}, errors.New("An error has occurred")
 		}
 

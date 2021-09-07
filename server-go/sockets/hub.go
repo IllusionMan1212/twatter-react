@@ -39,8 +39,8 @@ func (h *Hub) Run() {
 			h.users[payload.UserID] = append(h.users[payload.UserID], payload.Client)
 		case payload := <-h.unregister:
 			// check if websocket exists in the slice in the specific userid map item
-			if ok := contains(h.users[payload.UserID], payload.Client); ok {
-				h.users[payload.UserID] = remove(h.users[payload.UserID], payload.Client)
+			if utils.Contains(h.users[payload.UserID], payload.Client) {
+				h.users[payload.UserID] = removeClient(h.users[payload.UserID], payload.Client)
 				// close the channel on the specific websocket
 				close(payload.Client.send)
 
@@ -61,7 +61,7 @@ func (h *Hub) Run() {
 				// if the channel's buffer is full, close it and remove the client from the slice
 				if len(client.send) == cap(client.send) {
 					close(client.send)
-					h.users[userId] = remove(h.users[userId], client)
+					h.users[userId] = removeClient(h.users[userId], client)
 
 					if len(h.users[userId]) == 0 {
 						delete(h.users, userId)
@@ -71,19 +71,19 @@ func (h *Hub) Run() {
 				}
 			}
 
-			socketMessage := &models.SocketMessage{}
-			utils.UnmarshalJSON(message, socketMessage)
-			handleSocketEvent(socketMessage, clients, message)
+			socketPayload := &models.SocketPayload{}
+			utils.UnmarshalJSON(message, socketPayload)
+			handleSocketEvent(socketPayload, clients, payload.InvokingClient, message)
 		}
 	}
 }
 
-func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, message []byte) {
-	switch socketMessage.EventType {
+func handleSocketEvent(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client, message []byte) {
+	switch socketPayload.EventType {
 	case "post":
-		Post(socketMessage, clients)
+		Post(socketPayload, clients, invokingClient)
 	case "commentToServer":
-		Comment(socketMessage, clients)
+		Comment(socketPayload, clients, invokingClient)
 	case "deletePost":
 		for _, client := range clients {
 			client.send <- message
@@ -93,9 +93,9 @@ func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, m
 			client.send <- message
 		}
 	case "updateProfile":
-		UpdateProfile(socketMessage, clients)
+		UpdateProfile(socketPayload, invokingClient)
 	case "removeBirthday":
-		RemoveBirthday(socketMessage, clients)
+		RemoveBirthday(socketPayload, invokingClient)
 	case "typing":
 		fmt.Print("Received typing\n")
 		// TODO:
@@ -106,8 +106,7 @@ func handleSocketEvent(socketMessage *models.SocketMessage, clients []*Client, m
 		fmt.Print("Received mark as read\n")
 		// TODO:
 	case "message":
-		fmt.Print("Received message\n")
-		// TODO:
+		Message(socketPayload, clients, invokingClient)
 	default:
 		fmt.Print("Received unknown")
 	}

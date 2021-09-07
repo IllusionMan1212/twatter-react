@@ -10,6 +10,7 @@ import (
 	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -73,11 +74,16 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// checking if the conversation already exists (initiated by the other party but no messages were sent)
-	checkQuery := `SELECT id, participants FROM conversations WHERE ARRAY[$1::int8, $2::int8] = members;`
+	checkQuery := `SELECT id, participants FROM conversations WHERE members = $1;`
 	existingConvoId := uint64(0)
 	existingParticipants := make([]uint64, 0)
 
-	err = db.DBPool.QueryRow(context.Background(), checkQuery, body.ReceiverId, body.SenderId).Scan(&existingConvoId, &existingParticipants)
+	membersToCheck := []uint64{body.ReceiverId, body.SenderId}
+
+	// if the sorted members slice matches an existing sorted array in the DB then a conversation already exists. otherwise create a new one
+	sort.Slice(membersToCheck, func(i, j int) bool { return membersToCheck[i] < membersToCheck[j] })
+
+	err = db.DBPool.QueryRow(context.Background(), checkQuery, membersToCheck).Scan(&existingConvoId, &existingParticipants)
 	if err != nil {
 		if err != pgx.ErrNoRows {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -91,7 +97,26 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if existingConvoId != 0 {
-		// TODO: check if the sender isn't in the participants and add them
+		// check if the sender isn't in the participants and add them
+
+		if !utils.Contains(existingParticipants, body.SenderId) {
+			updateQuery := `UPDATE conversations SET participants = $1, last_updated = now() at time zone 'utc' WHERE id = $2`
+
+			newParticipants := append(existingParticipants, body.SenderId)
+
+			sort.Slice(newParticipants, func(i, j int) bool { return newParticipants[i] < newParticipants[j] })
+
+			_, err = db.DBPool.Exec(context.Background(), updateQuery, newParticipants, existingConvoId)
+			if err != nil {
+				utils.InternalServerErrorWithJSON(w, `{
+					"message": "An error has occurred, please try again later",
+					"status": 500,
+					"success": false
+				}`)
+				logger.Errorf("Error while updating existing conversation: %v", err)
+				return
+			}
+		}
 
 		utils.OkWithJSON(w, fmt.Sprintf(`{
 			"message": "Conversation found",
@@ -116,6 +141,9 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	members := []uint64{body.ReceiverId, body.SenderId}
 	participants := []uint64{body.SenderId}
 
+	// always sort the members array so lookups in the DB are faster and we're able to easily compare
+	sort.Slice(members, func(i, j int) bool { return members[i] < members[j] })
+
 	insertQuery := `INSERT INTO conversations(id, members, participants)
 		VALUES($1, $2, $3)`
 
@@ -126,7 +154,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
-		logger.Error("Error while inserting a new convo")
+		logger.Error("Error while inserting a new conversation")
 		return
 	}
 
@@ -196,7 +224,7 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	conversations := make([]models.Conversation, 0)
+	conversations := make([]models.ReturnedConversation, 0)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -214,7 +242,15 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		conversations = append(conversations, *conversation)
+		retConversation := &models.ReturnedConversation{}
+
+		retConversation.ID = fmt.Sprintf("%v", conversation.ID)
+		retConversation.LastMessage = conversation.LastMessage
+		retConversation.LastUpdated = conversation.LastUpdated
+		retConversation.Receiver = conversation.Receiver
+		retConversation.UnreadMessages = conversation.UnreadMessages
+
+		conversations = append(conversations, *retConversation)
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
