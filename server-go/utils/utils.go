@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"illusionman1212/twatter-go/logger"
 	"math/rand"
+	"reflect"
 	"time"
 )
 
@@ -34,4 +35,15 @@ func GenerateRandomBytes(n int) string {
 	rand.Seed(time.Now().UnixNano())
 	rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+func Contains(slice interface{}, element interface{}) bool {
+	sv := reflect.ValueOf(slice)
+
+	for i := 0; i < sv.Len(); i++ {
+		if sv.Index(i).Interface() == element {
+			return true
+		}
+	}
+	return false
 }

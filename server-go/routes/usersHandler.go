@@ -29,31 +29,16 @@ import (
 const dateLayout = "2006-01-02"
 
 func ValidateToken(w http.ResponseWriter, req *http.Request) {
-	session := redissession.GetSession(req)
-
-	if session.IsNew {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized user, please log in",
-			"status": 401,
-			"success": false
-		}`)
-		return
-	}
-
-	sessionUser, ok := session.Values["user"].(*models.User)
-	if !ok {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized user, please log in",
-			"status": 401,
-			"success": false
-		}`)
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
+		logger.Error(err)
 		return
 	}
 
 	user := &models.User{}
 
 	// query the db for the user
-	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE id = $1;`,
+	err = db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE id = $1;`,
 		sessionUser.ID).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
@@ -61,6 +46,7 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while validating user's token: %v", err)
 		return
 	}
 
@@ -80,6 +66,7 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("No username when request user data")
 		return
 	}
 
@@ -94,6 +81,7 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 				"status": 404,
 				"success": false
 			}`)
+			logger.Infof("User with username: %v not found", username)
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -101,6 +89,7 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while querying for user: %v", err)
 			return
 		}
 	}
@@ -122,6 +111,7 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("No token was sent when validating password reset token")
 		return
 	}
 
@@ -135,6 +125,7 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 				"status": 403,
 				"success": false
 			}`)
+			logger.Info("Invalid or expired token")
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -142,6 +133,7 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while querying for password reset token: %v", err)
 			return
 		}
 	}
@@ -180,6 +172,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Email, username, password or confirm password was left empty when creating a new account")
 		return
 	}
 
@@ -190,6 +183,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Username is either too short or too long")
 		return
 	}
 
@@ -200,6 +194,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Password is too short")
 		return
 	}
 
@@ -210,6 +205,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Passwords do not match")
 		return
 	}
 
@@ -221,6 +217,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while hashing password: %v", err)
 		return
 	}
 
@@ -233,7 +230,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
-		logger.Errorf("Error while generating a new id: ", err)
+		logger.Errorf("Error while generating id for a new user: ", err)
 		return
 	}
 
@@ -250,6 +247,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 				"status": 409,
 				"success": false
 			}`)
+			logger.Info("Attempt to sign up with a used username")
 			return
 		} else if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_email_key\"") {
 			utils.ConflictWithJSON(w, `{
@@ -257,6 +255,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 				"status": 409,
 				"success": false
 			}`)
+			logger.Info("Attempt to sign up with a used email")
 			return
 		}
 
@@ -265,6 +264,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while inserting new user: %v", err)
 		return
 	}
 
@@ -276,6 +276,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while setting the session: %v", err)
 		return
 	}
 
@@ -296,6 +297,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while decoding request body: %v", err)
 		return
 	}
 
@@ -309,16 +311,17 @@ func Login(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Attempt to login with no username and password")
 		return
 	}
 
 	user := &models.User{}
 	var hash string
 
-	// select the hash from the database
+	// select the user data from the database
 	fetchedUser := db.DBPool.QueryRow(context.Background(), `SELECT id, username, password, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE email = $1 OR username = $1;`, credsUsername)
 
-	// scan the hash from the row into the hash var
+	// scan the user data from the row into the user struct
 	err = fetchedUser.Scan(&user.ID, &user.Username, &hash, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 	if err != nil {
 		// if no returned then email/username is invalid
@@ -328,12 +331,14 @@ func Login(w http.ResponseWriter, req *http.Request) {
 				"status": 401,
 				"success": false
 			}`)
+			logger.Info("Attempt to login with incorrect credentials")
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while loging in: %v", err)
 		}
 		return
 	}
@@ -346,6 +351,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 			"status": 401,
 			"success": false
 		}`)
+		logger.Info("Attempt to login with incorrect password")
 		return
 	}
 
@@ -356,6 +362,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while setting session: %v", err)
 		return
 	}
 
@@ -378,11 +385,11 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while parsing multipart form: %v", err)
 		return
 	}
 
 	bio := req.MultipartForm.Value["bio"][0]
-	userID := req.MultipartForm.Value["userId"][0]
 	birthdayYear := req.MultipartForm.Value["birthday_year"][0]
 	birthdayMonth := req.MultipartForm.Value["birthday_month"][0]
 	birthdayDay := req.MultipartForm.Value["birthday_day"][0]
@@ -394,24 +401,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 	sessionUser, err := utils.ValidateSession(req, w)
 	if err != nil {
-		return
-	}
-
-	if userID != fmt.Sprintf("%v", sessionUser.ID) {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized to perform this action",
-			"status": 401,
-			"success": false
-		}`)
-		return
-	}
-
-	if userID == "null" {
-		utils.BadRequestWithJSON(w, `{
-			"message": "Invalid or incomplete request",
-			"status": 400,
-			"success": false
-		}`)
+		logger.Error(err)
 		return
 	}
 
@@ -421,11 +411,21 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			"status": 413,
 			"success": false
 		}`)
+		logger.Info("Attempt to set a bio that exceeds the character limit")
 		return
 	}
 
 	if bio != "null" {
-		db.DBPool.QueryRow(context.Background(), `UPDATE users SET bio = $1 WHERE id = $2;`, bio, userID)
+		_, err = db.DBPool.Exec(context.Background(), `UPDATE users SET bio = $1 WHERE id = $2;`, bio, sessionUser.ID)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while updating user bio: %v", err)
+			return
+		}
 	}
 
 	if birthdayDay != "null" && birthdayMonth != "null" && birthdayYear != "null" {
@@ -436,11 +436,21 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while parsing date: %v", err)
 			return
 		}
 		birthday := sql.NullTime{Time: birthdayTime, Valid: true}
 
-		db.DBPool.QueryRow(context.Background(), "UPDATE users SET birthday = $1 WHERE id = $2;", birthday, userID)
+		_, err = db.DBPool.Exec(context.Background(), "UPDATE users SET birthday = $1 WHERE id = $2;", birthday, sessionUser.ID)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while updating user birthday", err)
+			return
+		}
 	}
 
 	if image != nil {
@@ -451,6 +461,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 400,
 				"success": false
 			}`)
+			logger.Info("Attempt to upload an unsupported image type")
 			return
 		}
 
@@ -460,6 +471,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 400,
 				"success": false
 			}`)
+			logger.Info("Attempt to upload an image bigger than 8MB")
 			return
 		}
 
@@ -470,6 +482,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while opening image: %v", err)
 			return
 		}
 		buf, err := ioutil.ReadAll(imageContent)
@@ -479,6 +492,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while reading image data: %v", err)
 			return
 		}
 
@@ -494,6 +508,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 					"status": 500,
 					"success": false
 				}`)
+				logger.Errorf("Error while removing exif data from image: %v", err)
 				return
 			}
 			tempBuf := new(bytes.Buffer)
@@ -504,12 +519,13 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 					"status": 500,
 					"success": false
 				}`)
+				logger.Errorf("Error while reading from image: %v", err)
 				return
 			}
 			imageBytes = tempBuf.Bytes()
 		}
 		extension := strings.Split(mimetype, "/")[1]
-		fileDirectory := fmt.Sprintf("../cdn/profile_images/%s/", userID)
+		fileDirectory := fmt.Sprintf("../cdn/profile_images/%v/", sessionUser.ID)
 		err = os.Mkdir(fileDirectory, 0755)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -517,6 +533,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while creating directory for user profile image: %v", err)
 			return
 		}
 
@@ -529,19 +546,47 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while creating new file for user profile image: %v", err)
 			return
 		}
 
-		file.Write(imageBytes)
+		_, err = file.Write(imageBytes)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while writing profile image: %v", err)
+			return
+		}
 
-		avatar_url := fmt.Sprintf("%s/cdn/profile_images/%s/profile.%s", os.Getenv("API_DOMAIN_URL"), userID, extension)
+		avatar_url := fmt.Sprintf("%s/cdn/profile_images/%v/profile.%s", os.Getenv("API_DOMAIN_URL"), sessionUser.ID, extension)
 
 		// TODO: compress the image and have multiple sizes
 
-		db.DBPool.QueryRow(context.Background(), "UPDATE users SET avatar_url = $1 WHERE id = $2", avatar_url, userID)
+		_, err = db.DBPool.Exec(context.Background(), "UPDATE users SET avatar_url = $1 WHERE id = $2", avatar_url, sessionUser.ID)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while updating user avatar url", err)
+			return
+		}
 	}
 
-	db.DBPool.QueryRow(context.Background(), `UPDATE users SET finished_setup = true WHERE id = $1;`, userID)
+	_, err = db.DBPool.Exec(context.Background(), `UPDATE users SET finished_setup = true WHERE id = $1;`, sessionUser.ID)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+		logger.Errorf("Error while updating user setup", err)
+		return
+	}
 
 	// TODO: return the user as well to use the frontend login() funcion so that the home page loads correctly
 	utils.OkWithJSON(w, `{
@@ -560,6 +605,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while decoding request body: %v", err)
 		return
 	}
 
@@ -571,6 +617,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Attempt to recover password with no email")
 		return
 	}
 
@@ -588,6 +635,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 				"status": 200,
 				"success": true
 			}`)
+			logger.Info("Attempt to recover password for a nonexistant user")
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -595,6 +643,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while querying user using email: %v", err)
 			return
 		}
 	}
@@ -606,12 +655,13 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while setting reset password token: %v", err)
 		return
 	}
 
 	// send an email to the user with the reset token
 	// Sender data.
-	from := mail.Address{"Twatter Support", os.Getenv("SUPPORT_EMAIL")}
+	from := mail.Address{Name: "Twatter Support", Address: os.Getenv("SUPPORT_EMAIL")}
 	password := os.Getenv("SUPPORT_EMAIL_PASSWORD")
 
 	// Receiver email address.
@@ -649,7 +699,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 	// Sending email.
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from.Address, to, []byte(message))
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("Error while sending password recovery email to user: %v", err)
 		return
 	}
 
@@ -669,6 +719,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while decoding request body: %v", err)
 		return
 	}
 
@@ -682,6 +733,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Attempt to reset password with no reset token or new password")
 		return
 	}
 
@@ -691,6 +743,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Passwords do not match when resetting password")
 		return
 	}
 
@@ -700,6 +753,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Password is too short when resetting password")
 		return
 	}
 
@@ -710,6 +764,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while hashing password: %v", err)
 		return
 	}
 
@@ -723,6 +778,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 				"status": 400,
 				"success": false
 			}`)
+			logger.Info("Attempt to reset password with an invalid or expired token")
 			return
 		} else {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -730,6 +786,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while resetting password: %v", err)
 			return
 		}
 	}
@@ -749,6 +806,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 			"status": 403,
 			"success": false
 		}`)
+		logger.Info("Attempt to logout with an invalid or expired session")
 		return
 	}
 
@@ -760,6 +818,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while removing sessions and saving it")
 		return
 	}
 

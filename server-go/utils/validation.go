@@ -15,7 +15,7 @@ func ValidateSession(req *http.Request, w http.ResponseWriter) (*models.User, er
 			"status": 401,
 			"success": false
 		}`)
-		return &models.User{}, errors.New("Unauthorized user")
+		return &models.User{}, errors.New("Error while checking the user's session, session is new")
 	}
 
 	sessionUser, ok := session.Values["user"].(*models.User)
@@ -25,7 +25,7 @@ func ValidateSession(req *http.Request, w http.ResponseWriter) (*models.User, er
 			"status": "401",
 			"success": false
 		}`)
-		return &models.User{}, errors.New("Unauthorized user")
+		return &models.User{}, errors.New("Error while extracting user info from session, either invalid session or internal error")
 	}
 
 	return sessionUser, nil

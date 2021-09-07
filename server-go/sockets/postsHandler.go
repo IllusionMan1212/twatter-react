@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 	"illusionman1212/twatter-go/db"
+	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
 )
 
-func Post(socketMessage *models.SocketMessage, clients []*Client) {
+func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client) {
 	post := &models.SocketPost{}
 
 	// NOTE: this is still ugly af
-	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketMessage.Data)), post)
+	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), post)
 
 	if len(post.Attachments) == 0 && post.Content == "" {
 		errPayload := `{
@@ -21,9 +22,8 @@ func Post(socketMessage *models.SocketMessage, clients []*Client) {
 				"message": "Cannot send an empty post"
 			}
 		}`
-		for _, client := range clients {
-			client.emitEvent([]byte(errPayload))
-		}
+		invokingClient.emitEvent([]byte(errPayload))
+		logger.Error("Cannot send an empty post")
 		return
 	}
 
@@ -35,9 +35,8 @@ func Post(socketMessage *models.SocketMessage, clients []*Client) {
 				"message": "An error has occurred, please try again later"
 			}
 		}`
-		for _, client := range clients {
-			client.emitEvent([]byte(errPayload))
-		}
+		invokingClient.emitEvent([]byte(errPayload))
+		logger.Errorf("Error while generating id for new post: %v", err)
 		return
 	}
 
@@ -47,8 +46,15 @@ func Post(socketMessage *models.SocketMessage, clients []*Client) {
 
 	returnedPost := &models.DBPost{}
 
-	returnedAttachments, err := writeAttachmentsFiles(post.Attachments, postId, clients)
+	returnedAttachments, err := writeAttachmentsFiles(post.Attachments, postId, invokingClient)
 	if err != nil {
+		errPayload := fmt.Sprintf(`{
+			"eventType": "postError",
+			"data": {
+				"message": "%v"
+			}
+		}`, err)
+		invokingClient.emitEvent([]byte(errPayload))
 		return
 	}
 
@@ -60,9 +66,8 @@ func Post(socketMessage *models.SocketMessage, clients []*Client) {
 				"message": "An error has occurred, please try again later"
 			}
 		}`
-		for _, client := range clients {
-			client.emitEvent([]byte(errPayload))
-		}
+		invokingClient.emitEvent([]byte(errPayload))
+		logger.Errorf("Error while inserting into posts table: %v", err)
 		return
 	}
 
@@ -91,10 +96,10 @@ func Post(socketMessage *models.SocketMessage, clients []*Client) {
 	}
 }
 
-func Comment(socketMessage *models.SocketMessage, clients []*Client) {
+func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client) {
 	comment := &models.SocketComment{}
 
-	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketMessage.Data)), comment)
+	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), comment)
 
 	if len(comment.Attachments) == 0 && comment.Content == "" {
 		errPayload := `{
@@ -104,9 +109,8 @@ func Comment(socketMessage *models.SocketMessage, clients []*Client) {
 			}
 		}
 		`
-		for _, client := range clients {
-			client.emitEvent([]byte(errPayload))
-		}
+		invokingClient.emitEvent([]byte(errPayload))
+		logger.Error("Cannot send an empty post")
 		return
 	}
 
@@ -123,16 +127,23 @@ func Comment(socketMessage *models.SocketMessage, clients []*Client) {
 			}
 		}
 		`
-		for _, client := range clients {
-			client.emitEvent([]byte(errPayload))
-		}
+		invokingClient.emitEvent([]byte(errPayload))
+		logger.Errorf("Error while generating id for new post: %v", err)
 		return
 	}
 
 	returnedComment := &models.DBPost{}
 
-	returnedAttachments, err := writeAttachmentsFiles(comment.Attachments, commentId, clients)
+	returnedAttachments, err := writeAttachmentsFiles(comment.Attachments, commentId, invokingClient)
 	if err != nil {
+		errPayload := `{
+			"eventType": "postError",
+			"data": {
+				"message": "An error has occurred, please try again later"
+			}
+		}
+		`
+		invokingClient.emitEvent([]byte(errPayload))
 		return
 	}
 
@@ -145,9 +156,8 @@ func Comment(socketMessage *models.SocketMessage, clients []*Client) {
 			}
 		}
 		`
-		for _, client := range clients {
-			client.emitEvent([]byte(errPayload))
-		}
+		invokingClient.emitEvent([]byte(errPayload))
+		logger.Errorf("Error while inserting into posts table: %v", err)
 		return
 	}
 

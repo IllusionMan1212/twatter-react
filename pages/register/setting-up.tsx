@@ -65,7 +65,6 @@ export default function UserSetup(): ReactElement {
         }
         const payload: FormData = new FormData();
         payload.append("bio", bio);
-        payload.append("userId", user.id);
         payload.append("birthday_year", birthday_year);
         payload.append("birthday_month", birthday_month);
         payload.append("birthday_day", birthday_day);

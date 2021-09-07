@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -20,14 +19,21 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	logger.Initialize()
 
-	db.InitializeDB()
+	err = db.InitializeDB()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	redissession.InitializeTypes()
-	redissession.Initialize()
+	err = redissession.Initialize()
+	if err != nil {
+		logger.Fatal(err)
+	}
 
 	hub := sockets.NewHub()
 	go hub.Run()

@@ -1,6 +1,6 @@
 package models
 
-type SocketMessage struct {
+type SocketPayload struct {
 	EventType string      `json:"eventType"`
 	Data      interface{} `json:"data"`
 }

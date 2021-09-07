@@ -20,6 +20,7 @@ import (
 func DeletePost(w http.ResponseWriter, req *http.Request) {
 	sessionUser, err := utils.ValidateSession(req, w)
 	if err != nil {
+		logger.Error(err)
 		return
 	}
 
@@ -31,6 +32,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "500",
 			"success": "false"
 		}`)
+		logger.Errorf("Error while decoding route body: %v", err)
 		return
 	}
 
@@ -40,6 +42,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "401",
 			"success": false
 		}`)
+		logger.Info("Unauthorized action: different session user id and id sent in body")
 		return
 	}
 
@@ -52,6 +55,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "500",
 			"success": "false"
 		}`)
+		logger.Errorf("Error while deleting post: %v", err)
 		return
 	}
 
@@ -63,6 +67,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 			"status": "500",
 			"success": "false"
 		}`)
+		logger.Errorf("Error while removing attachment(s) directory: %v", err)
 		return
 	}
 
@@ -76,12 +81,17 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 func LikePost(w http.ResponseWriter, req *http.Request) {
 	sessionUser, err := utils.ValidateSession(req, w)
 	if err != nil {
+		logger.Error(err)
 		return
 	}
 
 	body := &models.LikePostBody{}
 
-	json.NewDecoder(req.Body).Decode(&body)
+	err = json.NewDecoder(req.Body).Decode(&body)
+	if err != nil {
+		logger.Errorf("Error while decoding route body: %v", err)
+		return
+	}
 
 	var query string
 
@@ -99,6 +109,7 @@ func LikePost(w http.ResponseWriter, req *http.Request) {
 			"status": 500,
 			"success": false
 		}`)
+		logger.Errorf("Error while liking/disliking post: %v", err)
 		return
 	}
 
@@ -116,7 +127,16 @@ func GetPostsCount(w http.ResponseWriter, req *http.Request) {
 	query := `SELECT count(posts) FROM posts WHERE user_id = $1;`
 
 	var count int
-	db.DBPool.QueryRow(context.Background(), query, userId).Scan(&count)
+	err := db.DBPool.QueryRow(context.Background(), query, userId).Scan(&count)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Errorf("Error while fetching posts count: %v", err)
+		return
+	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Successfully fetched posts count",
@@ -149,6 +169,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 			"status": 400,
 			"success": false
 		}`)
+		logger.Info("Attempt to get posts with no post type and no author id")
 		return
 	}
 
@@ -252,6 +273,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while fetching posts: %v", err)
 			return
 		}
 	} else {
@@ -286,6 +308,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while fetching posts: %v", err)
 			return
 		}
 	}
@@ -309,6 +332,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while scanning fetched posts into structs: %v", err)
 			return
 		}
 		postAttachments := make([]models.Attachment, 0)
@@ -334,6 +358,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 				"status": 500,
 				"success": false
 		}`)
+		logger.Errorf("Rows error: %v", err)
 		return
 	}
 
@@ -413,6 +438,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 				"status": 404,
 				"success": false
 			}`)
+			logger.Infof("Post with id: %v not found", postId)
 			return
 		}
 		utils.InternalServerErrorWithJSON(w, `{
@@ -420,6 +446,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 				"status": 500,
 				"success": false
 		}`)
+		logger.Errorf("Error while scanning post data into struct: %v", err)
 		return
 	}
 
@@ -465,11 +492,20 @@ GROUP BY comment.id, author.id;`
 
 	rows, err := db.DBPool.Query(context.Background(), query, postId, userId)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
+		if err == pgx.ErrNoRows {
+			utils.NotFoundWithJSON(w, `{
+				"message": "No comments were found",
+				"status": 404,
+				"success": true
+			}`)
+		} else {
+			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
 				"status": 500,
 				"success": false
-		}`)
+			}`)
+			logger.Errorf("Error while fetching comments: %v", err)
+		}
 		return
 	}
 
@@ -491,6 +527,7 @@ GROUP BY comment.id, author.id;`
 				"status": 500,
 				"success": false
 			}`)
+			logger.Errorf("Error while scanning comments data into structs: %v", err)
 			return
 		}
 
@@ -517,6 +554,7 @@ GROUP BY comment.id, author.id;`
 				"status": 500,
 				"success": false
 		}`)
+		logger.Errorf("Rows error: %v", err)
 		return
 	}
 

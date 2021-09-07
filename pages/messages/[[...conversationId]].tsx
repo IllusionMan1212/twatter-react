@@ -309,10 +309,10 @@ export default function Messages(): ReactElement {
         const payload = {
             eventType: "message",
             data: {
-                conversationId: activeConversation.id,
-                receiverId: activeConversation.receiver_id,
-                senderId: user.id,
-                messageContent: messageContent,
+                conversation_id: activeConversation.id,
+                receiver_id: activeConversation.receiver_id,
+                sender_id: user.id,
+                message_content: messageContent,
                 attachment: attachment,
             },
         };

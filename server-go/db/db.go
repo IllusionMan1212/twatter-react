@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"illusionman1212/twatter-go/utils"
 	"os"
@@ -92,14 +93,13 @@ var Snowflake = sonyflake.NewSonyflake(sonyflake.Settings{
 	StartTime: time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC),
 })
 
-func InitializeDB() {
+func InitializeDB() error {
 	// url example postgres://user:password@host:port/database?sslmode=verify-full
 	// url example postgres://username:password@localhost:5432/database_name
 	var err error
 	DBPool, err = pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to connect to database: %v", err)
-		panic(err)
+		return errors.New(fmt.Sprintf("Fatal error while connecting to database: %v", err))
 	}
 
 	_, err = DBPool.Exec(context.Background(), users_table)
@@ -120,4 +120,6 @@ func InitializeDB() {
 	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), message_attachments_table)
 	utils.FatalError(err)
+
+	return nil
 }
