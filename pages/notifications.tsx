@@ -1,12 +1,12 @@
 /* eslint-disable react/react-in-jsx-scope */
-import StatusBar from "../components/statusBar";
-import Navbar from "../components/navbar";
-import Loading from "../components/loading";
-import { useUser } from "../src/hooks/useUser";
+import StatusBar from "components/statusBar";
+import Navbar from "components/navbar";
+import Loading from "components/loading";
 import { ReactElement } from "react";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Notifications(): ReactElement {
-    const user = useUser("/login", null);
+    const { user } = useUserContext();
 
     return (
         <>
