@@ -320,7 +320,9 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 		post := &models.DBPost{}
 		parent := &models.ParentPost{}
 		attachments := &models.DBAttachment{}
-		err = rows.Scan(&post.ID, &post.Author.ID,
+		var postId uint64
+
+		err = rows.Scan(&postId, &post.Author.ID,
 			&post.Author.Username, &post.Author.DisplayName, &post.Author.AvatarURL,
 			&post.Content, &post.CreatedAt,
 			&parent.ID, &parent.Content, &parent.Author.Username, &parent.Author.DisplayName, &parent.Author.AvatarURL,
@@ -346,6 +348,8 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 			postAttachment.Type = attachments.Types.Elements[i].String
 			postAttachments = append(postAttachments, *postAttachment)
 		}
+
+		post.ID = fmt.Sprintf("%v", postId)
 		post.ReplyingTo = *parent
 		post.Attachments = postAttachments
 		posts = append(posts, *post)
@@ -371,7 +375,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetPost(w http.ResponseWriter, req *http.Request) {
-	postId := req.URL.Query().Get("postId")
+	postIdIn := req.URL.Query().Get("postId")
 	var userId uint64
 
 	session := redissession.GetSession(req)
@@ -408,7 +412,9 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 	post := &models.DBPost{}
 	parent := &models.ParentPost{}
 	attachments := &models.DBAttachment{}
-	err := db.DBPool.QueryRow(context.Background(), query, postId, userId).Scan(&post.ID,
+	var postIdOut uint64
+
+	err := db.DBPool.QueryRow(context.Background(), query, postIdIn, userId).Scan(&postIdOut,
 		&post.Author.ID, &post.Author.Username, &post.Author.DisplayName, &post.Author.AvatarURL,
 		&post.Content, &post.CreatedAt,
 		&parent.ID, &parent.Content, &parent.Author.Username, &parent.Author.DisplayName, &parent.Author.AvatarURL,
@@ -429,6 +435,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 		postAttachments = append(postAttachments, *postAttachment)
 	}
 
+	post.ID = fmt.Sprintf("%v", postIdOut)
 	post.Attachments = postAttachments
 	post.ReplyingTo = *parent
 	if err != nil {
@@ -438,7 +445,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 				"status": 404,
 				"success": false
 			}`)
-			logger.Infof("Post with id: %v not found", postId)
+			logger.Infof("Post with id: %v not found", postIdIn)
 			return
 		}
 		utils.InternalServerErrorWithJSON(w, `{
@@ -515,8 +522,9 @@ GROUP BY comment.id, author.id;`
 	for rows.Next() {
 		comment := &models.DBPost{}
 		attachments := &models.DBAttachment{}
+		var commentId uint64
 
-		err = rows.Scan(&comment.ID,
+		err = rows.Scan(&commentId,
 			&comment.Author.ID, &comment.Author.Username, &comment.Author.DisplayName, &comment.Author.AvatarURL,
 			&comment.Content, &comment.CreatedAt,
 			&attachments.Urls, &attachments.Types,
@@ -543,6 +551,7 @@ GROUP BY comment.id, author.id;`
 			commentAttachments = append(commentAttachments, *commentAttachment)
 		}
 
+		comment.ID = fmt.Sprintf("%v", commentId)
 		comment.Attachments = commentAttachments
 		comments = append(comments, *comment)
 	}

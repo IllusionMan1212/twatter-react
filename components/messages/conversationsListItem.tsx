@@ -44,9 +44,11 @@ export default function ConversationsListItem(
                     </p>
                 </div>
             </div>
-            <div className={styles.date}>
-                <p>{timeSince(props.lastUpdated)}</p>
-            </div>
+            {props.lastUpdated.Valid && (
+                <div className={styles.date}>
+                    <p>{timeSince(props.lastUpdated.Time.toString())}</p>
+                </div>
+            )}
             <div>
                 {props.unreadMessages != 0 && (
                     <div className={styles.unreadMessages}>{props.unreadMessages}</div>

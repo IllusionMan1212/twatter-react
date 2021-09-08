@@ -2,18 +2,19 @@ package routes
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"illusionman1212/twatter-go/db"
 	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
-	"illusionman1212/twatter-go/redissession"
 	"illusionman1212/twatter-go/utils"
 	"net/http"
 	"sort"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -30,26 +31,9 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	session := redissession.GetSession(req)
-
-	if session.IsNew {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized user, please log in",
-			"status": 401,
-			"success": false
-		}`)
-		logger.Info("Unauthorized user attempted to fetch conversations")
-		return
-	}
-
-	sessionUser, ok := session.Values["user"].(*models.User)
-	if !ok {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
-		logger.Error("Error while extracting user info from session")
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
+		logger.Error(err)
 		return
 	}
 
@@ -59,7 +43,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 			"status": 401,
 			"success": false
 		}`)
-		logger.Info("Mismatching cookie user and senderId")
+		logger.Info("Mismatching cookie user id and senderId")
 		return
 	}
 
@@ -100,7 +84,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		// check if the sender isn't in the participants and add them
 
 		if !utils.Contains(existingParticipants, body.SenderId) {
-			updateQuery := `UPDATE conversations SET participants = $1, last_updated = now() at time zone 'utc' WHERE id = $2`
+			updateQuery := `UPDATE conversations SET participants = $1 WHERE id = $2`
 
 			newParticipants := append(existingParticipants, body.SenderId)
 
@@ -122,7 +106,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 			"message": "Conversation found",
 			"status": 200,
 			"success": true,
-			"conversationId": %v
+			"conversationId": "%v"
 		}`, existingConvoId))
 		return
 	}
@@ -162,7 +146,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		"message": "Conversation created",
 		"status": 200,
 		"success": true,
-		"conversationId": %v
+		"conversationId": "%v"
 	}`, convoId))
 }
 
@@ -180,26 +164,9 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	session := redissession.GetSession(req)
-
-	if session.IsNew {
-		utils.UnauthorizedWithJSON(w, `{
-			"message": "Unauthorized user, please log in",
-			"status": 401,
-			"success": false
-		}`)
-		logger.Info("Unauthorized user attempted to fetch conversations")
-		return
-	}
-
-	sessionUser, ok := session.Values["user"].(*models.User)
-	if !ok {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
-		logger.Error("Error while extracting user info from session")
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
+		logger.Error(err)
 		return
 	}
 
@@ -224,13 +191,14 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	conversations := make([]models.ReturnedConversation, 0)
+	conversations := make([]models.Conversation, 0)
 
 	defer rows.Close()
 	for rows.Next() {
 		conversation := &models.Conversation{}
+		var conversationId uint64
 
-		err := rows.Scan(&conversation.ID, &conversation.LastUpdated,
+		err := rows.Scan(&conversationId, &conversation.LastUpdated,
 			&conversation.Receiver.ID, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
@@ -241,16 +209,9 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 			logger.Errorf("Error scanning fields into conversation struct: %s", err)
 			return
 		}
+		conversation.ID = fmt.Sprintf("%v", conversationId)
 
-		retConversation := &models.ReturnedConversation{}
-
-		retConversation.ID = fmt.Sprintf("%v", conversation.ID)
-		retConversation.LastMessage = conversation.LastMessage
-		retConversation.LastUpdated = conversation.LastUpdated
-		retConversation.Receiver = conversation.Receiver
-		retConversation.UnreadMessages = conversation.UnreadMessages
-
-		conversations = append(conversations, *retConversation)
+		conversations = append(conversations, *conversation)
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
@@ -262,14 +223,103 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetMessages(w http.ResponseWriter, req *http.Request) {
-	// TODO: implement
+	params := mux.Vars(req)
+	conversationId := params["conversationId"]
+	pageParam := params["page"]
+	page, err := strconv.Atoi(pageParam)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Errorf("Error while converting page string to int: %v", err)
+		return
+	}
 
-	utils.OkWithJSON(w, `{
+	_, err = utils.ValidateSession(req, w)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	query := `SELECT message.id, message.author_id, message.conversation_id, message.content, message.sent_time, message.read_by, message.deleted,
+		attachment.url, attachment.type
+		FROM messages message
+		LEFT JOIN message_attachments attachment
+		ON attachment.message_id = message.id
+		WHERE conversation_id = $1
+		ORDER BY message.sent_time DESC
+		LIMIT 50 OFFSET $2;`
+
+	rows, err := db.DBPool.Query(context.Background(), query, conversationId, page*50)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			utils.NotFoundWithJSON(w, `{
+				"message": "No messages were found",
+				"status": 404,
+				"success": true
+			}`)
+			return
+		}
+
+		utils.InternalServerErrorWithJSON(w, `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`)
+		logger.Errorf("Error while querying for messages: %v", err)
+		return
+	}
+
+	messages := make([]models.Message, 0)
+
+	for rows.Next() {
+		message := &models.Message{}
+		var messageId uint64
+		var messageAuthorId uint64
+		var messageConversationId uint64
+		var readBy pgtype.Int8Array
+
+		var attachmentUrl sql.NullString
+		var attachmentType sql.NullString
+
+		err = rows.Scan(&messageId, &messageAuthorId, &messageConversationId, &message.Content, &message.SentTime, &readBy, &message.Deleted,
+			&attachmentUrl, &attachmentType)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again later",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while scanning message data into struct: %v", err)
+			return
+		}
+
+		if attachmentUrl.Valid && attachmentType.Valid {
+			message.Attachment.Url = attachmentUrl.String
+			message.Attachment.Type = attachmentType.String
+		}
+
+		message.ID = fmt.Sprintf("%v", messageId)
+		message.AuthorID = fmt.Sprintf("%v", messageAuthorId)
+		message.ConversationID = fmt.Sprintf("%v", messageConversationId)
+		for _, element := range readBy.Elements {
+			message.ReadBy = append(message.ReadBy, fmt.Sprintf("%v", element.Int))
+		}
+
+		messages = append(messages, *message)
+	}
+
+	// sort the latest messages by sent time in ascending order
+	sort.Slice(messages, func(i, j int) bool { return messages[i].SentTime.Before(messages[j].SentTime) })
+
+	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Successfully fetched messages",
 		"status": 200,
 		"success": true,
-		"messages": []
-	}`)
+		"messages": %v
+	}`, utils.MarshalJSON(messages)))
 }
 
 func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {

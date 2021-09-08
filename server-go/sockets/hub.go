@@ -9,7 +9,7 @@ import (
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
-	// Registered users and their users.
+	// Registered users and their clients.
 	users map[uint64][]*Client
 
 	// Inbound messages from the clients.

@@ -31,7 +31,8 @@ const users_table = `CREATE TABLE IF NOT EXISTS users(
 
 const conversations_table = `CREATE TABLE IF NOT EXISTS conversations(
 	id BIGINT PRIMARY KEY UNIQUE,
-	last_updated timestamp NOT NULL DEFAULT (now() at time zone 'utc'),
+	last_updated timestamp,
+	created_at timestamp NOT NULL DEFAULT (now() at time zone 'utc'),
 	members BIGINT[] NOT NULL,
 	participants BIGINT[] NOT NULL
 );`

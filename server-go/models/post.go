@@ -21,7 +21,7 @@ type SocketComment struct {
 }
 
 type DBPost struct {
-	ID          uint64       `json:"id"`
+	ID          string       `json:"id"`
 	Author      User         `json:"author"`
 	Content     string       `json:"content"`
 	CreatedAt   time.Time    `json:"created_at"`

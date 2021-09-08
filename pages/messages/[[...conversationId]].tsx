@@ -22,6 +22,8 @@ import {
     IAttachment,
     IConversation,
     IActiveConversation,
+    IMessage,
+    ISocketMessage
 } from "src/types/general";
 import Link from "next/link";
 import MessageMediaModal from "components/messages/messageMediaModal";
@@ -56,7 +58,7 @@ export default function Messages(): ReactElement {
     const [activeConversation, setActiveConversation] =
         useState<IActiveConversation>();
     const [isConversationActive, setIsConversationActive] = useState(false);
-    const [messages, setMessages] = useState([]); // TODO: explicitly type this
+    const [messages, setMessages] = useState<IMessage[]>([]); // TODO: explicitly type this
     const [nowSending, setNowSending] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
     const [imageModal, setImageModal] = useState(false);
@@ -194,18 +196,20 @@ export default function Messages(): ReactElement {
     };
 
     const handleMessageRecieved = useCallback(
-        (msg) => {
+        (msg: ISocketMessage) => {
             setNowSending(false);
 
             // check if the client's active conversation is the one the message was received in
             // this basically ensures that convos that dont have the same id as the receiving message arent updated
-            if (activeConversation?.id == msg.conversationId) {
+            if (activeConversation?.id == msg.conversation_id) {
                 setTyping(false);
                 const newMessages = messages.concat({
                     content: msg.content,
-                    sentTime: msg.sentTime,
-                    ownerId: msg.sender,
+                    sent_time: msg.sent_time,
+                    author_id: msg.author_id,
                     attachment: msg.attachment,
+                    deleted: msg.deleted,
+                    conversation_id: msg.conversation_id
                 });
                 setMessages(newMessages);
                 if (!atBottom) {
@@ -216,9 +220,9 @@ export default function Messages(): ReactElement {
                 const payload = {
                     eventType: "markMessagesAsRead",
                     data: {
-                        conversationId: msg.conversationId,
+                        conversationId: msg.conversation_id,
                         userId: user.id,
-                        unreadMessages: msg.sender == user.id ? 0 : 1,
+                        unreadMessages: msg.author_id == user.id ? 0 : 1,
                     },
                 };
 
@@ -227,19 +231,19 @@ export default function Messages(): ReactElement {
             }
             const newConversations = conversations.map(
                 (conversation: IConversation) => {
-                    return conversation.id == msg.conversationId
+                    return conversation.id == msg.conversation_id
                         ? {
                               ...conversation,
                               last_message: msg.content
                                   ? msg.content
-                                  : msg.sender == user.id
+                                  : msg.author_id == user.id
                                   ? `${user.display_name} sent an image`
                                   : `${conversation.receiver.display_name} sent an image`,
-                              last_updated: msg.sentTime,
+                              last_updated: { Valid: true, Time: new Date(msg.sent_time) },
                               unreadMessages:
-                                  activeConversation?.id == msg.conversationId
+                                  activeConversation?.id == msg.conversation_id
                                       ? 0
-                                      : msg.sender == user.id
+                                      : msg.author_id == user.id
                                       ? 0
                                       : conversation.unread_messages + 1,
                           }
@@ -249,8 +253,8 @@ export default function Messages(): ReactElement {
             // sort conversations by latest updated conversation
             newConversations.sort(
                 (a, b) =>
-                    new Date(b.last_updated).getTime() -
-                    new Date(a.last_updated).getTime()
+                    new Date(b.last_updated.Time.toString()).getTime() -
+                    new Date(a.last_updated.Time.toString()).getTime()
             );
             setConversations(newConversations);
         },
@@ -767,11 +771,11 @@ export default function Messages(): ReactElement {
                                                     key={index}
                                                     sender={
                                                         user.id ==
-                                                        message.ownerId
+                                                        message.author_id
                                                     }
-                                                    sentTime={message.sentTime}
+                                                    sentTime={message.sent_time}
                                                     attachment={
-                                                        message.attachment
+                                                        message.attachment.url
                                                     }
                                                     conversationId={
                                                         activeConversation?.id

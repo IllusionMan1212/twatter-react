@@ -1,5 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction } from "react";
-import { IPost, IUser } from "./general";
+import { IPost, IUser, DateAndTime } from "./general";
 
 export interface ToastProps {
     text: string;
@@ -37,7 +37,7 @@ export interface MessageProps {
 
 export interface ConversationsListItemProps {
     lastMessage: string;
-    lastUpdated: string;
+    lastUpdated: DateAndTime;
     receiver: IUser;
     onClick: () => void;
     isActive: boolean;
