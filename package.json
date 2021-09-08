@@ -62,5 +62,6 @@
   "bugs": {
     "url": "https://github.com/IllusionMan1212/twatter/issues"
   },
-  "homepage": "https://github.com/IllusionMan1212/twatter#readme"
+  "homepage": "https://github.com/IllusionMan1212/twatter#readme",
+  "packageManager": "yarn@3.0.2"
 }
