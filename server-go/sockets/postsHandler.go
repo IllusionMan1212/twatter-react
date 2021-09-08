@@ -74,7 +74,7 @@ func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient
 	postPayload := fmt.Sprintf(`{
 		"eventType": "post",
 		"data": {
-		  "id": %v,
+		  "id": "%v",
 		  "content": "%v",
 		  "author": %v,
 		  "created_at": %v,
@@ -167,7 +167,7 @@ func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 	commentPayload := fmt.Sprintf(`{
 		"eventType": "commentToClient",
 		"data": {
-		  "id": %v,
+		  "id": "%v",
 		  "content": "%v",
 		  "author": %v,
 		  "created_at": %v,

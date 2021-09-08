@@ -18,7 +18,7 @@ interface NullableBoolean {
     Valid: boolean;
 }
 
-interface DateAndTime {
+export interface DateAndTime {
     Time: Date;
     Valid: boolean;
 }
@@ -49,7 +49,7 @@ export interface IConversation {
     id: string;
     receiver: IUser;
     unread_messages: number;
-    last_updated: string;
+    last_updated: DateAndTime;
     last_message: string;
 }
 
@@ -98,4 +98,17 @@ export interface IBirthday {
     year: number;
     month: number;
     day: number;
+}
+
+export interface IMessage {
+    author_id: string;
+    conversation_id: string;
+    content: string;
+    sent_time: string;
+    attachment: PostAttachment; // TODO: different MessageAttachment type maybe ???
+    deleted: boolean;
+}
+
+export interface ISocketMessage extends IMessage {
+    receiver_id: string;
 }

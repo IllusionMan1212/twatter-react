@@ -2,11 +2,13 @@ package sockets
 
 import (
 	"context"
+	"fmt"
 	"illusionman1212/twatter-go/db"
 	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
 	"strconv"
+	"time"
 )
 
 func Message(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client) {
@@ -14,9 +16,6 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 
 	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), message)
 
-	logger.Debugf("%v", message)
-
-	// TODO: write the message to the db and then send it back to all connected client sockets
 	// TODO: write attachment if exists
 
 	insertQuery := `INSERT INTO messages(id, author_id, conversation_id, content, read_by)
@@ -43,5 +42,41 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		sendGenericSocketErr(invokingClient)
 		logger.Errorf("Error while inserting new message into database: %v", err)
 		return
+	}
+
+	updateQuery := `UPDATE conversations SET last_updated = now() at time zone 'utc' WHERE id = $1`
+
+	_, err = db.DBPool.Exec(context.Background(), updateQuery, conversationId)
+	if err != nil {
+		sendGenericSocketErr(invokingClient)
+		logger.Errorf("Error while updating conversation's last_updated field: %v", err)
+		return
+	}
+
+	messagePayload := fmt.Sprintf(`{
+		"eventType": "message",
+		"data": {
+			"attachment": "%v",
+      "content": "%v",
+      "conversation_id": "%v",
+      "receiver_id": "%v",
+      "author_id": "%v",
+      "sent_time": "%v",
+			"deleted": false
+		}
+	}`,
+		message.Attachment.Url,
+		message.Content,
+		message.ConversationId,
+		message.ReceiverId,
+		message.SenderId,
+		time.Now().UTC().Format(time.RFC3339))
+
+	for _, receiverClient := range invokingClient.hub.users[message.ReceiverId] {
+		receiverClient.emitEvent([]byte(messagePayload))
+	}
+
+	for _, client := range clients {
+		client.emitEvent([]byte(messagePayload))
 	}
 }

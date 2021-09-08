@@ -1,7 +1,7 @@
 package models
 
 import (
-	"time"
+	"database/sql"
 )
 
 type ConversationInitPayload struct {
@@ -10,17 +10,9 @@ type ConversationInitPayload struct {
 }
 
 type Conversation struct {
-	ID             uint64    `json:"id"`
-	LastUpdated    time.Time `json:"last_updated"`
-	Receiver       User      `json:"receiver"`
-	LastMessage    string    `json:"last_message"`
-	UnreadMessages int       `json:"unread_messages"`
-}
-
-type ReturnedConversation struct {
-	ID             string    `json:"id"`
-	LastUpdated    time.Time `json:"last_updated"`
-	Receiver       User      `json:"receiver"`
-	LastMessage    string    `json:"last_message"`
-	UnreadMessages int       `json:"unread_messages"`
+	ID             string       `json:"id"`
+	LastUpdated    sql.NullTime `json:"last_updated"`
+	Receiver       User         `json:"receiver"`
+	LastMessage    string       `json:"last_message"`
+	UnreadMessages int          `json:"unread_messages"`
 }
