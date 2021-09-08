@@ -37,7 +37,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if sessionUser.ID != body.SenderId {
+	if sessionUser.ID != fmt.Sprintf("%v", body.SenderId) {
 		utils.UnauthorizedWithJSON(w, `{
 			"message": "Unauthorized user, please log in",
 			"status": 401,

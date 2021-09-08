@@ -29,7 +29,7 @@ type ResetPasswordCreds struct {
 }
 
 type User struct {
-	ID            uint64       `json:"id"`
+	ID            string       `json:"id"`
 	Username      string       `json:"username"`
 	DisplayName   string       `json:"display_name"`
 	Bio           string       `json:"bio"`
@@ -39,6 +39,7 @@ type User struct {
 	FinishedSetup bool         `json:"finished_setup"`
 }
 
+// TODO: change the ID's type to sql.NullString
 type ParentUser struct {
 	ID            sql.NullInt64  `json:"id"`
 	Username      sql.NullString `json:"username"`

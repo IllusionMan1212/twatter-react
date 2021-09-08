@@ -33,6 +33,7 @@ type DBPost struct {
 }
 
 // TODO: no idea if this is a good idea, seems to work for now ??
+// TODO: change the ID's type to sql.NullString
 type ParentPost struct {
 	ID         sql.NullInt64  `json:"id"`
 	Author     ParentUser     `json:"author"`
@@ -44,8 +45,8 @@ type ParentPost struct {
 }
 
 type DeletePostBody struct {
-	PostAuthorId uint64 `json:"postAuthorId"`
-	PostId       uint64 `json:"postId"`
+	PostAuthorId string `json:"postAuthorId"`
+	PostId       string `json:"postId"`
 }
 
 type LikeType string
@@ -61,6 +62,6 @@ func (n LikeType) String() string {
 }
 
 type LikePostBody struct {
-	PostId   uint64   `json:"postId"`
+	PostId   string   `json:"postId"`
 	LikeType LikeType `json:"likeType"`
 }

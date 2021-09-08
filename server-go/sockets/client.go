@@ -53,7 +53,7 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump(userID uint64) {
+func (c *Client) readPump(userID string) {
 	defer func() {
 		payload := &UserClientPayload{}
 		payload.Client = c
