@@ -1,12 +1,12 @@
 package sockets
 
 type UserClientPayload struct {
-	UserID uint64
+	UserID string
 	Client *Client
 }
 
 type UserMessagePayload struct {
-	UserID         uint64
+	UserID         string
 	Message        []byte
 	InvokingClient *Client
 }

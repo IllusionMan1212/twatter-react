@@ -103,6 +103,10 @@ func InitializeDB() error {
 		return errors.New(fmt.Sprintf("Fatal error while connecting to database: %v", err))
 	}
 
+	if Snowflake == nil {
+		return errors.New(fmt.Sprintf("Fatal error while initializing snowflake: %v", err))
+	}
+
 	_, err = DBPool.Exec(context.Background(), users_table)
 	utils.FatalError(err)
 	_, err = DBPool.Exec(context.Background(), conversations_table)

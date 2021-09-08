@@ -10,7 +10,7 @@ import (
 // clients.
 type Hub struct {
 	// Registered users and their clients.
-	users map[uint64][]*Client
+	users map[string][]*Client
 
 	// Inbound messages from the clients.
 	broadcast chan UserMessagePayload
@@ -27,7 +27,7 @@ func NewHub() *Hub {
 		broadcast:  make(chan UserMessagePayload),
 		register:   make(chan UserClientPayload),
 		unregister: make(chan UserClientPayload),
-		users:      make(map[uint64][]*Client),
+		users:      make(map[string][]*Client),
 	}
 }
 

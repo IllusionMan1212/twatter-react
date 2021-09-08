@@ -36,10 +36,11 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	}
 
 	user := &models.User{}
+	var userId uint64
 
 	// query the db for the user
 	err = db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE id = $1;`,
-		sessionUser.ID).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
+		sessionUser.ID).Scan(&userId, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, `{
 			"message": "An error has occurred, please try again later",
@@ -49,6 +50,8 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 		logger.Errorf("Error while validating user's token: %v", err)
 		return
 	}
+
+	user.ID = fmt.Sprintf("%v", userId)
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"status": 200,
@@ -71,8 +74,9 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 	}
 
 	user := &models.User{}
+	var userId uint64
 
-	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE username = $1;`, username).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
+	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE username = $1;`, username).Scan(&userId, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -93,6 +97,8 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
+
+	user.ID = fmt.Sprintf("%v", userId)
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Retrieved user data successfully",
@@ -116,8 +122,9 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 	}
 
 	user := &models.User{}
+	var userId uint64
 
-	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, avatar_url FROM users WHERE reset_password_token = $1 AND reset_password_token_expiration > now();`, token).Scan(&user.ID, &user.Username, &user.DisplayName, &user.AvatarURL)
+	err := db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, avatar_url FROM users WHERE reset_password_token = $1 AND reset_password_token_expiration > now();`, token).Scan(&userId, &user.Username, &user.DisplayName, &user.AvatarURL)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			utils.ForbiddenWithJSON(w, `{
@@ -137,6 +144,8 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
+
+	user.ID = fmt.Sprintf("%v", userId)
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Token validated",
@@ -222,6 +231,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	}
 
 	user := &models.User{}
+	var userId uint64
 
 	id, err := db.Snowflake.NextID()
 	if err != nil {
@@ -239,7 +249,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	RETURNING id, username, display_name, bio, avatar_url, birthday, created_at, finished_setup;`
 
 	// insert into the DB and scan the result into user
-	err = db.DBPool.QueryRow(context.Background(), insertQuery, id, username, hashedPassword, email).Scan(&user.ID, &user.Username, &user.DisplayName, &user.Bio, &user.AvatarURL, &user.Birthday, &user.CreatedAt, &user.FinishedSetup)
+	err = db.DBPool.QueryRow(context.Background(), insertQuery, id, username, hashedPassword, email).Scan(&userId, &user.Username, &user.DisplayName, &user.Bio, &user.AvatarURL, &user.Birthday, &user.CreatedAt, &user.FinishedSetup)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"users_username_key\"") {
 			utils.ConflictWithJSON(w, `{
@@ -267,6 +277,8 @@ func Create(w http.ResponseWriter, req *http.Request) {
 		logger.Errorf("Error while inserting new user: %v", err)
 		return
 	}
+
+	user.ID = fmt.Sprintf("%v", userId)
 
 	// set the session
 	err = redissession.SetSession("user", user, req, w)
@@ -316,13 +328,14 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	}
 
 	user := &models.User{}
+	var userId uint64
 	var hash string
 
 	// select the user data from the database
 	fetchedUser := db.DBPool.QueryRow(context.Background(), `SELECT id, username, password, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE email = $1 OR username = $1;`, credsUsername)
 
 	// scan the user data from the row into the user struct
-	err = fetchedUser.Scan(&user.ID, &user.Username, &hash, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
+	err = fetchedUser.Scan(&userId, &user.Username, &hash, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 	if err != nil {
 		// if no returned then email/username is invalid
 		if strings.Contains(err.Error(), "no rows") {
@@ -342,6 +355,8 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
+
+	user.ID = fmt.Sprintf("%v", userId)
 
 	// compare the hash and the password and respond accordingly
 	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(credsPassword))
@@ -623,9 +638,9 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 
 	reset_token := utils.GenerateRandomBytes(32)
 
-	user := models.User{}
+	var userId uint64
 
-	err = db.DBPool.QueryRow(context.Background(), `SELECT id FROM users WHERE email = $1`, email).Scan(&user.ID)
+	err = db.DBPool.QueryRow(context.Background(), `SELECT id FROM users WHERE email = $1`, email).Scan(&userId)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			// respond with a 200 to prevent malicious parties from finding out which emails exist
@@ -768,9 +783,9 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user := models.User{}
+	var userId uint64
 
-	err = db.DBPool.QueryRow(context.Background(), `UPDATE users SET password = $1 WHERE reset_password_token = $2 AND reset_password_token_expiration > now()`, string(hash), reset_token).Scan(&user.ID)
+	err = db.DBPool.QueryRow(context.Background(), `UPDATE users SET password = $1 WHERE reset_password_token = $2 AND reset_password_token_expiration > now()`, string(hash), reset_token).Scan(&userId)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			utils.BadRequestWithJSON(w, `{

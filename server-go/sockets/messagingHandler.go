@@ -72,7 +72,7 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		message.SenderId,
 		time.Now().UTC().Format(time.RFC3339))
 
-	for _, receiverClient := range invokingClient.hub.users[message.ReceiverId] {
+	for _, receiverClient := range invokingClient.hub.users[fmt.Sprintf("%v", message.ReceiverId)] {
 		receiverClient.emitEvent([]byte(messagePayload))
 	}
 

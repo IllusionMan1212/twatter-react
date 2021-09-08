@@ -36,7 +36,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if sessionUser.ID != body.PostAuthorId {
+	if sessionUser.ID != fmt.Sprintf("%v", body.PostAuthorId) {
 		utils.UnauthorizedWithJSON(w, `{
 			"message": "Unauthorized user, please log in",
 			"status": "401",
@@ -181,7 +181,17 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 
 	sessionUser, ok := session.Values["user"].(*models.User)
 	if ok {
-		userId = sessionUser.ID
+		id, err := strconv.Atoi(sessionUser.ID)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while converting string to int: %v", err)
+			return
+		}
+		userId = uint64(id)
 	} else {
 		userId = 0
 	}
@@ -321,8 +331,9 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 		parent := &models.ParentPost{}
 		attachments := &models.DBAttachment{}
 		var postId uint64
+		var authorId uint64
 
-		err = rows.Scan(&postId, &post.Author.ID,
+		err = rows.Scan(&postId, &authorId,
 			&post.Author.Username, &post.Author.DisplayName, &post.Author.AvatarURL,
 			&post.Content, &post.CreatedAt,
 			&parent.ID, &parent.Content, &parent.Author.Username, &parent.Author.DisplayName, &parent.Author.AvatarURL,
@@ -350,6 +361,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 		}
 
 		post.ID = fmt.Sprintf("%v", postId)
+		post.Author.ID = fmt.Sprintf("%v", authorId)
 		post.ReplyingTo = *parent
 		post.Attachments = postAttachments
 		posts = append(posts, *post)
@@ -382,7 +394,17 @@ func GetPost(w http.ResponseWriter, req *http.Request) {
 
 	sessionUser, ok := session.Values["user"].(*models.User)
 	if ok {
-		userId = sessionUser.ID
+		id, err := strconv.Atoi(sessionUser.ID)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while converting string to int: %v", err)
+			return
+		}
+		userId = uint64(id)
 	} else {
 		userId = 0
 	}
@@ -413,9 +435,10 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 	parent := &models.ParentPost{}
 	attachments := &models.DBAttachment{}
 	var postIdOut uint64
+	var authorId uint64
 
 	err := db.DBPool.QueryRow(context.Background(), query, postIdIn, userId).Scan(&postIdOut,
-		&post.Author.ID, &post.Author.Username, &post.Author.DisplayName, &post.Author.AvatarURL,
+		&authorId, &post.Author.Username, &post.Author.DisplayName, &post.Author.AvatarURL,
 		&post.Content, &post.CreatedAt,
 		&parent.ID, &parent.Content, &parent.Author.Username, &parent.Author.DisplayName, &parent.Author.AvatarURL,
 		&attachments.Urls, &attachments.Types,
@@ -436,6 +459,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 	}
 
 	post.ID = fmt.Sprintf("%v", postIdOut)
+	post.Author.ID = fmt.Sprintf("%v", authorId)
 	post.Attachments = postAttachments
 	post.ReplyingTo = *parent
 	if err != nil {
@@ -475,7 +499,17 @@ func GetComments(w http.ResponseWriter, req *http.Request) {
 
 	sessionUser, ok := session.Values["user"].(*models.User)
 	if ok {
-		userId = sessionUser.ID
+		id, err := strconv.Atoi(sessionUser.ID)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, `{
+				"message": "An error has occurred, please try again",
+				"status": 500,
+				"success": false
+			}`)
+			logger.Errorf("Error while converting string to int: %v", err)
+			return
+		}
+		userId = uint64(id)
 	} else {
 		userId = 0
 	}
