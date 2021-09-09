@@ -35,6 +35,12 @@ export interface MessageProps {
     setModalAttachment: (attachment: string) => void;
 }
 
+export interface DeletedMessageProps {
+    sender: boolean;
+    sentTime: string;
+    conversationId: string;
+}
+
 export interface ConversationsListItemProps {
     lastMessage: string;
     lastUpdated: DateAndTime;

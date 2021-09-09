@@ -35,6 +35,7 @@ import {
 } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
+import DeletedMessage from "components/messages/deletedMessage";
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
@@ -58,7 +59,7 @@ export default function Messages(): ReactElement {
     const [activeConversation, setActiveConversation] =
         useState<IActiveConversation>();
     const [isConversationActive, setIsConversationActive] = useState(false);
-    const [messages, setMessages] = useState<IMessage[]>([]); // TODO: explicitly type this
+    const [messages, setMessages] = useState<IMessage[]>([]);
     const [nowSending, setNowSending] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
     const [imageModal, setImageModal] = useState(false);
@@ -767,6 +768,8 @@ export default function Messages(): ReactElement {
                                                 },
                                             }}
                                             itemContent={(index, message) => (
+					    <>
+					    	{message.deleted ? (
                                                 <Message
                                                     key={index}
                                                     sender={
@@ -789,6 +792,15 @@ export default function Messages(): ReactElement {
                                                 >
                                                     {message.content}
                                                 </Message>
+						) : (
+						<DeletedMessage
+						    key={index}
+						    sender={user.id == message.author_id}
+						    sentTime={message.sent_time}
+						    conversationId={activeConversation?.id}
+						/>
+						)}
+						</>
                                             )}
                                         ></Virtuoso>
                                         {newMessagesAlert && (
