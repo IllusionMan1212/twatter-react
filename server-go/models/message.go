@@ -18,7 +18,7 @@ type Message struct {
 type SocketMessage struct {
 	Content        string     `json:"message_content"`
 	Attachment     Attachment `json:"attachments"`
-	SenderId       uint64     `json:"sender_id"`
-	ReceiverId     uint64     `json:"receiver_id"`
+	SenderId       string     `json:"sender_id"`
+	ReceiverId     string     `json:"receiver_id"`
 	ConversationId string     `json:"conversation_id"`
 }
