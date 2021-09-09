@@ -37,7 +37,18 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	_, err = db.DBPool.Exec(context.Background(), insertQuery, messageId, message.SenderId, conversationId, message.Content, []uint64{message.SenderId})
+	senderId, err := strconv.Atoi(message.SenderId)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `
+			"message": "An error has occurred, please try again",
+			"status": 500,
+			"success": false
+		`)
+		logger.Errorf("Error while converting string to int: %v", err)
+		return
+	}_
+
+	_, err = db.DBPool.Exec(context.Background(), insertQuery, messageId, message.SenderId, conversationId, message.Content, []uint64{uint64(senderId)})
 	if err != nil {
 		sendGenericSocketErr(invokingClient)
 		logger.Errorf("Error while inserting new message into database: %v", err)

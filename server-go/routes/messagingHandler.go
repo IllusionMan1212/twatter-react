@@ -62,7 +62,28 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	existingConvoId := uint64(0)
 	existingParticipants := make([]uint64, 0)
 
-	membersToCheck := []uint64{body.ReceiverId, body.SenderId}
+	receiverId, err := strconv.Atoi(body.ReceiverId)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		`)
+		logger.Errorf("Error while converting string to int: %v", err)
+		return
+	}
+	senderId, err := strconv.Atoi(body.SenderId)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, `
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		`)
+		logger.Errorf("Error while converting string to int: %v", err)
+		return
+	}
+
+	membersToCheck := []uint64{uint64(receiverId), uint64(senderId)}
 
 	// if the sorted members slice matches an existing sorted array in the DB then a conversation already exists. otherwise create a new one
 	sort.Slice(membersToCheck, func(i, j int) bool { return membersToCheck[i] < membersToCheck[j] })
@@ -86,7 +107,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		if !utils.Contains(existingParticipants, body.SenderId) {
 			updateQuery := `UPDATE conversations SET participants = $1 WHERE id = $2`
 
-			newParticipants := append(existingParticipants, body.SenderId)
+			newParticipants := append(existingParticipants, uint64(senderId))
 
 			sort.Slice(newParticipants, func(i, j int) bool { return newParticipants[i] < newParticipants[j] })
 
@@ -122,8 +143,8 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	members := []uint64{body.ReceiverId, body.SenderId}
-	participants := []uint64{body.SenderId}
+	members := []uint64{uint64(receiverId), uint64(senderId)}
+	participants := []uint64{uint64(senderId)}
 
 	// always sort the members array so lookups in the DB are faster and we're able to easily compare
 	sort.Slice(members, func(i, j int) bool { return members[i] < members[j] })
@@ -197,9 +218,10 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 	for rows.Next() {
 		conversation := &models.Conversation{}
 		var conversationId uint64
+		var receiverId uint64
 
 		err := rows.Scan(&conversationId, &conversation.LastUpdated,
-			&conversation.Receiver.ID, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL)
+			&receiverId, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, `{
 				"message": "An error has occurred, please try again later",
@@ -210,6 +232,7 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		conversation.ID = fmt.Sprintf("%v", conversationId)
+		conversation.Receiver.ID = fmt.Sprintf("%v", receiverId)
 
 		conversations = append(conversations, *conversation)
 	}

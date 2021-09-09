@@ -5,8 +5,8 @@ import (
 )
 
 type ConversationInitPayload struct {
-	ReceiverId uint64 `json:"receiverId"`
-	SenderId   uint64 `json:"senderId"`
+	ReceiverId string `json:"receiverId"`
+	SenderId   string `json:"senderId"`
 }
 
 type Conversation struct {
