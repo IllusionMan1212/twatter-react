@@ -518,7 +518,7 @@ export default function Messages(): ReactElement {
                 setReachedStartOfMessages(true);
             }
         });
-    }, [router.query?.conversationId, conversations.length]);
+    }, [router.query?.conversationId, conversations?.length]);
 
     useEffect(() => {
         messageInputRef?.current?.addEventListener(
@@ -535,11 +535,13 @@ export default function Messages(): ReactElement {
     });
 
     useEffect(() => {
-        getConversations()
-            .then((_conversations) => {
-                setConversations(_conversations);
-                setConversationsLoading(false);
-            });
+        if (user) {
+            getConversations()
+                .then((_conversations) => {
+                    setConversations(_conversations);
+                    setConversationsLoading(false);
+                });
+        }
     }, [user]);
 
     useEffect(() => {
