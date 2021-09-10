@@ -9,7 +9,7 @@ import Loading from "components/loading";
 import Router from "next/router";
 import axios from "src/axios";
 import { useToastContext } from "src/contexts/toastContext";
-import { IUser, IBirthday } from "src/types/general";
+import { IBirthday } from "src/types/general";
 import { handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 
@@ -26,7 +26,6 @@ export default function UserSetup(): ReactElement {
     const [profileImage, setProfileImage] = useState(null);
     const [bio, setBio] = useState("");
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<IUser>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files[0];
@@ -108,7 +107,6 @@ export default function UserSetup(): ReactElement {
             )
             .then((res) => {
                 if (res.data.user) {
-                    setUser(res.data.user);
                     if (res.data.user.finished_setup == true) {
                         Router.push("/home");
                         return;

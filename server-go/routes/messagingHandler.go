@@ -22,11 +22,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	body := &models.ConversationInitPayload{}
 	err := json.NewDecoder(req.Body).Decode(&body)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while decoding request body: ", err)
 		return
 	}
@@ -57,28 +53,20 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// checking if the conversation already exists (initiated by the other party but no messages were sent)
+	// checking if the conversation already exists (it exists if initiated by the other party but no messages were sent)
 	checkQuery := `SELECT id, participants FROM conversations WHERE members = $1;`
 	existingConvoId := uint64(0)
 	existingParticipants := make([]uint64, 0)
 
 	receiverId, err := strconv.Atoi(body.ReceiverId)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while converting string to int: %v", err)
 		return
 	}
 	senderId, err := strconv.Atoi(body.SenderId)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while converting string to int: %v", err)
 		return
 	}
@@ -91,11 +79,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	err = db.DBPool.QueryRow(context.Background(), checkQuery, membersToCheck).Scan(&existingConvoId, &existingParticipants)
 	if err != nil {
 		if err != pgx.ErrNoRows {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while fetching conversation: %v", err)
 			return
 		}
@@ -113,11 +97,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 
 			_, err = db.DBPool.Exec(context.Background(), updateQuery, newParticipants, existingConvoId)
 			if err != nil {
-				utils.InternalServerErrorWithJSON(w, `{
-					"message": "An error has occurred, please try again later",
-					"status": 500,
-					"success": false
-				}`)
+				utils.InternalServerErrorWithJSON(w, "")
 				logger.Errorf("Error while updating existing conversation: %v", err)
 				return
 			}
@@ -134,11 +114,7 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 
 	convoId, err := db.Snowflake.NextID()
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while generating a new id: ", err)
 		return
 	}
@@ -154,12 +130,8 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 
 	_, err = db.DBPool.Exec(context.Background(), insertQuery, convoId, members, participants)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
-		logger.Error("Error while inserting a new conversation")
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Errorf("Error while inserting a new conversation: %v", err)
 		return
 	}
 
@@ -203,11 +175,7 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 
 	rows, err := db.DBPool.Query(context.Background(), query, sessionUser.ID, page*20)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while fetching conversations: %s", err)
 		return
 	}
@@ -223,11 +191,7 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		err := rows.Scan(&conversationId, &conversation.LastUpdated,
 			&receiverId, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error scanning fields into conversation struct: %s", err)
 			return
 		}
@@ -251,11 +215,7 @@ func GetMessages(w http.ResponseWriter, req *http.Request) {
 	pageParam := params["page"]
 	page, err := strconv.Atoi(pageParam)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while converting page string to int: %v", err)
 		return
 	}
@@ -286,11 +246,7 @@ func GetMessages(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while querying for messages: %v", err)
 		return
 	}
@@ -310,11 +266,7 @@ func GetMessages(w http.ResponseWriter, req *http.Request) {
 		err = rows.Scan(&messageId, &messageAuthorId, &messageConversationId, &message.Content, &message.SentTime, &readBy, &message.Deleted,
 			&attachmentUrl, &attachmentType)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while scanning message data into struct: %v", err)
 			return
 		}

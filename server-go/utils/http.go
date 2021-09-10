@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -54,8 +55,22 @@ func PayloadTooLargeWithJSON(w http.ResponseWriter, json string) {
 }
 
 // HTTP 500
-func InternalServerErrorWithJSON(w http.ResponseWriter, json string) {
+func InternalServerErrorWithJSON(w http.ResponseWriter, errMessage string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
+	var json string
+	if errMessage != "" {
+		json = fmt.Sprintf(`{
+			"message": "%v",
+			"status": 500,
+			"success": false
+		}`, errMessage)
+	} else {
+		json = `{
+			"message": "An error has occurred, please try again later",
+			"status": 500,
+			"success": false
+		}`
+	}
 	w.Write([]byte(json))
 }

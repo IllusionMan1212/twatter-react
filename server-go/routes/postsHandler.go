@@ -27,11 +27,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 	body := &models.DeletePostBody{}
 	err = json.NewDecoder(req.Body).Decode(&body)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": "500",
-			"success": "false"
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while decoding route body: %v", err)
 		return
 	}
@@ -50,11 +46,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 
 	_, err = db.DBPool.Exec(context.Background(), deleteQuery, body.PostId, body.PostAuthorId)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": "500",
-			"success": "false"
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while deleting post: %v", err)
 		return
 	}
@@ -62,11 +54,7 @@ func DeletePost(w http.ResponseWriter, req *http.Request) {
 	// remove attachment if any
 	err = os.RemoveAll(fmt.Sprintf("../cdn/posts/%v/", body.PostId))
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": "500",
-			"success": "false"
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while removing attachment(s) directory: %v", err)
 		return
 	}
@@ -103,12 +91,7 @@ func LikePost(w http.ResponseWriter, req *http.Request) {
 
 	_, err = db.DBPool.Exec(context.Background(), query, body.PostId, sessionUser.ID)
 	if err != nil {
-		fmt.Printf("%v\n", err.Error())
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while liking/disliking post: %v", err)
 		return
 	}
@@ -129,11 +112,7 @@ func GetPostsCount(w http.ResponseWriter, req *http.Request) {
 	var count int
 	err := db.DBPool.QueryRow(context.Background(), query, userId).Scan(&count)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while fetching posts count: %v", err)
 		return
 	}
@@ -183,11 +162,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 	if ok {
 		id, err := strconv.Atoi(sessionUser.ID)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while converting string to int: %v", err)
 			return
 		}
@@ -278,11 +253,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 
 		rows, err = db.DBPool.Query(context.Background(), selectQuery, authorId, page*50, userId)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while fetching posts: %v", err)
 			return
 		}
@@ -313,11 +284,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 
 		rows, err = db.DBPool.Query(context.Background(), selectQuery, page*50, userId)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while fetching posts: %v", err)
 			return
 		}
@@ -340,11 +307,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 			&attachments.Urls, &attachments.Types,
 			&post.Likes, &post.Comments, &post.Liked)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while scanning fetched posts into structs: %v", err)
 			return
 		}
@@ -369,11 +332,7 @@ func GetPosts(w http.ResponseWriter, req *http.Request) {
 
 	err = rows.Err()
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Rows error: %v", err)
 		return
 	}
@@ -396,11 +355,7 @@ func GetPost(w http.ResponseWriter, req *http.Request) {
 	if ok {
 		id, err := strconv.Atoi(sessionUser.ID)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while converting string to int: %v", err)
 			return
 		}
@@ -472,11 +427,7 @@ GROUP BY post.id, author.id, parent.id, parent_author.username, parent_author.di
 			logger.Infof("Post with id: %v not found", postIdIn)
 			return
 		}
-		utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while scanning post data into struct: %v", err)
 		return
 	}
@@ -501,11 +452,7 @@ func GetComments(w http.ResponseWriter, req *http.Request) {
 	if ok {
 		id, err := strconv.Atoi(sessionUser.ID)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while converting string to int: %v", err)
 			return
 		}
@@ -540,11 +487,7 @@ GROUP BY comment.id, author.id;`
 				"success": true
 			}`)
 		} else {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while fetching comments: %v", err)
 		}
 		return
@@ -564,11 +507,7 @@ GROUP BY comment.id, author.id;`
 			&attachments.Urls, &attachments.Types,
 			&comment.Likes, &comment.Comments, &comment.Liked)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while scanning comments data into structs: %v", err)
 			return
 		}
@@ -592,11 +531,7 @@ GROUP BY comment.id, author.id;`
 
 	err = rows.Err()
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Rows error: %v", err)
 		return
 	}
