@@ -1,27 +1,25 @@
-.content {
-    padding: 0px 20px;
-}
-
 .recipientMessage {
-    background-color: white;
+    background-color: transparent;
     justify-self: flex-start;
     max-width: 75%;
     overflow: auto;
     overflow-wrap: break-word;
     display: flex;
     flex-direction: column;
-    color: black;
+    color: rgb(150, 150, 150);
     border-radius: 2000px;
+    border: 1px solid;
 }
 
 .senderMessage {
-    background-color: white;
+    background-color: transparent;
     justify-self: flex-end;
     max-width: 75%;
     overflow: auto;
     overflow-wrap: break-word;
     display: flex;
     flex-direction: column;
-    color: black;
+    color: rgb(150, 150, 150);
     border-radius: 2000px;
+    border: 1px solid;
 }
