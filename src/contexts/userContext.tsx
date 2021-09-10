@@ -34,7 +34,6 @@ const unprotectedRoutes = [
     "/",
     "/login",
     "/register",
-    "/register/setting-up",
     "/forgot-password",
     "/reset-password",
 ];

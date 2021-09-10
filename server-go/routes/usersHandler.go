@@ -18,6 +18,7 @@ import (
 	"net/mail"
 	"net/smtp"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,11 +43,7 @@ func ValidateToken(w http.ResponseWriter, req *http.Request) {
 	err = db.DBPool.QueryRow(context.Background(), `SELECT id, username, display_name, bio, birthday, created_at, finished_setup, avatar_url FROM users WHERE id = $1;`,
 		sessionUser.ID).Scan(&userId, &user.Username, &user.DisplayName, &user.Bio, &user.Birthday, &user.CreatedAt, &user.FinishedSetup, &user.AvatarURL)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while validating user's token: %v", err)
 		return
 	}
@@ -88,11 +85,7 @@ func GetUserData(w http.ResponseWriter, req *http.Request) {
 			logger.Infof("User with username: %v not found", username)
 			return
 		} else {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while querying for user: %v", err)
 			return
 		}
@@ -135,11 +128,7 @@ func validatePasswordResetToken(w http.ResponseWriter, req *http.Request) {
 			logger.Info("Invalid or expired token")
 			return
 		} else {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while querying for password reset token: %v", err)
 			return
 		}
@@ -159,11 +148,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	creds := &models.RegisterCreds{}
 	err := json.NewDecoder(req.Body).Decode(&creds)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while decoding request body: ", err)
 		return
 	}
@@ -221,11 +206,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	// hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), bcrypt.DefaultCost)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "Internal server error, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while hashing password: %v", err)
 		return
 	}
@@ -235,11 +216,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 
 	id, err := db.Snowflake.NextID()
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while generating id for a new user: ", err)
 		return
 	}
@@ -269,11 +246,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error occurred while creating your account, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "An error occurred while creating your account, please try again later")
 		logger.Errorf("Error while inserting new user: %v", err)
 		return
 	}
@@ -283,11 +256,7 @@ func Create(w http.ResponseWriter, req *http.Request) {
 	// set the session
 	err = redissession.SetSession("user", user, req, w)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while setting the session: %v", err)
 		return
 	}
@@ -304,11 +273,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	creds := &models.LoginCreds{}
 	err := json.NewDecoder(req.Body).Decode(&creds)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "Internal server error, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while decoding request body: %v", err)
 		return
 	}
@@ -346,11 +311,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 			}`)
 			logger.Info("Attempt to login with incorrect credentials")
 		} else {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while loging in: %v", err)
 		}
 		return
@@ -372,11 +333,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 
 	err = redissession.SetSession("user", user, req, w)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while setting session: %v", err)
 		return
 	}
@@ -395,11 +352,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	err := req.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while parsing multipart form: %v", err)
 		return
 	}
@@ -433,24 +386,35 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 	if bio != "null" {
 		_, err = db.DBPool.Exec(context.Background(), `UPDATE users SET bio = $1 WHERE id = $2;`, bio, sessionUser.ID)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while updating user bio: %v", err)
 			return
 		}
 	}
 
 	if birthdayDay != "null" && birthdayMonth != "null" && birthdayYear != "null" {
+		day, err := strconv.Atoi(birthdayDay)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, "")
+			logger.Errorf("Error while converting string to int: %v", err)
+		}
+
+		month, err := strconv.Atoi(birthdayMonth)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, "")
+			logger.Errorf("Error while converting string to int: %v", err)
+		}
+
+		if day < 10 {
+			birthdayDay = "0" + birthdayDay
+		}
+
+		if month < 10 {
+			birthdayMonth = "0" + birthdayMonth
+		}
 		birthdayTime, err := time.Parse(dateLayout, fmt.Sprintf("%v-%v-%v", birthdayYear, birthdayMonth, birthdayDay))
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while parsing date: %v", err)
 			return
 		}
@@ -458,11 +422,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 		_, err = db.DBPool.Exec(context.Background(), "UPDATE users SET birthday = $1 WHERE id = $2;", birthday, sessionUser.ID)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while updating user birthday", err)
 			return
 		}
@@ -492,21 +452,13 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 		imageContent, err := image.Open()
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while opening image: %v", err)
 			return
 		}
 		buf, err := ioutil.ReadAll(imageContent)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while reading image data: %v", err)
 			return
 		}
@@ -518,22 +470,14 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			r := bytes.NewReader(buf)
 			reader, err := imageutil.RemoveExif(r)
 			if err != nil {
-				utils.InternalServerErrorWithJSON(w, `{
-					"message": "An error has occurred, please try again later",
-					"status": 500,
-					"success": false
-				}`)
+				utils.InternalServerErrorWithJSON(w, "")
 				logger.Errorf("Error while removing exif data from image: %v", err)
 				return
 			}
 			tempBuf := new(bytes.Buffer)
 			_, err = tempBuf.ReadFrom(reader)
 			if err != nil {
-				utils.InternalServerErrorWithJSON(w, `{
-					"message": "An error has occurred, please try again later",
-					"status": 500,
-					"success": false
-				}`)
+				utils.InternalServerErrorWithJSON(w, "")
 				logger.Errorf("Error while reading from image: %v", err)
 				return
 			}
@@ -543,11 +487,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		fileDirectory := fmt.Sprintf("../cdn/profile_images/%v/", sessionUser.ID)
 		err = os.Mkdir(fileDirectory, 0755)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while creating directory for user profile image: %v", err)
 			return
 		}
@@ -556,22 +496,14 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 		file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while creating new file for user profile image: %v", err)
 			return
 		}
 
 		_, err = file.Write(imageBytes)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while writing profile image: %v", err)
 			return
 		}
@@ -582,11 +514,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 		_, err = db.DBPool.Exec(context.Background(), "UPDATE users SET avatar_url = $1 WHERE id = $2", avatar_url, sessionUser.ID)
 		if err != nil {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while updating user avatar url", err)
 			return
 		}
@@ -594,11 +522,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 
 	_, err = db.DBPool.Exec(context.Background(), `UPDATE users SET finished_setup = true WHERE id = $1;`, sessionUser.ID)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while updating user setup", err)
 		return
 	}
@@ -615,11 +539,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 	creds := &models.ForgotPasswordCreds{}
 	err := json.NewDecoder(req.Body).Decode(&creds)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while decoding request body: %v", err)
 		return
 	}
@@ -653,11 +573,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 			logger.Info("Attempt to recover password for a nonexistant user")
 			return
 		} else {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while querying user using email: %v", err)
 			return
 		}
@@ -665,11 +581,7 @@ func ForgotPassword(w http.ResponseWriter, req *http.Request) {
 
 	_, err = db.DBPool.Exec(context.Background(), `UPDATE users SET reset_password_token = $1, reset_password_token_expiration = $2 WHERE email = $3;`, reset_token, time.Now().Add(time.Hour), email)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while setting reset password token: %v", err)
 		return
 	}
@@ -729,11 +641,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 	creds := &models.ResetPasswordCreds{}
 	err := json.NewDecoder(req.Body).Decode(&creds)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while decoding request body: %v", err)
 		return
 	}
@@ -774,11 +682,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while hashing password: %v", err)
 		return
 	}
@@ -796,11 +700,7 @@ func ResetPassword(w http.ResponseWriter, req *http.Request) {
 			logger.Info("Attempt to reset password with an invalid or expired token")
 			return
 		} else {
-			utils.InternalServerErrorWithJSON(w, `{
-				"message": "An error has occurred, please try again later",
-				"status": 500,
-				"success": false
-			}`)
+			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error while resetting password: %v", err)
 			return
 		}
@@ -828,11 +728,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 	session.Options.MaxAge = -1
 	err := session.Save(req, w)
 	if err != nil {
-		utils.InternalServerErrorWithJSON(w, `{
-			"message": "An error has occurred, please try again later",
-			"status": 500,
-			"success": false
-		}`)
+		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while removing sessions and saving it")
 		return
 	}

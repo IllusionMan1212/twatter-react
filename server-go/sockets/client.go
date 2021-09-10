@@ -70,7 +70,7 @@ func (c *Client) readPump(userID string) {
 			if err == websocket.ErrReadLimit {
 				logger.Errorf("Error while reading websocket message: %v", err)
 			}
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
 				logger.Errorf("Unexpected websocket close: %v", err)
 			}
 			break
