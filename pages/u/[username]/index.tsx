@@ -70,8 +70,8 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [mediaPage, setMediaPage] = useLatestState(0);
     const [postsCount, setPostsCount] = useState(0);
 
-    const [creationDate, setCreationDate] = useState(user.created_at);
-    const [birthday, setBirthday] = useState(user.birthday.Time.toString());
+    const [creationDate, setCreationDate] = useState(user?.created_at);
+    const [birthday, setBirthday] = useState(user?.birthday.Time.toString());
 
     const handleMediaClick = (
         _e: React.MouseEvent<HTMLElement, MouseEvent>,
@@ -143,14 +143,14 @@ export default function Profile(props: ProfileProps): ReactElement {
     };
 
     useEffect(() => {
-        setCreationDate(formatJoinDate(user.created_at));
-    }, [user.created_at])
+        setCreationDate(formatJoinDate(user?.created_at));
+    }, [user?.created_at])
 
     useEffect(() => {
-        if (user.birthday.Valid) {
+        if (user?.birthday.Valid) {
             setBirthday(formatBirthday(user.birthday.Time.toString()));
         }
-    }, [user.birthday.Time])
+    }, [user?.birthday.Time])
 
     const getActiveTabPosts = useCallback((): Array<IPost> => {
         switch (activeTab.current) {
