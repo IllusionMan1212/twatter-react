@@ -10,24 +10,28 @@ export default function DeletedMessage(props: DeletedMessageProps): ReactElement
 
     useEffect(() => {
         setSentTime(formatMessageTime(props.sentTime));
-    }, [props.sentTime])
+    }, [props.sentTime]);
 
     return (
-    	<div className={messageStyles.messageContainer}>
-	    <div
-	    	className={`${
-		    props.sender ? styles.senderMessage : styles.recipientMessage
-	    	}`}
-	    >
-	    	<div className={styles.content}>This Message Was Deleted</div>
-            	<div
+        <div className={messageStyles.messageContainer}>
+            <div
+                className={`${
+                    props.sender
+                        ? styles.senderMessage
+                        : styles.recipientMessage
+                }`}
+            >
+                <div className={styles.content}>This Message Was Deleted</div>
+                <div
                     className={`${
-                        props.sender ? messageStyles.senderTime : messageStyles.recipientTime
+                        props.sender
+                            ? messageStyles.senderTime
+                            : messageStyles.recipientTime
                     }`}
                 >
                     {sentTime}
-	        </div>
-	    </div>
-	</div>
-    )
+                </div>
+            </div>
+        </div>
+    );
 }

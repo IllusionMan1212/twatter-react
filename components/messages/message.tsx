@@ -5,7 +5,6 @@ import { ReactElement, useEffect, useState } from "react";
 import { formatMessageTime } from "src/utils/functions";
 
 export default function Message(props: MessageProps): ReactElement {
-
     const [sentTime, setSentTime] = useState(props.sentTime);
 
     const handleClick = () => {
