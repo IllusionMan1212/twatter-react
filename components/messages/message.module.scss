@@ -4,22 +4,38 @@
     width: 100%;
     display: grid;
     font-weight: bold;
+
+    &:hover .options {
+        display: flex;
+    }
 }
 
 .recipientMessage {
-    background-color: variables.$bg-color-secondary;
     justify-self: flex-start;
     max-width: 75%;
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+}
+
+.senderMessage {
+    justify-self: flex-end;
+    max-width: 75%;
+    display: flex;
+    flex-direction: row-reverse;
+    column-gap: 10px;
+}
+
+.senderMessageBlock {
+    background-color: rgba(96, 103, 254, 0.45);
     overflow: auto;
     overflow-wrap: break-word;
     display: flex;
     flex-direction: column;
 }
 
-.senderMessage {
-    background-color: rgba(96, 103, 254, 0.45);
-    justify-self: flex-end;
-    max-width: 75%;
+.recipientMessageBlock {
+    background-color: variables.$bg-color-secondary;
     overflow: auto;
     overflow-wrap: break-word;
     display: flex;
@@ -27,7 +43,7 @@
 }
 
 .content {
-    padding: 20px;
+    padding: 10px 20px;
 }
 
 .attachment {
@@ -58,4 +74,9 @@
     @media (max-width: 800px) {
         font-size: 0.7em;
     }
+}
+
+.options {
+    display: none;
+    align-items: center;
 }

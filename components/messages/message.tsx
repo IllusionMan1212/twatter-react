@@ -3,6 +3,7 @@ import styles from "./message.module.scss";
 import { MessageProps } from "src/types/props";
 import { ReactElement, useEffect, useState } from "react";
 import { formatMessageTime } from "src/utils/functions";
+import { DotsThreeVertical } from "phosphor-react";
 
 export default function Message(props: MessageProps): ReactElement {
     const [sentTime, setSentTime] = useState(props.sentTime);
@@ -24,19 +25,33 @@ export default function Message(props: MessageProps): ReactElement {
                     props.sender ? styles.senderMessage : styles.recipientMessage
                 }`}
             >
-                {props.children && (
-                    <div className={styles.content}>{props.children}</div>
-                )}
-                {props.attachment && (
-                    <img
-                        className={styles.attachment}
-                        src={props.attachment}
-                        height="auto"
-                        width="auto"
-                        onClick={handleClick}
-                        alt="Message's attached image"
+                <div
+                    className={`${
+                        props.sender ? styles.senderMessageBlock : styles.recipientMessageBlock
+                    }`}
+                >
+                    {props.children && (
+                        <div className={styles.content}>{props.children}</div>
+                    )}
+                    {props.attachment && (
+                        <img
+                            className={styles.attachment}
+                            src={props.attachment}
+                            height="auto"
+                            width="auto"
+                            onClick={handleClick}
+                            alt="Message's attached image"
+                        />
+                    )}
+                </div>
+                <div className={styles.options}>
+                    <DotsThreeVertical
+                        size={20}
+                        weight="bold"
+                        color="grey"
+                        className="pointer"
                     />
-                )}
+                </div>
             </div>
             <div
                 className={`${

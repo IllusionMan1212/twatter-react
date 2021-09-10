@@ -23,7 +23,7 @@ import {
     IConversation,
     IActiveConversation,
     IMessage,
-    ISocketMessage
+    ISocketMessage,
 } from "src/types/general";
 import Link from "next/link";
 import MessageMediaModal from "components/messages/messageMediaModal";
@@ -210,7 +210,7 @@ export default function Messages(): ReactElement {
                     author_id: msg.author_id,
                     attachment: msg.attachment,
                     deleted: msg.deleted,
-                    conversation_id: msg.conversation_id
+                    conversation_id: msg.conversation_id,
                 });
                 setMessages(newMessages);
                 if (!atBottom) {
@@ -240,7 +240,10 @@ export default function Messages(): ReactElement {
                                   : msg.author_id == user.id
                                   ? `${user.display_name} sent an image`
                                   : `${conversation.receiver.display_name} sent an image`,
-                              last_updated: { Valid: true, Time: new Date(msg.sent_time) },
+                              last_updated: {
+                                  Valid: true,
+                                  Time: new Date(msg.sent_time),
+                              },
                               unreadMessages:
                                   activeConversation?.id == msg.conversation_id
                                       ? 0
@@ -451,20 +454,26 @@ export default function Messages(): ReactElement {
             setMessages((messages) => [...newMessages].concat(messages));
             return false;
         });
-    }, [setMessages, messages, page, pageRef, firstItemIndex, reachedStartOfMessages]);
+    }, [
+        setMessages,
+        messages,
+        page,
+        pageRef,
+        firstItemIndex,
+        reachedStartOfMessages,
+    ]);
 
     const loadMoreConversations = useCallback(() => {
         setConversationsPage(conversationsPage.current + 1);
-        getConversations()
-            .then((newConversations) => {
-                if (!newConversations.length) {
-                    setReachedEndOfConvos(true);
-                    return true;
-                }
+        getConversations().then((newConversations) => {
+            if (!newConversations.length) {
+                setReachedEndOfConvos(true);
+                return true;
+            }
 
-                setConversations(conversations.concat(newConversations));
-                return false;
-            });
+            setConversations(conversations.concat(newConversations));
+            return false;
+        });
     }, [conversations, conversationsPage.current]);
 
     useEffect(() => {
@@ -536,11 +545,10 @@ export default function Messages(): ReactElement {
 
     useEffect(() => {
         if (user) {
-            getConversations()
-                .then((_conversations) => {
-                    setConversations(_conversations);
-                    setConversationsLoading(false);
-                });
+            getConversations().then((_conversations) => {
+                setConversations(_conversations);
+                setConversationsLoading(false);
+            });
         }
     }, [user]);
 
@@ -602,8 +610,10 @@ export default function Messages(): ReactElement {
                                         {conversations.length ? (
                                             <Virtuoso
                                                 data={conversations}
-                                                style={{width: "100%"}}
-                                                totalCount={conversations.length}
+                                                style={{ width: "100%" }}
+                                                totalCount={
+                                                    conversations.length
+                                                }
                                                 // eslint-disable-next-line react/display-name
                                                 components={{
                                                     Footer: () => {
@@ -621,7 +631,9 @@ export default function Messages(): ReactElement {
                                                         );
                                                     },
                                                 }}
-                                                endReached={loadMoreConversations}
+                                                endReached={
+                                                    loadMoreConversations
+                                                }
                                                 itemContent={(
                                                     _,
                                                     conversation
@@ -770,39 +782,50 @@ export default function Messages(): ReactElement {
                                                 },
                                             }}
                                             itemContent={(index, message) => (
-					    <>
-					    	{message.deleted ? (
-                                                <Message
-                                                    key={index}
-                                                    sender={
-                                                        user.id ==
-                                                        message.author_id
-                                                    }
-                                                    sentTime={message.sent_time}
-                                                    attachment={
-                                                        message.attachment.url
-                                                    }
-                                                    conversationId={
-                                                        activeConversation?.id
-                                                    }
-                                                    setImageModal={
-                                                        setImageModal
-                                                    }
-                                                    setModalAttachment={
-                                                        setModalAttachment
-                                                    }
-                                                >
-                                                    {message.content}
-                                                </Message>
-						) : (
-						<DeletedMessage
-						    key={index}
-						    sender={user.id == message.author_id}
-						    sentTime={message.sent_time}
-						    conversationId={activeConversation?.id}
-						/>
-						)}
-						</>
+                                                <>
+                                                    {!message.deleted ? (
+                                                        <Message
+                                                            key={index}
+                                                            sender={
+                                                                user.id ==
+                                                                message.author_id
+                                                            }
+                                                            sentTime={
+                                                                message.sent_time
+                                                            }
+                                                            attachment={
+                                                                message
+                                                                    .attachment
+                                                                    .url
+                                                            }
+                                                            conversationId={
+                                                                activeConversation?.id
+                                                            }
+                                                            setImageModal={
+                                                                setImageModal
+                                                            }
+                                                            setModalAttachment={
+                                                                setModalAttachment
+                                                            }
+                                                        >
+                                                            {message.content}
+                                                        </Message>
+                                                    ) : (
+                                                        <DeletedMessage
+                                                            key={index}
+                                                            sender={
+                                                                user.id ==
+                                                                message.author_id
+                                                            }
+                                                            sentTime={
+                                                                message.sent_time
+                                                            }
+                                                            conversationId={
+                                                                activeConversation?.id
+                                                            }
+                                                        />
+                                                    )}
+                                                </>
                                             )}
                                         ></Virtuoso>
                                         {newMessagesAlert && (

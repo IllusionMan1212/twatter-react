@@ -21,16 +21,18 @@ export default function DeletedMessage(props: DeletedMessageProps): ReactElement
                         : styles.recipientMessage
                 }`}
             >
-                <div className={styles.content}>This Message Was Deleted</div>
-                <div
-                    className={`${
-                        props.sender
-                            ? messageStyles.senderTime
-                            : messageStyles.recipientTime
-                    }`}
-                >
-                    {sentTime}
+                <div className={messageStyles.content}>
+                    <i>This Message Was Deleted</i>
                 </div>
+            </div>
+            <div
+                className={`${
+                    props.sender
+                        ? messageStyles.senderTime
+                        : messageStyles.recipientTime
+                }`}
+            >
+                {sentTime}
             </div>
         </div>
     );
