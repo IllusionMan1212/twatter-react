@@ -38,7 +38,10 @@ export class TwatWebSocket {
         this.callbacks[event] = this.callbacks[event].filter((_callback) => {
             return _callback !== callback;
         });
-        // TODO: unregister the event listener
+
+        if (!this.callbacks[event].length) {
+            delete this.callbacks[event];
+        }
     }
 
     dispatch(event_name: string, data: any): void {
