@@ -24,7 +24,7 @@ const UserContext = createContext<UserContextType>(UserContextDefaultValues);
 
 const protectedRoutes = [
     "/home",
-    "/messages",
+    "/messages/[[...conversationId]]",
     "/settings",
     "/friends",
     "/notifications"
