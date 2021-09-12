@@ -3,7 +3,7 @@ import styles from "./message.module.scss";
 import { MessageProps } from "src/types/props";
 import { ReactElement, useEffect, useState } from "react";
 import { formatMessageTime } from "src/utils/functions";
-import { DotsThreeVertical } from "phosphor-react";
+import MessageOptionsMenuButton from "components/messages/messageOptionsMenuButton";
 
 export default function Message(props: MessageProps): ReactElement {
     const [sentTime, setSentTime] = useState(props.sentTime);
@@ -44,14 +44,14 @@ export default function Message(props: MessageProps): ReactElement {
                         />
                     )}
                 </div>
-                <div className={styles.options}>
-                    <DotsThreeVertical
-                        size={20}
-                        weight="bold"
-                        color="grey"
-                        className="pointer"
+                {props.sender && (
+                    <MessageOptionsMenuButton
+                        className={styles.optionsButton}
+                        parentContainerRef={props.parentContainerRef}
+                        messageId={props.messageId}
+                        messageAuthorId={props.messageAuthorId}
                     />
-                </div>
+                )}
             </div>
             <div
                 className={`${

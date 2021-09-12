@@ -47,6 +47,7 @@ export default function Messages(): ReactElement {
     const messageInputRef = useRef<HTMLSpanElement>(null);
     const virtuosoRef = useRef(null);
     const pageRef = useRef(null);
+    const messagesAreaContainerRef = useRef(null);
 
     const router = useRouter();
 
@@ -205,6 +206,7 @@ export default function Messages(): ReactElement {
             if (activeConversation?.id == msg.conversation_id) {
                 setTyping(false);
                 const newMessages = messages.concat({
+                    id: msg.id,
                     content: msg.content,
                     sent_time: msg.sent_time,
                     author_id: msg.author_id,
@@ -291,6 +293,10 @@ export default function Messages(): ReactElement {
             setTyping(false);
         }
     };
+
+    const handleDeleteMessage = () => {
+        // TODO: impl this
+    }
 
     const handleClickSend = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!sendingAllowed) {
@@ -413,6 +419,7 @@ export default function Messages(): ReactElement {
         return axiosInstance
             .get(`/messaging/getMessages/${conversationId}/${pageRef.current}`)
             .then((res) => {
+                console.log(res.data.messages);
                 return res.data.messages;
             })
             .catch((err) => {
@@ -558,6 +565,7 @@ export default function Messages(): ReactElement {
             socket.on("markMessagesAsRead", handleMarkedMessagesAsRead);
             socket.on("typing", handleTyping);
             socket.on("stopTyping", handleStopTyping);
+            socket.on("deleteMessage", handleDeleteMessage);
         }
 
         return () => {
@@ -566,6 +574,7 @@ export default function Messages(): ReactElement {
                 socket.off("markMessagesAsRead", handleMarkedMessagesAsRead);
                 socket.off("typing", handleTyping);
                 socket.off("stopTyping", handleStopTyping);
+                socket.off("deleteMessage", handleDeleteMessage);
             }
         };
     }, [
@@ -730,6 +739,7 @@ export default function Messages(): ReactElement {
                                         )}
                                     </div>
                                     <div
+                                        ref={messagesAreaContainerRef}
                                         className={styles.messagesAreaContainer}
                                     >
                                         <Virtuoso
@@ -786,6 +796,12 @@ export default function Messages(): ReactElement {
                                                     {!message.deleted ? (
                                                         <Message
                                                             key={index}
+                                                            messageId={
+                                                                message.id
+                                                            }
+                                                            messageAuthorId={
+                                                                message.author_id
+                                                            }
                                                             sender={
                                                                 user.id ==
                                                                 message.author_id
@@ -806,6 +822,9 @@ export default function Messages(): ReactElement {
                                                             }
                                                             setModalAttachment={
                                                                 setModalAttachment
+                                                            }
+                                                            parentContainerRef={
+                                                                messagesAreaContainerRef
                                                             }
                                                         >
                                                             {message.content}

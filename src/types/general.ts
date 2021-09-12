@@ -101,6 +101,7 @@ export interface IBirthday {
 }
 
 export interface IMessage {
+    id: string;
     author_id: string;
     conversation_id: string;
     content: string;
