@@ -7,6 +7,7 @@ import (
 	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -44,6 +45,13 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
+	receiverId, err := strconv.Atoi(message.ReceiverId)
+	if err != nil {
+		sendGenericSocketErr(invokingClient)
+		logger.Errorf("Error while converting string to int: %v", err)
+		return
+	}
+
 	_, err = db.DBPool.Exec(context.Background(), insertQuery, messageId, message.SenderId, conversationId, message.Content, []uint64{uint64(senderId)})
 	if err != nil {
 		sendGenericSocketErr(invokingClient)
@@ -51,9 +59,13 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	updateQuery := `UPDATE conversations SET last_updated = now() at time zone 'utc' WHERE id = $1`
+	updateQuery := `UPDATE conversations SET last_updated = now() at time zone 'utc', participants = $1 WHERE id = $2`
 
-	_, err = db.DBPool.Exec(context.Background(), updateQuery, conversationId)
+	participants := []uint64{uint64(senderId), uint64(receiverId)}
+
+	sort.Slice(participants, func(i, j int) bool { return participants[i] < participants[j] })
+
+	_, err = db.DBPool.Exec(context.Background(), updateQuery, participants, conversationId)
 	if err != nil {
 		sendGenericSocketErr(invokingClient)
 		logger.Errorf("Error while updating conversation's last_updated field: %v", err)
@@ -63,6 +75,7 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 	messagePayload := fmt.Sprintf(`{
 		"eventType": "message",
 		"data": {
+			"id", "%v",
 			"attachment": "%v",
       "content": "%v",
       "conversation_id": "%v",
@@ -72,6 +85,7 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 			"deleted": false
 		}
 	}`,
+		messageId,
 		message.Attachment.Url,
 		message.Content,
 		message.ConversationId,
