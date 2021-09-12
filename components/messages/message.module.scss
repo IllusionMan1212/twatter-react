@@ -5,7 +5,7 @@
     display: grid;
     font-weight: bold;
 
-    &:hover .options {
+    &:hover .optionsButton {
         display: flex;
     }
 }
@@ -76,7 +76,6 @@
     }
 }
 
-.options {
+.optionsButton {
     display: none;
-    align-items: center;
 }

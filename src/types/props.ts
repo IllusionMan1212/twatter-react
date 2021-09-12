@@ -1,5 +1,7 @@
-import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction } from "react";
+import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent } from "react";
 import { IPost, IUser, DateAndTime } from "./general";
+import { IconProps } from "phosphor-react";
+import { ContextMenuPosition } from "src/types/utils";
 
 export interface ToastProps {
     text: string;
@@ -26,6 +28,8 @@ export interface UserContextMenuProps {
 }
 
 export interface MessageProps {
+    messageId: string;
+    messageAuthorId: string;
     sender: boolean;
     children: string;
     sentTime: string;
@@ -33,6 +37,9 @@ export interface MessageProps {
     conversationId: string;
     setImageModal: (bool: boolean) => void;
     setModalAttachment: (attachment: string) => void;
+
+    // ref of container that the options menu shouldn't exceed in width and height
+    parentContainerRef?: MutableRefObject<HTMLElement>;
 }
 
 export interface DeletedMessageProps {
@@ -77,7 +84,23 @@ export interface ExpandedPostProps extends Omit<PostProps, "post"> {
     loadingComments: Boolean;
 }
 
-interface PostOptionsMenuBaseProps {
+export interface ContextMenuProps {
+    topOffset?: number;
+    rightOffset?: number;
+    menuPosition?: ContextMenuPosition;
+    children: ReactNode;
+}
+
+export interface ContextMenuItemProps {
+    onClick: () => void;
+    icon: ForwardRefExoticComponent<IconProps>;
+    color?: string;
+    text: string;
+}
+
+export interface PostOptionsMenuButtonProps {
+    // ref of container that the menu shouldn't exceed in height
+    parentContainerRef?: MutableRefObject<HTMLElement>;
     postAuthorId: string;
     postAuthorUsername: string;
     currentUserId: string;
@@ -85,13 +108,12 @@ interface PostOptionsMenuBaseProps {
     deleteCallback?: <T extends unknown[]>(...args: T) => void;
 }
 
-export interface PostOptionsMenuProps extends PostOptionsMenuBaseProps {
-    topOffset?: number;
-}
-
-export interface PostOptionsMenuButtonProps extends PostOptionsMenuBaseProps {
-    // ref of container that the menu shouldn't exceed in height
+export interface MessageOptionsMenuButtonProps {
+    className: string;
+    // ref of container that the options menu shouldn't exceed in width and height
     parentContainerRef?: MutableRefObject<HTMLElement>;
+    messageId: string;
+    messageAuthorId: string;
 }
 
 export interface MediaModalProps {

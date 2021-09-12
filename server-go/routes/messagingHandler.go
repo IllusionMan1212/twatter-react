@@ -143,6 +143,10 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 	}`, convoId))
 }
 
+func DeleteMessage(w http.ResponseWriter, req *http.Request) {
+	// TODO:
+}
+
 func GetConversations(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	pageParam := params["page"]

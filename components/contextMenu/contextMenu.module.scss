@@ -1,10 +1,9 @@
-@use "../styles/variables";
+@use "../../styles/variables";
 
 .menu {
     background-color: variables.$bg-color-primary;
     width: 200px;
     position: absolute;
-    top: 30px;
     right: 0px;
     z-index: 25;
     border-radius: 16px;
@@ -17,7 +16,13 @@
         border-radius: 16px;
         animation: menuItem 0.5s forwards;
 
-        &:hover {
+        @media (hover: hover) {
+            &:hover {
+                background-color: variables.$bg-color-secondary;
+            }
+        }
+
+        &:active {
             background-color: variables.$bg-color-secondary;
         }
     }
