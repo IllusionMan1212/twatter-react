@@ -97,11 +97,9 @@ func handleSocketEvent(socketPayload *models.SocketPayload, clients []*Client, i
 	case "removeBirthday":
 		RemoveBirthday(socketPayload, invokingClient)
 	case "typing":
-		fmt.Print("Received typing\n")
-		// TODO:
+		Typing(socketPayload, invokingClient, "typing")
 	case "stopTyping":
-		fmt.Print("Received stop typing\n")
-		// TODO:
+		Typing(socketPayload, invokingClient, "stopTyping")
 	case "markMessagesAsRead":
 		fmt.Print("Received mark as read\n")
 		// TODO:

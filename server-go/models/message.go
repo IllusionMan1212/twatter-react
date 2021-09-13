@@ -42,3 +42,12 @@ type MessageReturnPayload struct {
 	SentTime       string `json:"sent_time"`
 	Deleted        bool   `json:"deleted"`
 }
+
+type TypingData struct {
+	ConversationID string `json:"conversationId"`
+	ReceiverID     string `json:"receiverId"`
+}
+
+type TypingReturnPayload struct {
+	ConversationID string `json:"conversationId"`
+}
