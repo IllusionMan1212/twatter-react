@@ -58,9 +58,21 @@ type Birthday struct {
 }
 
 type ProfileValues struct {
-	UserID       uint64           `json:"userId"`
+	UserID       string           `json:"userId"`
 	DisplayName  string           `json:"displayName"`
 	ProfileImage SocketAttachment `json:"profileImage"`
 	Bio          string           `json:"bio"`
 	Birthday     Birthday         `json:"birthday"`
+}
+
+type RemoveBirthdayReturnPayload struct {
+	ID string `json:"id"`
+}
+
+type UpdateProfileReturnPayload struct {
+	UserID       string       `json:"userId"`
+	DisplayName  string       `json:"displayName"`
+	Bio          string       `json:"bio"`
+	ProfileImage string       `json:"profileImage"`
+	Birthday     sql.NullTime `json:"birthday"`
 }

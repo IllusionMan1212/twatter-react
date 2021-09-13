@@ -9,14 +9,17 @@ import (
 	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
+	"time"
 )
+
+const dateLayout = "2006-01-02"
 
 func UpdateProfile(socketPayload *models.SocketPayload, invokingClient *Client) {
 	profile := &models.ProfileValues{}
 
 	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), profile)
 
-	if profile.UserID == 0 {
+	if profile.UserID == "" {
 		sendGenericSocketErr(invokingClient)
 		logger.Error("No user id was sent when updating profile")
 		return
@@ -71,7 +74,7 @@ func UpdateProfile(socketPayload *models.SocketPayload, invokingClient *Client) 
 		}
 	}
 
-	isBirthdayValid := profile.Birthday.Day != 1 && profile.Birthday.Month != 1 && profile.Birthday.Year != 1
+	isBirthdayValid := profile.Birthday.Year != 1 && profile.Birthday.Month != 1 && profile.Birthday.Day != 1
 
 	if isBirthdayValid {
 		birthday := fmt.Sprintf("%v-%v-%v", profile.Birthday.Year, profile.Birthday.Month, profile.Birthday.Day)
@@ -85,26 +88,41 @@ func UpdateProfile(socketPayload *models.SocketPayload, invokingClient *Client) 
 		}
 	}
 
-	payload := fmt.Sprintf(`{
-		"eventType": "updateProfile",
-		"data": {
-			"userId": "%v",
-			"displayName": "%v",
-			"bio": "%v",
-			"profileImage": "%v",
-			"birthday": {
-				"Time": "%v-%v-%v",
-				"Valid": %v
-			}
-		}
-	}`, profile.UserID,
-		profile.DisplayName,
-		profile.Bio,
-		profile.ProfileImage.Data,
-		profile.Birthday.Year, profile.Birthday.Month, profile.Birthday.Day,
-		isBirthdayValid)
+	payload := &models.SocketPayload{}
+	dataPayload := &models.UpdateProfileReturnPayload{}
 
-	invokingClient.send <- []byte(payload)
+	day := fmt.Sprintf("%v", profile.Birthday.Day)
+	month := fmt.Sprintf("%v", profile.Birthday.Month)
+	year := fmt.Sprintf("%v", profile.Birthday.Year)
+
+	if profile.Birthday.Day < 10 {
+		day = "0" + day
+	}
+
+	if profile.Birthday.Month < 10 {
+		month = "0" + month
+	}
+
+	birthdayString := year + "-" + month + "-" + day
+
+	birthday, err := time.Parse(dateLayout, birthdayString)
+	if err != nil {
+		sendGenericSocketErr(invokingClient)
+		logger.Errorf("Error while parsing date: %v", err)
+		return
+	}
+
+	dataPayload.UserID = fmt.Sprintf("%v", profile.UserID)
+	dataPayload.DisplayName = profile.DisplayName
+	dataPayload.Bio = profile.Bio
+	dataPayload.ProfileImage = profile.ProfileImage.Data
+	dataPayload.Birthday.Time = birthday
+	dataPayload.Birthday.Valid = isBirthdayValid
+
+	payload.EventType = "updateProfile"
+	payload.Data = dataPayload
+
+	invokingClient.emitEvent([]byte(utils.MarshalJSON(payload)))
 }
 
 func RemoveBirthday(socketPayload *models.SocketPayload, invokingClient *Client) {
@@ -120,12 +138,13 @@ func RemoveBirthday(socketPayload *models.SocketPayload, invokingClient *Client)
 		return
 	}
 
-	payload := fmt.Sprintf(`{
-		"eventType": "birthdayRemoved",
-		"data": {
-			"id": "%v"
-		}
-	}`, user.ID)
+	payload := &models.SocketPayload{}
+	dataPayload := &models.RemoveBirthdayReturnPayload{}
 
-	invokingClient.send <- []byte(payload)
+	dataPayload.ID = user.ID
+
+	payload.EventType = "birthdayRemoved"
+	payload.Data = dataPayload
+
+	invokingClient.emitEvent([]byte(utils.MarshalJSON(payload)))
 }

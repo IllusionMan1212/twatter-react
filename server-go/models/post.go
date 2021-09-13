@@ -17,7 +17,7 @@ type SocketComment struct {
 	ContentLength int                `json:"contentLength"`
 	Author        User               `json:"author"`
 	Attachments   []SocketAttachment `json:"attachments"`
-	ReplyingTo    uint64             `json:"replying_to"`
+	ReplyingTo    string             `json:"replying_to"`
 }
 
 type DBPost struct {
@@ -64,4 +64,15 @@ func (n LikeType) String() string {
 type LikePostBody struct {
 	PostId   string   `json:"postId"`
 	LikeType LikeType `json:"likeType"`
+}
+
+type PostReturnPayload struct {
+	ID          string       `json:"id"`
+	Content     string       `json:"content"`
+	Author      User         `json:"author"`
+	CreatedAt   time.Time    `json:"created_at"`
+	Attachments []Attachment `json:"attachments"`
+	Likes       int          `json:"likes"`
+	Comments    int          `json:"comments"`
+	ReplyingTo  ParentPost   `json:"replying_to"`
 }

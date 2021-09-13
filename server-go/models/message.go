@@ -32,3 +32,13 @@ type DeleteMessageSocketPayload struct {
 	ReceiverID string `json:"receiver_id"`
 }
 
+type MessageReturnPayload struct {
+	MessageID      string `json:"id"`
+	Attachment     string `json:"attachment"`
+	Content        string `json:"content"`
+	ConversationID string `json:"conversation_id"`
+	ReceiverID     string `json:"receiver_id"`
+	AuthorID       string `json:"author_id"`
+	SentTime       string `json:"sent_time"`
+	Deleted        bool   `json:"deleted"`
+}
