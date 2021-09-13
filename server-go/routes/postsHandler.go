@@ -500,9 +500,10 @@ GROUP BY comment.id, author.id;`
 		comment := &models.DBPost{}
 		attachments := &models.DBAttachment{}
 		var commentId uint64
+		var authorId uint64
 
 		err = rows.Scan(&commentId,
-			&comment.Author.ID, &comment.Author.Username, &comment.Author.DisplayName, &comment.Author.AvatarURL,
+			&authorId, &comment.Author.Username, &comment.Author.DisplayName, &comment.Author.AvatarURL,
 			&comment.Content, &comment.CreatedAt,
 			&attachments.Urls, &attachments.Types,
 			&comment.Likes, &comment.Comments, &comment.Liked)
@@ -525,6 +526,7 @@ GROUP BY comment.id, author.id;`
 		}
 
 		comment.ID = fmt.Sprintf("%v", commentId)
+		comment.Author.ID = fmt.Sprintf("%v", authorId)
 		comment.Attachments = commentAttachments
 		comments = append(comments, *comment)
 	}
