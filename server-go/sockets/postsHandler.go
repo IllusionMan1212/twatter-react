@@ -7,7 +7,6 @@ import (
 	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
-	"strconv"
 )
 
 func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client) {
@@ -157,14 +156,7 @@ func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	replyingToId, err := strconv.Atoi(comment.ReplyingTo)
-	if err != nil {
-		sendGenericSocketErr(invokingClient)
-		logger.Errorf("Error while converting string to int: %v", err)
-		return
-	}
-
-	returnedComment.ReplyingTo.ID.Int64 = int64(replyingToId)
+	returnedComment.ReplyingTo.ID.String = comment.ReplyingTo
 	returnedComment.ReplyingTo.ID.Valid = true
 
 	payload := &models.SocketPayload{}

@@ -39,9 +39,8 @@ type User struct {
 	FinishedSetup bool         `json:"finished_setup"`
 }
 
-// TODO: change the ID's type to sql.NullString
 type ParentUser struct {
-	ID            sql.NullInt64  `json:"id"`
+	ID            sql.NullString `json:"id"`
 	Username      sql.NullString `json:"username"`
 	DisplayName   sql.NullString `json:"display_name"`
 	Bio           sql.NullString `json:"bio"`

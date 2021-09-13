@@ -3,11 +3,6 @@ interface NullableInt32 {
     Valid: boolean;
 }
 
-interface NullableInt64 {
-    Int64: number;
-    Valid: boolean;
-}
-
 interface NullableString {
     String: string;
     Valid: boolean;
@@ -24,7 +19,7 @@ export interface DateAndTime {
 }
 
 interface IParentUser {
-    id: NullableInt64;
+    id: NullableString;
     username: NullableString;
     display_name: NullableString;
     avatar_url: NullableString;
@@ -61,7 +56,7 @@ export interface IActiveConversation {
 }
 
 interface IParentPost {
-    id: NullableInt64;
+    id: NullableString;
     author: IParentUser;
     content: NullableString;
     likes: NullableInt32;
