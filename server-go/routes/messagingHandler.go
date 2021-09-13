@@ -190,9 +190,15 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: query for unread messages and last message
+	// TODO: query for unread messages
 	query := `SELECT convo.id, convo.last_updated,
-		receiver.id as receiver_id, receiver.username as receiver_username, receiver.display_name as receiver_display_name, receiver.avatar_url as receiver_avatar_url
+		receiver.id as receiver_id, receiver.username as receiver_username, receiver.display_name as receiver_display_name, receiver.avatar_url as receiver_avatar_url,
+		(SELECT content
+			FROM messages
+			WHERE conversation_id = convo.id
+			GROUP BY content
+			ORDER BY MAX(sent_time) DESC
+			LIMIT 1) as last_message
 		FROM conversations convo
 		INNER JOIN users receiver
 		ON receiver.id <> $1 AND receiver.id = ANY(convo.members)
@@ -216,7 +222,8 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		var receiverId uint64
 
 		err := rows.Scan(&conversationId, &conversation.LastUpdated,
-			&receiverId, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL)
+			&receiverId, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL,
+			&conversation.LastMessage)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error scanning fields into conversation struct: %s", err)
@@ -224,6 +231,8 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		}
 		conversation.ID = fmt.Sprintf("%v", conversationId)
 		conversation.Receiver.ID = fmt.Sprintf("%v", receiverId)
+
+		// TODO: if lastmessage has attachment only and no content, show "sent an attachment" as lastmessage
 
 		conversations = append(conversations, *conversation)
 	}
