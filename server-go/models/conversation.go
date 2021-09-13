@@ -10,9 +10,9 @@ type ConversationInitPayload struct {
 }
 
 type Conversation struct {
-	ID             string       `json:"id"`
-	LastUpdated    sql.NullTime `json:"last_updated"`
-	Receiver       User         `json:"receiver"`
-	LastMessage    string       `json:"last_message"`
-	UnreadMessages int          `json:"unread_messages"`
+	ID             string         `json:"id"`
+	LastUpdated    sql.NullTime   `json:"last_updated"`
+	Receiver       User           `json:"receiver"`
+	LastMessage    sql.NullString `json:"last_message"`
+	UnreadMessages int            `json:"unread_messages"`
 }

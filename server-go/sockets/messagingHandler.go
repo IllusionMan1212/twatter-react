@@ -22,8 +22,6 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 	insertQuery := `INSERT INTO messages(id, author_id, conversation_id, content, read_by)
 		VALUES($1, $2, $3, $4, $5)`
 
-	// TODO: check length of content ??? encrypted content would probably vary and even exceed the 1000 character limit. so maybe dont check
-
 	conversationId, err := strconv.Atoi(message.ConversationId)
 	if err != nil {
 		sendGenericSocketErr(invokingClient)

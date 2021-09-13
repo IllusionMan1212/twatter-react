@@ -240,16 +240,15 @@ export default function Messages(): ReactElement {
                     return conversation.id == msg.conversation_id
                         ? {
                               ...conversation,
-                              last_message: msg.content
-                                  ? msg.content
-                                  : msg.author_id == user.id
-                                  ? `${user.display_name} sent an image`
-                                  : `${conversation.receiver.display_name} sent an image`,
+                              last_message: {
+                                  String: msg.content,
+                                  Valid: true
+                              },
                               last_updated: {
                                   Valid: true,
                                   Time: new Date(msg.sent_time),
                               },
-                              unreadMessages:
+                              unread_messages:
                                   activeConversation?.id == msg.conversation_id
                                       ? 0
                                       : msg.author_id == user.id
@@ -304,7 +303,8 @@ export default function Messages(): ReactElement {
                 if (i == (messages.length - 1)) {
                     setConversations(conversations.map((convo) => {
                         if (convo.id == message.conversation_id) {
-                            convo.last_message = "";
+                            convo.last_message.String = "";
+                            convo.last_message.Valid = false;
                         }
                         return convo;
                     }));
@@ -671,7 +671,7 @@ export default function Messages(): ReactElement {
                                                                 conversation.receiver
                                                             }
                                                             lastMessage={
-                                                                conversation.last_message
+                                                                conversation.last_message.String
                                                             }
                                                             lastUpdated={
                                                                 conversation.last_updated
