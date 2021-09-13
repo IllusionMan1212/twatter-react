@@ -7,6 +7,7 @@ import (
 	"illusionman1212/twatter-go/logger"
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
+	"strconv"
 )
 
 func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client) {
@@ -71,28 +72,23 @@ func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient
 		return
 	}
 
-	postPayload := fmt.Sprintf(`{
-		"eventType": "post",
-		"data": {
-		  "id": "%v",
-		  "content": "%v",
-		  "author": %v,
-		  "created_at": %v,
-		  "attachments": %v,
-		  "likes": 0,
-		  "comments": 0,
-		  "replying_to": %v
-		}
-	}`,
-		postId,
-		post.Content,
-		utils.MarshalJSON(post.Author),
-		utils.MarshalJSON(returnedPost.CreatedAt),
-		utils.MarshalJSON(returnedAttachments),
-		utils.MarshalJSON(returnedPost.ReplyingTo))
+	payload := &models.SocketPayload{}
+	dataPayload := &models.PostReturnPayload{}
+
+	dataPayload.ID = fmt.Sprintf("%v", postId)
+	dataPayload.Content = post.Content
+	dataPayload.Author = post.Author
+	dataPayload.CreatedAt = returnedPost.CreatedAt
+	dataPayload.Attachments = returnedAttachments
+	dataPayload.Likes = 0
+	dataPayload.Comments = 0
+	dataPayload.ReplyingTo = returnedPost.ReplyingTo
+
+	payload.EventType = "post"
+	payload.Data = dataPayload
 
 	for _, client := range clients {
-		client.emitEvent([]byte(postPayload))
+		client.emitEvent([]byte(utils.MarshalJSON(payload)))
 	}
 }
 
@@ -161,30 +157,32 @@ func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	returnedComment.ReplyingTo.ID.Int64 = int64(comment.ReplyingTo)
+	replyingToId, err := strconv.Atoi(comment.ReplyingTo)
+	if err != nil {
+		sendGenericSocketErr(invokingClient)
+		logger.Errorf("Error while converting string to int: %v", err)
+		return
+	}
+
+	returnedComment.ReplyingTo.ID.Int64 = int64(replyingToId)
 	returnedComment.ReplyingTo.ID.Valid = true
 
-	commentPayload := fmt.Sprintf(`{
-		"eventType": "commentToClient",
-		"data": {
-		  "id": "%v",
-		  "content": "%v",
-		  "author": %v,
-		  "created_at": %v,
-		  "attachments": %v,
-		  "likes": 0,
-		  "comments": 0,
-		  "replying_to": %v
-		}
-	}`,
-		commentId,
-		comment.Content,
-		utils.MarshalJSON(comment.Author),
-		utils.MarshalJSON(returnedComment.CreatedAt),
-		utils.MarshalJSON(returnedAttachments),
-		utils.MarshalJSON(returnedComment.ReplyingTo))
+	payload := &models.SocketPayload{}
+	dataPayload := &models.PostReturnPayload{}
+
+	dataPayload.ID = fmt.Sprintf("%v", commentId)
+	dataPayload.Content = comment.Content
+	dataPayload.Author = comment.Author
+	dataPayload.CreatedAt = returnedComment.CreatedAt
+	dataPayload.Attachments = returnedAttachments
+	dataPayload.Likes = 0
+	dataPayload.Comments = 0
+	dataPayload.ReplyingTo = returnedComment.ReplyingTo
+
+	payload.EventType = "commentToClient"
+	payload.Data = dataPayload
 
 	for _, client := range clients {
-		client.send <- []byte(commentPayload)
+		client.emitEvent([]byte(utils.MarshalJSON(payload)))
 	}
 }

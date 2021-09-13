@@ -72,29 +72,27 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	messagePayload := fmt.Sprintf(`{
-		"eventType": "message",
-		"data": {
-			"id", "%v",
-			"attachment": "%v",
-      "content": "%v",
-      "conversation_id": "%v",
-      "receiver_id": "%v",
-      "author_id": "%v",
-      "sent_time": "%v",
-			"deleted": false
-		}
-	}`,
-		messageId,
-		message.Attachment.Url,
-		message.Content,
-		message.ConversationId,
-		message.ReceiverId,
-		message.SenderId,
-		time.Now().UTC().Format(time.RFC3339))
+	messagePayload := &models.MessageReturnPayload{}
+	payload := &models.SocketPayload{}
+
+	messagePayload.MessageID = fmt.Sprintf("%v", messageId)
+	messagePayload.Attachment = message.Attachment.Url
+	messagePayload.Content = message.Content
+	messagePayload.ConversationID = message.ConversationId
+	messagePayload.ReceiverID = message.ReceiverId
+	messagePayload.AuthorID = message.SenderId
+	messagePayload.SentTime = time.Now().UTC().Format(time.RFC3339)
+	messagePayload.Deleted = false
+
+	payload.EventType = "message"
+	payload.Data = messagePayload
 
 	for _, receiverClient := range invokingClient.hub.users[fmt.Sprintf("%v", message.ReceiverId)] {
-		receiverClient.emitEvent([]byte(messagePayload))
+		receiverClient.emitEvent([]byte(utils.MarshalJSON(payload)))
+	}
+
+	for _, client := range clients {
+		client.emitEvent([]byte(utils.MarshalJSON(payload)))
 	}
 }
 

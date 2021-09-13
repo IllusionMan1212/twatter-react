@@ -13,7 +13,7 @@ import (
 	"github.com/go-oss/image/imageutil"
 )
 
-func WriteProfileImage(mimetype string, userID uint64, buf []byte) error {
+func WriteProfileImage(mimetype string, userID string, buf []byte) error {
 	var imageBytes []byte
 
 	if len(buf) > utils.MaxFileSize {
