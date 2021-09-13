@@ -36,6 +36,7 @@ import {
 import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import DeletedMessage from "components/messages/deletedMessage";
+import { DeleteMessagePayload } from "src/types/socketEvents";
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
@@ -197,7 +198,7 @@ export default function Messages(): ReactElement {
         setNewMessagesAlert(false);
     };
 
-    const handleMessageRecieved = useCallback(
+    const handleMessageReceived = useCallback(
         (msg: ISocketMessage) => {
             setNowSending(false);
 
@@ -294,8 +295,21 @@ export default function Messages(): ReactElement {
         }
     };
 
-    const handleDeleteMessage = () => {
-        // TODO: impl this
+    const handleDeleteMessage = (payload: DeleteMessagePayload) => {
+        setMessages(messages.map((message, i) => {
+            if (message.id == payload.message_id) {
+                message.deleted = true;
+                if (i == (messages.length - 1)) {
+                    setConversations(conversations.map((convo) => {
+                        if (convo.id == message.conversation_id) {
+                            convo.last_message = "";
+                        }
+                        return convo;
+                    }));
+                }
+            }
+            return message;
+        }));
     }
 
     const handleClickSend = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -419,7 +433,6 @@ export default function Messages(): ReactElement {
         return axiosInstance
             .get(`/messaging/getMessages/${conversationId}/${pageRef.current}`)
             .then((res) => {
-                console.log(res.data.messages);
                 return res.data.messages;
             })
             .catch((err) => {
@@ -561,7 +574,7 @@ export default function Messages(): ReactElement {
 
     useEffect(() => {
         if (socket) {
-            socket.on("message", handleMessageRecieved);
+            socket.on("message", handleMessageReceived);
             socket.on("markMessagesAsRead", handleMarkedMessagesAsRead);
             socket.on("typing", handleTyping);
             socket.on("stopTyping", handleStopTyping);
@@ -570,7 +583,7 @@ export default function Messages(): ReactElement {
 
         return () => {
             if (socket) {
-                socket.off("message", handleMessageRecieved);
+                socket.off("message", handleMessageReceived);
                 socket.off("markMessagesAsRead", handleMarkedMessagesAsRead);
                 socket.off("typing", handleTyping);
                 socket.off("stopTyping", handleStopTyping);
@@ -578,7 +591,7 @@ export default function Messages(): ReactElement {
             }
         };
     }, [
-        handleMessageRecieved,
+        handleMessageReceived,
         handleMarkedMessagesAsRead,
         handleTyping,
         handleStopTyping,
@@ -801,6 +814,9 @@ export default function Messages(): ReactElement {
                                                             }
                                                             messageAuthorId={
                                                                 message.author_id
+                                                            }
+                                                            receiverId={
+                                                                activeConversation?.receiver_id
                                                             }
                                                             sender={
                                                                 user.id ==

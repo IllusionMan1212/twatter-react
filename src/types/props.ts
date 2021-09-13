@@ -30,6 +30,7 @@ export interface UserContextMenuProps {
 export interface MessageProps {
     messageId: string;
     messageAuthorId: string;
+    receiverId: string;
     sender: boolean;
     children: string;
     sentTime: string;
@@ -114,6 +115,7 @@ export interface MessageOptionsMenuButtonProps {
     parentContainerRef?: MutableRefObject<HTMLElement>;
     messageId: string;
     messageAuthorId: string;
+    receiverId: string;
 }
 
 export interface MediaModalProps {

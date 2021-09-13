@@ -96,8 +96,18 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 	for _, receiverClient := range invokingClient.hub.users[fmt.Sprintf("%v", message.ReceiverId)] {
 		receiverClient.emitEvent([]byte(messagePayload))
 	}
+}
+
+func DeleteMessage(socketPayload *models.SocketPayload, clients []*Client, invokingClient *Client, message []byte) {
+	payload := &models.DeleteMessageSocketPayload{}
+
+	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), payload)
 
 	for _, client := range clients {
-		client.emitEvent([]byte(messagePayload))
+		client.emitEvent(message)
+	}
+
+	for _, client := range invokingClient.hub.users[payload.ReceiverID] {
+		client.emitEvent(message)
 	}
 }

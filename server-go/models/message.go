@@ -22,3 +22,13 @@ type SocketMessage struct {
 	ReceiverId     string     `json:"receiver_id"`
 	ConversationId string     `json:"conversation_id"`
 }
+
+type DeleteMessageBody struct {
+	MessageID string `json:"message_id"`
+}
+
+type DeleteMessageSocketPayload struct {
+	MessageID  string `json:"message_id"`
+	ReceiverID string `json:"receiver_id"`
+}
+

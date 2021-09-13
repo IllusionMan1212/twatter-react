@@ -144,7 +144,30 @@ func StartConversation(w http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteMessage(w http.ResponseWriter, req *http.Request) {
-	// TODO:
+	body := &models.DeleteMessageBody{}
+	err := json.NewDecoder(req.Body).Decode(&body)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Errorf("Error while decoding request body: %v", err)
+		return
+	}
+
+	updateQuery := `UPDATE messages SET deleted = true, content = '' WHERE id = $1`
+
+	_, err = db.DBPool.Exec(context.Background(), updateQuery, body.MessageID)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Errorf("Error while updating message: %v", err)
+		return
+	}
+
+	// TODO: remove attachments from filesystem and from DB
+
+	utils.OkWithJSON(w, `{
+		"message": "Deleted message successfully",
+		"status": 200,
+		"success": true
+	}`)
 }
 
 func GetConversations(w http.ResponseWriter, req *http.Request) {
