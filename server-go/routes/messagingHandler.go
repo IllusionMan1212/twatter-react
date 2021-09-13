@@ -190,7 +190,6 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: query for unread messages
 	query := `SELECT convo.id, convo.last_updated,
 		receiver.id as receiver_id, receiver.username as receiver_username, receiver.display_name as receiver_display_name, receiver.avatar_url as receiver_avatar_url,
 		(SELECT content
@@ -198,11 +197,15 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 			WHERE conversation_id = convo.id
 			GROUP BY content
 			ORDER BY MAX(sent_time) DESC
-			LIMIT 1) as last_message
+			LIMIT 1) as last_message,
+		COUNT(messages) as unread_messages
 		FROM conversations convo
 		INNER JOIN users receiver
 		ON receiver.id <> $1 AND receiver.id = ANY(convo.members)
+		LEFT JOIN messages
+		ON messages.conversation_id = convo.id AND $1 <> ANY(messages.read_by)
 		WHERE $1 = ANY(convo.participants)
+		GROUP BY convo.id, receiver.id
 		ORDER BY convo.last_updated DESC
 		LIMIT 20 OFFSET $2;`
 
@@ -223,7 +226,8 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 
 		err := rows.Scan(&conversationId, &conversation.LastUpdated,
 			&receiverId, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL,
-			&conversation.LastMessage)
+			&conversation.LastMessage,
+			&conversation.UnreadMessages)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, "")
 			logger.Errorf("Error scanning fields into conversation struct: %s", err)
@@ -334,13 +338,35 @@ func GetMessages(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {
-	// TODO: get session and user id from cookie
-	// TODO: fetch from the db
+	sessionUser, err := utils.ValidateSession(req, w)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Error(err)
+		return
+	}
 
-	utils.OkWithJSON(w, `{
+	query := `SELECT COUNT(*) AS unread_convos
+		FROM (SELECT COUNT(*) FROM conversations convo
+			INNER JOIN messages
+			ON messages.conversation_id = convo.id
+			WHERE $1 <> ANY(messages.read_by)
+			AND $1 = ANY(convo.participants)
+			GROUP BY convo.id
+		) as convos`
+
+	var unread_convos int
+
+	err = db.DBPool.QueryRow(context.Background(), query, sessionUser.ID).Scan(&unread_convos)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Errorf("Error while querying for unread messages: %v", err)
+		return
+	}
+
+	utils.OkWithJSON(w, fmt.Sprintf(`{
 		"message": "Fetched unread messages succesfully",
 		"status": 200,
 		"success": true,
-		"unreadMessages": 0
-	}`)
+		"unreadMessages": %v
+	}`, unread_convos))
 }

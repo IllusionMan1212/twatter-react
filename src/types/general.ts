@@ -45,7 +45,7 @@ export interface IConversation {
     receiver: IUser;
     unread_messages: number;
     last_updated: DateAndTime;
-    last_message: string;
+    last_message: NullableString;
 }
 
 export interface IActiveConversation {

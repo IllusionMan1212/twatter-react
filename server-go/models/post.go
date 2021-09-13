@@ -32,7 +32,6 @@ type DBPost struct {
 	Liked       bool         `json:"liked"`
 }
 
-// TODO: no idea if this is a good idea, seems to work for now ??
 type ParentPost struct {
 	ID         sql.NullString `json:"id"`
 	Author     ParentUser     `json:"author"`
