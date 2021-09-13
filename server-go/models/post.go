@@ -33,9 +33,8 @@ type DBPost struct {
 }
 
 // TODO: no idea if this is a good idea, seems to work for now ??
-// TODO: change the ID's type to sql.NullString
 type ParentPost struct {
-	ID         sql.NullInt64  `json:"id"`
+	ID         sql.NullString `json:"id"`
 	Author     ParentUser     `json:"author"`
 	Content    sql.NullString `json:"content"`
 	CreatedAt  sql.NullTime   `json:"created_at"`

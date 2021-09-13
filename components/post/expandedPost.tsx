@@ -115,7 +115,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                 <div className={styles.expandedPostContent}>
                     {props.post.replying_to.id.Valid && (
                         <Link
-                            href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.Int64}`}
+                            href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.String}`}
                         >
                             <a
                                 className={`flex mb-1Percent text-small ${styles.replyingTo}`}
@@ -126,8 +126,9 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                         <span className="px-1">
                                             Replying to:{" "}
                                         </span>
-                                        <img
-                                            className="round"
+                                        <ProfileImage
+                                            width={30}
+                                            height={30}
                                             src={`${
                                                 props.post.replying_to.author
                                                     .avatar_url.String ==
@@ -138,9 +139,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                                 props.post.replying_to.author
                                                     .avatar_url.String
                                             }`}
-                                            width={25}
-                                            height={25}
-                                        ></img>{" "}
+                                        />
                                         <span
                                             className="text-bold"
                                             style={{ paddingLeft: "0.5em" }}

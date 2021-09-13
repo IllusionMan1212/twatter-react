@@ -31,7 +31,7 @@ export default function Post(props: PostProps): ReactElement {
             <div className={styles.postContent}>
                 {props.post.replying_to?.id.Valid && (
                     <Link
-                        href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.Int64}`}
+                        href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.String}`}
                     >
                         <a
                             className={`flex mb-1Percent text-small ${styles.replyingTo}`}
