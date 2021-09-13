@@ -94,15 +94,17 @@ export default function Messages(): ReactElement {
 
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
         clearTimeout(timeoutId);
-        const payload = {
-            eventType: "typing",
-            data: {
-                receiverId: activeConversation.receiver_id,
-                senderId: user.id,
-                conversationId: activeConversation.id,
-            },
-        };
-        socket.send(JSON.stringify(payload));
+
+        if (!timeoutId) {
+            const payload = {
+                eventType: "typing",
+                data: {
+                    receiverId: activeConversation.receiver_id,
+                    conversationId: activeConversation.id,
+                },
+            };
+            socket.send(JSON.stringify(payload));
+        }
 
         if (e.currentTarget.textContent.trim().length > messageCharLimit) {
             setSendingAllowed(false);
@@ -123,10 +125,10 @@ export default function Messages(): ReactElement {
                     eventType: "stopTyping",
                     data: {
                         receiverId: activeConversation.receiver_id,
-                        senderId: user.id,
                         conversationId: activeConversation.id,
                     },
                 };
+                setTimeoutId(null);
                 socket.send(JSON.stringify(payload));
             }, 4000)
         );
@@ -283,14 +285,14 @@ export default function Messages(): ReactElement {
         [conversations]
     );
 
-    const handleTyping = (conversationId: string) => {
-        if (activeConversation?.id == conversationId) {
+    const handleTyping = (payload: { conversationId: string }) => {
+        if (activeConversation?.id == payload.conversationId) {
             setTyping(true);
         }
     };
 
-    const handleStopTyping = (conversationId: string) => {
-        if (activeConversation?.id == conversationId) {
+    const handleStopTyping = (payload: { conversationId: string }) => {
+        if (activeConversation?.id == payload.conversationId) {
             setTyping(false);
         }
     };
