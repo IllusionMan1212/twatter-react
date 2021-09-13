@@ -23,19 +23,19 @@ export default function MessageOptionsMenuButton(props: MessageOptionsMenuButton
         }
 
         const payload = {
-            "messageId": props.messageId,
+            "message_id": props.messageId,
         }
         const socketPayload = {
             "eventType": "deleteMessage",
             "data": {
-                "messageId": props.messageId
+                "message_id": props.messageId,
+                "receiver_id": props.receiverId
             }
         }
 
         axios.post("messaging/deleteMessage", payload)
-            .then((res) => {
+            .then(() => {
                 socket.send(JSON.stringify(socketPayload));
-                toast(res.data.message, 3000);
             })
             .catch((err) => {
                 toast(err?.response?.data?.message ?? "An error has occurred", 3000);

@@ -44,6 +44,8 @@
 
 .content {
     padding: 10px 20px;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .attachment {
@@ -70,6 +72,7 @@
     font-size: 0.8em;
     color: grey;
     margin-top: 0.5em;
+    margin-bottom: 1em;
 
     @media (max-width: 800px) {
         font-size: 0.7em;

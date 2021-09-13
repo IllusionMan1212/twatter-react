@@ -86,11 +86,11 @@ func handleSocketEvent(socketPayload *models.SocketPayload, clients []*Client, i
 		Comment(socketPayload, clients, invokingClient)
 	case "deletePost":
 		for _, client := range clients {
-			client.send <- message
+			client.emitEvent(message)
 		}
 	case "like":
 		for _, client := range clients {
-			client.send <- message
+			client.emitEvent(message)
 		}
 	case "updateProfile":
 		UpdateProfile(socketPayload, invokingClient)
@@ -107,6 +107,8 @@ func handleSocketEvent(socketPayload *models.SocketPayload, clients []*Client, i
 		// TODO:
 	case "message":
 		Message(socketPayload, clients, invokingClient)
+	case "deleteMessage":
+		DeleteMessage(socketPayload, clients, invokingClient, message)
 	default:
 		fmt.Print("Received unknown")
 	}

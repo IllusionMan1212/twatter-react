@@ -50,6 +50,7 @@ export default function Message(props: MessageProps): ReactElement {
                         parentContainerRef={props.parentContainerRef}
                         messageId={props.messageId}
                         messageAuthorId={props.messageAuthorId}
+                        receiverId={props.receiverId}
                     />
                 )}
             </div>
