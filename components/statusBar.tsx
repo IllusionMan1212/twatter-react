@@ -103,15 +103,17 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                 <Search></Search>
             </div>
             <div className={`ml-auto flex align-items-center ${styles.messagesAndNotifs}`}>
-                <div className={styles.messages}>
+                <div
+                    className={styles.messages}
+                    onClick={() => {
+                        Router.push("/messages", null, {
+                            shallow: true,
+                        });
+                    }}
+                >
                     <ChatsTeardrop
                         className={`mr-1 ${styles.icon}`}
                         size="25"
-                        onClick={() => {
-                            Router.push("/messages", null, {
-                                shallow: true,
-                            });
-                        }}
                         weight="fill"
                     ></ChatsTeardrop>
                     {unreadMessages != 0 && (

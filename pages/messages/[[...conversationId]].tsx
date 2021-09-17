@@ -27,7 +27,7 @@ import {
 } from "src/types/general";
 import Link from "next/link";
 import MessageMediaModal from "components/messages/messageMediaModal";
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import {
     fileSizeLimit,
     messageCharLimit,
@@ -46,7 +46,7 @@ export default function Messages(): ReactElement {
     const { user, socket } = useUserContext();
 
     const messageInputRef = useRef<HTMLSpanElement>(null);
-    const virtuosoRef = useRef(null);
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
     const pageRef = useRef(null);
     const messagesAreaContainerRef = useRef(null);
 
@@ -410,21 +410,22 @@ export default function Messages(): ReactElement {
             setAttachment(null);
             setPreviewImage(null);
         }
-        const payload = {
-            eventType: "markMessagesAsRead",
-            data: {
-                conversationId: conversation.id,
-                userId: user.id,
-                unreadMessages: conversation.unread_messages,
-            },
-        };
 
-        // when a conversation is opened, we mark its messages as read
-        socket.send(JSON.stringify(payload));
+        if (!conversation.unread_messages) {
+            const payload = {
+                eventType: "markMessagesAsRead",
+                data: {
+                    conversationId: conversation.id,
+                    userId: user.id,
+                    unreadMessages: conversation.unread_messages,
+                },
+            };
+
+            // when a conversation is opened, we mark its messages as read
+            socket.send(JSON.stringify(payload));
+        }
+
         if (router.query?.conversationId?.[0] != conversation.id) {
-            // HACK: this works around virutoso not calling the loadMoreMessages function
-            // when changing conversations
-            router.push("/messages", null, { scroll: false });
             router.push(`/messages/${conversation.id}`, null, {
                 scroll: false,
             });
@@ -467,14 +468,14 @@ export default function Messages(): ReactElement {
         getMessages(activeConversation.id).then((newMessages) => {
             if (!newMessages.length) {
                 setReachedStartOfMessages(true);
-                return true;
+                return;
             }
             const messagesToPrepend = newMessages.length;
             const nextFirstItemIndex = firstItemIndex - messagesToPrepend;
 
-            setFirstItemIndex(() => nextFirstItemIndex);
+            setFirstItemIndex(nextFirstItemIndex);
             setMessages((messages) => [...newMessages].concat(messages));
-            return false;
+            return;
         });
     }, [
         setMessages,
@@ -482,7 +483,7 @@ export default function Messages(): ReactElement {
         page,
         pageRef,
         firstItemIndex,
-        reachedStartOfMessages,
+        reachedStartOfMessages
     ]);
 
     const loadMoreConversations = useCallback(() => {
@@ -490,11 +491,11 @@ export default function Messages(): ReactElement {
         getConversations().then((newConversations) => {
             if (!newConversations.length) {
                 setReachedEndOfConvos(true);
-                return true;
+                return;
             }
 
             setConversations(conversations.concat(newConversations));
-            return false;
+            return;
         });
     }, [conversations, conversationsPage.current]);
 
@@ -505,11 +506,6 @@ export default function Messages(): ReactElement {
     }, [atBottom, setNewMessagesAlert]);
 
     useEffect(() => {
-        setPage(0);
-        pageRef.current = 0;
-        setReachedStartOfMessages(false);
-        setFirstItemIndex(START_INDEX);
-
         if (!router.query?.conversationId?.[0]) {
             setIsConversationActive(false);
 
@@ -540,15 +536,24 @@ export default function Messages(): ReactElement {
             display_name: newActiveConversation.receiver?.display_name,
             receiver_id: newActiveConversation.receiver?.id,
         });
-        setMessages([]);
         setIsConversationActive(true);
 
         getMessages(router.query.conversationId[0]).then((messages) => {
-            setMessages(messages);
             if (messages.length < 50) {
                 setReachedStartOfMessages(true);
             }
+            setMessages(messages);
         });
+
+        return () => {
+            setActiveConversation(null);
+            setIsConversationActive(false);
+            setMessages([]);
+            setPage(0);
+            pageRef.current = 0;
+            setReachedStartOfMessages(false);
+            setFirstItemIndex(START_INDEX);
+        }
     }, [router.query?.conversationId, conversations?.length]);
 
     useEffect(() => {
@@ -759,6 +764,7 @@ export default function Messages(): ReactElement {
                                     >
                                         <Virtuoso
                                             ref={virtuosoRef}
+                                            key={activeConversation?.id}
                                             className={styles.messagesArea}
                                             totalCount={messages.length}
                                             initialTopMostItemIndex={
@@ -771,11 +777,7 @@ export default function Messages(): ReactElement {
                                             alignToBottom
                                             followOutput
                                             atBottomStateChange={(bottom) => {
-                                                if (bottom) {
-                                                    setAtBottom(bottom);
-                                                } else {
-                                                    setAtBottom(bottom);
-                                                }
+                                                setAtBottom(bottom);
                                             }}
                                             startReached={loadMoreMessages}
                                             // eslint-disable-next-line react/display-name
@@ -810,7 +812,7 @@ export default function Messages(): ReactElement {
                                                 <>
                                                     {!message.deleted ? (
                                                         <Message
-                                                            key={index}
+                                                            key={message.id}
                                                             messageId={
                                                                 message.id
                                                             }
