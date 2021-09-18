@@ -1,22 +1,18 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./message.module.scss";
 import { MessageProps } from "src/types/props";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useState } from "react";
 import { formatMessageTime } from "src/utils/functions";
 import MessageOptionsMenuButton from "components/messages/messageOptionsMenuButton";
 
 export default function Message(props: MessageProps): ReactElement {
-    const [sentTime, setSentTime] = useState(props.sentTime);
+    const [sentTime, _] = useState(formatMessageTime(props.sentTime));
 
     const handleClick = () => {
         window.history.pushState(null, null, `${props.conversationId}/media`);
         props.setImageModal(true);
         props.setModalAttachment(props.attachment);
     };
-
-    useEffect(() => {
-        setSentTime(formatMessageTime(props.sentTime));
-    }, [props.sentTime])
 
     return (
         <div className={styles.messageContainer}>

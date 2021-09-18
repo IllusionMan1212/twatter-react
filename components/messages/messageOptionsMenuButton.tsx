@@ -10,7 +10,9 @@ import axios from "src/axios";
 import { useUserContext } from "src/contexts/userContext";
 import { useToastContext } from "src/contexts/toastContext";
 
-export default function MessageOptionsMenuButton(props: MessageOptionsMenuButtonProps): ReactElement {
+export default function MessageOptionsMenuButton(
+    props: MessageOptionsMenuButtonProps
+): ReactElement {
     const { user, socket } = useUserContext();
     const toast = useToastContext();
 
@@ -23,55 +25,56 @@ export default function MessageOptionsMenuButton(props: MessageOptionsMenuButton
         }
 
         const payload = {
-            "message_id": props.messageId,
-        }
+            message_id: props.messageId,
+        };
         const socketPayload = {
-            "eventType": "deleteMessage",
-            "data": {
-                "message_id": props.messageId,
-                "receiver_id": props.receiverId
-            }
-        }
+            eventType: "deleteMessage",
+            data: {
+                message_id: props.messageId,
+                receiver_id: props.receiverId,
+            },
+        };
 
-        axios.post("messaging/deleteMessage", payload)
+        axios
+            .post("messaging/deleteMessage", payload)
             .then(() => {
                 socket.send(JSON.stringify(socketPayload));
             })
             .catch((err) => {
-                toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                toast(
+                    err?.response?.data?.message ?? "An error has occurred",
+                    3000
+                );
             });
-    }
+    };
 
     return (
-        <div
-            className={`${props.className} ${styles.optionsButton}`}
-            onClick={(e) => {
-                e.stopPropagation();
-                setOptionsMenu(!optionsMenu);
-                if (props.parentContainerRef && !optionsMenu) {
-                    setOffset(e.clientX);
-                }
-            }}
-        >
-            <DotsThreeVertical
-                size={20}
-                weight="bold"
-                color="grey"
-                className="pointer"
-            />
-            {optionsMenu && (
-                <ContextMenu
-                    menuPosition={ContextMenuPosition.LEFT}
-                    rightOffset={offset}
-                >
-                    <ContextMenuItem
-                        text="Delete Message"
-                        icon={Trash}
-                        color="#EC4646"
-                        onClick={handleDelete}
-                    />
-                </ContextMenu>
-            )}
+        <div className="flex align-items-center">
+            <div
+                className={`pointer ${props.className} ${styles.optionsButton}`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setOptionsMenu(!optionsMenu);
+                    if (props.parentContainerRef && !optionsMenu) {
+                        setOffset(e.clientX);
+                    }
+                }}
+            >
+                <DotsThreeVertical size={20} weight="bold" color="grey" />
+                {optionsMenu && (
+                    <ContextMenu
+                        menuPosition={ContextMenuPosition.LEFT}
+                        rightOffset={offset}
+                    >
+                        <ContextMenuItem
+                            text="Delete Message"
+                            icon={Trash}
+                            color="#EC4646"
+                            onClick={handleDelete}
+                        />
+                    </ContextMenu>
+                )}
+            </div>
         </div>
-    )
+    );
 }
