@@ -46,18 +46,6 @@ func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient
 
 	returnedPost := &models.DBPost{}
 
-	returnedAttachments, err := writeAttachmentsFiles(post.Attachments, postId, invokingClient)
-	if err != nil {
-		errPayload := fmt.Sprintf(`{
-			"eventType": "postError",
-			"data": {
-				"message": "%v"
-			}
-		}`, err)
-		invokingClient.emitEvent([]byte(errPayload))
-		return
-	}
-
 	err = db.DBPool.QueryRow(context.Background(), insertQuery, postId, post.Content, post.Author.ID).Scan(&returnedPost.CreatedAt)
 	if err != nil {
 		errPayload := `{
@@ -68,6 +56,18 @@ func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient
 		}`
 		invokingClient.emitEvent([]byte(errPayload))
 		logger.Errorf("Error while inserting into posts table: %v", err)
+		return
+	}
+
+	returnedAttachments, err := writeAttachmentsFiles(post.Attachments, postId, invokingClient)
+	if err != nil {
+		errPayload := fmt.Sprintf(`{
+			"eventType": "postError",
+			"data": {
+				"message": "%v"
+			}
+		}`, err)
+		invokingClient.emitEvent([]byte(errPayload))
 		return
 	}
 
@@ -129,19 +129,6 @@ func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 
 	returnedComment := &models.DBPost{}
 
-	returnedAttachments, err := writeAttachmentsFiles(comment.Attachments, commentId, invokingClient)
-	if err != nil {
-		errPayload := `{
-			"eventType": "postError",
-			"data": {
-				"message": "An error has occurred, please try again later"
-			}
-		}
-		`
-		invokingClient.emitEvent([]byte(errPayload))
-		return
-	}
-
 	err = db.DBPool.QueryRow(context.Background(), insertQuery, commentId, comment.Content, comment.Author.ID, comment.ReplyingTo).Scan(&returnedComment.CreatedAt)
 	if err != nil {
 		errPayload := `{
@@ -153,6 +140,19 @@ func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		`
 		invokingClient.emitEvent([]byte(errPayload))
 		logger.Errorf("Error while inserting into posts table: %v", err)
+		return
+	}
+
+	returnedAttachments, err := writeAttachmentsFiles(comment.Attachments, commentId, invokingClient)
+	if err != nil {
+		errPayload := `{
+			"eventType": "postError",
+			"data": {
+				"message": "An error has occurred, please try again later"
+			}
+		}
+		`
+		invokingClient.emitEvent([]byte(errPayload))
 		return
 	}
 
