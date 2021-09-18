@@ -195,7 +195,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     const handleComment = useCallback(
         (comment: IPost) => {
             getActiveTabPosts().map((post) => {
-                if (post.id == comment.replying_to.id.Int64.toString()) {
+                if (post.id == comment.replying_to.id.String) {
                     post.comments++;
                     return post;
                 }
