@@ -125,3 +125,28 @@ func Typing(socketPayload *models.SocketPayload, invokingClient *Client, eventTy
 		receiverClient.emitEvent([]byte(utils.MarshalJSON(payload)))
 	}
 }
+
+func MarkMessagesAsRead(socketPayload *models.SocketPayload, invokingClient *Client, clients []*Client) {
+	data := &models.MarkMessagesAsReadData{}
+
+	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), data)
+
+	updateQuery := `UPDATE messages SET read_by = ARRAY_APPEND(read_by, $1) WHERE conversation_id = $2 AND $1 <> ALL(read_by)`
+
+	_, err := db.DBPool.Exec(context.Background(), updateQuery, data.UserID, data.ConversationID)
+	if err != nil {
+		sendGenericSocketErr(invokingClient)
+	}
+
+	payload := &models.SocketPayload{}
+	returnData := &models.MarkMessagesAsReadReturnData{}
+
+	returnData.ConversationID = data.ConversationID
+
+	payload.EventType = "markedMessagesAsRead"
+	payload.Data = returnData
+
+	for _, client := range clients {
+		client.emitEvent([]byte(utils.MarshalJSON(payload)))
+	}
+}

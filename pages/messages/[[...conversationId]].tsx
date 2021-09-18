@@ -130,7 +130,7 @@ export default function Messages(): ReactElement {
                 };
                 setTimeoutId(null);
                 socket.send(JSON.stringify(payload));
-            }, 4000)
+            }, 3500)
         );
     };
 
@@ -228,7 +228,6 @@ export default function Messages(): ReactElement {
                     data: {
                         conversationId: msg.conversation_id,
                         userId: user.id,
-                        unreadMessages: msg.author_id == user.id ? 0 : 1,
                     },
                 };
 
@@ -411,13 +410,12 @@ export default function Messages(): ReactElement {
             setPreviewImage(null);
         }
 
-        if (!conversation.unread_messages) {
+        if (conversation.unread_messages) {
             const payload = {
                 eventType: "markMessagesAsRead",
                 data: {
                     conversationId: conversation.id,
                     userId: user.id,
-                    unreadMessages: conversation.unread_messages,
                 },
             };
 
@@ -582,7 +580,7 @@ export default function Messages(): ReactElement {
     useEffect(() => {
         if (socket) {
             socket.on("message", handleMessageReceived);
-            socket.on("markMessagesAsRead", handleMarkedMessagesAsRead);
+            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
             socket.on("typing", handleTyping);
             socket.on("stopTyping", handleStopTyping);
             socket.on("deleteMessage", handleDeleteMessage);
@@ -591,7 +589,7 @@ export default function Messages(): ReactElement {
         return () => {
             if (socket) {
                 socket.off("message", handleMessageReceived);
-                socket.off("markMessagesAsRead", handleMarkedMessagesAsRead);
+                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
                 socket.off("typing", handleTyping);
                 socket.off("stopTyping", handleStopTyping);
                 socket.off("deleteMessage", handleDeleteMessage);
