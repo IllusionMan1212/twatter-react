@@ -203,7 +203,7 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		INNER JOIN users receiver
 		ON receiver.id <> $1 AND receiver.id = ANY(convo.members)
 		LEFT JOIN messages
-		ON messages.conversation_id = convo.id AND $1 <> ANY(messages.read_by)
+		ON messages.conversation_id = convo.id AND $1 <> ALL(messages.read_by)
 		WHERE $1 = ANY(convo.participants)
 		GROUP BY convo.id, receiver.id
 		ORDER BY convo.last_updated DESC
@@ -349,7 +349,7 @@ func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {
 		FROM (SELECT COUNT(*) FROM conversations convo
 			INNER JOIN messages
 			ON messages.conversation_id = convo.id
-			WHERE $1 <> ANY(messages.read_by)
+			WHERE $1 <> ALL(messages.read_by)
 			AND $1 = ANY(convo.participants)
 			GROUP BY convo.id
 		) as convos`

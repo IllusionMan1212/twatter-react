@@ -101,8 +101,7 @@ func handleSocketEvent(socketPayload *models.SocketPayload, clients []*Client, i
 	case "stopTyping":
 		Typing(socketPayload, invokingClient, "stopTyping")
 	case "markMessagesAsRead":
-		fmt.Print("Received mark as read\n")
-		// TODO:
+		MarkMessagesAsRead(socketPayload, invokingClient, clients)
 	case "message":
 		Message(socketPayload, clients, invokingClient)
 	case "deleteMessage":

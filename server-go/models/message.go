@@ -51,3 +51,12 @@ type TypingData struct {
 type TypingReturnPayload struct {
 	ConversationID string `json:"conversationId"`
 }
+
+type MarkMessagesAsReadData struct {
+	ConversationID string `json:"conversationId"`
+	UserID         string `json:"userId"`
+}
+
+type MarkMessagesAsReadReturnData struct {
+	ConversationID string `json:"conversationId"`
+}
