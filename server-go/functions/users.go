@@ -36,14 +36,7 @@ func WriteProfileImage(mimetype string, userID string, buf []byte) error {
 	}
 
 	fileDirectory := fmt.Sprintf("../cdn/profile_images/%v/", userID)
-	err := os.Mkdir(fileDirectory, 0755)
-	if err != nil {
-		return err
-	}
-
-	filePath := fmt.Sprintf("%s/profile.%s", fileDirectory, extension)
-
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	err := os.MkdirAll(fileDirectory, 0755)
 	if err != nil {
 		return err
 	}
@@ -55,7 +48,37 @@ func WriteProfileImage(mimetype string, userID string, buf []byte) error {
 		return err
 	}
 
-	file.Write(imageBytes)
+	// remove all existing profile images before writing new ones
+	dir, err := os.Open(fileDirectory)
+	if err != nil {
+		return err
+	}
+
+	filesInDir, err := dir.ReadDir(0)
+	if err != nil {
+		return err
+	}
+
+	for _, fileInDir := range filesInDir {
+		os.Remove(fileDirectory + fileInDir.Name())
+	}
+
+	err = dir.Close()
+	if err != nil {
+		return err
+	}
+
+	filePath := fmt.Sprintf("%s/profile.%s", fileDirectory, extension)
+
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+
+	_, err = file.Write(imageBytes)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
