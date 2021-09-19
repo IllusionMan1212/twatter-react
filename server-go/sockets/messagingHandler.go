@@ -17,9 +17,7 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 
 	utils.UnmarshalJSON([]byte(utils.MarshalJSON(socketPayload.Data)), message)
 
-	// TODO: write attachment if exists
-
-	insertQuery := `INSERT INTO messages(id, author_id, conversation_id, content, read_by)
+	insertMessageQuery := `INSERT INTO messages(id, author_id, conversation_id, content, read_by)
 		VALUES($1, $2, $3, $4, $5)`
 
 	conversationId, err := strconv.Atoi(message.ConversationId)
@@ -50,7 +48,7 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	_, err = db.DBPool.Exec(context.Background(), insertQuery, messageId, message.SenderId, conversationId, message.Content, []uint64{uint64(senderId)})
+	_, err = db.DBPool.Exec(context.Background(), insertMessageQuery, messageId, message.SenderId, conversationId, message.Content, []uint64{uint64(senderId)})
 	if err != nil {
 		sendGenericSocketErr(invokingClient)
 		logger.Errorf("Error while inserting new message into database: %v", err)
@@ -70,11 +68,13 @@ func Message(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
+	returnedAttachment, err := writeMessageAttachmentFile(message.Attachment, messageId, message.ConversationId)
+
 	messagePayload := &models.MessageReturnPayload{}
 	payload := &models.SocketPayload{}
 
 	messagePayload.MessageID = fmt.Sprintf("%v", messageId)
-	messagePayload.Attachment = message.Attachment.Url
+	messagePayload.Attachment = returnedAttachment
 	messagePayload.Content = message.Content
 	messagePayload.ConversationID = message.ConversationId
 	messagePayload.ReceiverID = message.ReceiverId

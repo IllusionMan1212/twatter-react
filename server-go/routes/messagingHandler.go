@@ -10,6 +10,7 @@ import (
 	"illusionman1212/twatter-go/models"
 	"illusionman1212/twatter-go/utils"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 
@@ -152,7 +153,7 @@ func DeleteMessage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	updateQuery := `UPDATE messages SET deleted = true, content = '' WHERE id = $1`
+	updateQuery := `UPDATE messages SET deleted = true, content = '' WHERE id = $1;`
 
 	_, err = db.DBPool.Exec(context.Background(), updateQuery, body.MessageID)
 	if err != nil {
@@ -161,7 +162,21 @@ func DeleteMessage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: remove attachments from filesystem and from DB
+	err = os.RemoveAll(fmt.Sprintf("../cdn/messages/%s/%s", body.ConversationID, body.MessageID))
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Errorf("Error while deleting message attachment file(s): %v", err)
+		return
+	}
+
+	deleteQuery := `DELETE FROM message_attachments WHERE message_id = $1;`
+
+	_, err = db.DBPool.Exec(context.Background(), deleteQuery, body.MessageID)
+	if err != nil {
+		utils.InternalServerErrorWithJSON(w, "")
+		logger.Errorf("Error while removing message attachment from DB: %v", err)
+		return
+	}
 
 	utils.OkWithJSON(w, `{
 		"message": "Deleted message successfully",

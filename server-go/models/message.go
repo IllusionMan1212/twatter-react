@@ -16,15 +16,16 @@ type Message struct {
 }
 
 type SocketMessage struct {
-	Content        string     `json:"message_content"`
-	Attachment     Attachment `json:"attachments"`
-	SenderId       string     `json:"sender_id"`
-	ReceiverId     string     `json:"receiver_id"`
-	ConversationId string     `json:"conversation_id"`
+	Content        string           `json:"message_content"`
+	Attachment     SocketAttachment `json:"attachment"`
+	SenderId       string           `json:"sender_id"`
+	ReceiverId     string           `json:"receiver_id"`
+	ConversationId string           `json:"conversation_id"`
 }
 
 type DeleteMessageBody struct {
-	MessageID string `json:"message_id"`
+	MessageID      string `json:"message_id"`
+	ConversationID string `json:"conversation_id"`
 }
 
 type DeleteMessageSocketPayload struct {
@@ -33,14 +34,14 @@ type DeleteMessageSocketPayload struct {
 }
 
 type MessageReturnPayload struct {
-	MessageID      string `json:"id"`
-	Attachment     string `json:"attachment"`
-	Content        string `json:"content"`
-	ConversationID string `json:"conversation_id"`
-	ReceiverID     string `json:"receiver_id"`
-	AuthorID       string `json:"author_id"`
-	SentTime       string `json:"sent_time"`
-	Deleted        bool   `json:"deleted"`
+	MessageID      string     `json:"id"`
+	Attachment     Attachment `json:"attachment"`
+	Content        string     `json:"content"`
+	ConversationID string     `json:"conversation_id"`
+	ReceiverID     string     `json:"receiver_id"`
+	AuthorID       string     `json:"author_id"`
+	SentTime       string     `json:"sent_time"`
+	Deleted        bool       `json:"deleted"`
 }
 
 type TypingData struct {

@@ -25,8 +25,9 @@ func GetPostImages(w http.ResponseWriter, req *http.Request) {
 
 func GetMessageImage(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
+	conversationId := params["conversationId"]
 	messageId := params["messageId"]
 	fileName := params["fileName"]
 
-	http.ServeFile(w, req, fmt.Sprintf("../cdn/messages/%s/%s", messageId, fileName))
+	http.ServeFile(w, req, fmt.Sprintf("../cdn/messages/%s/%s/%s", conversationId, messageId, fileName))
 }

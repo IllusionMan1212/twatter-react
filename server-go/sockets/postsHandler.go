@@ -59,7 +59,7 @@ func Post(socketPayload *models.SocketPayload, clients []*Client, invokingClient
 		return
 	}
 
-	returnedAttachments, err := writeAttachmentsFiles(post.Attachments, postId, invokingClient)
+	returnedAttachments, err := writePostAttachmentsFiles(post.Attachments, postId)
 	if err != nil {
 		errPayload := fmt.Sprintf(`{
 			"eventType": "postError",
@@ -143,7 +143,7 @@ func Comment(socketPayload *models.SocketPayload, clients []*Client, invokingCli
 		return
 	}
 
-	returnedAttachments, err := writeAttachmentsFiles(comment.Attachments, commentId, invokingClient)
+	returnedAttachments, err := writePostAttachmentsFiles(comment.Attachments, commentId)
 	if err != nil {
 		errPayload := `{
 			"eventType": "postError",
