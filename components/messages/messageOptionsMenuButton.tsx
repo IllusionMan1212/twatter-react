@@ -20,6 +20,7 @@ export default function MessageOptionsMenuButton(
     const [offset, setOffset] = useState(-1);
 
     const handleDelete = () => {
+        setOptionsMenu(!optionsMenu);
         if (user.id != props.messageAuthorId) {
             return;
         }
@@ -53,7 +54,6 @@ export default function MessageOptionsMenuButton(
             <div
                 className={`pointer ${props.className} ${styles.optionsButton}`}
                 onClick={(e) => {
-                    e.stopPropagation();
                     setOptionsMenu(!optionsMenu);
                     if (props.parentContainerRef && !optionsMenu) {
                         setOffset(e.clientX);
