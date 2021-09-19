@@ -116,6 +116,7 @@ export interface MessageOptionsMenuButtonProps {
     messageId: string;
     messageAuthorId: string;
     receiverId: string;
+    conversationId: string;
 }
 
 export interface MediaModalProps {

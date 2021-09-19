@@ -313,7 +313,7 @@ export default function Messages(): ReactElement {
         }));
     }
 
-    const handleClickSend = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const handleClickSend = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!sendingAllowed) {
             e.preventDefault();
             return;
@@ -335,6 +335,11 @@ export default function Messages(): ReactElement {
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
         setNowSending(true);
+
+        const attachmentArrayBuffer = await attachment.data.arrayBuffer();
+        const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
+        const data = Buffer.from(attachmentBuffer).toString("base64");
+
         const payload = {
             eventType: "message",
             data: {
@@ -342,7 +347,10 @@ export default function Messages(): ReactElement {
                 receiver_id: activeConversation.receiver_id,
                 sender_id: user.id,
                 message_content: messageContent,
-                attachment: attachment,
+                attachment: {
+                    data: data,
+                    mimetype: attachment.mimetype
+                },
             },
         };
         messageInputRef.current.textContent = "";

@@ -47,6 +47,7 @@ export default function Message(props: MessageProps): ReactElement {
                         messageId={props.messageId}
                         messageAuthorId={props.messageAuthorId}
                         receiverId={props.receiverId}
+                        conversationId={props.conversationId}
                     />
                 )}
             </div>

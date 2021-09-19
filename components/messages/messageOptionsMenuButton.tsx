@@ -27,6 +27,7 @@ export default function MessageOptionsMenuButton(
 
         const payload = {
             message_id: props.messageId,
+            conversation_id: props.conversationId
         };
         const socketPayload = {
             eventType: "deleteMessage",
