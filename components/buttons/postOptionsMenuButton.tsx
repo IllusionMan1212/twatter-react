@@ -18,7 +18,13 @@ export default function PostOptionsMenuButton(
     const [optionsMenu, setOptionsMenu] = useState(false);
     const [offset, setOffset] = useState(-1);
 
+    const handleReport = () => {
+        setOptionsMenu(!optionsMenu);
+        console.log("Coming soon");
+    }
+
     const handleShare = () => {
+        setOptionsMenu(!optionsMenu);
         if (navigator.share) {
             navigator.share({
                 url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`,
@@ -35,6 +41,7 @@ export default function PostOptionsMenuButton(
     }
 
     const handleCopyLink = () => {
+        setOptionsMenu(!optionsMenu);
         const link = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`;
         const tempInput = document.createElement("input");
         tempInput.value = link;
@@ -56,6 +63,7 @@ export default function PostOptionsMenuButton(
     }
 
     const handleDelete = () => {
+        setOptionsMenu(!optionsMenu);
         if (props.postAuthorId != props.currentUserId) {
             return;
         }
@@ -98,9 +106,6 @@ export default function PostOptionsMenuButton(
                 className="pointer"
                 size="30"
                 color="#8F8F8F"
-                onClick={() => {
-                    setOptionsMenu(!optionsMenu);
-                }}
             ></DotsThree>
             {optionsMenu && (
                 <ContextMenu
@@ -110,7 +115,7 @@ export default function PostOptionsMenuButton(
                     <ContextMenuItem
                         text="Report Post"
                         icon={Flag}
-                        onClick={() => { console.log("Coming soon") }}
+                        onClick={handleReport}
                     />
                     <hr />
                     <ContextMenuItem
