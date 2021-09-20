@@ -112,6 +112,10 @@ func writePostAttachmentsFiles(attachments []models.SocketAttachment, postId uin
 }
 
 func writeMessageAttachmentFile(attachment models.SocketAttachment, messageId uint64, conversationId string) (models.Attachment, error) {
+	if attachment.Data == "" {
+		return models.Attachment{}, nil
+	}
+
 	buf, err := base64.StdEncoding.DecodeString(attachment.Data)
 	if err != nil {
 		logger.Errorf("Error while decoding base64 string: %v", err)

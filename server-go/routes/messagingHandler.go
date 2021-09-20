@@ -213,6 +213,20 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 			GROUP BY content
 			ORDER BY MAX(sent_time) DESC
 			LIMIT 1) as last_message,
+		(SELECT author_id
+			FROM messages
+			WHERE conversation_id = convo.id
+			GROUP BY author_id
+			ORDER BY MAX(sent_time) DESC
+			LIMIT 1) as last_message_author,
+		(SELECT attachment.url
+			FROM messages
+			LEFT JOIN message_attachments attachment
+			ON attachment.message_id = messages.id
+			WHERE conversation_id = convo.id
+			GROUP BY attachment.url
+			ORDER BY MAX(sent_time) DESC
+			LIMIT 1) as last_message_attachment_url,
 		COUNT(messages) as unread_messages
 		FROM conversations convo
 		INNER JOIN users receiver
@@ -238,10 +252,12 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		conversation := &models.Conversation{}
 		var conversationId uint64
 		var receiverId uint64
+		var lastMessageAuthorID uint64
+		var lastMessageAttachment sql.NullString
 
 		err := rows.Scan(&conversationId, &conversation.LastUpdated,
 			&receiverId, &conversation.Receiver.Username, &conversation.Receiver.DisplayName, &conversation.Receiver.AvatarURL,
-			&conversation.LastMessage,
+			&conversation.LastMessage, &lastMessageAuthorID, &lastMessageAttachment,
 			&conversation.UnreadMessages)
 		if err != nil {
 			utils.InternalServerErrorWithJSON(w, "")
@@ -251,7 +267,15 @@ func GetConversations(w http.ResponseWriter, req *http.Request) {
 		conversation.ID = fmt.Sprintf("%v", conversationId)
 		conversation.Receiver.ID = fmt.Sprintf("%v", receiverId)
 
-		// TODO: if lastmessage has attachment only and no content, show "sent an attachment" as lastmessage
+		if conversation.LastMessage.String == "" && lastMessageAttachment.String != "" {
+			if lastMessageAuthorID == receiverId {
+				conversation.LastMessage.String = fmt.Sprintf("%s sent an attachment", conversation.Receiver.DisplayName)
+				conversation.LastMessage.Valid = true
+			} else {
+				conversation.LastMessage.String = "You sent an attachment"
+				conversation.LastMessage.Valid = true
+			}
+		}
 
 		conversations = append(conversations, *conversation)
 	}
