@@ -234,13 +234,23 @@ export default function Messages(): ReactElement {
                 // conversation is active, so the user has read the message
                 socket.send(JSON.stringify(payload));
             }
+
+            let lastMessage = msg.content;
+            if (!msg.content && msg.attachment) {
+                if (msg.author_id == user.id) {
+                    lastMessage = "You sent an attachment";
+                } else {
+                    lastMessage = `${activeConversation.display_name} sent an attachment`;
+                }
+            }
+
             const newConversations = conversations.map(
                 (conversation: IConversation) => {
                     return conversation.id == msg.conversation_id
                         ? {
                               ...conversation,
                               last_message: {
-                                  String: msg.content,
+                                  String: lastMessage,
                                   Valid: true
                               },
                               last_updated: {
@@ -336,7 +346,7 @@ export default function Messages(): ReactElement {
             .trim();
         setNowSending(true);
 
-        const attachmentArrayBuffer = await attachment.data.arrayBuffer();
+        const attachmentArrayBuffer = await attachment?.data.arrayBuffer();
         const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
         const data = Buffer.from(attachmentBuffer).toString("base64");
 
@@ -348,8 +358,8 @@ export default function Messages(): ReactElement {
                 sender_id: user.id,
                 message_content: messageContent,
                 attachment: {
-                    data: data,
-                    mimetype: attachment.mimetype
+                    data: data || "",
+                    mimetype: attachment?.mimetype || ""
                 },
             },
         };
