@@ -10,16 +10,10 @@ interface ICallback {
 
 export class TwatWebSocket {
     conn: WebSocket;
-    callbacks: ICallback = {};
+    private callbacks: ICallback = {};
 
     constructor(url: string) {
         this.conn = new WebSocket(url);
-        this.conn.onopen = function () {
-            console.log("WebSocket opened");
-        };
-        this.conn.onclose = function () {
-            console.log("WebSocket closed");
-        };
     }
 
     on(event: string, callback: (data: any) => void): void {

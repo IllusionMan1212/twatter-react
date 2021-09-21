@@ -15,8 +15,8 @@ interface UserContextType {
 
 const UserContextDefaultValues : UserContextType = {
     user: null,
-    login: () => {return;},
-    logout: () => {return;},
+    login: () => {},
+    logout: () => {},
     socket: null,
 };
 
@@ -49,6 +49,7 @@ export function UserWrapper({ children }: any): ReactElement {
     const [user, setUser] = useState<IUser>(null);
     const [socket, setSocket] = useState<TwatWebSocket>(null);
     const [loading, setLoading] = useState(true);
+    const [reconnectInterval, setReconnectInterval] = useState<NodeJS.Timeout>(null);
 
     const { data } = useSWR(
         `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
@@ -63,6 +64,29 @@ export function UserWrapper({ children }: any): ReactElement {
 
         setSocket(_socket);
     }, []);
+
+    useEffect(() => {
+        if (socket) {
+            socket.conn.onopen = () => {
+                console.log("WebSocket opened");
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                }
+            }
+
+            socket.conn.onclose = () => {
+                console.log("WebSocket closed");
+                if (reconnectInterval) {
+                    return;
+                }
+                const interval = setInterval(() => {
+                    openSocket();
+                }, 5000);
+
+                setReconnectInterval(interval);
+            }
+        }
+    }, [socket]);
 
     useEffect(() => {
         setLoading(true);
