@@ -4,83 +4,20 @@ import Router from "next/router";
 import Search from "./search";
 import { ChatsTeardrop, ArrowLeft, Bell } from "phosphor-react";
 import UserContextMenu from "./userContextMenu";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement, useState } from "react";
 import { StatusBarProps } from "src/types/props";
-import { useToastContext } from "src/contexts/toastContext";
-import axiosInstance from "src/axios";
-import axios from "axios";
 import ProfileImage from "./post/profileImage";
-import { useUserContext } from "src/contexts/userContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
+    const { unreadMessages } = useGlobalContext();
+
     const [userMenu, setUserMenu] = useState(false);
-
-    const toast = useToastContext();
-    const { socket } = useUserContext();
-
-    const [unreadMessages, setUnreadMessages] = useState(0);
     const [unreadNotifications] = useState(0);
 
     const handleClickBack = () => {
         history.back();
     };
-
-    const handleMessageFromServer = useCallback(
-        (msg) => {
-            if (props.user.id != msg.sender) {
-                setUnreadMessages(unreadMessages + 1);
-            }
-        },
-        [unreadMessages]
-    );
-
-    const handleMarkedMessagesAsRead = useCallback(
-        (payload) => {
-            setUnreadMessages(unreadMessages - payload.messagesRead);
-        },
-        [unreadMessages]
-    );
-
-    useEffect(() => {
-        const cancelToken = axios.CancelToken;
-        const tokenSource = cancelToken.source();
-        axiosInstance
-            .get("/messaging/getUnreadMessages", {
-                cancelToken: tokenSource.token,
-            })
-            .then((res) => {
-                setUnreadMessages(res.data.unreadMessages);
-            })
-            .catch((err) => {
-                if (axios.isCancel(err)) {
-                    console.log("request canceled");
-                } else {
-                    err?.response?.data?.status != 404 &&
-                        toast(
-                            err?.response?.data?.message ??
-                                "An error has occurred while fetching unread messages",
-                            4000
-                        );
-                }
-            });
-        return () => {
-            tokenSource.cancel();
-        };
-    }, [toast]);
-
-    useEffect(() => {
-        if (socket) {
-            socket.on("messageFromServer", handleMessageFromServer);
-            socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
-        }
-
-        return () => {
-            if (socket) {
-                socket.off("messageFromServer", handleMessageFromServer);
-                socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
-            }
-        };
-    }, [handleMessageFromServer, handleMarkedMessagesAsRead]);
 
     return (
         <div
@@ -116,9 +53,9 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                         size="25"
                         weight="fill"
                     ></ChatsTeardrop>
-                    {unreadMessages != 0 && (
+                    {unreadMessages.length != 0 && (
                         <div className={styles.unreadBubble}>
-                            {unreadMessages > 99 ? "99+" : unreadMessages}
+                            {unreadMessages.length > 99 ? "99+" : unreadMessages.length}
                         </div>
                     )}
                 </div>

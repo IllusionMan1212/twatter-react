@@ -37,11 +37,13 @@ import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import DeletedMessage from "components/messages/deletedMessage";
 import { DeleteMessagePayload } from "src/types/socketEvents";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
 
     const toast = useToastContext();
+    const { setUnreadMessages, setActiveConversationId } = useGlobalContext();
 
     const { user, socket } = useUserContext();
 
@@ -289,6 +291,12 @@ export default function Messages(): ReactElement {
                     : conversation;
             });
             setConversations(newConversations);
+
+            setUnreadMessages((unreadMessages) => {
+                return unreadMessages.filter((conversationId) => {
+                    return payload.conversationId != conversationId;
+                });
+            });
         },
         [conversations]
     );
@@ -522,6 +530,10 @@ export default function Messages(): ReactElement {
     }, [atBottom, setNewMessagesAlert]);
 
     useEffect(() => {
+        setPage(0);
+        pageRef.current = 0;
+        setReachedStartOfMessages(false);
+        setFirstItemIndex(START_INDEX);
         if (!router.query?.conversationId?.[0]) {
             setIsConversationActive(false);
 
@@ -552,6 +564,9 @@ export default function Messages(): ReactElement {
             display_name: newActiveConversation.receiver?.display_name,
             receiver_id: newActiveConversation.receiver?.id,
         });
+        console.log(router.query.conversationId[0]);
+        setActiveConversationId(router.query.conversationId[0]);
+        setMessages([]);
         setIsConversationActive(true);
 
         getMessages(router.query.conversationId[0]).then((messages) => {
@@ -562,13 +577,7 @@ export default function Messages(): ReactElement {
         });
 
         return () => {
-            setActiveConversation(null);
-            setIsConversationActive(false);
-            setMessages([]);
-            setPage(0);
-            pageRef.current = 0;
-            setReachedStartOfMessages(false);
-            setFirstItemIndex(START_INDEX);
+            setActiveConversationId("");
         }
     }, [router.query?.conversationId, conversations?.length]);
 

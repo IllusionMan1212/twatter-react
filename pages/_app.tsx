@@ -1,9 +1,10 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
 import React, { ReactElement, useCallback, useEffect } from "react";
-import { ToastWrapper, useToastContext } from "../src/contexts/toastContext";
+import { ToastWrapper, useToastContext } from "src/contexts/toastContext";
 import { NextSeo } from "next-seo";
 import { UserWrapper, useUserContext } from "src/contexts/userContext";
+import { GlobalWrapper } from "src/contexts/globalContext";
 import "../styles/globals.scss";
 
 import "swiper/swiper.scss";
@@ -109,7 +110,9 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
             </Head>
             <UserWrapper>
                 <ToastWrapper>
-                    <Component {...pageProps} />
+                    <GlobalWrapper>
+                        <Component {...pageProps} />
+                    </GlobalWrapper>
                 </ToastWrapper>
             </UserWrapper>
         </>
