@@ -384,22 +384,34 @@ func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	query := `SELECT COUNT(*) AS unread_convos
-		FROM (SELECT COUNT(*) FROM conversations convo
+	query := `SELECT convo.id FROM conversations convo
 			INNER JOIN messages
 			ON messages.conversation_id = convo.id
 			WHERE $1 <> ALL(messages.read_by)
 			AND $1 = ANY(convo.participants)
-			GROUP BY convo.id
-		) as convos`
+			GROUP BY convo.id;`
 
-	var unread_convos int
+	unread_convos := make([]string, 0)
 
-	err = db.DBPool.QueryRow(context.Background(), query, sessionUser.ID).Scan(&unread_convos)
+	rows, err := db.DBPool.Query(context.Background(), query, sessionUser.ID)
 	if err != nil {
 		utils.InternalServerErrorWithJSON(w, "")
 		logger.Errorf("Error while querying for unread messages: %v", err)
 		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var conversationId uint64
+
+		err = rows.Scan(&conversationId)
+		if err != nil {
+			utils.InternalServerErrorWithJSON(w, "")
+			logger.Errorf("Error while scanning unread conversations: %v", err)
+			return
+		}
+
+		unread_convos = append(unread_convos, fmt.Sprintf("%v", conversationId))
 	}
 
 	utils.OkWithJSON(w, fmt.Sprintf(`{
@@ -407,5 +419,5 @@ func GetUnreadMessages(w http.ResponseWriter, req *http.Request) {
 		"status": 200,
 		"success": true,
 		"unreadMessages": %v
-	}`, unread_convos))
+	}`, utils.MarshalJSON(unread_convos)))
 }

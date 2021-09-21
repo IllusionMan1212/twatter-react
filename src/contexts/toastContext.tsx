@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { createContext, ReactElement, useContext, useState } from "react";
-import Toast from "../../components/toast";
+import Toast from "components/toast";
 
 const ToastContext = createContext((_text: string, _length: number) => void {});
 
