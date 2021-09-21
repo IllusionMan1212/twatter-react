@@ -15,9 +15,9 @@ interface GlobalContextType {
 
 const GlobalContextDefaultValues: GlobalContextType = {
     unreadMessages: [],
-    setUnreadMessages: () => {return;},
+    setUnreadMessages: () => {},
     activeConversationId: null,
-    setActiveConversationId: () => {return;}
+    setActiveConversationId: () => {}
 };
 
 const GlobalContext = createContext<GlobalContextType>(
