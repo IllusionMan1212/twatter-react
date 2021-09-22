@@ -60,7 +60,14 @@ export function UserWrapper({ children }: any): ReactElement {
     const hasUser = Boolean(_user);
 
     const openSocket = useCallback(() => {
-        const _socket = new TwatWebSocket(`ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`);
+        let wsURL = "";
+        if (process.env.NODE_ENV == "development") {
+            wsURL = `ws://${process.env.NEXT_PUBLIC_DOMAIN}/ws`;
+        } else if (process.env.NODE_ENV == "production") {
+            wsURL = `wss://${process.env.NEXT_PUBLIC_DOMAIN}/ws`;
+        }
+
+        const _socket = new TwatWebSocket(wsURL);
 
         setSocket(_socket);
     }, []);
