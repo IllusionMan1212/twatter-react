@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"illusionman1212/twatter-go/utils"
+	"net"
 	"os"
 	"time"
 
@@ -92,6 +93,19 @@ const attachments_table = `CREATE TABLE IF NOT EXISTS attachments(
 var DBPool *pgxpool.Pool
 var Snowflake = sonyflake.NewSonyflake(sonyflake.Settings{
 	StartTime: time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC),
+	MachineID: func() (uint16, error) {
+		conn, err := net.Dial("udp", "8.8.8.8:80")
+		if err != nil {
+			return 0, err
+		}
+		defer conn.Close()
+
+		addr := conn.LocalAddr().(*net.UDPAddr)
+
+		machineID := uint16(addr.IP[2])<<8 + uint16(addr.IP[3])
+
+		return machineID, nil
+	},
 })
 
 func InitializeDB() error {
