@@ -12,9 +12,11 @@ import { useToastContext } from "src/contexts/toastContext";
 import { IBirthday } from "src/types/general";
 import { handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function UserSetup(): ReactElement {
     const toast = useToastContext();
+    const { login } = useUserContext();
 
     const dayRef = useRef<HTMLSelectElement>(null);
     const monthRef = useRef<HTMLSelectElement>(null);
@@ -72,7 +74,6 @@ export default function UserSetup(): ReactElement {
             .post("users/initialSetup", payload)
             .then((res) => {
                 toast(res.data.message, 4000);
-                // TODO: login() here
                 Router.push("/home");
             })
             .catch((err) => {
@@ -107,6 +108,7 @@ export default function UserSetup(): ReactElement {
             )
             .then((res) => {
                 if (res.data.user) {
+                    login(res.data.user);
                     if (res.data.user.finished_setup == true) {
                         Router.push("/home");
                         return;

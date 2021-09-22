@@ -527,7 +527,6 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: return the user as well to use the frontend login() funcion so that the home page loads correctly
 	utils.OkWithJSON(w, `{
 		"message": "Setup has been completed",
 		"status": 200,
