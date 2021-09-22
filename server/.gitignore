@@ -1,5 +1,0 @@
-# go server env file
-.env
-
-# redis dump file
-dump.rdb
