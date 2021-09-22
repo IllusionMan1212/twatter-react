@@ -88,8 +88,8 @@ func writePostAttachmentsFiles(attachments []models.SocketAttachment, postId uin
 		insertQuery := `INSERT INTO attachments(post_id, url, type, size)
 		VALUES($1, $2, $3, $4)`
 
-		attachmentUrl := fmt.Sprintf("%s/cdn/posts/%v/%v.%s",
-			os.Getenv("API_DOMAIN_URL"),
+		attachmentUrl := fmt.Sprintf("%s/posts/%v/%v.%s",
+			os.Getenv("CDN_DOMAIN_URL"),
 			postId,
 			i+1,
 			extension)
@@ -181,8 +181,8 @@ func writeMessageAttachmentFile(attachment models.SocketAttachment, messageId ui
 	insertMessageAttachmentQuery := `INSERT INTO message_attachments(message_id, url, type, size)
 		VALUES($1, $2, $3, $4);`
 
-	attachmentUrl := fmt.Sprintf("%s/cdn/messages/%s/%v/1.%s",
-		os.Getenv("API_DOMAIN_URL"),
+	attachmentUrl := fmt.Sprintf("%s/messages/%s/%v/1.%s",
+		os.Getenv("CDN_DOMAIN_URL"),
 		conversationId,
 		messageId,
 		extension)

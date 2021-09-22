@@ -1,4 +1,4 @@
-module illusionman1212/twatter-go
+module github.com/illusionman1212/twatter-go
 
 go 1.16
 

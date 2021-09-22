@@ -1,4 +1,4 @@
-package routes
+package main
 
 import "github.com/gorilla/mux"
 

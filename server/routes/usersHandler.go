@@ -508,7 +508,7 @@ func InitialSetup(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		avatar_url := fmt.Sprintf("%s/cdn/profile_images/%v/profile.%s", os.Getenv("API_DOMAIN_URL"), sessionUser.ID, extension)
+		avatar_url := fmt.Sprintf("%s/profile_images/%v/profile.%s", os.Getenv("CDN_DOMAIN_URL"), sessionUser.ID, extension)
 
 		// TODO: compress the image and have multiple sizes
 

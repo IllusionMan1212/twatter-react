@@ -39,7 +39,7 @@ func main() {
 	go hub.Run()
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://192.168.119.4:3000"},
+		AllowedOrigins:   []string{os.Getenv("ALLOWED_ORIGINS")},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Origin", "Content-Type", "Accept"},
 		ExposedHeaders:   []string{"Content-Length", "Content-Type"},
@@ -47,12 +47,10 @@ func main() {
 	})
 
 	router := mux.NewRouter().StrictSlash(true)
-	cdnSubrouter := router.PathPrefix("/cdn/").Subrouter()
 	apiSubrouter := router.PathPrefix("/api/").Subrouter()
 	routes.RegisterUsersRoutes(apiSubrouter)     // only some routes need to validate the user/token
 	routes.RegisterMessagingRoutes(apiSubrouter) // all routes need to validate the user/token
 	routes.RegisterPostsRoutes(apiSubrouter)     // only some routes need to validate the user/token
-	routes.RegisterCdnRoutes(cdnSubrouter)       // no validation required
 	router.HandleFunc("/ws", func(w http.ResponseWriter, req *http.Request) {
 		sockets.ServeWs(hub, w, req)
 	})

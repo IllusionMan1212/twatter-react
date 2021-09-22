@@ -41,7 +41,7 @@ func WriteProfileImage(mimetype string, userID string, buf []byte) error {
 		return err
 	}
 
-	avatar_url := fmt.Sprintf("%s/cdn/profile_images/%v/profile.%s", os.Getenv("API_DOMAIN_URL"), userID, extension)
+	avatar_url := fmt.Sprintf("%s/profile_images/%v/profile.%s", os.Getenv("CDN_DOMAIN_URL"), userID, extension)
 
 	_, err = db.DBPool.Exec(context.Background(), "UPDATE users SET avatar_url = $1 WHERE id = $2", avatar_url, userID)
 	if err != nil {
