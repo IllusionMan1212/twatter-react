@@ -52,7 +52,7 @@ export function UserWrapper({ children }: any): ReactElement {
     const [reconnectInterval, setReconnectInterval] = useState<NodeJS.Timeout>(null);
 
     const { data } = useSWR(
-        `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
+        `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
         fetcher
     );
     const _user = data?.user;

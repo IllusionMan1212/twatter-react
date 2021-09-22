@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const baseUrl = `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api`;
+const baseUrl = `${process.env.NEXT_PUBLIC_DOMAIN_URL}/`;
 const axiosInstance = axios.create({
-    baseURL: `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api`,
+    baseURL: `${process.env.NEXT_PUBLIC_DOMAIN_URL}/`,
     timeout: 15000,
     withCredentials: true,
 });

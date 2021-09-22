@@ -143,7 +143,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
         if (props.post) {
             axios
                 .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.post.id}`,
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getComments/${props.post.id}`,
                     { withCredentials: true }
                 )
                 .then((response) => {
@@ -339,7 +339,7 @@ export async function getServerSideProps(
 
     try {
         res = await axios.get(
-            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
             {
                 withCredentials: true,
                 // cookies aren't being sent automatically here for some reason

@@ -39,7 +39,7 @@ export default function Login(): ReactElement {
             if (validateForm()) {
                 axios
                     .post(
-                        `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/login`,
+                        `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/login`,
                         form,
                         { withCredentials: true }
                     )

@@ -32,7 +32,7 @@ export default function ForgotPassword(): ReactElement {
             };
             axios
                 .post(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/forgotPassword`,
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/forgotPassword`,
                     payload,
                     { withCredentials: true }
                 )

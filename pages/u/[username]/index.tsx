@@ -339,7 +339,7 @@ export default function Profile(props: ProfileProps): ReactElement {
         (page: number, postsType: string): Promise<IPost[]> => {
             return axios
                 .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
                     { withCredentials: true }
                 )
                 .then((res) => {
@@ -361,7 +361,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     const getPostsCount = useCallback((): Promise<number> => {
         return axios
             .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getPostsCount/${props.user.id}`,
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPostsCount/${props.user.id}`,
                 { withCredentials: true }
             )
             .then((res) => {
@@ -968,7 +968,7 @@ export async function getServerSideProps(
 
     try {
         const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/getUserData?username=${context.params.username}`,
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/getUserData?username=${context.params.username}`,
             { withCredentials: true }
         );
         user = res.data.user;

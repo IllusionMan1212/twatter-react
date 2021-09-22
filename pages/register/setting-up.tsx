@@ -103,7 +103,7 @@ export default function UserSetup(): ReactElement {
     useEffect(() => {
         axios
             .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validateToken`,
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
                 { withCredentials: true }
             )
             .then((res) => {

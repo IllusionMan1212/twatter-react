@@ -58,7 +58,7 @@ export default function ResetPassword(): ReactElement {
                 };
                 axios
                     .post(
-                        `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/resetPassword`,
+                        `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/resetPassword`,
                         payload
                     )
                     .then((res) => {
@@ -87,7 +87,7 @@ export default function ResetPassword(): ReactElement {
         if (router.query.token) {
             axios
                 .get(
-                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/users/validatePasswordResetToken?token=${router.query.token}`
+                    `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validatePasswordResetToken?token=${router.query.token}`
                 )
                 .then((res) => {
                     setLoading(false);

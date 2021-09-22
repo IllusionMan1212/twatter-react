@@ -171,7 +171,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
         axios
             .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/api/posts/getComments/${props.modalData.post.id}`,
+                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getComments/${props.modalData.post.id}`,
                 { cancelToken: tokenSource.token, withCredentials: true }
             )
             .then((res) => {
