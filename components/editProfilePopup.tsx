@@ -19,7 +19,6 @@ import { allowedProfileImageMimetypes } from "src/utils/variables";
 interface UpdateProfilePayload {
     eventType: string;
     data: {
-        userId: string;
         displayName: string;
         profileImage: {
             mimetype: string;
@@ -44,7 +43,7 @@ export default function EditProfilePopup(
     );
     const [bio, setBio] = useState<string>(props.userData.bio);
     const [showBirthdayFields, setShowBirthdayFields] = useState(false);
-    const [selectedBirthday, setSelectedBirthday] = useState<IBirthday>(null);
+    const [selectedBirthday, setSelectedBirthday] = useState<IBirthday>({day: 1, month:1, year: 1});
     const [birthday, setBirthday] = useState(props.userData.birthday.Time.toString());
 
     const handleSaveButtonClick = async () => {
@@ -71,7 +70,6 @@ export default function EditProfilePopup(
         const payload: UpdateProfilePayload = {
             eventType: "updateProfile",
             data: {
-                userId: props.userData.id,
                 displayName: displayName,
                 profileImage: profileImagePayload,
                 bio: bio,
@@ -102,15 +100,12 @@ export default function EditProfilePopup(
 
     const handleCancelBirthday = () => {
         setShowBirthdayFields(false);
-        setSelectedBirthday(null);
+        setSelectedBirthday({day: 1, month: 1, year: 1});
     };
 
     const handleRemoveBirthday = () => {
         const payload = {
             eventType: "removeBirthday",
-            data: {
-                id: props.userData.id,
-            },
         };
         setSelectedBirthday(null);
         socket.send(JSON.stringify(payload));
