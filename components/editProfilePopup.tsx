@@ -100,7 +100,9 @@ export default function EditProfilePopup(
 
     const handleCancelBirthday = () => {
         setShowBirthdayFields(false);
-        setSelectedBirthday({day: 1, month: 1, year: 1});
+        if (!props.userData.birthday.Valid) {
+            setSelectedBirthday({day: 1, month: 1, year: 1});
+        }
     };
 
     const handleRemoveBirthday = () => {
