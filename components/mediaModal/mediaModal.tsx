@@ -7,14 +7,14 @@ import {
     ArrowRight,
 } from "phosphor-react";
 import styles from "./mediaModal.module.scss";
-import messagesStyles from "../../styles/messages.module.scss";
+import messagesStyles from "styles/messages.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { formatDate } from "../../src/utils/functions";
+import { formatDate } from "src/utils/functions";
 import LikeButton from "../buttons/likeButton";
-import { MediaModalProps } from "../../src/types/props";
+import { MediaModalProps } from "src/types/props";
 import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
-import { useToastContext } from "../../src/contexts/toastContext";
-import SwiperCore, { Navigation } from "swiper";
+import { useToastContext } from "src/contexts/toastContext";
+import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "../loading";
 import axios from "axios";
@@ -33,10 +33,7 @@ import Link from "next/link";
 import CommentButton from "../buttons/commentButton";
 import { LikePayload } from "src/types/utils";
 import ProfileImage from "../post/profileImage";
-import { NavigationMethods } from "swiper/types/components/navigation";
 import { useUserContext } from "src/contexts/userContext";
-
-SwiperCore.use([Navigation]);
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
     const toast = useToastContext();
@@ -457,17 +454,12 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             </div>
             <div className={styles.modalImageContainer}>
                 <Swiper
+                    modules={[Navigation]}
                     slidesPerView={1}
                     initialSlide={props.modalData.imageIndex}
-                    onInit={(swiper) => {
-                        (swiper.navigation as NavigationMethods).init();
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        swiper.params.navigation.prevEl = prevRef.current;
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        swiper.params.navigation.nextEl = nextRef.current;
-                        (swiper.navigation as NavigationMethods).update();
+                    navigation={{
+                        prevEl: prevRef.current,
+                        nextEl: nextRef.current
                     }}
                 >
                     {props.modalData.post.attachments.length > 1 && (

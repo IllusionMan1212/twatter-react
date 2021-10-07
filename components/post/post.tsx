@@ -2,14 +2,14 @@
 import styles from "./post.module.scss";
 import Link from "next/link";
 import { ReactElement } from "react";
-import { timeSince } from "../../src/utils/functions";
-import LikeButton from "../buttons/likeButton";
-import { PostProps } from "../../src/types/props";
-import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
+import { timeSince } from "src/utils/functions";
+import LikeButton from "components/buttons/likeButton";
+import { PostProps } from "src/types/props";
+import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
 import Router from "next/router";
-import CommentButton from "../buttons/commentButton";
+import CommentButton from "components/buttons/commentButton";
 import { ArrowArcLeft } from "phosphor-react";
-import AttachmentsContainer from "../attachmentsContainer";
+import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
 
 export default function Post(props: PostProps): ReactElement {

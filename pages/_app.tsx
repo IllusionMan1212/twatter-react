@@ -7,8 +7,8 @@ import { UserWrapper, useUserContext } from "src/contexts/userContext";
 import { GlobalWrapper } from "src/contexts/globalContext";
 import "../styles/globals.scss";
 
-import "swiper/swiper.scss";
-import "swiper/components/navigation/navigation.scss";
+import "swiper/scss";
+import "swiper/scss/navigation";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     const toast = useToastContext();
