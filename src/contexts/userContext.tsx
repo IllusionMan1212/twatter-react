@@ -5,6 +5,7 @@ import Router from "next/router";
 import useSWR from "swr";
 import Loading from "components/loading";
 import { TwatWebSocket } from "../customSocket";
+import { ContextWrapperProps } from "src/types/props";
 
 interface UserContextType {
     user: IUser;
@@ -15,8 +16,8 @@ interface UserContextType {
 
 const UserContextDefaultValues : UserContextType = {
     user: null,
-    login: () => {},
-    logout: () => {},
+    login: null,
+    logout: null,
     socket: null,
 };
 
@@ -45,7 +46,7 @@ const fetcher = (url: string) =>
             return { user: data?.user, token: data?.token || null };
         });
 
-export function UserWrapper({ children }: any): ReactElement {
+export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     const [user, setUser] = useState<IUser>(null);
     const [socket, setSocket] = useState<TwatWebSocket>(null);
     const [loading, setLoading] = useState(true);
@@ -79,7 +80,7 @@ export function UserWrapper({ children }: any): ReactElement {
                 if (reconnectInterval) {
                     clearInterval(reconnectInterval);
                 }
-            }
+            };
 
             socket.conn.onclose = () => {
                 console.log("WebSocket closed");
@@ -91,9 +92,9 @@ export function UserWrapper({ children }: any): ReactElement {
                 }, 5000);
 
                 setReconnectInterval(interval);
-            }
+            };
         }
-    }, [socket]);
+    }, [socket, openSocket]);
 
     useEffect(() => {
         setLoading(true);

@@ -1,17 +1,31 @@
 /* eslint-disable react/react-in-jsx-scope */
 import Head from "next/head";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { FormEvent, ReactElement, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import LayoutRegular from "../../components/layouts/layoutRegular";
-import registerStyles from "../../styles/register-login.module.scss";
-import forgotPassStyles from "../../styles/forgot-password.module.scss";
-import StatusBarLoggedOut from "../../components/statusBarLoggedOut";
+import LayoutRegular from "components/layouts/layoutRegular";
+import registerStyles from "styles/register-login.module.scss";
+import forgotPassStyles from "styles/forgot-password.module.scss";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
 import { EyeClosed, Eye } from "phosphor-react";
-import { useToastContext } from "../../src/contexts/toastContext";
-import Loading from "../../components/loading";
+import { useToastContext } from "src/contexts/toastContext";
+import Loading from "components/loading";
 import { IUser } from "src/types/general";
 import ProfileImage from "components/post/profileImage";
+
+interface PostApiRequest {
+    password: string;
+    confirm_password: string;
+    token: string | string[];
+}
+
+interface PostApiResponse {
+    message: string;
+}
+
+interface GetApiResponse {
+    user: IUser;
+}
 
 export default function ResetPassword(): ReactElement {
     const toast = useToastContext();
@@ -57,7 +71,7 @@ export default function ResetPassword(): ReactElement {
                     token: router.query.token,
                 };
                 axios
-                    .post(
+                    .post<PostApiRequest, AxiosResponse<PostApiResponse>>(
                         `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/resetPassword`,
                         payload
                     )
@@ -89,7 +103,7 @@ export default function ResetPassword(): ReactElement {
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validatePasswordResetToken?token=${router.query.token}`
                 )
-                .then((res) => {
+                .then((res: AxiosResponse<GetApiResponse>) => {
                     setLoading(false);
                     setUser(res.data.user);
                 })
@@ -101,7 +115,7 @@ export default function ResetPassword(): ReactElement {
                     router.push("/forgot-password");
                 });
         }
-    }, [router.query]);
+    }, [router, router.query, toast]);
 
     return (
         <>

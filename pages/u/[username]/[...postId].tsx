@@ -4,7 +4,7 @@ import Loading from "components/loading";
 import { useRouter } from "next/router";
 import StatusBarLoggedOut from "components/statusBarLoggedOut";
 import StatusBar from "components/statusBar";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import ExpandedPost from "components/post/expandedPost";
 import styles from "components/post/expandedPost.module.scss";
 import MediaModal from "components/mediaModal/mediaModal";
@@ -18,6 +18,10 @@ import useScrollRestoration from "src/hooks/useScrollRestoration";
 import { ArrowLeft } from "phosphor-react";
 import { useUserContext } from "src/contexts/userContext";
 import Router from "next/router";
+
+interface ApiResponse {
+    comments: IPost[];
+}
 
 export default function UserPost(props: UserPostProps): ReactElement {
     const router = useRouter();
@@ -81,7 +85,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
             setNowCommenting(false);
             toast("Commented Successfully", 2000);
         },
-        [comments, post]
+        [toast]
     );
 
     const handleCommentDelete = useCallback(
@@ -90,14 +94,14 @@ export default function UserPost(props: UserPostProps): ReactElement {
             setPost((post) => {
                 post.comments--;
                 return post;
-            })
+            });
             setComments(comments => {
                 return comments.filter(
                     (comment) => comment.id != commentId
                 );
-            })
+            });
         },
-        [comments, post]
+        []
     );
 
     const handleLike = useCallback(
@@ -108,7 +112,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         ...post,
                         likes: post.likes + 1,
                         liked: true
-                    })
+                    });
                 } else if (payload.likeType == "UNLIKE") {
                     setPost({
                         ...post,
@@ -130,11 +134,11 @@ export default function UserPost(props: UserPostProps): ReactElement {
                             return comment;
                         }
                         return comment;
-                    })
+                    });
                 });        
             }
         },
-        [post, comments]
+        [post]
     );
 
     useEffect(() => {
@@ -146,8 +150,8 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getComments/${props.post.id}`,
                     { withCredentials: true }
                 )
-                .then((response) => {
-                    setComments(response.data.comments);
+                .then((res: AxiosResponse<ApiResponse>) => {
+                    setComments(res.data.comments);
                     setLoadingComments(false);
                 })
                 .catch((err) => {
@@ -157,7 +161,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     );
                 });
         }
-    }, [post?.id]);
+    }, [post?.id, toast]);
 
     useEffect(() => {
         if (socket) {
@@ -173,7 +177,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 socket.off("like", handleLike);
             }
         };
-    }, [handleComment, handleCommentDelete, handleLike]);
+    }, [handleComment, handleCommentDelete, handleLike, socket]);
 
     useEffect(() => {
         setMediaModal(false);
@@ -331,14 +335,18 @@ export default function UserPost(props: UserPostProps): ReactElement {
     );
 }
 
+interface ServerSideResponse {
+    post: IPost;
+}
+
 export async function getServerSideProps(
     context: GetServerSidePropsContext
-): Promise<any> {
+): Promise<{ props: { post: IPost } }> {
     let res = null;
     let post: IPost = null;
 
     try {
-        res = await axios.get(
+        res = await axios.get<ServerSideResponse>(
             `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
             {
                 withCredentials: true,

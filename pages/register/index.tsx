@@ -1,14 +1,14 @@
-import LayoutRegular from "../../components/layouts/layoutRegular";
-import StatusBarLoggedOut from "../../components/statusBarLoggedOut";
-import styles from "../../styles/register-login.module.scss";
-import indexStyles from "../../styles/index.module.scss";
+import LayoutRegular from "components/layouts/layoutRegular";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import styles from "styles/register-login.module.scss";
+import indexStyles from "styles/index.module.scss";
 import Link from "next/link";
 import Head from "next/head";
 import React, { FormEvent, ReactElement, useState } from "react";
 import { Eye, EyeClosed } from "phosphor-react";
 import axios from "axios";
 import Router from "next/router";
-import { useToastContext } from "../../src/contexts/toastContext";
+import { useToastContext } from "src/contexts/toastContext";
 
 export default function Register(): ReactElement {
     const toast = useToastContext();

@@ -1,10 +1,10 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./likeButton.module.scss";
 import { ReactElement, useRef, useState } from "react";
-import { useToastContext } from "../../src/contexts/toastContext";
-import axios from "../../src/axios";
-import { LikeButtonProps } from "../../src/types/props";
-import { formatBigNumbers } from "../../src/utils/functions";
+import { useToastContext } from "src/contexts/toastContext";
+import axios from "src/axios";
+import { LikeButtonProps } from "src/types/props";
+import { formatBigNumbers } from "src/utils/functions";
 import { LikePayload } from "src/types/utils";
 import { useUserContext } from "src/contexts/userContext";
 
@@ -41,7 +41,7 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
                 postId: props.post.id,
                 likeType: props.liked ? "UNLIKE" : "LIKE"
             }
-        }
+        };
 
         axios.post("posts/likePost", payload)
             .then(() => {

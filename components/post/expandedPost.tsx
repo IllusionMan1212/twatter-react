@@ -1,16 +1,16 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useEffect, useRef, useState } from "react";
-import { ExpandedPostProps } from "../../src/types/props";
+import { ExpandedPostProps } from "src/types/props";
 import styles from "./expandedPost.module.scss";
 import postStyles from "./post.module.scss";
 import Link from "next/link";
-import { formatDate } from "../../src/utils/functions";
-import LikeButton from "../buttons/likeButton";
-import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
+import { formatDate } from "src/utils/functions";
+import LikeButton from "components/buttons/likeButton";
+import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
 import { ArrowArcLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
-import messagesStyles from "../../styles/messages.module.scss";
-import { useToastContext } from "../../src/contexts/toastContext";
-import mediaModalStyles from "../mediaModal/mediaModal.module.scss";
+import messagesStyles from "styles/messages.module.scss";
+import { useToastContext } from "src/contexts/toastContext";
+import mediaModalStyles from "components/mediaModal/mediaModal.module.scss";
 import { IAttachment } from "src/types/general";
 import {
     handleAttachmentChange,
@@ -21,7 +21,7 @@ import {
     handleTextInput,
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
-import CommentButton from "../buttons/commentButton";
+import CommentButton from "components/buttons/commentButton";
 import Comment from "./comment";
 import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
@@ -70,7 +70,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             const attachment = {
                 mimetype: attachments[0].mimetype,
                 data: data
-            }
+            };
             attachmentsToSend.push(attachment);
         }
         const payload = {
@@ -96,13 +96,14 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     };
 
     useEffect(() => {
-        commentBoxRef?.current?.addEventListener(
+        const commentBox = commentBoxRef?.current;
+        commentBox?.addEventListener(
             "textInput",
             handleTextInput as never
         );
 
         return () => {
-            commentBoxRef?.current?.removeEventListener(
+            commentBox?.removeEventListener(
                 "textInput",
                 handleTextInput as never
             );

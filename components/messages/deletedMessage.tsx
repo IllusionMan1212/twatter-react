@@ -6,7 +6,7 @@ import styles from "./deletedMessage.module.scss";
 import { formatMessageTime } from "src/utils/functions";
 
 export default function DeletedMessage(props: DeletedMessageProps): ReactElement {
-    const [sentTime, _] = useState(formatMessageTime(props.sentTime));
+    const [sentTime] = useState(formatMessageTime(props.sentTime));
 
     return (
         <div className={messageStyles.messageContainer}>

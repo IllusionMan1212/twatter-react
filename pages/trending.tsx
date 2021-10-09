@@ -8,14 +8,10 @@ export default function Trending(): ReactElement {
 
     return (
         <>
-                <div>
-                    <Navbar
-                        user={user}
-                    />
-                    <div className="text-white">
-                        trending uwu owo
-                    </div>
-                </div>
+            <div>
+                <Navbar user={user} />
+                <div className="text-white">trending uwu owo</div>
+            </div>
             )
         </>
     );

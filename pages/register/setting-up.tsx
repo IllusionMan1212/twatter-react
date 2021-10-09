@@ -13,6 +13,16 @@ import { IBirthday } from "src/types/general";
 import { handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
+import { AxiosResponse } from "axios";
+import { IUser } from "src/types/general";
+
+interface PostReqResponse {
+    message: string;
+}
+
+interface GetReqResponse {
+    user: IUser;
+}
 
 export default function UserSetup(): ReactElement {
     const toast = useToastContext();
@@ -71,7 +81,7 @@ export default function UserSetup(): ReactElement {
         payload.append("birthday_day", birthday_day);
         payload.append("profileImage", profileImage);
         axios
-            .post("users/initialSetup", payload)
+            .post<FormData, AxiosResponse<PostReqResponse>>("users/initialSetup", payload)
             .then((res) => {
                 toast(res.data.message, 4000);
                 Router.push("/home");
@@ -106,7 +116,7 @@ export default function UserSetup(): ReactElement {
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
                 { withCredentials: true }
             )
-            .then((res) => {
+            .then((res: AxiosResponse<GetReqResponse>) => {
                 if (res.data.user) {
                     login(res.data.user);
                     if (res.data.user.finished_setup == true) {
@@ -123,7 +133,7 @@ export default function UserSetup(): ReactElement {
                 );
                 setLoading(false);
             });
-    }, []);
+    }, [toast, login]);
 
     return (
         <>

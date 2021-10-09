@@ -1,10 +1,15 @@
 /* eslint-disable react/react-in-jsx-scope */
-import styles from "../styles/404.module.scss";
+import styles from "styles/404.module.scss";
 import Link from "next/link";
 import Head from "next/head";
-import Loading from "../components/loading";
+import Loading from "components/loading";
 import { ReactElement, useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
+import { IUser } from "src/types/general";
+
+interface ApiResponse {
+    user: IUser;
+}
 
 export default function NotFound(): ReactElement {
     const [loading, setLoading] = useState(true);
@@ -16,7 +21,7 @@ export default function NotFound(): ReactElement {
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
                 { withCredentials: true }
             )
-            .then((res) => {
+            .then((res: AxiosResponse<ApiResponse>) => {
                 if (res.data.user) {
                     setLoading(false);
                     setLoggedIn(true);

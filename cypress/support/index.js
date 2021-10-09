@@ -14,13 +14,13 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import "./commands";
 
 
 Cypress.on("uncaught:exception", (err) => {
     // dont stop tests if the exception is a resizeobserver exception
     if (err.message.includes("ResizeObserver")) {
-        return false
+        return false;
     }
 });
 // Alternatively you can use CommonJS syntax:

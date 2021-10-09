@@ -1,8 +1,8 @@
 /* eslint-disable react/react-in-jsx-scope */
 import Link from "next/link";
-import LayoutRegular from "../components/layouts/layoutRegular";
-import StatusBarLoggedOut from "../components/statusBarLoggedOut";
-import indexStyles from "../styles/index.module.scss";
+import LayoutRegular from "components/layouts/layoutRegular";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import indexStyles from "styles/index.module.scss";
 import { CurrencyCircleDollar, Fingerprint } from "phosphor-react";
 import { ReactElement } from "react";
 

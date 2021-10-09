@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
@@ -30,8 +30,17 @@ import { Virtuoso } from "react-virtuoso";
 import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
 
+interface ApiRequest {
+    senderId: string;
+    receiverId: string;
+}
+
+interface ApiResponse {
+    conversationId: string;
+}
+
 export default function Profile(props: ProfileProps): ReactElement {
-    enum Tabs {
+    const enum Tabs {
         Posts = 1,
         PostsAndComments,
         MediaPosts,
@@ -95,7 +104,7 @@ export default function Profile(props: ProfileProps): ReactElement {
             receiverId: user.id,
         };
         axiosInstance
-            .post("/messaging/startConversation", payload)
+            .post<ApiRequest, AxiosResponse<ApiResponse>>("/messaging/startConversation", payload)
             .then((res) => {
                 router.push(`/messages/${res.data.conversationId}`);
             })
@@ -121,10 +130,10 @@ export default function Profile(props: ProfileProps): ReactElement {
         activeTab.current = Tabs.PostsAndComments;
         if (!postsAndComments.current.length && !commentsReachedEnd) {
             getPosts(commentsPage.current, "comments").then((newPosts) => {
-                if (newPosts.length < 50) {
+                if ((newPosts as IPost[]).length < 50) {
                     setCommentsReachedEnd(true);
                 }
-                setPostsAndComments(newPosts);
+                setPostsAndComments(newPosts as IPost[]);
             });
         }
     };
@@ -134,47 +143,47 @@ export default function Profile(props: ProfileProps): ReactElement {
         activeTab.current = Tabs.MediaPosts;
         if (!mediaPosts.current.length && !mediaReachedEnd) {
             getPosts(mediaPage.current, "media").then((newPosts) => {
-                if (newPosts.length < 50) {
+                if ((newPosts as IPost[]).length < 50) {
                     setMediaReachedEnd(true);
                 }
-                setMediaPosts(newPosts);
+                setMediaPosts(newPosts as IPost[]);
             });
         }
     };
 
     useEffect(() => {
         setCreationDate(formatJoinDate(user?.created_at));
-    }, [user?.created_at])
+    }, [user?.created_at]);
 
     useEffect(() => {
         if (user?.birthday.Valid) {
             setBirthday(formatBirthday(user.birthday.Time.toString()));
         }
-    }, [user?.birthday.Time])
+    }, [user?.birthday]);
 
     const getActiveTabPosts = useCallback((): Array<IPost> => {
         switch (activeTab.current) {
-            case Tabs.Posts:
-                return posts.current;
-            case Tabs.PostsAndComments:
-                return postsAndComments.current;
-            case Tabs.MediaPosts:
-                return mediaPosts.current;
+        case Tabs.Posts:
+            return posts.current;
+        case Tabs.PostsAndComments:
+            return postsAndComments.current;
+        case Tabs.MediaPosts:
+            return mediaPosts.current;
         }
     }, [mediaPosts, posts, postsAndComments]);
 
     const setActiveTabPosts = useCallback(
         (posts: Array<IPost>) => {
             switch (activeTab.current) {
-                case Tabs.Posts:
-                    setPosts(posts);
-                    break;
-                case Tabs.PostsAndComments:
-                    setPostsAndComments(posts);
-                    break;
-                case Tabs.MediaPosts:
-                    setMediaPosts(posts);
-                    break;
+            case Tabs.Posts:
+                setPosts(posts);
+                break;
+            case Tabs.PostsAndComments:
+                setPostsAndComments(posts);
+                break;
+            case Tabs.MediaPosts:
+                setMediaPosts(posts);
+                break;
             }
         },
         [setMediaPosts, setPosts, setPostsAndComments]
@@ -182,12 +191,12 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const getActiveReachedEnd = (): boolean => {
         switch (activeTab.current) {
-            case Tabs.Posts:
-                return postsReachedEnd;
-            case Tabs.PostsAndComments:
-                return commentsReachedEnd;
-            case Tabs.MediaPosts:
-                return mediaReachedEnd;
+        case Tabs.Posts:
+            return postsReachedEnd;
+        case Tabs.PostsAndComments:
+            return commentsReachedEnd;
+        case Tabs.MediaPosts:
+            return mediaReachedEnd;
         }
     };
 
@@ -202,7 +211,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 return post;
             });
         },
-        [getActiveTabPosts, postsCount]
+        [getActiveTabPosts]
     );
 
     // this is for the mediamodal
@@ -278,7 +287,6 @@ export default function Profile(props: ProfileProps): ReactElement {
             );
         },
         [
-            currentUser?.id,
             mediaPosts,
             posts,
             postsAndComments,
@@ -336,13 +344,13 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     const getPosts = useCallback(
-        (page: number, postsType: string): Promise<IPost[]> => {
+        (page: number, postsType: string): Promise<IPost[] | void> => {
             return axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
                     { withCredentials: true }
                 )
-                .then((res) => {
+                .then((res: AxiosResponse<{ posts: IPost[] }>) => {
                     if (res.data.posts.length < 50) {
                         setPostsReachedEnd(true);
                     }
@@ -364,60 +372,60 @@ export default function Profile(props: ProfileProps): ReactElement {
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPostsCount/${props.user.id}`,
                 { withCredentials: true }
             )
-            .then((res) => {
+            .then((res: AxiosResponse<{ count: number }>) => {
                 return res.data.count;
             });
     }, [props.user?.id]);
 
     const loadMorePosts = (lastItemIndex: number) => {
         switch (activeTab.current) {
-            case Tabs.Posts:
-                // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-                if (lastItemIndex < 49) {
+        case Tabs.Posts:
+            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+            if (lastItemIndex < 49) {
+                setPostsReachedEnd(true);
+                return;
+            }
+            setPostsPage(postsPage.current + 1);
+            getPosts(postsPage.current, "posts").then((newPosts) => {
+                if (!(newPosts as IPost[]).length) {
                     setPostsReachedEnd(true);
                     return;
                 }
-                setPostsPage(postsPage.current + 1);
-                getPosts(postsPage.current, "posts").then((newPosts) => {
-                    if (!newPosts.length) {
-                        setPostsReachedEnd(true);
-                        return;
-                    }
-                    setPosts(posts.current.concat(newPosts));
-                });
-                break;
-            case Tabs.PostsAndComments:
-                // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-                if (lastItemIndex < 49) {
+                setPosts(posts.current.concat(newPosts as IPost[]));
+            });
+            break;
+        case Tabs.PostsAndComments:
+            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+            if (lastItemIndex < 49) {
+                setCommentsReachedEnd(true);
+                return;
+            }
+            setCommentsPage(commentsPage.current + 1);
+            getPosts(commentsPage.current, "comments").then((newPosts) => {
+                if (!(newPosts as IPost[]).length) {
                     setCommentsReachedEnd(true);
                     return;
                 }
-                setCommentsPage(commentsPage.current + 1);
-                getPosts(commentsPage.current, "comments").then((newPosts) => {
-                    if (!newPosts.length) {
-                        setCommentsReachedEnd(true);
-                        return;
-                    }
-                    setPostsAndComments(
-                        postsAndComments.current.concat(newPosts)
-                    );
-                });
-                break;
-            case Tabs.MediaPosts:
-                // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-                if (lastItemIndex < 49) {
+                setPostsAndComments(
+                    postsAndComments.current.concat(newPosts as IPost[])
+                );
+            });
+            break;
+        case Tabs.MediaPosts:
+            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
+            if (lastItemIndex < 49) {
+                setMediaReachedEnd(true);
+                return;
+            }
+            setMediaPage(mediaPage.current + 1);
+            getPosts(mediaPage.current, "media").then((newPosts) => {
+                if (!(newPosts as IPost[]).length) {
                     setMediaReachedEnd(true);
                     return;
                 }
-                setMediaPage(mediaPage.current + 1);
-                getPosts(mediaPage.current, "media").then((newPosts) => {
-                    if (!newPosts.length) {
-                        setMediaReachedEnd(true);
-                        return;
-                    }
-                    setMediaPosts(mediaPosts.current.concat(newPosts));
-                });
-                break;
+                setMediaPosts(mediaPosts.current.concat(newPosts as IPost[]));
+            });
+            break;
         }
     };
 
@@ -456,7 +464,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setPostsCount(postsCount);
             });
             getPosts(postsPage.current, "posts").then((posts) => {
-                setPosts(posts);
+                setPosts(posts as IPost[]);
                 setPostsLoading(false);
             });
         } else {
@@ -491,7 +499,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setPostsCount(count);
             });
             getPosts(postsPage.current, "posts").then((posts) => {
-                setPosts(posts);
+                setPosts(posts as IPost[]);
                 setPostsLoading(false);
             });
         }
@@ -615,50 +623,50 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     >
                                                         {currentUser?.id !=
                                                         user.id ? (
-                                                            <div
-                                                                className={
-                                                                    styles.userButtons
-                                                                }
-                                                            >
-                                                                {currentUser && (
-                                                                    <div
-                                                                        className="pointer"
-                                                                        onClick={
-                                                                            handleMessageClick
+                                                                <div
+                                                                    className={
+                                                                        styles.userButtons
+                                                                    }
+                                                                >
+                                                                    {currentUser && (
+                                                                        <div
+                                                                            className="pointer"
+                                                                            onClick={
+                                                                                handleMessageClick
+                                                                            }
+                                                                        >
+                                                                            <ChatTeardropText
+                                                                                color="#6067FE"
+                                                                                size="40"
+                                                                                weight="fill"
+                                                                            ></ChatTeardropText>
+                                                                        </div>
+                                                                    )}
+                                                                    <Button
+                                                                        text="Follow"
+                                                                        size={10}
+                                                                        type={
+                                                                            ButtonType.Regular
                                                                         }
-                                                                    >
-                                                                        <ChatTeardropText
-                                                                            color="#6067FE"
-                                                                            size="40"
-                                                                            weight="fill"
-                                                                        ></ChatTeardropText>
-                                                                    </div>
-                                                                )}
+                                                                        handleClick={
+                                                                            handleFollowClick
+                                                                        }
+                                                                    ></Button>
+                                                                </div>
+                                                            ) : (
                                                                 <Button
-                                                                    text="Follow"
+                                                                    text="Edit Profile"
                                                                     size={10}
                                                                     type={
                                                                         ButtonType.Regular
                                                                     }
-                                                                    handleClick={
-                                                                        handleFollowClick
+                                                                    handleClick={() =>
+                                                                        setEditProfilePopup(
+                                                                            true
+                                                                        )
                                                                     }
                                                                 ></Button>
-                                                            </div>
-                                                        ) : (
-                                                            <Button
-                                                                text="Edit Profile"
-                                                                size={10}
-                                                                type={
-                                                                    ButtonType.Regular
-                                                                }
-                                                                handleClick={() =>
-                                                                    setEditProfilePopup(
-                                                                        true
-                                                                    )
-                                                                }
-                                                            ></Button>
-                                                        )}
+                                                            )}
                                                         <div
                                                             className={
                                                                 styles.statsContainer
@@ -858,28 +866,28 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             {getActiveTabPosts()
                                                                 .length == 0 &&
                                                                 getActiveReachedEnd() && (
-                                                                    <div
-                                                                        className="flex justify-content-center"
-                                                                        style={{
-                                                                            padding:
-                                                                                "20px",
-                                                                        }}
-                                                                    >
-                                                                        <p>
-                                                                            @
-                                                                            {
-                                                                                user.username
-                                                                            }{" "}
-                                                                            doesn&apos;t
-                                                                            have
-                                                                            any
-                                                                            posts
-                                                                            under
-                                                                            this
-                                                                            tab.
-                                                                        </p>
-                                                                    </div>
-                                                                )}
+                                                                <div
+                                                                    className="flex justify-content-center"
+                                                                    style={{
+                                                                        padding:
+                                                                            "20px",
+                                                                    }}
+                                                                >
+                                                                    <p>
+                                                                        @
+                                                                        {
+                                                                            user.username
+                                                                        }{" "}
+                                                                        doesn&apos;t
+                                                                        have
+                                                                        any
+                                                                        posts
+                                                                        under
+                                                                        this
+                                                                        tab.
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                         </>
                                                     ) : (
                                                         <Loading
@@ -967,7 +975,7 @@ export async function getServerSideProps(
     let user: IUser = null;
 
     try {
-        const res = await axios.get(
+        const res = await axios.get<{ user: IUser }>(
             `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/getUserData?username=${context.params.username}`,
             { withCredentials: true }
         );

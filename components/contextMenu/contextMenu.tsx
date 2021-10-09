@@ -1,3 +1,5 @@
+/* eslint-disable react/react-in-jsx-scope */
+
 import { ReactElement, useRef, useState, useEffect, CSSProperties } from "react";
 import styles from "./contextMenu.module.scss";
 import { ContextMenuProps } from "src/types/props";
@@ -6,8 +8,8 @@ import { ContextMenuPosition } from "src/types/utils";
 export default function ContextMenu(props: ContextMenuProps): ReactElement {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const [menuPosition, _] = useState(props.menuPosition || ContextMenuPosition.BOTTOM)
-    const [style, setStyle] = useState<CSSProperties>({})
+    const [menuPosition] = useState(props.menuPosition || ContextMenuPosition.BOTTOM);
+    const [style, setStyle] = useState<CSSProperties>({});
 
     useEffect(() => {
         let top = -1;
@@ -31,33 +33,33 @@ export default function ContextMenu(props: ContextMenuProps): ReactElement {
         case ContextMenuPosition.TOP: {
             const style: CSSProperties = {
                 bottom: "30px"
-            }
+            };
             setStyle(style);
             break;
         }
         case ContextMenuPosition.RIGHT: {
             const style: CSSProperties = {
                 left: "30px"
-            }
+            };
             setStyle(style);
             break;
         }
         case ContextMenuPosition.BOTTOM: {
             const style: CSSProperties = {
                 top: top != -1 ? top : "30px"
-            }
+            };
             setStyle(style);
             break;
         }
         case ContextMenuPosition.LEFT: {
             const style: CSSProperties = {
                 right: right != -1 ? right: "30px"
-            }
+            };
             setStyle(style);
             break;
         }
         }
-    }, []);
+    }, [menuPosition, props.rightOffset, props.topOffset]);
 
     return (
         <>
@@ -70,5 +72,5 @@ export default function ContextMenu(props: ContextMenuProps): ReactElement {
             </div>
             <div className="outsideClickOverlay"></div>
         </>
-    )
+    );
 }

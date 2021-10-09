@@ -1,7 +1,13 @@
 {
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
     "env": {
         "browser": true,
-        "es2021": true
+        "es2021": true,
+        "node": true
     },
     
     "extends": [
@@ -9,7 +15,8 @@
         "plugin:react/recommended",
         "plugin:react-hooks/recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:cypress/recommended"
+        "plugin:cypress/recommended",
+        "next"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {

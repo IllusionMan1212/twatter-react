@@ -13,10 +13,12 @@ import {
     useEffect,
     useRef,
     useState,
+    useReducer,
 } from "react";
 import Message from "components/messages/message";
 import { useToastContext } from "src/contexts/toastContext";
 import axiosInstance from "src/axios";
+import { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 import {
     IAttachment,
@@ -36,8 +38,17 @@ import {
 import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import DeletedMessage from "components/messages/deletedMessage";
-import { DeleteMessagePayload } from "src/types/socketEvents";
+import { DeleteMessagePayload, MarkMessagesAsReadPayload } from "src/types/socketEvents";
 import { useGlobalContext } from "src/contexts/globalContext";
+import { MessagingActions } from "src/types/actions";
+import messagingReducer from "src/reducers/messagingReducer";
+
+const initialState = {
+    conversations: [] as IConversation[],
+    messages: [] as IMessage[],
+    activeConversation: null as IActiveConversation,
+    isConversationActive: false
+};
 
 export default function Messages(): ReactElement {
     const START_INDEX = 10000;
@@ -54,16 +65,13 @@ export default function Messages(): ReactElement {
 
     const router = useRouter();
 
+    const [state, dispatch] = useReducer(messagingReducer, initialState);
+
     const [charsLeft, setCharsLeft] = useState(messageCharLimit);
     const [sendingAllowed, setSendingAllowed] = useState(false);
     const [attachment, setAttachment] = useState<IAttachment>(null);
     const [previewImage, setPreviewImage] = useState(null);
-    const [conversations, setConversations] = useState<IConversation[]>([]);
     const [conversationsLoading, setConversationsLoading] = useState(true);
-    const [activeConversation, setActiveConversation] =
-        useState<IActiveConversation>();
-    const [isConversationActive, setIsConversationActive] = useState(false);
-    const [messages, setMessages] = useState<IMessage[]>([]);
     const [nowSending, setNowSending] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
     const [imageModal, setImageModal] = useState(false);
@@ -79,12 +87,12 @@ export default function Messages(): ReactElement {
 
     pageRef.current = page;
 
-    const scrollToBottom = () => {
+    const scrollToBottom = useCallback(() => {
         virtuosoRef?.current?.scrollToIndex({
-            index: messages.length - 1,
+            index: state.messages.length - 1,
             behavior: "smooth",
         });
-    };
+    }, [state.messages.length]);
 
     const handleClickBack = () => {
         router.back();
@@ -101,8 +109,8 @@ export default function Messages(): ReactElement {
             const payload = {
                 eventType: "typing",
                 data: {
-                    receiverId: activeConversation.receiver_id,
-                    conversationId: activeConversation.id,
+                    receiverId: state.activeConversation.receiver_id,
+                    conversationId: state.activeConversation.id,
                 },
             };
             socket.send(JSON.stringify(payload));
@@ -126,8 +134,8 @@ export default function Messages(): ReactElement {
                 const payload = {
                     eventType: "stopTyping",
                     data: {
-                        receiverId: activeConversation.receiver_id,
-                        conversationId: activeConversation.id,
+                        receiverId: state.activeConversation.receiver_id,
+                        conversationId: state.activeConversation.id,
                     },
                 };
                 setTimeoutId(null);
@@ -204,13 +212,56 @@ export default function Messages(): ReactElement {
 
     const handleMessageReceived = useCallback(
         (msg: ISocketMessage) => {
-            setNowSending(false);
+            if (msg.receiver_id != user.id) {
+                setNowSending(false);
+            }
+
+            let lastMessage = msg.content;
+            if (!msg.content && msg.attachment) {
+                if (msg.author_id == user.id) {
+                    lastMessage = "You sent an attachment";
+                } else {
+                    lastMessage = `${state.activeConversation.display_name} sent an attachment`;
+                }
+            }
+
+            const newConversations = state.conversations.map(
+                (conversation: IConversation) => {
+                    return conversation.id == msg.conversation_id
+                        ? {
+                            ...conversation,
+                            last_message: {
+                                String: lastMessage,
+                                Valid: true
+                            },
+                            last_updated: {
+                                Valid: true,
+                                Time: new Date(msg.sent_time),
+                            },
+                            unread_messages:
+                                state.activeConversation?.id == msg.conversation_id
+                                    ? 0
+                                    : msg.author_id == user.id
+                                        ? 0
+                                        : conversation.unread_messages + 1,
+                        }
+                        : conversation;
+                }
+            );
+            // sort conversations by latest updated conversation
+            newConversations.sort(
+                (a, b) =>
+                    new Date(b.last_updated.Time.toString()).getTime() -
+                    new Date(a.last_updated.Time.toString()).getTime()
+            );
+
+            let newMessages = [] as IMessage[];
 
             // check if the client's active conversation is the one the message was received in
             // this basically ensures that convos that dont have the same id as the receiving message arent updated
-            if (activeConversation?.id == msg.conversation_id) {
+            if (state.activeConversation?.id == msg.conversation_id) {
                 setTyping(false);
-                const newMessages = messages.concat({
+                newMessages = newMessages.concat({
                     id: msg.id,
                     content: msg.content,
                     sent_time: msg.sent_time,
@@ -219,12 +270,11 @@ export default function Messages(): ReactElement {
                     deleted: msg.deleted,
                     conversation_id: msg.conversation_id,
                 });
-                setMessages(newMessages);
+
                 if (!atBottom) {
                     setNewMessagesAlert(true);
-                } else {
-                    scrollToBottom();
                 }
+
                 const payload = {
                     eventType: "markMessagesAsRead",
                     data: {
@@ -237,60 +287,23 @@ export default function Messages(): ReactElement {
                 socket.send(JSON.stringify(payload));
             }
 
-            let lastMessage = msg.content;
-            if (!msg.content && msg.attachment) {
-                if (msg.author_id == user.id) {
-                    lastMessage = "You sent an attachment";
-                } else {
-                    lastMessage = `${activeConversation.display_name} sent an attachment`;
+            dispatch({
+                type: MessagingActions.RECEIVE_MESSAGE,
+                payload: {
+                    newMessages,
+                    newConversations
                 }
-            }
-
-            const newConversations = conversations.map(
-                (conversation: IConversation) => {
-                    return conversation.id == msg.conversation_id
-                        ? {
-                              ...conversation,
-                              last_message: {
-                                  String: lastMessage,
-                                  Valid: true
-                              },
-                              last_updated: {
-                                  Valid: true,
-                                  Time: new Date(msg.sent_time),
-                              },
-                              unread_messages:
-                                  activeConversation?.id == msg.conversation_id
-                                      ? 0
-                                      : msg.author_id == user.id
-                                      ? 0
-                                      : conversation.unread_messages + 1,
-                          }
-                        : conversation;
-                }
-            );
-            // sort conversations by latest updated conversation
-            newConversations.sort(
-                (a, b) =>
-                    new Date(b.last_updated.Time.toString()).getTime() -
-                    new Date(a.last_updated.Time.toString()).getTime()
-            );
-            setConversations(newConversations);
+            });
         },
-        [activeConversation, messages, conversations]
+        [state.activeConversation, state.conversations, atBottom, socket, user?.id]
     );
 
     const handleMarkedMessagesAsRead = useCallback(
-        (payload) => {
-            const newConversations = conversations.map((conversation) => {
-                return conversation.id == payload.conversationId
-                    ? {
-                          ...conversation,
-                          unread_messages: 0,
-                      }
-                    : conversation;
+        (payload: MarkMessagesAsReadPayload) => {
+            dispatch({
+                type: MessagingActions.MARK_AS_READ,
+                payload
             });
-            setConversations(newConversations);
 
             setUnreadMessages((unreadMessages) => {
                 return unreadMessages.filter((conversationId) => {
@@ -298,38 +311,27 @@ export default function Messages(): ReactElement {
                 });
             });
         },
-        [conversations]
+        [setUnreadMessages]
     );
 
-    const handleTyping = (payload: { conversationId: string }) => {
-        if (activeConversation?.id == payload.conversationId) {
+    const handleTyping = useCallback((payload: { conversationId: string }) => {
+        if (state.activeConversation?.id == payload.conversationId) {
             setTyping(true);
         }
-    };
+    }, [state.activeConversation?.id]);
 
-    const handleStopTyping = (payload: { conversationId: string }) => {
-        if (activeConversation?.id == payload.conversationId) {
+    const handleStopTyping = useCallback((payload: { conversationId: string }) => {
+        if (state.activeConversation?.id == payload.conversationId) {
             setTyping(false);
         }
-    };
+    }, [state.activeConversation?.id]);
 
-    const handleDeleteMessage = (payload: DeleteMessagePayload) => {
-        setMessages(messages.map((message, i) => {
-            if (message.id == payload.message_id) {
-                message.deleted = true;
-                if (i == (messages.length - 1)) {
-                    setConversations(conversations.map((convo) => {
-                        if (convo.id == message.conversation_id) {
-                            convo.last_message.String = "";
-                            convo.last_message.Valid = false;
-                        }
-                        return convo;
-                    }));
-                }
-            }
-            return message;
-        }));
-    }
+    const handleDeleteMessage = useCallback((payload: DeleteMessagePayload) => {
+        dispatch({
+            type: MessagingActions.DELETE_MESSAGE,
+            payload
+        });
+    }, []);
 
     const handleClickSend = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!sendingAllowed) {
@@ -361,8 +363,8 @@ export default function Messages(): ReactElement {
         const payload = {
             eventType: "message",
             data: {
-                conversation_id: activeConversation.id,
-                receiver_id: activeConversation.receiver_id,
+                conversation_id: state.activeConversation.id,
+                receiver_id: state.activeConversation.receiver_id,
                 sender_id: user.id,
                 message_content: messageContent,
                 attachment: {
@@ -425,9 +427,10 @@ export default function Messages(): ReactElement {
     };
 
     const handleConversationClick = (conversation: IConversation) => {
-        if (conversation.id == activeConversation?.id) {
+        if (conversation.id == state.activeConversation?.id) {
             return;
         }
+
         if (messageInputRef && messageInputRef.current) {
             messageInputRef.current.innerHTML = "";
             setSendingAllowed(false);
@@ -456,10 +459,10 @@ export default function Messages(): ReactElement {
         }
     };
 
-    const getMessages = (conversationId: string): Promise<any> => {
+    const getMessages = useCallback((conversationId: string): Promise<IMessage[] | void> => {
         return axiosInstance
             .get(`/messaging/getMessages/${conversationId}/${pageRef.current}`)
-            .then((res) => {
+            .then((res: AxiosResponse<{ messages: IMessage[] }>) => {
                 return res.data.messages;
             })
             .catch((err) => {
@@ -468,12 +471,12 @@ export default function Messages(): ReactElement {
                     5000
                 );
             });
-    };
+    }, [toast]);
 
-    const getConversations = (): Promise<any> => {
+    const getConversations = useCallback((): Promise<IConversation[] | void> => {
         return axiosInstance
             .get(`/messaging/getConversations/${conversationsPage.current}`)
-            .then((res) => {
+            .then((res: AxiosResponse<{ conversations: IConversation[] }>) => {
                 return res.data.conversations;
             })
             .catch((err) => {
@@ -484,44 +487,51 @@ export default function Messages(): ReactElement {
                     );
                 setConversationsLoading(false);
             });
-    };
+    }, [conversationsPage, toast]);
 
     const loadMoreMessages = useCallback(() => {
-        console.log("loading more messages");
         setPage(pageRef.current + 1);
-        getMessages(activeConversation.id).then((newMessages) => {
-            if (!newMessages.length) {
+        getMessages(state.activeConversation.id).then((newMessages) => {
+            if (!(newMessages as IMessage[]).length) {
                 setReachedStartOfMessages(true);
                 return;
             }
-            const messagesToPrepend = newMessages.length;
+            const messagesToPrepend = (newMessages as IMessage[]).length;
             const nextFirstItemIndex = firstItemIndex - messagesToPrepend;
 
             setFirstItemIndex(nextFirstItemIndex);
-            setMessages((messages) => [...newMessages].concat(messages));
+
+            dispatch({
+                type: MessagingActions.LOAD_MORE_MESSAGES,
+                payload: {
+                    newMessages: newMessages as IMessage[]
+                }
+            });
             return;
         });
     }, [
-        setMessages,
-        messages,
-        page,
         pageRef,
         firstItemIndex,
-        reachedStartOfMessages
+        state.activeConversation?.id,
+        getMessages
     ]);
 
     const loadMoreConversations = useCallback(() => {
         setConversationsPage(conversationsPage.current + 1);
         getConversations().then((newConversations) => {
-            if (!newConversations.length) {
+            if (!(newConversations as IConversation[]).length) {
                 setReachedEndOfConvos(true);
                 return;
             }
 
-            setConversations(conversations.concat(newConversations));
-            return;
+            dispatch({
+                type: MessagingActions.LOAD_MORE_CONVERSATIONS,
+                payload: {
+                    newConversations: (newConversations as IConversation[])
+                }
+            });
         });
-    }, [conversations, conversationsPage.current]);
+    }, [conversationsPage, getConversations, setConversationsPage]);
 
     useEffect(() => {
         if (atBottom) {
@@ -534,61 +544,68 @@ export default function Messages(): ReactElement {
         pageRef.current = 0;
         setReachedStartOfMessages(false);
         setFirstItemIndex(START_INDEX);
-        if (!router.query?.conversationId?.[0]) {
-            setIsConversationActive(false);
 
-            // used to remove the active class from the last active conversation
-            setActiveConversation(null);
+        // dont fetch messages if current convo id is equal to new convo id
+        // this is to prevent state update from happening when updating convo's last message on socket event
+        if (state.activeConversation?.id == router.query.conversationId?.[0]) {
             return;
         }
+
         // if conversations haven't been fetched yet, dont fetch messages
-        if (!conversations.length) {
+        if (!state.conversations.length) {
             return;
         }
+
         // fetches current conversation based on the query in the url (works with back and forward buttons on browsers)
-        const newActiveConversation = conversations.find(
-            (conversation) => conversation.id == router.query.conversationId[0]
+        const newActiveConversation: IConversation = state.conversations.find(
+            (conversation) => conversation.id == router.query.conversationId?.[0]
         );
+
         // if we can't find the query string in our conversations, we just load the normal messages page
         if (!newActiveConversation) {
             return;
         }
-        // dont fetch messages if current convo id is equal to new convo id
-        // this is to prevent state update from happening when updating convo's last message on socket event
-        if (activeConversation?.id == router.query.conversationId[0]) {
-            return;
-        }
-        setActiveConversation({
-            id: router.query.conversationId[0],
-            username: newActiveConversation.receiver?.username,
-            display_name: newActiveConversation.receiver?.display_name,
-            receiver_id: newActiveConversation.receiver?.id,
-        });
-        console.log(router.query.conversationId[0]);
-        setActiveConversationId(router.query.conversationId[0]);
-        setMessages([]);
-        setIsConversationActive(true);
 
-        getMessages(router.query.conversationId[0]).then((messages) => {
-            if (messages.length < 50) {
+        const activeConversation: IActiveConversation = {
+            id: router.query.conversationId[0],
+            username: newActiveConversation.receiver.username,
+            display_name: newActiveConversation.receiver.display_name,
+            receiver_id: newActiveConversation.receiver.id,
+        };
+
+        setActiveConversationId(router.query.conversationId[0]);
+
+        dispatch({
+            type: MessagingActions.CHANGE_CONVERSATION,
+            payload: {
+                activeConversation: activeConversation,
+                queryConversationId: router.query.conversationId[0]
+            }
+        });
+
+        getMessages(router.query.conversationId[0]).then((_messages) => {
+            if ((_messages as IMessage[]).length < 50) {
                 setReachedStartOfMessages(true);
             }
-            setMessages(messages);
-        });
 
-        return () => {
-            setActiveConversationId("");
-        }
-    }, [router.query?.conversationId, conversations?.length]);
+            dispatch({
+                type: MessagingActions.FETCH_MESSAGES,
+                payload: {
+                    messages: _messages as IMessage[]
+                }
+            });
+        });
+    }, [router.query?.conversationId, state.activeConversation?.id, state.conversations, getMessages, setActiveConversationId]);
 
     useEffect(() => {
-        messageInputRef?.current?.addEventListener(
+        const messageInput = messageInputRef?.current;
+        messageInput?.addEventListener(
             "textInput",
             handleTextInput as never
         );
 
         return () => {
-            messageInputRef?.current?.removeEventListener(
+            messageInput?.removeEventListener(
                 "textInput",
                 handleTextInput as never
             );
@@ -598,7 +615,12 @@ export default function Messages(): ReactElement {
     useEffect(() => {
         if (user) {
             getConversations().then((_conversations) => {
-                setConversations(_conversations);
+                dispatch({
+                    type: MessagingActions.FETCH_CONVERSATIONS,
+                    payload: {
+                        conversations: _conversations as IConversation[],
+                    }
+                });
                 setConversationsLoading(false);
             });
         }
@@ -627,6 +649,8 @@ export default function Messages(): ReactElement {
         handleMarkedMessagesAsRead,
         handleTyping,
         handleStopTyping,
+        handleDeleteMessage,
+        socket
     ]);
 
     return (
@@ -643,30 +667,30 @@ export default function Messages(): ReactElement {
                             className={`text-white ${
                                 styles.messagesContainer
                             } ${
-                                isConversationActive
+                                state.isConversationActive
                                     ? styles.messagesContainerMobile
                                     : ""
                             }`}
                         >
                             <div
                                 className={`${styles.messagesList} ${
-                                    isConversationActive
+                                    state.isConversationActive
                                         ? styles.messagesListMobile
                                         : ""
                                 } ${
-                                    !conversations.length
+                                    !state.conversations.length
                                         ? "justify-content-center"
                                         : ""
                                 }`}
                             >
                                 {!conversationsLoading ? (
                                     <>
-                                        {conversations.length ? (
+                                        {state.conversations.length ? (
                                             <Virtuoso
-                                                data={conversations}
+                                                data={state.conversations}
                                                 style={{ width: "100%" }}
                                                 totalCount={
-                                                    conversations.length
+                                                    state.conversations.length
                                                 }
                                                 // eslint-disable-next-line react/display-name
                                                 components={{
@@ -708,7 +732,7 @@ export default function Messages(): ReactElement {
                                                             }
                                                             isActive={
                                                                 conversation.id ==
-                                                                activeConversation?.id
+                                                                state.activeConversation?.id
                                                             }
                                                             unreadMessages={
                                                                 conversation.unread_messages
@@ -732,10 +756,10 @@ export default function Messages(): ReactElement {
                                     <Loading height="50" width="50"></Loading>
                                 )}
                             </div>
-                            {isConversationActive && (
+                            {state.isConversationActive && (
                                 <div
                                     className={`${styles.conversation} ${
-                                        isConversationActive
+                                        state.isConversationActive
                                             ? styles.conversationMobile
                                             : ""
                                     }`}
@@ -747,21 +771,21 @@ export default function Messages(): ReactElement {
                                         >
                                             <ArrowLeft size="30"></ArrowLeft>
                                         </div>
-                                        {activeConversation?.username ? (
+                                        {state.activeConversation?.username ? (
                                             <>
                                                 <Link
-                                                    href={`/u/${activeConversation?.username}`}
+                                                    href={`/u/${state.activeConversation?.username}`}
                                                 >
                                                     <a>
                                                         <p className="text-bold text-large">
                                                             {
-                                                                activeConversation?.display_name
+                                                                state.activeConversation?.display_name
                                                             }
                                                         </p>
                                                     </a>
                                                 </Link>
                                                 <Link
-                                                    href={`/u/${activeConversation?.username}`}
+                                                    href={`/u/${state.activeConversation?.username}`}
                                                 >
                                                     <a>
                                                         <p
@@ -771,7 +795,7 @@ export default function Messages(): ReactElement {
                                                         >
                                                             @
                                                             {
-                                                                activeConversation?.username
+                                                                state.activeConversation?.username
                                                             }
                                                         </p>
                                                     </a>
@@ -789,15 +813,15 @@ export default function Messages(): ReactElement {
                                     >
                                         <Virtuoso
                                             ref={virtuosoRef}
-                                            key={activeConversation?.id}
+                                            key={state.activeConversation?.id}
                                             className={styles.messagesArea}
-                                            totalCount={messages.length}
+                                            totalCount={state.messages.length}
                                             initialTopMostItemIndex={
-                                                messages.length > 0
-                                                    ? messages.length - 1
+                                                state.messages.length > 0
+                                                    ? state.messages.length - 1
                                                     : 0
                                             }
-                                            data={messages}
+                                            data={state.messages}
                                             firstItemIndex={firstItemIndex}
                                             alignToBottom
                                             followOutput
@@ -845,7 +869,7 @@ export default function Messages(): ReactElement {
                                                                 message.author_id
                                                             }
                                                             receiverId={
-                                                                activeConversation?.receiver_id
+                                                                state.activeConversation?.receiver_id
                                                             }
                                                             sender={
                                                                 user.id ==
@@ -860,7 +884,7 @@ export default function Messages(): ReactElement {
                                                                     .url
                                                             }
                                                             conversationId={
-                                                                activeConversation?.id
+                                                                state.activeConversation?.id
                                                             }
                                                             setImageModal={
                                                                 setImageModal
@@ -885,7 +909,7 @@ export default function Messages(): ReactElement {
                                                                 message.sent_time
                                                             }
                                                             conversationId={
-                                                                activeConversation?.id
+                                                                state.activeConversation?.id
                                                             }
                                                         />
                                                     )}
@@ -907,7 +931,7 @@ export default function Messages(): ReactElement {
                                     </div>
                                     {typing && (
                                         <div className={styles.typing}>
-                                            {activeConversation.display_name} is
+                                            {state.activeConversation.display_name} is
                                             typing...
                                         </div>
                                     )}

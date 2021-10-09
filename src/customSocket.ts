@@ -1,12 +1,18 @@
-function onMessageReceived(event: MessageEvent<any>) {
-    const data = JSON.parse(event.data);
+interface ICallback {
+    [event: string]: Array<(data: never) => void>;
+}
+
+interface ReceivedData {
+    eventType: string;
+    data: never;
+}
+
+function onMessageReceived(event: MessageEvent<string>) {
+    const data = JSON.parse(event.data) as ReceivedData;
     const that: TwatWebSocket = this as TwatWebSocket;
     that.dispatch(data.eventType, data.data);
 }
 
-interface ICallback {
-    [event: string]: Array<(data: any) => void>;
-}
 
 export class TwatWebSocket {
     conn: WebSocket;
@@ -16,7 +22,7 @@ export class TwatWebSocket {
         this.conn = new WebSocket(url);
     }
 
-    on(event: string, callback: (data: any) => void): void {
+    on(event: string, callback: (data: never) => void): void {
         this.callbacks[event] = this.callbacks[event] || [];
         if (
             !this.callbacks[event].some((_callback) => {
@@ -28,7 +34,7 @@ export class TwatWebSocket {
         }
     }
 
-    off(event: string, callback: (data: any) => void): void {
+    off(event: string, callback: (data: never) => void): void {
         this.callbacks[event] = this.callbacks[event].filter((_callback) => {
             return _callback !== callback;
         });
@@ -38,7 +44,7 @@ export class TwatWebSocket {
         }
     }
 
-    dispatch(event_name: string, data: any): void {
+    dispatch(event_name: string, data: never): void {
         // get all the registered callbacks for this event and call them
         const events = this.callbacks[event_name];
         events?.forEach((event) => {

@@ -9,7 +9,7 @@ describe("navigation", () => {
         cy.get("[data-cy='composePostDiv']")
             .type("this is a test post");
         cy.get("[data-cy='sendBtn']")
-            .click()
+            .click();
 
         cy.get("[data-cy='postsList'] div div div div").eq(0).as("post")
             .should("contain.text", "this is a test post");
@@ -19,5 +19,5 @@ describe("navigation", () => {
 
         cy.get("@post")
             .should("not.contain.text", "this is a test post");
-    })
-})
+    });
+});

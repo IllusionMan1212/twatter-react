@@ -7,7 +7,7 @@ import {
     TrendUp,
 } from "phosphor-react";
 import Router from "next/router";
-import { NavbarLoggedInProps } from "../src/types/props";
+import { NavbarLoggedInProps } from "src/types/props";
 import { ReactElement, useState } from "react";
 import ProfileImage from "./post/profileImage";
 import UserContextMenu from "./userContextMenu";

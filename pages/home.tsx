@@ -1,9 +1,9 @@
 /* eslint-disable react/react-in-jsx-scope */
-import StatusBar from "../components/statusBar";
+import StatusBar from "components/statusBar";
 import Head from "next/head";
-import Loading from "../components/loading";
-import Navbar from "../components/navbar";
-import styles from "../styles/home.module.scss";
+import Loading from "components/loading";
+import Navbar from "components/navbar";
+import styles from "styles/home.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import {
     ArrowElbowRightDown,
@@ -12,10 +12,10 @@ import {
     PenNibStraight,
     X,
 } from "phosphor-react";
-import Post from "../components/post/post";
-import axiosInstance from "../src/axios";
-import { useToastContext } from "../src/contexts/toastContext";
-import MediaModal from "../components/mediaModal/mediaModal";
+import Post from "components/post/post";
+import axiosInstance from "src/axios";
+import { useToastContext } from "src/contexts/toastContext";
+import MediaModal from "components/mediaModal/mediaModal";
 import { IAttachment, IPost, IUser } from "src/types/general";
 import {
     handleAttachmentChange,
@@ -26,7 +26,7 @@ import {
     handleTextInput,
 } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { LikePayload } from "src/types/utils";
 import { Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
@@ -89,7 +89,7 @@ export default function Home(): ReactElement {
             const attachment = {
                 mimetype: attachments[0].mimetype,
                 data: data
-            }
+            };
             attachmentsToSend.push(attachment);
         }
         const payload = {
@@ -168,7 +168,7 @@ export default function Home(): ReactElement {
 
             setPosts([post].concat(posts.current));
         },
-        [posts]
+        [posts, setPosts, toast]
     );
 
     const handleDeletePost = useCallback(
@@ -182,7 +182,7 @@ export default function Home(): ReactElement {
                 // TODO: handle comment deletion. (needed when deleting comments when mediamodal is open)
                 // should we even do this ???
             }
-        }, [posts]);
+        }, [posts, setPosts]);
 
     // this is for the mediamodal
     const handleComment = useCallback(
@@ -197,7 +197,7 @@ export default function Home(): ReactElement {
                 })
             );
         },
-        [posts]
+        [posts, setPosts]
     );
 
     const handleLike = useCallback(
@@ -218,25 +218,25 @@ export default function Home(): ReactElement {
                 })
             );
         },
-        [posts, user?.id]
+        [posts, setPosts]
     );
 
     const handleError = useCallback(
         (payload) => {
             setNowPosting(false);
-            toast(payload.message, 3000)
+            toast(payload.message, 3000);
         },
-        [nowPosting]
-    )
+        [toast]
+    );
 
-    const getPosts = (): Promise<any> => {
+    const getPosts = useCallback((): Promise<IPost[] | void> => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
         return axiosInstance
             .get(`posts/getPosts/${page.current}`, {
                 cancelToken: tokenSource.token,
             })
-            .then((res) => {
+            .then((res: AxiosResponse<{ posts: IPost[] }>) => {
                 return res.data.posts;
             })
             .catch((err) => {
@@ -247,16 +247,16 @@ export default function Home(): ReactElement {
                     console.error(err);
                 }
             });
-    };
+    }, [page]);
 
     const loadMorePosts = () => {
         setPage(page.current + 1);
         getPosts().then((newPosts) => {
-            if (!newPosts.length) {
+            if (!(newPosts as IPost[]).length) {
                 setReachedEnd(true);
                 return;
             }
-            setPosts(posts.current.concat(newPosts));
+            setPosts(posts.current.concat(newPosts as IPost[]));
         });
     };
 
@@ -278,25 +278,24 @@ export default function Home(): ReactElement {
                 socket.off("postError", handleError);
             }
         };
-    }, [handlePost, handleDeletePost, handleComment, handleLike, socket]);
+    }, [handlePost, handleDeletePost, handleComment, handleLike, handleError, socket]);
 
     useEffect(() => {
         getPosts().then((posts) => {
-            if (posts?.length < 50) {
+            if ((posts as IPost[])?.length < 50) {
                 setReachedEnd(true);
             }
-            setPosts(posts);
+            setPosts(posts as IPost[]);
         });
         // TODO: cancel api call on return
-    }, []);
+    }, [getPosts, setPosts]);
 
     useEffect(() => {
-        if (composePostRef?.current) {
-            composePostRef.current.addEventListener(
-                "textInput",
-                handleTextInput as never
-            );
-        }
+        const composePost = composePostRef?.current;
+        composePost?.addEventListener(
+            "textInput",
+            handleTextInput as never
+        );
 
         // on browser back button press, close the media modal
         window.onpopstate = () => {
@@ -304,12 +303,10 @@ export default function Home(): ReactElement {
         };
 
         return () => {
-            if (composePostRef?.current) {
-                composePostRef.current.removeEventListener(
-                    "textInput",
-                    handleTextInput as never
-                );
-            }
+            composePost?.removeEventListener(
+                "textInput",
+                handleTextInput as never
+            );
         };
     });
 

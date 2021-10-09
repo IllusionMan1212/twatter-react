@@ -2,7 +2,7 @@
 import { ReactElement, useEffect } from "react";
 import styles from "./messageMediaModal.module.scss";
 import { X } from "phosphor-react";
-import { MessageMediaModalProps } from "../../src/types/props";
+import { MessageMediaModalProps } from "src/types/props";
 
 export default function MessageMediaModal(
     props: MessageMediaModalProps

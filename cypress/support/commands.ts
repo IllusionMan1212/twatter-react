@@ -25,10 +25,10 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 Cypress.Commands.add("login", () => {
-  cy.visit("/login");
+    cy.visit("/login");
 
-  cy.get("input[name='username']").type("illusion");
-  cy.get("input[name='password']").type("11111111")
+    cy.get("input[name='username']").type("illusion");
+    cy.get("input[name='password']").type("11111111");
 
-  cy.get("button").click()
+    cy.get("button").click();
 });

@@ -5,7 +5,7 @@ import { ToastWrapper, useToastContext } from "src/contexts/toastContext";
 import { NextSeo } from "next-seo";
 import { UserWrapper, useUserContext } from "src/contexts/userContext";
 import { GlobalWrapper } from "src/contexts/globalContext";
-import "../styles/globals.scss";
+import "styles/globals.scss";
 
 import "swiper/scss";
 import "swiper/scss/navigation";
@@ -30,7 +30,7 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
             if (socket) {
                 socket.off("error", handleError);
             }
-        }
+        };
     }, [socket, handleError]);
 
     return (

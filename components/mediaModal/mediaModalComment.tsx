@@ -1,14 +1,14 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { ReactElement } from "react";
-import LikeButton from "../buttons/likeButton";
-import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
-import CommentButton from "../buttons/commentButton";
+import LikeButton from "components/buttons/likeButton";
+import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
+import CommentButton from "components/buttons/commentButton";
 import Router from "next/router";
 import Link from "next/link";
-import { timeSince } from "../../src/utils/functions";
+import { timeSince } from "src/utils/functions";
 import { IUser } from "src/types/general";
 import styles from "./mediaModalComment.module.scss";
-import postStyles from "../post/post.module.scss";
+import postStyles from "components/post/post.module.scss";
 import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "components/post/profileImage";

@@ -6,7 +6,7 @@ import { formatMessageTime } from "src/utils/functions";
 import MessageOptionsMenuButton from "components/messages/messageOptionsMenuButton";
 
 export default function Message(props: MessageProps): ReactElement {
-    const [sentTime, _] = useState(formatMessageTime(props.sentTime));
+    const [sentTime] = useState(formatMessageTime(props.sentTime));
 
     const handleClick = () => {
         window.history.pushState(null, null, `${props.conversationId}/media`);

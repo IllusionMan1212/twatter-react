@@ -1,16 +1,27 @@
 /* eslint-disable react/react-in-jsx-scope */
-import LayoutRegular from "../components/layouts/layoutRegular";
-import StatusBarLoggedOut from "../components/statusBarLoggedOut";
-import styles from "../styles/register-login.module.scss";
-import indexStyles from "../styles/index.module.scss";
+import LayoutRegular from "components/layouts/layoutRegular";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import styles from "styles/register-login.module.scss";
+import indexStyles from "styles/index.module.scss";
 import Link from "next/link";
 import Head from "next/head";
 import { Eye, EyeClosed } from "phosphor-react";
 import React, { FormEvent, ReactElement, useState } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import Router from "next/router";
-import { useToastContext } from "../src/contexts/toastContext";
+import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
+import { IUser } from "src/types/general";
+
+interface ApiRequest {
+    username: string;
+    password: string;
+}
+
+interface ApiResponse {
+    success: boolean;
+    user: IUser;
+}
 
 export default function Login(): ReactElement {
     const toast = useToastContext();
@@ -38,15 +49,15 @@ export default function Login(): ReactElement {
             setLoginAllowed(false);
             if (validateForm()) {
                 axios
-                    .post(
+                    .post<ApiRequest, AxiosResponse<ApiResponse>>(
                         `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/login`,
                         form,
                         { withCredentials: true }
                     )
-                    .then((response) => {
+                    .then((res) => {
                         toast("Successfully logged in", 5000);
-                        if (response.data.success) {
-                            login(response.data.user);
+                        if (res.data.success) {
+                            login(res.data.user);
                             Router.push("/home");
                         }
                     })

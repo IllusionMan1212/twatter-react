@@ -1,17 +1,26 @@
 /* eslint-disable react/react-in-jsx-scope */
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import Head from "next/head";
 import { ReactElement, useState } from "react";
-import LayoutRegular from "../components/layouts/layoutRegular";
-import { useToastContext } from "../src/contexts/toastContext";
-import registerLoginStyles from "../styles/register-login.module.scss";
-import styles from "../styles/forgot-password.module.scss";
-import StatusBarLoggedOut from "../components/statusBarLoggedOut";
+import LayoutRegular from "components/layouts/layoutRegular";
+import { useToastContext } from "src/contexts/toastContext";
+import registerLoginStyles from "styles/register-login.module.scss";
+import styles from "styles/forgot-password.module.scss";
+import StatusBarLoggedOut from "components/statusBarLoggedOut";
+
+interface ApiRequest {
+    email: string;
+}
+
+interface ApiResponse {
+    success: boolean;
+    message: string;
+}
 
 export default function ForgotPassword(): ReactElement {
     const toast = useToastContext();
 
-    const [email, setEmail] = useState(null);
+    const [email, setEmail] = useState("");
     const [resetAllowed, setResetAllowed] = useState(true);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,14 +40,14 @@ export default function ForgotPassword(): ReactElement {
                 email: email,
             };
             axios
-                .post(
+                .post<ApiRequest, AxiosResponse<ApiResponse>>(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/forgotPassword`,
                     payload,
                     { withCredentials: true }
                 )
-                .then((response) => {
-                    if (response.data.success) {
-                        toast(response.data.message, 7000);
+                .then((res) => {
+                    if (res.data.success) {
+                        toast(res.data.message, 7000);
                         setResetAllowed(true);
                     }
                 })

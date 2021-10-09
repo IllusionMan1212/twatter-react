@@ -10,13 +10,13 @@ import styles from "./mediaModal.module.scss";
 import messagesStyles from "styles/messages.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { formatDate } from "src/utils/functions";
-import LikeButton from "../buttons/likeButton";
+import LikeButton from "components/buttons/likeButton";
 import { MediaModalProps } from "src/types/props";
-import PostOptionsMenuButton from "../buttons/postOptionsMenuButton";
+import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
 import { useToastContext } from "src/contexts/toastContext";
 import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import Loading from "../loading";
+import Loading from "components/loading";
 import axios from "axios";
 import { IAttachment, IPost } from "src/types/general";
 import {
@@ -30,10 +30,11 @@ import {
 import { postCharLimit } from "src/utils/variables";
 import MediaModalComment from "./mediaModalComment";
 import Link from "next/link";
-import CommentButton from "../buttons/commentButton";
+import CommentButton from "components/buttons/commentButton";
 import { LikePayload } from "src/types/utils";
-import ProfileImage from "../post/profileImage";
+import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
+import { AxiosResponse } from "axios";
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
     const toast = useToastContext();
@@ -107,7 +108,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             setComments([payload].concat(comments));
             toast("Commented Successfully", 2000);
         },
-        [comments]
+        [comments, toast]
     );
 
     const handleCommentDelete = useCallback(
@@ -146,7 +147,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 });    
             }
         },
-        [comments]
+        [props.modalData.post.id]
     );
 
     useEffect(() => {
@@ -171,7 +172,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getComments/${props.modalData.post.id}`,
                 { cancelToken: tokenSource.token, withCredentials: true }
             )
-            .then((res) => {
+            .then((res: AxiosResponse<{ comments: IPost[] }>) => {
                 setComments(res.data.comments);
                 setCommentsLoading(false);
             })
@@ -192,7 +193,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         return () => {
             tokenSource.cancel();
         };
-    }, [props.modalData.post.id]);
+    }, [props.modalData.post.id, toast]);
 
     useEffect(() => {
         if (socket) {
@@ -208,25 +209,22 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 socket.off("like", handleLike);
             }
         };
-    }, [handleComment, handleCommentDelete, handleLike]);
+    }, [handleComment, handleCommentDelete, handleLike, socket]);
 
     useEffect(() => {
-        if (commentBoxRef?.current) {
-            commentBoxRef.current.addEventListener(
-                "textInput",
-                handleTextInput as never
-            );
-        }
+        const commentBox = commentBoxRef?.current;
+        commentBox?.addEventListener(
+            "textInput",
+            handleTextInput as never
+        );
 
         window?.addEventListener("keydown", handleWindowKeyDown);
 
         return () => {
-            if (commentBoxRef?.current) {
-                commentBoxRef.current.removeEventListener(
-                    "textInput",
-                    handleTextInput as never
-                );
-            }
+            commentBox?.removeEventListener(
+                "textInput",
+                handleTextInput as never
+            );
             window?.removeEventListener("keydown", handleWindowKeyDown);
         };
     });

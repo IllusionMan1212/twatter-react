@@ -1,10 +1,11 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { createContext, ReactElement, useContext, useState } from "react";
 import Toast from "components/toast";
+import { ContextWrapperProps } from "src/types/props";
 
-const ToastContext = createContext((_text: string, _length: number) => void {});
+const ToastContext = createContext(null);
 
-export function ToastWrapper({ children }: any): ReactElement {
+export function ToastWrapper({ children }: ContextWrapperProps): ReactElement {
     const [toasts, setToasts] = useState([]);
 
     const setToastAttributes = (text: string, length: number) => {

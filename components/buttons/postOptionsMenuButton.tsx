@@ -6,8 +6,18 @@ import ContextMenuItem from "components/contextMenu/contextMenuItem";
 import { DotsThree, Eraser, Flag, Share, Link } from "phosphor-react";
 import { PostOptionsMenuButtonProps } from "src/types/props";
 import axios from "src/axios";
+import { AxiosResponse } from "axios";
 import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
+
+interface ApiRequest {
+    postAuthorId: string;
+    postId: string;
+}
+
+interface ApiResponse {
+    message: string;
+}
 
 export default function PostOptionsMenuButton(
     props: PostOptionsMenuButtonProps
@@ -21,7 +31,7 @@ export default function PostOptionsMenuButton(
     const handleReport = () => {
         setOptionsMenu(!optionsMenu);
         console.log("Coming soon");
-    }
+    };
 
     const handleShare = () => {
         setOptionsMenu(!optionsMenu);
@@ -38,7 +48,7 @@ export default function PostOptionsMenuButton(
             // TODO: fallback share popup
             console.log("cant share, fallback sharing popup coming soon");
         }
-    }
+    };
 
     const handleCopyLink = () => {
         setOptionsMenu(!optionsMenu);
@@ -60,7 +70,7 @@ export default function PostOptionsMenuButton(
         finally {
             document.body.removeChild(tempInput);
         }
-    }
+    };
 
     const handleDelete = () => {
         setOptionsMenu(!optionsMenu);
@@ -78,7 +88,7 @@ export default function PostOptionsMenuButton(
             }
         };
         axios
-            .post("posts/deletePost", payload)
+            .post<ApiRequest, AxiosResponse<ApiResponse>>("posts/deletePost", payload)
             .then((res) => {
                 props.deleteCallback?.();
                 socket.send(JSON.stringify(socketPayload));
@@ -87,7 +97,7 @@ export default function PostOptionsMenuButton(
             .catch((err) => {
                 toast(err?.response?.data?.message ?? "An error has occurred while deleting your post", 3000);
             });
-    }
+    };
 
     return (
         <div
@@ -112,34 +122,34 @@ export default function PostOptionsMenuButton(
                     topOffset={offset}
                 >
                     <>
-                    <ContextMenuItem
-                        text="Report Post"
-                        icon={Flag}
-                        onClick={handleReport}
-                    />
-                    <hr />
-                    <ContextMenuItem
-                        text="Share Post"
-                        icon={Share}
-                        onClick={handleShare}
-                    />
-                    <hr />
-                    <ContextMenuItem
-                        text="Copy Link"
-                        icon={Link}
-                        onClick={handleCopyLink}
-                    />
-                    {props.postAuthorId == props.currentUserId ? (
-                        <>
-                            <hr />
-                            <ContextMenuItem
-                                text="Delete Post"
-                                icon={Eraser}
-                                color="#EC4646"
-                                onClick={handleDelete}
-                            />
-                        </>
-                    ) : null}
+                        <ContextMenuItem
+                            text="Report Post"
+                            icon={Flag}
+                            onClick={handleReport}
+                        />
+                        <hr />
+                        <ContextMenuItem
+                            text="Share Post"
+                            icon={Share}
+                            onClick={handleShare}
+                        />
+                        <hr />
+                        <ContextMenuItem
+                            text="Copy Link"
+                            icon={Link}
+                            onClick={handleCopyLink}
+                        />
+                        {props.postAuthorId == props.currentUserId ? (
+                            <>
+                                <hr />
+                                <ContextMenuItem
+                                    text="Delete Post"
+                                    icon={Eraser}
+                                    color="#EC4646"
+                                    onClick={handleDelete}
+                                />
+                            </>
+                        ) : null}
                     </>
                 </ContextMenu>
             )}

@@ -82,7 +82,7 @@ export interface ExpandedPostProps extends Omit<PostProps, "post"> {
     nowCommenting: boolean;
     setNowCommenting: (value: SetStateAction<boolean>) => void;
     comments: Array<IPost>;
-    loadingComments: Boolean;
+    loadingComments: boolean;
 }
 
 export interface ContextMenuProps {
@@ -203,4 +203,8 @@ export interface ProfileImageProps {
     height: number;
     src: string;
     hyperlink?: string;
+}
+
+export interface ContextWrapperProps {
+    children: ReactNode;
 }

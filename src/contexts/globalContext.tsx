@@ -3,8 +3,9 @@ import { createContext, ReactElement, useContext, useEffect, useState, SetStateA
 import { useUserContext } from "./userContext";
 import { useToastContext } from "./toastContext";
 import axiosInstance from "src/axios";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { ISocketMessage } from "src/types/general";
+import { ContextWrapperProps } from "src/types/props";
 
 interface GlobalContextType {
     unreadMessages: string[];
@@ -13,18 +14,22 @@ interface GlobalContextType {
     setActiveConversationId: Dispatch<SetStateAction<string>>;
 }
 
+interface ApiResponse {
+    unreadMessages: string[];
+}
+
 const GlobalContextDefaultValues: GlobalContextType = {
     unreadMessages: [],
-    setUnreadMessages: () => {},
+    setUnreadMessages: null,
     activeConversationId: null,
-    setActiveConversationId: () => {}
+    setActiveConversationId: null
 };
 
 const GlobalContext = createContext<GlobalContextType>(
     GlobalContextDefaultValues
 );
 
-export function GlobalWrapper({ children }: any): ReactElement {
+export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     const { user, socket } = useUserContext();
     const toast = useToastContext();
 
@@ -37,7 +42,7 @@ export function GlobalWrapper({ children }: any): ReactElement {
                 setUnreadMessages(unreadMessages.concat(msg.conversation_id));
             }
         }
-    }, [toast, user, unreadMessages, activeConversationId]);
+    }, [user, unreadMessages, activeConversationId]);
 
     useEffect(() => {
         if (socket) {
@@ -48,7 +53,7 @@ export function GlobalWrapper({ children }: any): ReactElement {
             if (socket) {
                 socket.off("message", handleMessage);
             }
-        }
+        };
     }, [socket, handleMessage]);
 
     useEffect(() => {
@@ -59,7 +64,7 @@ export function GlobalWrapper({ children }: any): ReactElement {
                 .get("/messaging/getUnreadMessages", {
                     cancelToken: tokenSource.token,
                 })
-                .then((res) => {
+                .then((res: AxiosResponse<ApiResponse>) => {
                     setUnreadMessages(res.data.unreadMessages);
                 })
                 .catch((err) => {

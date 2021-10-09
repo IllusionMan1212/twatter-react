@@ -117,7 +117,7 @@ export default function EditProfilePopup(
         if (props.userData.birthday.Valid) {
             setBirthday(formatBirthday(props.userData.birthday.Time.toString()));
         }
-    }, [props.userData.birthday.Time])
+    }, [props.userData.birthday]);
 
     useEffect(() => {
         if (props.userData.birthday) {
@@ -134,7 +134,7 @@ export default function EditProfilePopup(
                 ).getUTCDate(),
             });
         }
-    }, []);
+    }, [props.userData.birthday]);
 
     return (
         <div
