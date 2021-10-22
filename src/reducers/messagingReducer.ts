@@ -22,6 +22,7 @@ export default function messagingReducer(state: State, action: MessagingAction):
 
         return {
             ...state,
+            messages: [],
             isConversationActive: true,
             activeConversation: action.payload.activeConversation,
         };

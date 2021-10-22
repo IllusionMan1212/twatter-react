@@ -540,21 +540,16 @@ export default function Messages(): ReactElement {
     }, [atBottom, setNewMessagesAlert]);
 
     useEffect(() => {
-        setPage(0);
-        pageRef.current = 0;
-        setReachedStartOfMessages(false);
-        setFirstItemIndex(START_INDEX);
-
         // dont fetch messages if current convo id is equal to new convo id
         // this is to prevent state update from happening when updating convo's last message on socket event
         if (state.activeConversation?.id == router.query.conversationId?.[0]) {
             return;
         }
 
-        // if conversations haven't been fetched yet, dont fetch messages
-        if (!state.conversations.length) {
-            return;
-        }
+        setPage(0);
+        pageRef.current = 0;
+        setReachedStartOfMessages(false);
+        setFirstItemIndex(START_INDEX);
 
         // fetches current conversation based on the query in the url (works with back and forward buttons on browsers)
         const newActiveConversation: IConversation = state.conversations.find(
@@ -563,6 +558,13 @@ export default function Messages(): ReactElement {
 
         // if we can't find the query string in our conversations, we just load the normal messages page
         if (!newActiveConversation) {
+            dispatch({
+                type: MessagingActions.CHANGE_CONVERSATION,
+                payload: {
+                    activeConversation: null,
+                    queryConversationId: null
+                }
+            });
             return;
         }
 
@@ -595,7 +597,7 @@ export default function Messages(): ReactElement {
                 }
             });
         });
-    }, [router.query?.conversationId, state.activeConversation?.id, state.conversations, getMessages, setActiveConversationId]);
+    }, [router.query?.conversationId, state.activeConversation?.id, getMessages, setActiveConversationId]);
 
     useEffect(() => {
         const messageInput = messageInputRef?.current;
