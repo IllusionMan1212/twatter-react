@@ -597,7 +597,7 @@ export default function Messages(): ReactElement {
                 }
             });
         });
-    }, [router.query?.conversationId, state.activeConversation?.id, getMessages, setActiveConversationId]);
+    }, [router.query?.conversationId, state.activeConversation?.id, state.conversations, getMessages, setActiveConversationId]);
 
     useEffect(() => {
         const messageInput = messageInputRef?.current;
