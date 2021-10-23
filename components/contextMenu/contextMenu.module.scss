@@ -1,4 +1,4 @@
-@use "../../styles/variables";
+@use "styles/variables";
 
 .menu {
     background-color: variables.$bg-color-primary;
@@ -14,7 +14,7 @@
         column-gap: 10px;
         padding: 15px;
         border-radius: 16px;
-        animation: menuItem 0.5s forwards;
+        animation: menuItem 0.4s forwards;
 
         @media (hover: hover) {
             &:hover {
@@ -39,9 +39,9 @@
 
 @keyframes menuItem {
     0% {
-        transform: rotateX(-90deg);
+        opacity: 0.3;
     }
     100% {
-        transform: rotateX(0deg);
+        opacity: 1.0;
     }
 }

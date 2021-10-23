@@ -565,6 +565,7 @@ export default function Messages(): ReactElement {
                     queryConversationId: null
                 }
             });
+            setActiveConversationId("");
             return;
         }
 
@@ -627,6 +628,13 @@ export default function Messages(): ReactElement {
             });
         }
     }, [user]);
+
+    // when unmounting the entire page, set the global active conversation id to an empty string so we get to receive messages notifications.
+    useEffect(() => {
+        return () => {
+            setActiveConversationId("");
+        };
+    }, [setActiveConversationId]);
 
     useEffect(() => {
         if (socket) {

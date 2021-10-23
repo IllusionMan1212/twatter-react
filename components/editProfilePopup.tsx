@@ -10,7 +10,7 @@ import {
 } from "src/utils/functions";
 import Button from "./buttons/button";
 import styles from "./editProfilePopup.module.scss";
-import homeStyles from "../styles/home.module.scss";
+import homeStyles from "styles/home.module.scss";
 import { useToastContext } from "src/contexts/toastContext";
 import { IAttachment, IBirthday } from "src/types/general";
 import { useUserContext } from "src/contexts/userContext";
@@ -156,6 +156,7 @@ export default function EditProfilePopup(
                                         : ""
                                 }${previewImage ?? props.userData.avatar_url}`}
                                 className={`round ${styles.profileImage}`}
+                                alt="Profile Image"
                             />
                             <div className={styles.imageOverlay}>
                                 <div className={styles.iconBackground}>
@@ -171,7 +172,7 @@ export default function EditProfilePopup(
                         </div>
                         <div className={styles.displayName}>
                             <div>
-                                <p className="usernameGrey text-bold text-small">
+                                <p className="usernameGrey text-bold">
                                     Display Name
                                 </p>
                                 <input
@@ -187,7 +188,7 @@ export default function EditProfilePopup(
                         </div>
                     </div>
                     <div className={styles.body}>
-                        <p className="usernameGrey text-bold text-small mb-2Percent">
+                        <p className="usernameGrey text-bold mb-2Percent">
                             Bio
                         </p>
                         <div className={`mb-1 ${styles.bioContainer}`}>
@@ -200,7 +201,7 @@ export default function EditProfilePopup(
                             />
                         </div>
                         <div className="mb-3">
-                            <p className="usernameGrey text-bold text-small mb-2Percent">
+                            <p className="usernameGrey text-bold mb-2Percent">
                                 Birthday
                             </p>
                             <div
