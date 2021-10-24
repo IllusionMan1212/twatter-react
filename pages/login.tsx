@@ -136,13 +136,13 @@ export default function Login(): ReactElement {
                         </button>
                         <p className="text-white text-center mt-1">
                             <Link href="/forgot-password">
-                                <a>Forgot your password?</a>
+                                <a className="linkColor">Forgot your password?</a>
                             </Link>
                         </p>
                         <p className="usernameGrey text-center my-1">or</p>
                         <p className="text-white text-center">
                             <Link href="/register">
-                                <a>Don&apos;t have an account yet? Sign up</a>
+                                <a className="linkColor">Don&apos;t have an account yet? Sign up</a>
                             </Link>
                         </p>
                     </form>

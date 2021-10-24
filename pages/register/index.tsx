@@ -175,7 +175,7 @@ export default function Register(): ReactElement {
                         </button>
                         <p className="text-white text-right my-3Percent">
                             <Link href="/login">
-                                <a>Already have an account? Log in</a>
+                                <a className="linkColor">Already have an account? Log in</a>
                             </Link>
                         </p>
                     </form>

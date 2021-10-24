@@ -9,8 +9,8 @@ import {
 import Router from "next/router";
 import { NavbarLoggedInProps } from "src/types/props";
 import { ReactElement, useState } from "react";
-import ProfileImage from "./post/profileImage";
-import UserContextMenu from "./userContextMenu";
+import ProfileImage from "components/post/profileImage";
+import UserContextMenu from "components/userContextMenu";
 
 export default function Navbar(
     props: NavbarLoggedInProps

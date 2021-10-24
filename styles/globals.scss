@@ -58,8 +58,13 @@ a {
     text-decoration: none;
 
     &:hover {
-        color: variables.$accent-color;
         cursor: pointer;
+    }
+}
+
+.linkColor {
+    &:hover {
+        color: variables.$accent-color;
     }
 }
 

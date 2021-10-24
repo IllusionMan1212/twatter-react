@@ -98,12 +98,12 @@ export default function Index(): ReactElement {
                                 <h2 className="my-1">Legal</h2>
                                 <p className="my-1 text-medium">
                                     <Link href="/terms-of-service">
-                                        <a>Terms of Service</a>
+                                        <a className="linkColor">Terms of Service</a>
                                     </Link>
                                 </p>
                                 <p className="mt-1 text-medium">
                                     <Link href="/privacy-policy">
-                                        <a>Privacy Policy</a>
+                                        <a className="linkColor">Privacy Policy</a>
                                     </Link>
                                 </p>
                             </div>
