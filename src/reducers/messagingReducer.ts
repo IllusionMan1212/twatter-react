@@ -67,6 +67,8 @@ export default function messagingReducer(state: State, action: MessagingAction):
                         }
                         return convo;
                     });
+                } else {
+                    newConversations = [...state.conversations];
                 }
             }
             return message;
