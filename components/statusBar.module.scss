@@ -16,12 +16,20 @@
 
 .title {
     min-width: -moz-fit-content;
-    font-size: 3.5em;
+    font-size: 3em;
     flex-basis: 0;
     flex-grow: 0;
     flex-shrink: 0;
     min-width: 20%;
     justify-content: center;
+
+    @media (max-width: 1200px) {
+        font-size: 2.5em;
+    }
+
+    @media (max-width: 1000px) {
+        font-size: 2em;
+    }
 
     @media (max-width: 800px) {
         font-size: 1.3em;

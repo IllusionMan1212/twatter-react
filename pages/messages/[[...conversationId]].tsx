@@ -787,17 +787,11 @@ export default function Messages(): ReactElement {
                                                     href={`/u/${state.activeConversation?.username}`}
                                                 >
                                                     <a>
-                                                        <p className="text-bold text-large">
+                                                        <p className="text-bold text-medium">
                                                             {
                                                                 state.activeConversation?.display_name
                                                             }
                                                         </p>
-                                                    </a>
-                                                </Link>
-                                                <Link
-                                                    href={`/u/${state.activeConversation?.username}`}
-                                                >
-                                                    <a>
                                                         <p
                                                             className={
                                                                 styles.username

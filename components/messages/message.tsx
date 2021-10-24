@@ -21,22 +21,21 @@ export default function Message(props: MessageProps): ReactElement {
                     props.sender ? styles.senderMessage : styles.recipientMessage
                 }`}
             >
-                <div
-                    className={`${
-                        props.sender ? styles.senderMessageBlock : styles.recipientMessageBlock
-                    }`}
-                >
-                    {props.children && (
-                        <div className={styles.content}>{props.children}</div>
-                    )}
+                <div className="flex flex-column">
+                    <div
+                        className={`${
+                            props.sender ? styles.senderMessageBlock : styles.recipientMessageBlock
+                        }`}
+                    >
+                        {props.children && (
+                            <div className={styles.content}>{props.children}</div>
+                        )}
+                    </div>
                     {props.attachment && (
-                        <img
+                        <div
                             className={styles.attachment}
-                            src={props.attachment}
-                            height="auto"
-                            width="auto"
+                            style={{ backgroundImage: `url(${props.attachment})` }}
                             onClick={handleClick}
-                            alt="Message's attached image"
                         />
                     )}
                 </div>

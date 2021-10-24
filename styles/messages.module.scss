@@ -9,7 +9,7 @@
     margin-top: 1em;
     position: relative;
 
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         height: calc(100vh - 60px - 51px);
         max-height: calc(100vh - 60px - 51px);
         margin: 0;
@@ -17,7 +17,7 @@
 }
 
 .messagesContainerMobile {
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         height: calc(100vh);
         max-height: calc(100vh);
         position: absolute;
@@ -40,7 +40,7 @@
     border-right: 1px solid variables.$divider-color;
     border-left: 1px solid variables.$divider-color;
 
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         width: 100%;
         border-right: unset;
         border-left: unset;    
@@ -51,7 +51,7 @@
 }
 
 .messagesListMobile {
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         display: none;
     }
 }
@@ -65,14 +65,14 @@
     border-top: 1px solid variables.$divider-color;
     border-right: 1px solid variables.$divider-color;
 
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         width: 100%;
         display: none;
     }
 }
 
 .conversationMobile {
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         display: flex;
     }
 }
@@ -84,13 +84,13 @@
     padding: 5px 15px;
     border-bottom: 1px solid variables.$divider-color;
 
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         padding: 15px;
     }
 }
 
 .username {
-    font-size: 1.2em;
+    font-size: 0.9em;
     color: #666;
 }
 
@@ -107,7 +107,7 @@
         cursor: pointer;
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
         display: flex;
     }
 }
@@ -127,7 +127,7 @@
         padding-left: 50px;
         padding-right: 50px;
 
-        @media (max-width: 800px) {
+        @media (max-width: 900px) {
             padding-left: 20px;
             padding-right: 20px;    
         }

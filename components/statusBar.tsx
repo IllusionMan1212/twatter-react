@@ -1,23 +1,37 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./statusBar.module.scss";
 import Router from "next/router";
-import Search from "./search";
+import Search from "components/search";
 import { ChatsTeardrop, ArrowLeft, Bell } from "phosphor-react";
-import UserContextMenu from "./userContextMenu";
-import { ReactElement, useState } from "react";
+import UserContextMenu from "components/userContextMenu";
+import { ReactElement, useState, useEffect } from "react";
 import { StatusBarProps } from "src/types/props";
-import ProfileImage from "./post/profileImage";
+import ProfileImage from "components/post/profileImage";
 import { useGlobalContext } from "src/contexts/globalContext";
+import Link from "next/link";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
     const { unreadMessages } = useGlobalContext();
 
     const [userMenu, setUserMenu] = useState(false);
     const [unreadNotifications] = useState(0);
+    const [windowWidth, setWindowWidth] = useState(window?.innerWidth);
 
     const handleClickBack = () => {
         history.back();
     };
+
+    const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+    };
+
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
 
     return (
         <div
@@ -34,7 +48,15 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
             <div
                 className={`flex align-items-center ${styles.title}`}
             >
-                <p className="text-bold ellipsis">{props.title}</p>
+                {windowWidth > 800 ? (
+                    <Link href="/home">
+                        <a>
+                            <p className="text-bold ellipsis">Twatter</p>
+                        </a>
+                    </Link>
+                ): (
+                    <p className="text-bold ellipsis">{props.title}</p>
+                )}
             </div>
             <div className={styles.search}>
                 <Search></Search>

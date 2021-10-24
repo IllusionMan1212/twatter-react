@@ -49,10 +49,11 @@
 }
 
 .attachment {
-    width: auto;
+    width: 300px;
     max-width: 100%;
-    max-height: 600px;
-    object-fit: cover;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
     cursor: pointer;
 }
 
