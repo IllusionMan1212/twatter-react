@@ -173,6 +173,7 @@ export interface ButtonProps {
     size: number;
     text: string;
     type: ButtonType;
+    disabled?: boolean;
     handleClick: () => void;
 }
 

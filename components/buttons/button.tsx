@@ -6,7 +6,7 @@ import styles from "./button.module.scss";
 export default function Button(props: ButtonProps): ReactElement {
     return (
         <div
-            className={`${styles.button} ${
+            className={`${styles.button} ${props.disabled ? styles.buttonDisabled : ""} ${
                 props.type == ButtonType.Danger
                     ? styles.danger
                     : props.type == ButtonType.Warning
