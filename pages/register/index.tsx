@@ -77,6 +77,12 @@ export default function Register(): ReactElement {
             return false;
         }
 
+        if (!form.username.match(/^[a-z0-9_]+$/iu)) {
+            toast("Username cannot contain special characters", 4000);
+            setRegisterAllowed(true);
+            return false;
+        }
+
         if (form.password.length < 8) {
             toast("Password is too short", 4000);
             setRegisterAllowed(true);

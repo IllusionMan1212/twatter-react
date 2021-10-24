@@ -36,6 +36,13 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     const [unreadMessages, setUnreadMessages] = useState<string[]>([]);
     const [activeConversationId, setActiveConversationId] = useState("");
 
+    const handleError = useCallback(
+        (payload) => {
+            toast(payload.message, 4000);
+        },
+        [toast]
+    );
+
     const handleMessage = useCallback((msg: ISocketMessage) => {
         if (msg.author_id != user.id && activeConversationId != msg.conversation_id) {
             if (!unreadMessages.includes(msg.conversation_id)) {
@@ -47,11 +54,13 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     useEffect(() => {
         if (socket) {
             socket.on("message", handleMessage);
+            socket.on("error", handleError);
         }
 
         return () => {
             if (socket) {
                 socket.off("message", handleMessage);
+                socket.off("error", handleError);
             }
         };
     }, [socket, handleMessage]);

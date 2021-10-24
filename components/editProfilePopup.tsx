@@ -45,8 +45,12 @@ export default function EditProfilePopup(
     const [showBirthdayFields, setShowBirthdayFields] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<IBirthday>({day: 1, month:1, year: 1});
     const [birthday, setBirthday] = useState(props.userData.birthday.Time.toString());
+    const [savingDisabled, setSavingDisabled] = useState(false);
 
     const handleSaveButtonClick = async () => {
+        if (savingDisabled) {
+            return;
+        }
         if (!displayName) {
             toast("Display name cannot be empty", 3000);
             return;
@@ -180,9 +184,11 @@ export default function EditProfilePopup(
                                     defaultValue={props.userData.display_name}
                                     maxLength={16}
                                     max={16}
-                                    onChange={(e) =>
-                                        setDisplayName(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        const name = e.target.value.trim();
+                                        setDisplayName(name);
+                                        setSavingDisabled(!name);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -409,6 +415,7 @@ export default function EditProfilePopup(
                                 size={10}
                                 type={ButtonType.Regular}
                                 handleClick={handleSaveButtonClick}
+                                disabled={savingDisabled}
                             ></Button>
                             <span
                                 className="underline pointer"
