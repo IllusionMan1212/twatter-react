@@ -1,5 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent } from "react";
-import { IPost, IUser, DateAndTime } from "./general";
+import { IPost, IUser, IBirthday, DateAndTime } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
 
@@ -208,4 +208,12 @@ export interface ProfileImageProps {
 
 export interface ContextWrapperProps {
     children: ReactNode;
+}
+
+export interface BirthdayProps {
+    selectedBirthday: IBirthday
+    setSelectedBirthday: (birthday: SetStateAction<IBirthday>) => void;
+    dayRef?: MutableRefObject<HTMLSelectElement>;
+    monthRef?: MutableRefObject<HTMLSelectElement>;
+    yearRef?: MutableRefObject<HTMLSelectElement>;
 }

@@ -153,25 +153,6 @@
     }
 }
 
-.birthdaySelector {
-    background-color: #252525;
-    color: white;
-    border: none;
-    outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    text-align: center;
-    text-align-last: center;
-    font-size: 1em;
-    height: 40px;
-    width: 140px;
-    font-weight: bold;
-
-    &:hover {
-        cursor: pointer;
-    }
-}
-
 .footer {
     display: flex;
     padding: 0 5px;

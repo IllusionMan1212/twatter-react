@@ -10,11 +10,11 @@ import Router from "next/router";
 import axios from "src/axios";
 import { useToastContext } from "src/contexts/toastContext";
 import { IBirthday } from "src/types/general";
-import { handleBirthdayDayChange, handleBirthdayMonthChange, handleBirthdayYearChange } from "src/utils/functions";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
 import { AxiosResponse } from "axios";
 import { IUser } from "src/types/general";
+import Birthday from "components/birthday/birthday";
 
 interface PostReqResponse {
     message: string;
@@ -32,7 +32,6 @@ export default function UserSetup(): ReactElement {
     const monthRef = useRef<HTMLSelectElement>(null);
     const yearRef = useRef<HTMLSelectElement>(null);
 
-    const [maxDays, setMaxDays] = useState(31);
     const [birthday, setBirthday] = useState<IBirthday>(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
@@ -192,153 +191,13 @@ export default function UserSetup(): ReactElement {
                     <div className="flex flex-column align-items-center text-white text-medium my-1">
                         <div className={styles.birthday}>
                             <p className="mb-3Percent">Add your birthday</p>
-                            <div className="flex justify-content-space-between">
-                                <select
-                                    ref={dayRef}
-                                    className={styles.dropdownSelector}
-                                    onChange={(e) => handleBirthdayDayChange(e, setBirthday, birthday)}
-                                    defaultValue=""
-                                >
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value=""
-                                        hidden={true}
-                                    >
-                                        Day
-                                    </option>
-                                    {new Array(maxDays)
-                                        .fill(null)
-                                        .map((_day, i) => {
-                                            return (
-                                                <option
-                                                    key={i + 1}
-                                                    className={
-                                                        styles.dropdownItem
-                                                    }
-                                                    value={i + 1}
-                                                >
-                                                    {i + 1}
-                                                </option>
-                                            );
-                                        })}
-                                </select>
-                                <select
-                                    ref={monthRef}
-                                    className={styles.dropdownSelector}
-                                    onChange={(e) => handleBirthdayMonthChange(e, setBirthday, birthday, setMaxDays)}
-                                    defaultValue=""
-                                >
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value=""
-                                        hidden={true}
-                                    >
-                                        Month
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="1"
-                                    >
-                                        January
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="2"
-                                    >
-                                        Feburary
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="3"
-                                    >
-                                        March
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="4"
-                                    >
-                                        April
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="5"
-                                    >
-                                        May
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="6"
-                                    >
-                                        June
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="7"
-                                    >
-                                        July
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="8"
-                                    >
-                                        August
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="9"
-                                    >
-                                        September
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="10"
-                                    >
-                                        October
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="11"
-                                    >
-                                        November
-                                    </option>
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value="12"
-                                    >
-                                        December
-                                    </option>
-                                </select>
-                                <select
-                                    ref={yearRef}
-                                    className={styles.dropdownSelector}
-                                    onChange={(e) => handleBirthdayYearChange(e, setBirthday, birthday, setMaxDays)}
-                                    defaultValue=""
-                                >
-                                    <option
-                                        className={styles.dropdownItem}
-                                        value=""
-                                        hidden={true}
-                                    >
-                                        Year
-                                    </option>
-                                    {new Array(100)
-                                        .fill(null)
-                                        .map((_year, i) => {
-                                            const year = new Date().getUTCFullYear();
-                                            return (
-                                                <option
-                                                    key={year - i}
-                                                    className={
-                                                        styles.dropdownItem
-                                                    }
-                                                    value={year - i}
-                                                >
-                                                    {year - i}
-                                                </option>
-                                            );
-                                        })}
-                                </select>
-                            </div>
+                            <Birthday
+                                selectedBirthday={birthday}
+                                setSelectedBirthday={setBirthday}
+                                dayRef={dayRef}
+                                monthRef={monthRef}
+                                yearRef={yearRef}
+                            />
                             {birthday?.day != null &&
                                 birthday?.month != null &&
                                 birthday?.year && (
