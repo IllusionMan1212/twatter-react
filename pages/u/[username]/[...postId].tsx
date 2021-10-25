@@ -161,7 +161,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     );
                 });
         }
-    }, [post?.id, toast]);
+    }, [post?.id]);
 
     useEffect(() => {
         if (socket) {
@@ -186,12 +186,12 @@ export default function UserPost(props: UserPostProps): ReactElement {
             // if url contains other queries after the post id, remove them
             if (router.query.postId.length > 1) {
                 router.replace(
-                    router.asPath,
                     router.asPath.substr(
                         0,
                         router.asPath.indexOf(router.query.postId[0]) +
                             router.query.postId[0].length
                     ),
+                    null,
                     { shallow: true, scroll: false }
                 );
             }
@@ -204,9 +204,9 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 setLoading(false);
             }
         }
-    }, [router.query.postId?.[0]]);
+    }, [props.post, router]);
 
-    // TODO: make mediaModal state global and move this into _app.tsx
+    // TODO: make mediaModal state global and move this into the globalContext
     useEffect(() => {
         if (mediaModal) {
             document.body.classList.add("overflow-hidden");
@@ -221,7 +221,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
         };
     }, [mediaModal]);
 
-    // TODO: move this into _app.tsx, and refactor it for multiple open modals
+    // TODO: move this into the globalContext, and refactor it for multiple open modals
     useEffect(() => {
         // on browser back button press, close the media modal
         window.onpopstate = () => {

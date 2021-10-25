@@ -119,7 +119,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.String}`}
                         >
                             <a
-                                className={`flex mb-1Percent text-small ${styles.replyingTo}`}
+                                className={`flex mb-1Percent text-small linkColor ${styles.replyingTo}`}
                             >
                                 <div className="flex">
                                     <ArrowArcLeft size={25}></ArrowArcLeft>

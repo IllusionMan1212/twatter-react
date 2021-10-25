@@ -89,7 +89,7 @@ export default function Index(): ReactElement {
                                 <h2 className="my-1">Contact</h2>
                                 <p className="my-1 text-medium">
                                     Reach us at{" "}
-                                    <a href="mailto:twatter@illusionman1212.me">
+                                    <a className="linkColor" href="mailto:twatter@illusionman1212.me">
                                         twatter@illusionman1212.me
                                     </a>
                                 </p>

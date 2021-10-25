@@ -34,7 +34,7 @@ export default function Post(props: PostProps): ReactElement {
                         href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.String}`}
                     >
                         <a
-                            className={`flex mb-1Percent text-small ${styles.replyingTo}`}
+                            className={`flex mb-1Percent text-small linkColor ${styles.replyingTo}`}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex">
