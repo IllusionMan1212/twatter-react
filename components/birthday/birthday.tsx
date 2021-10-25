@@ -12,6 +12,7 @@ const months = ["January", "Feburary", "March", "April", "May", "June", "July",
 
 export default function Birthday(props: BirthdayProps): ReactElement {
     const [maxDays, setMaxDays] = useState(31);
+    const [maxMonths, setMaxMonths] = useState(months.length);
 
     return (
         <div className="flex justify-content-space-between">
@@ -58,9 +59,9 @@ export default function Birthday(props: BirthdayProps): ReactElement {
                 <option className={styles.dropdownItem} value="" hidden={true}>
                     Month
                 </option>
-                {months.map((month, index) => (
+                {new Array(maxMonths).fill(null).map((_, index) => (
                     <option key={index} className={styles.dropdownItem} value={index + 1}>
-                        {month}
+                        {months[index]}
                     </option>
                 ))}
             </select>
@@ -72,7 +73,8 @@ export default function Birthday(props: BirthdayProps): ReactElement {
                         e,
                         props.setSelectedBirthday,
                         props.selectedBirthday,
-                        setMaxDays
+                        setMaxDays,
+                        setMaxMonths
                     )
                 }
                 defaultValue=""
@@ -80,7 +82,7 @@ export default function Birthday(props: BirthdayProps): ReactElement {
                 <option className={styles.dropdownItem} value="" hidden={true}>
                     Year
                 </option>
-                {new Array(100).fill(null).map((_year, i) => {
+                {new Array(100).fill(null).map((_, i) => {
                     const year = new Date().getUTCFullYear();
                     return (
                         <option

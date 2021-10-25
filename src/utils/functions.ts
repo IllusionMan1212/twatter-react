@@ -105,6 +105,17 @@ export const formatBigNumbers = (number: number): string => {
     return number.toString();
 };
 
+const isLeapYear = (year: number): boolean => {
+    if (year % 400 == 0) {
+        return true;
+    } else if (year % 100 == 0) {
+        return false;
+    } else if (year % 4 == 0) {
+        return true;
+    }
+    return false;
+};
+
 export const handleBirthdayDayChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
     setBirthday: (birthday: SetStateAction<IBirthday>) => void,
@@ -126,6 +137,26 @@ export const handleBirthdayMonthChange = (
         ...birthday,
         month: Number(e.target.value),
     });
+
+    const today = new Date();
+    const currentYear = today.getUTCFullYear();
+    const currentMonth = today.getUTCMonth() + 1;
+    const currentDay = today.getUTCDate();
+
+    if (birthday.year == currentYear) {
+        console.log("month: " + e.target.value);
+        if (Number(e.target.value) == currentMonth) {
+            if (birthday.day >= currentDay) {
+                setBirthday({
+                    ...birthday,
+                    day: null,
+                });
+            }
+            setMaxDays(currentDay - 1);
+            return;
+        }
+    }
+
     switch (e.target.value) {
     case "1":
     case "3":
@@ -150,23 +181,7 @@ export const handleBirthdayMonthChange = (
         break;
     case "2":
         if (birthday?.year) {
-            if (birthday.year % 400 == 0) {
-                if (birthday.day > 29) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(29);
-            } else if (birthday.year % 100 == 0) {
-                if (birthday.day > 28) {
-                    setBirthday({
-                        ...birthday,
-                        day: null,
-                    });
-                }
-                setMaxDays(28);
-            } else if (birthday.year % 4 == 0) {
+            if (isLeapYear(birthday.year)) {
                 if (birthday.day > 29) {
                     setBirthday({
                         ...birthday,
@@ -209,31 +224,33 @@ export const handleBirthdayYearChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
     setBirthday: (birthday: SetStateAction<IBirthday>) => void,
     birthday: IBirthday,
-    setMaxDays: (days: SetStateAction<number>) => void
+    setMaxDays: (days: SetStateAction<number>) => void,
+    setMaxMonths: (months: SetStateAction<number>) => void
 ): void => {
     setBirthday({
         ...birthday,
         year: Number(e.target.value),
     });
 
+    const today = new Date();
+    const currentYear = today.getUTCFullYear();
+    const currentMonth = today.getUTCMonth() + 1;
+
+    if (Number(e.target.value) == currentYear) {
+        if (birthday.month > currentMonth) {
+            setBirthday({
+                ...birthday,
+                month: null,
+                year: Number(e.target.value),
+            });
+        }
+        setMaxMonths(currentMonth);
+    } else {
+        setMaxMonths(12);
+    }
+    
     if (birthday?.month == 2) {
-        if (parseInt(e.target.value) % 400 == 0) {
-            if (birthday?.day > 29) {
-                setBirthday({
-                    ...birthday,
-                    day: null,
-                });
-            }
-            setMaxDays(29);
-        } else if (parseInt(e.target.value) % 100 == 0) {
-            if (birthday?.day > 28) {
-                setBirthday({
-                    ...birthday,
-                    day: null,
-                });
-            }
-            setMaxDays(28);
-        } else if (parseInt(e.target.value) % 4 == 0) {
+        if (isLeapYear(parseInt(e.target.value))) {
             if (birthday?.day > 29) {
                 setBirthday({
                     ...birthday,
@@ -242,7 +259,7 @@ export const handleBirthdayYearChange = (
             }
             setMaxDays(29);
         } else {
-            if (parseInt(e.target.value) > 28) {
+            if (birthday?.day > 28) {
                 setBirthday({
                     ...birthday,
                     day: null,
