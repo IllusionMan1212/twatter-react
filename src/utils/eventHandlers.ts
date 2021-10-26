@@ -12,7 +12,8 @@ export const handlePaste = (
     setPreviewImages: (value: SetStateAction<Array<string>>) => void,
     attachments: Array<IAttachment>,
     setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
-    toast: (text: string, length: number) => void
+    toast: (text: string, length: number) => void,
+    _maxAttachments = maxAttachments
 ): void => {
     e.preventDefault();
     // handle pasting clipboard images
@@ -27,7 +28,7 @@ export const handlePaste = (
             return;
         }
 
-        if (attachments.length == 4) {
+        if (attachments.length == _maxAttachments) {
             return;
         }
 
@@ -114,14 +115,20 @@ export const handleAttachmentChange = (
     previewImages: Array<string>,
     setPreviewImages: (value: SetStateAction<Array<string>>) => void,
     setPostingAllowed: (value: SetStateAction<boolean>) => void,
-    toast: (text: string, length: number) => void
+    toast: (text: string, length: number) => void,
+    _maxAttachments = maxAttachments
 ): void => {
     const files: File[] = Array.from(e.target?.files as ArrayLike<File>);
     const validFiles: Array<IAttachment> = [...attachments];
     const validPreviewImages: Array<string> = [...previewImages];
 
+    if (attachments.length == _maxAttachments) {
+        toast(`You can only upload up to ${_maxAttachments} image(s)`, 4000);
+        return;
+    }
+
     if (files.length > maxAttachments) {
-        toast("You can only upload up to 4 images", 4000);
+        toast(`You can only upload up to ${_maxAttachments} image(s)`, 4000);
         return;
     }
     for (let i = 0; i < files.length; i++) {
@@ -161,7 +168,7 @@ export const handlePreviewImageClose = (
     setPreviewImages: (value: SetStateAction<Array<string>>) => void,
     attachments: Array<IAttachment>,
     setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
-    ref: MutableRefObject<HTMLElement>,
+    inputRef: MutableRefObject<HTMLElement>,
     setPostingAllowed: (value: SetStateAction<boolean>) => void
 ): void => {
     const tempPreviewImages = [...previewImages];
@@ -171,7 +178,7 @@ export const handlePreviewImageClose = (
     tempAttachments.splice(i, 1);
     setAttachments(tempAttachments);
     // if there're no attachments AND no text, disable the posting button
-    if (!tempAttachments.length && !ref.current.textContent.trim().length) {
+    if (!tempAttachments.length && !inputRef.current.textContent.trim().length) {
         setPostingAllowed(false);
     }
 };

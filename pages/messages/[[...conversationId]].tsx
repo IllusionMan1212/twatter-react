@@ -31,9 +31,7 @@ import Link from "next/link";
 import MessageMediaModal from "components/messages/messageMediaModal";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import {
-    fileSizeLimit,
     messageCharLimit,
-    supportedFileTypes,
 } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
@@ -42,6 +40,7 @@ import { DeleteMessagePayload, MarkMessagesAsReadPayload } from "src/types/socke
 import { useGlobalContext } from "src/contexts/globalContext";
 import { MessagingActions } from "src/types/actions";
 import messagingReducer from "src/reducers/messagingReducer";
+import { handlePaste, handlePreviewImageClose, handleAttachmentChange } from "src/utils/eventHandlers";
 
 const initialState = {
     conversations: [] as IConversation[],
@@ -69,8 +68,8 @@ export default function Messages(): ReactElement {
 
     const [charsLeft, setCharsLeft] = useState(messageCharLimit);
     const [sendingAllowed, setSendingAllowed] = useState(false);
-    const [attachment, setAttachment] = useState<IAttachment>(null);
-    const [previewImage, setPreviewImage] = useState(null);
+    const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    const [previewImages, setPreviewImages] = useState<string[]>([]);
     const [conversationsLoading, setConversationsLoading] = useState(true);
     const [nowSending, setNowSending] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
@@ -120,7 +119,7 @@ export default function Messages(): ReactElement {
             setSendingAllowed(false);
         } else if (
             e.currentTarget.textContent.trim().length != 0 ||
-            attachment
+            attachments.length
         ) {
             setSendingAllowed(true);
         } else {
@@ -150,7 +149,7 @@ export default function Messages(): ReactElement {
 
             if (
                 !messageInputRef.current.textContent.length &&
-                !attachment?.data
+                !attachments?.[0]?.data
             )
                 return;
 
@@ -165,42 +164,6 @@ export default function Messages(): ReactElement {
                 e.shiftKey && document.execCommand("insertLineBreak");
             } else if (window.innerWidth <= 800) {
                 document.execCommand("insertLineBreak");
-            }
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
-        e.preventDefault();
-        // handle pasting strings as plain text
-        if (e.clipboardData.items?.[0].kind == "string") {
-            const text = e.clipboardData.getData("text/plain");
-            e.currentTarget.textContent += text;
-
-            if (e.currentTarget.textContent.length > messageCharLimit) {
-                setSendingAllowed(false);
-            } else if (e.currentTarget.textContent.length) {
-                setSendingAllowed(true);
-            }
-            setCharsLeft(messageCharLimit - e.currentTarget.textContent.length);
-            // handle pasting images
-        } else if (e.clipboardData.items?.[0].kind == "file") {
-            const file = e.clipboardData.items[0].getAsFile();
-            if (!supportedFileTypes.includes(file.type)) {
-                return;
-            }
-            if (file.size > fileSizeLimit) {
-                toast("File size is limited to 8MB", 4000);
-                return;
-            }
-            setAttachment({
-                data: file,
-                mimetype: file.type,
-                name: file.name,
-                size: file.size,
-            });
-            setPreviewImage(URL.createObjectURL(file));
-            if (charsLeft >= 0) {
-                setSendingAllowed(true);
             }
         }
     };
@@ -346,7 +309,7 @@ export default function Messages(): ReactElement {
         }
         if (
             messageInputRef.current.textContent.length == 0 &&
-            !attachment.data
+            !attachments.length
         ) {
             e.preventDefault();
             return;
@@ -356,7 +319,7 @@ export default function Messages(): ReactElement {
             .trim();
         setNowSending(true);
 
-        const attachmentArrayBuffer = await attachment?.data.arrayBuffer();
+        const attachmentArrayBuffer = await attachments?.[0]?.data.arrayBuffer();
         const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
         const data = Buffer.from(attachmentBuffer).toString("base64");
 
@@ -369,48 +332,16 @@ export default function Messages(): ReactElement {
                 message_content: messageContent,
                 attachment: {
                     data: data || "",
-                    mimetype: attachment?.mimetype || ""
+                    mimetype: attachments?.[0]?.mimetype || ""
                 },
             },
         };
         messageInputRef.current.textContent = "";
-        setAttachment(null);
-        setPreviewImage(null);
+        setAttachments([]);
+        setPreviewImages([]);
         setSendingAllowed(false);
         setCharsLeft(messageCharLimit);
         socket.send(JSON.stringify(payload));
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file: File = e.target?.files[0];
-
-        if (!supportedFileTypes.includes(file.type)) {
-            toast("This file format is not supported", 4000);
-            return;
-        }
-        if (file.size > fileSizeLimit) {
-            toast("File size is limited to 8MB", 4000);
-            return;
-        }
-        setAttachment({
-            data: file,
-            mimetype: file.type,
-            name: file.name,
-            size: file.size,
-        });
-        setPreviewImage(URL.createObjectURL(file));
-        if (charsLeft >= 0) {
-            setSendingAllowed(true);
-        }
-        // TODO: videos
-    };
-
-    const handleImagePreviewClose = () => {
-        setPreviewImage(null);
-        setAttachment(null);
-        if (!messageInputRef.current.textContent.trim().length) {
-            setSendingAllowed(false);
-        }
     };
 
     const handleTextInput = (e: InputEvent) => {
@@ -435,8 +366,8 @@ export default function Messages(): ReactElement {
             messageInputRef.current.innerHTML = "";
             setSendingAllowed(false);
             setCharsLeft(messageCharLimit);
-            setAttachment(null);
-            setPreviewImage(null);
+            setAttachments([]);
+            setPreviewImages([]);
         }
 
         if (conversation.unread_messages) {
@@ -964,33 +895,45 @@ export default function Messages(): ReactElement {
                                                     : ""
                                             }`}
                                         ></div>
-                                        {previewImage && (
-                                            <div
-                                                className={
-                                                    styles.messageAttachment
-                                                }
-                                            >
+                                        {previewImages.map((previewImage, i) => {
+                                            return (
                                                 <div
                                                     className={
-                                                        styles.previewImage
+                                                        styles.messageAttachment
                                                     }
-                                                    style={{
-                                                        backgroundImage: `url("${previewImage}")`,
-                                                    }}
+                                                    key={i}
                                                 >
                                                     <div
                                                         className={
-                                                            styles.previewImageClose
+                                                            styles.previewImage
                                                         }
-                                                        onClick={
-                                                            handleImagePreviewClose
-                                                        }
+                                                        style={{
+                                                            backgroundImage: `url("${previewImage}")`,
+                                                        }}
                                                     >
-                                                        <X weight="bold"></X>
+                                                        <div
+                                                            className={
+                                                                styles.previewImageClose
+                                                            }
+                                                            onClick={(e) => {
+                                                                handlePreviewImageClose(
+                                                                    e,
+                                                                    i,
+                                                                    previewImages,
+                                                                    setPreviewImages,
+                                                                    attachments,
+                                                                    setAttachments,
+                                                                    messageInputRef,
+                                                                    setSendingAllowed
+                                                                );
+                                                            }}
+                                                        >
+                                                            <X weight="bold"></X>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            );
+                                        })}
                                         <div
                                             className={styles.messageInputArea}
                                         >
@@ -1000,7 +943,21 @@ export default function Messages(): ReactElement {
                                                 contentEditable="true"
                                                 data-placeholder="Send a message..."
                                                 onInput={handleInput}
-                                                onPaste={handlePaste}
+                                                onPaste={(e) => {
+                                                    handlePaste(
+                                                        e,
+                                                        messageCharLimit,
+                                                        charsLeft,
+                                                        setCharsLeft,
+                                                        setSendingAllowed,
+                                                        previewImages,
+                                                        setPreviewImages,
+                                                        attachments,
+                                                        setAttachments,
+                                                        toast,
+                                                        1
+                                                    );
+                                                }}
                                                 onKeyDown={handleKeyDown}
                                                 onFocus={handleFocus}
                                             ></span>
@@ -1015,7 +972,18 @@ export default function Messages(): ReactElement {
                                                         className={
                                                             styles.fileInput
                                                         }
-                                                        onChange={handleChange}
+                                                        onChange={(e) => {
+                                                            handleAttachmentChange(
+                                                                e,
+                                                                attachments,
+                                                                setAttachments,
+                                                                previewImages,
+                                                                setPreviewImages,
+                                                                setSendingAllowed,
+                                                                toast,
+                                                                1
+                                                            );
+                                                        }}
                                                         onClick={(e) => {
                                                             e.currentTarget.value =
                                                                 null;

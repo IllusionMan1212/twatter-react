@@ -14,7 +14,7 @@ import LikeButton from "components/buttons/likeButton";
 import { MediaModalProps } from "src/types/props";
 import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
 import { useToastContext } from "src/contexts/toastContext";
-import { Navigation } from "swiper";
+import { Navigation, Keyboard } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "components/loading";
 import axios from "axios";
@@ -55,7 +55,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const [postLikes, setPostLikes] = useState(props.modalData.post.likes);
     const [postLiked, setPostLiked] = useState(props.modalData.post.liked);
 
-    const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const handleClick = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!commentingAllowed) {
             e.preventDefault();
             return;
@@ -75,13 +75,25 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         const content = commentBoxRef.current.innerText
             .replace(/(\n){2,}/g, "\n\n")
             .trim();
+        const attachmentsToSend = [];
+        for (let i = 0; i < attachments.length; i++) {
+            const attachmentArrayBuffer =
+                await attachments[i].data.arrayBuffer();
+            const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
+            const data = Buffer.from(attachmentBuffer).toString("base64");
+            const attachment = {
+                mimetype: attachments[i].mimetype,
+                data: data
+            };
+            attachmentsToSend.push(attachment);
+        }
         const payload = {
             eventType: "commentToServer",
             data: {
                 content: content,
                 contentLength: commentBoxRef.current.textContent.length,
                 author: props.modalData.currentUser,
-                attachments: attachments,
+                attachments: attachmentsToSend,
                 replying_to: props.modalData.post.id,
             }
         };
@@ -193,7 +205,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         return () => {
             tokenSource.cancel();
         };
-    }, [props.modalData.post.id, toast]);
+    }, [props.modalData.post.id]);
 
     useEffect(() => {
         if (socket) {
@@ -452,13 +464,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             </div>
             <div className={styles.modalImageContainer}>
                 <Swiper
-                    modules={[Navigation]}
+                    modules={[Navigation, Keyboard]}
                     slidesPerView={1}
                     initialSlide={props.modalData.imageIndex}
                     navigation={{
                         prevEl: prevRef.current,
                         nextEl: nextRef.current
                     }}
+                    keyboard={true}
                 >
                     {props.modalData.post.attachments.length > 1 && (
                         <>
