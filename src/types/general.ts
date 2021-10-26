@@ -101,7 +101,7 @@ export interface IMessage {
     conversation_id: string;
     content: string;
     sent_time: string;
-    attachment: PostAttachment; // TODO: different MessageAttachment type maybe ???
+    attachment: PostAttachment;
     deleted: boolean;
 }
 

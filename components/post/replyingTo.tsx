@@ -18,7 +18,7 @@ export default function ReplyingTo(props: ReplyingToProps): ReactElement {
                         size={25}
                     />
                     <div className={`${styles.innerContainer} flex align-items-center`}>
-                        <span className="px-1">Replying to:</span>
+                        <span style={{ paddingLeft: "1em", paddingRight: "0.5em" }}>Replying to:</span>
                         <ProfileImage
                             width={props.avatar_size}
                             height={props.avatar_size}
