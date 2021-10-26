@@ -27,6 +27,10 @@ export const handlePaste = (
             return;
         }
 
+        if (attachments.length == 4) {
+            return;
+        }
+
         setPreviewImages(previewImages.concat(URL.createObjectURL(file)));
         setAttachments(
             attachments.concat({

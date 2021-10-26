@@ -87,7 +87,7 @@ export default function Home(): ReactElement {
             const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
             const data = Buffer.from(attachmentBuffer).toString("base64");
             const attachment = {
-                mimetype: attachments[0].mimetype,
+                mimetype: attachments[i].mimetype,
                 data: data
             };
             attachmentsToSend.push(attachment);
