@@ -51,6 +51,11 @@ export default function EditProfilePopup(
             return;
         }
 
+        if (bio.length > 150) {
+            toast("Bio cannot be longer than 150 characters", 4000);
+            return;
+        }
+
         const profileImagePayload = {
             mimetype: "",
             data: ""
@@ -64,7 +69,6 @@ export default function EditProfilePopup(
             profileImagePayload.mimetype = profileImage.mimetype;
             profileImagePayload.data = profileImageData;
         }
-
 
         const payload: UpdateProfilePayload = {
             eventType: "updateProfile",
