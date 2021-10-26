@@ -3,7 +3,7 @@ interface NullableInt32 {
     Valid: boolean;
 }
 
-interface NullableString {
+export interface NullableString {
     String: string;
     Valid: boolean;
 }

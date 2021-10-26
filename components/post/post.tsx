@@ -8,9 +8,9 @@ import { PostProps } from "src/types/props";
 import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
 import Router from "next/router";
 import CommentButton from "components/buttons/commentButton";
-import { ArrowArcLeft } from "phosphor-react";
 import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
+import ReplyingTo from "./replyingTo";
 
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
@@ -30,50 +30,13 @@ export default function Post(props: PostProps): ReactElement {
         >
             <div className={styles.postContent}>
                 {props.post.replying_to?.id.Valid && (
-                    <Link
-                        href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.String}`}
-                    >
-                        <a
-                            className={`flex mb-1Percent text-small linkColor ${styles.replyingTo}`}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="flex">
-                                <ArrowArcLeft size={25}></ArrowArcLeft>
-                                <div className="flex align-items-center">
-                                    <span className="px-1">
-                                        Replying to:
-                                    </span>
-                                    <ProfileImage
-                                        width={25}
-                                        height={25}
-                                        src={props.post.replying_to.author.avatar_url.String}
-                                    />
-                                    <span
-                                        className="text-bold"
-                                        style={{ paddingLeft: "0.5em" }}
-                                    >
-                                        {
-                                            props.post.replying_to.author
-                                                .display_name.String
-                                        }
-                                        {"'s post: "}
-                                    </span>
-                                    {props.post.replying_to.content.Valid && (
-                                        <span
-                                            style={{ paddingLeft: "0.5em" }}
-                                        >
-                                            &quot;
-                                            {
-                                                props.post.replying_to
-                                                    .content.String
-                                            }
-                                            &quot;
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </a>
-                    </Link>
+                    <ReplyingTo
+                        post_id={props.post.replying_to.id.String}
+                        avatar_url={props.post.replying_to.author.avatar_url.String}
+                        avatar_size={25}
+                        username={props.post.replying_to.author.username.String}
+                        content={props.post.replying_to.content}
+                    />
                 )}
                 {props.post.author ? (
                     <ProfileImage

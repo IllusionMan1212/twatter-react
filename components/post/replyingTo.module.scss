@@ -1,0 +1,23 @@
+.replyingTo {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    color: #888;
+    max-width: calc(100% - 30px);
+}
+
+.outerContainer {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.innerContainer {
+    width: 100%;
+}
+
+.content {
+    padding-left: 0.5em;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: "...\"";
+}
+

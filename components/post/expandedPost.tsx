@@ -7,7 +7,7 @@ import Link from "next/link";
 import { formatDate } from "src/utils/functions";
 import LikeButton from "components/buttons/likeButton";
 import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
-import { ArrowArcLeft, ImageSquare, PaperPlane, X } from "phosphor-react";
+import { ImageSquare, PaperPlane, X } from "phosphor-react";
 import messagesStyles from "styles/messages.module.scss";
 import { useToastContext } from "src/contexts/toastContext";
 import mediaModalStyles from "components/mediaModal/mediaModal.module.scss";
@@ -27,6 +27,7 @@ import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
 import { useUserContext } from "src/contexts/userContext";
 import Loading from "components/loading";
+import ReplyingTo from "./replyingTo";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const toast = useToastContext();
@@ -115,59 +116,13 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             <div className={`mx-auto ${styles.expandedPost}`}>
                 <div className={styles.expandedPostContent}>
                     {props.post.replying_to.id.Valid && (
-                        <Link
-                            href={`/u/${props.post.replying_to.author.username.String}/${props.post.replying_to.id.String}`}
-                        >
-                            <a
-                                className={`flex mb-1Percent text-small linkColor ${styles.replyingTo}`}
-                            >
-                                <div className="flex">
-                                    <ArrowArcLeft size={25}></ArrowArcLeft>
-                                    <div className="flex align-items-center">
-                                        <span className="px-1">
-                                            Replying to:{" "}
-                                        </span>
-                                        <ProfileImage
-                                            width={30}
-                                            height={30}
-                                            src={`${
-                                                props.post.replying_to.author
-                                                    .avatar_url.String ==
-                                                "default_profile.svg"
-                                                    ? "/"
-                                                    : ""
-                                            }${
-                                                props.post.replying_to.author
-                                                    .avatar_url.String
-                                            }`}
-                                        />
-                                        <span
-                                            className="text-bold"
-                                            style={{ paddingLeft: "0.5em" }}
-                                        >
-                                            {
-                                                props.post.replying_to.author
-                                                    .display_name.String
-                                            }
-                                            {"'s post: "}
-                                        </span>
-                                        {props.post.replying_to.content
-                                            .Valid && (
-                                            <span
-                                                style={{ paddingLeft: "0.5em" }}
-                                            >
-                                                &quot;
-                                                {
-                                                    props.post.replying_to
-                                                        .content.String
-                                                }
-                                                &quot;
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </a>
-                        </Link>
+                        <ReplyingTo
+                            post_id={props.post.replying_to.id.String}
+                            avatar_url={props.post.replying_to.author.avatar_url.String}
+                            avatar_size={30}
+                            username={props.post.replying_to.author.username.String}
+                            content={props.post.replying_to.content}
+                        />
                     )}
                     <ProfileImage
                         width={50}

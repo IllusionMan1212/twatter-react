@@ -179,16 +179,6 @@
     }
 }
 
-.replyingTo {
-    grid-column-start: 1;
-    grid-column-end: 4;
-    color: #888;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: calc(100% - 50px);
-}
-
 .progressBar {
     background-color: #16c79a;
     position: absolute;

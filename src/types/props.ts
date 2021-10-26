@@ -1,5 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent } from "react";
-import { IPost, IUser, IBirthday, DateAndTime } from "./general";
+import { IPost, IUser, IBirthday, DateAndTime, NullableString } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
 
@@ -216,4 +216,12 @@ export interface BirthdayProps {
     dayRef?: MutableRefObject<HTMLSelectElement>;
     monthRef?: MutableRefObject<HTMLSelectElement>;
     yearRef?: MutableRefObject<HTMLSelectElement>;
+}
+
+export interface ReplyingToProps {
+    post_id: string;
+    avatar_url: string;
+    username: string;
+    content: NullableString;
+    avatar_size: number;
 }
