@@ -1,5 +1,5 @@
 import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent } from "react";
-import { IPost, IUser, IBirthday, DateAndTime, NullableString } from "./general";
+import { IPost, IUser, IBirthday, IAttachment, DateAndTime, NullableString } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
 
@@ -224,4 +224,20 @@ export interface ReplyingToProps {
     username: string;
     content: NullableString;
     avatar_size: number;
+}
+
+export interface CommentBoxProps {
+    commentBoxRef: MutableRefObject<HTMLSpanElement>;
+    charLimit: number;
+    charsLeft: number;
+    setCharsLeft: (chars: SetStateAction<number>) => void;
+    commentingAllowed: boolean;
+    setCommentingAllowed: (commentingAllowed: SetStateAction<boolean>) => void;
+    nowCommenting: boolean;
+    setNowCommenting: (nowCommenting: SetStateAction<boolean>) => void;
+    attachments: IAttachment[];
+    setAttachments: (attachments: SetStateAction<IAttachment[]>) => void;
+    previewImages: string[];
+    setPreviewImages: (previewImages: SetStateAction<string[]>) => void;
+    handleClick: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }

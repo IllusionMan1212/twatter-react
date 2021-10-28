@@ -1,13 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
-import {
-    X,
-    ImageSquare,
-    PaperPlane,
-    ArrowLeft,
-    ArrowRight,
-} from "phosphor-react";
+import { X, ArrowLeft, ArrowRight } from "phosphor-react";
 import styles from "./mediaModal.module.scss";
-import messagesStyles from "styles/messages.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { formatDate } from "src/utils/functions";
 import LikeButton from "components/buttons/likeButton";
@@ -19,14 +12,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "components/loading";
 import axios from "axios";
 import { IAttachment, IPost } from "src/types/general";
-import {
-    handleAttachmentChange,
-    handleInput,
-    handleKeyDown,
-    handlePaste,
-    handlePreviewImageClose,
-    handleTextInput,
-} from "src/utils/eventHandlers";
+import { handleTextInput } from "src/utils/eventHandlers";
 import { postCharLimit } from "src/utils/variables";
 import MediaModalComment from "./mediaModalComment";
 import Link from "next/link";
@@ -35,6 +21,7 @@ import { LikePayload } from "src/types/utils";
 import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
 import { AxiosResponse } from "axios";
+import CommentBox from "components/commentBox/commentBox";
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
     const toast = useToastContext();
@@ -55,12 +42,17 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     const [postLikes, setPostLikes] = useState(props.modalData.post.likes);
     const [postLiked, setPostLiked] = useState(props.modalData.post.liked);
 
-    const handleClick = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const handleClick = async (
+        e: React.MouseEvent<HTMLElement, MouseEvent>
+    ) => {
         if (!commentingAllowed) {
             e.preventDefault();
             return;
         }
-        if (commentBoxRef.current.textContent.trim().length > postCharLimit) {
+        if (
+            commentBoxRef.current.textContent.trim().length >
+            postCharLimit
+        ) {
             e.preventDefault();
             return;
         }
@@ -77,13 +69,14 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             .trim();
         const attachmentsToSend = [];
         for (let i = 0; i < attachments.length; i++) {
-            const attachmentArrayBuffer =
-                await attachments[i].data.arrayBuffer();
+            const attachmentArrayBuffer = await attachments[
+                i
+            ].data.arrayBuffer();
             const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
             const data = Buffer.from(attachmentBuffer).toString("base64");
             const attachment = {
                 mimetype: attachments[i].mimetype,
-                data: data
+                data: data,
             };
             attachmentsToSend.push(attachment);
         }
@@ -95,7 +88,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 author: props.modalData.currentUser,
                 attachments: attachmentsToSend,
                 replying_to: props.modalData.post.id,
-            }
+            },
         };
         commentBoxRef.current.textContent = "";
         setAttachments([]);
@@ -223,6 +216,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         };
     }, [handleComment, handleCommentDelete, handleLike, socket]);
 
+    // TODO: put this in the commentBox components after mediamodal is refactored
     useEffect(() => {
         const commentBox = commentBoxRef?.current;
         commentBox?.addEventListener(
@@ -328,139 +322,21 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <Loading height="50" width="50"></Loading>
                     )}
                 </div>
-                {props.modalData.currentUser && (
-                    <div className={messagesStyles.messageInputContainer}>
-                        <div
-                            className={`${styles.charLimit} ${
-                                charsLeft < 0 ? styles.charLimitReached : ""
-                            }`}
-                            style={{
-                                width: `${
-                                    ((postCharLimit - charsLeft) * 100) /
-                                    postCharLimit
-                                }%`,
-                            }}
-                        ></div>
-                        <div
-                            className={`${styles.progressBar} ${
-                                nowCommenting
-                                    ? styles.progressBarInProgress
-                                    : ""
-                            }`}
-                        ></div>
-                        {attachments.length != 0 && (
-                            <div className={styles.previewImagesContainer}>
-                                {previewImages.map((previewImage, i) => {
-                                    return (
-                                        <div
-                                            key={i}
-                                            className={styles.previewImage}
-                                            style={{
-                                                backgroundImage: `url(${previewImage})`,
-                                            }}
-                                        >
-                                            <div
-                                                className={
-                                                    messagesStyles.previewImageClose
-                                                }
-                                                onClick={(e) =>
-                                                    handlePreviewImageClose(
-                                                        e,
-                                                        i,
-                                                        previewImages,
-                                                        setPreviewImages,
-                                                        attachments,
-                                                        setAttachments,
-                                                        commentBoxRef,
-                                                        setCommentingAllowed
-                                                    )
-                                                }
-                                            >
-                                                <X weight="bold"></X>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                        <div className={messagesStyles.messageInputArea}>
-                            <span
-                                ref={commentBoxRef}
-                                className={messagesStyles.messageInput}
-                                contentEditable="true"
-                                data-placeholder="Comment on this..."
-                                onInput={(e) =>
-                                    handleInput(
-                                        e,
-                                        postCharLimit,
-                                        attachments,
-                                        setCommentingAllowed,
-                                        setCharsLeft
-                                    )
-                                }
-                                onPaste={(e) =>
-                                    handlePaste(
-                                        e,
-                                        postCharLimit,
-                                        charsLeft,
-                                        setCharsLeft,
-                                        setCommentingAllowed,
-                                        previewImages,
-                                        setPreviewImages,
-                                        attachments,
-                                        setAttachments,
-                                        toast
-                                    )
-                                }
-                                onKeyDown={(e) =>
-                                    handleKeyDown(e, commentBoxRef, handleClick)
-                                }
-                            ></span>
-                            <div
-                                className={`flex ${messagesStyles.messageInputOptions}`}
-                            >
-                                <div
-                                    className={`${messagesStyles.sendMessageButton}`}
-                                >
-                                    <ImageSquare size="30"></ImageSquare>
-                                    <input
-                                        className={messagesStyles.fileInput}
-                                        onChange={(e) =>
-                                            handleAttachmentChange(
-                                                e,
-                                                attachments,
-                                                setAttachments,
-                                                previewImages,
-                                                setPreviewImages,
-                                                setCommentingAllowed,
-                                                toast
-                                            )
-                                        }
-                                        onClick={(e) => {
-                                            e.currentTarget.value = null;
-                                        }}
-                                        type="file"
-                                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                        multiple
-                                    />
-                                </div>
-                                <button
-                                    className={messagesStyles.button}
-                                    disabled={commentingAllowed ? false : true}
-                                    onClick={handleClick}
-                                >
-                                    <PaperPlane
-                                        size="30"
-                                        color="#6067fe"
-                                        opacity={
-                                            commentingAllowed ? "1" : "0.3"
-                                        }
-                                    ></PaperPlane>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <CommentBox
+                    commentBoxRef={commentBoxRef}
+                    charLimit={postCharLimit}
+                    charsLeft={charsLeft}
+                    setCharsLeft={setCharsLeft}
+                    commentingAllowed={commentingAllowed}
+                    setCommentingAllowed={setCommentingAllowed}
+                    nowCommenting={nowCommenting}
+                    setNowCommenting={setNowCommenting}
+                    attachments={attachments}
+                    setAttachments={setAttachments}
+                    previewImages={previewImages}
+                    setPreviewImages={setPreviewImages}
+                    handleClick={handleClick}
+                />
             </div>
             <div className={styles.modalImageContainer}>
                 <Swiper
