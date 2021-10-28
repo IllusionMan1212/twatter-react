@@ -284,7 +284,7 @@
     margin-top: 1em;
 
     @media (max-width: 800px) {
-        margin: auto 0% 83px;
+        margin: auto 0% variables.$status-bar-height;
     }
 }
 

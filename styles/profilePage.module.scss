@@ -67,8 +67,8 @@
     @media (max-width: 1200px) {
         grid-column-start: 1;
         grid-column-end: 3;
-        height: calc(100% - 65px);
-        max-height: calc(100% - 65px);
+        height: calc(100% - variables.$nav-bar-height);
+        max-height: calc(100% - variables.$nav-bar-height);
     }
 }
 

@@ -2,16 +2,16 @@
 
 .messagesContainer {
     width: 100%;
-    height: calc(100vh - 83px - 1em);
+    height: calc(100vh - variables.$status-bar-height - 1em);
     display: flex;
     align-items: stretch;
-    max-height: calc(100vh - 83px - 1em);
+    max-height: calc(100vh - variables.$status-bar-height - 1em);
     margin-top: 1em;
     position: relative;
 
     @media (max-width: 900px) {
-        height: calc(100vh - 60px - 51px);
-        max-height: calc(100vh - 60px - 51px);
+        height: calc(100vh - variables.$status-bar-height-mobile - 51px);
+        max-height: calc(100vh - variables.$status-bar-height-mobile - 51px);
         margin: 0;
     }
 }
@@ -195,7 +195,7 @@
     background-color: #111;
     flex-direction: column;
     position: relative;
-    overflow: hidden;
+    overflow: clip;
 }
 
 .messageInput {

@@ -967,7 +967,7 @@ export default function Messages(): ReactElement {
                                                 <div
                                                     className={`${styles.sendMessageButton}`}
                                                 >
-                                                    <ImageSquare size="30"></ImageSquare>
+                                                    <ImageSquare size="30"/>
                                                     <input
                                                         className={
                                                             styles.fileInput

@@ -1,7 +1,7 @@
 @use "styles/variables";
 
 .statusBar {
-    height: 83px;
+    height: variables.$status-bar-height;
     column-gap: 2em;
     position: sticky;
     top: 0;
@@ -9,7 +9,7 @@
     background-color: variables.$base-bg-color;
 
     @media (max-width: 800px) {
-        height: 60px;
+        height: variables.$status-bar-height-mobile;
         column-gap: unset;
     }
 }
@@ -84,6 +84,7 @@
 
 .messagesAndNotifs {
     justify-content: flex-end;
+    align-items: center;
     flex-basis: 0;
     flex-grow: 0;
     flex-shrink: 0;
