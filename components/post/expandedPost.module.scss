@@ -6,14 +6,11 @@
     margin-top: 1em;
 
     .leftSide {
-        flex-basis: 0;
-        flex-grow: 0;
-        flex-shrink: 0;
         min-width: 20%;
         color: white;
         position: sticky;
         top: 6em;
-        height: 80%;
+        height: 100%;
 
         @media (max-width: 800px) {
             display: none;
@@ -23,27 +20,21 @@
     .center {
         display: flex;
         flex-direction: column;
-        flex-basis: 0;
-        flex-grow: 0;
-        flex-shrink: 0;
         min-width: 50%;
-        height: calc(100vh - variables.$status-bar-height - 1em);
+        min-height: calc(100vh - variables.$status-bar-height - 1em);
 
         @media (max-width: 800px) {
             flex-basis: 100%;
-            height: calc(100vh - variables.$status-bar-height-mobile);
+            min-height: calc(100vh - variables.$status-bar-height-mobile);
         }
     }
 
     .rightSide {
-        flex-basis: 0;
-        flex-grow: 0;
-        flex-shrink: 0;
-        min-width: 30%;
+        width: 100%;
         color: white;
         position: sticky;
         top: 6em;
-        height: 80%;
+        height: 100%;
 
         @media (max-width: 800px) {
             display: none;
@@ -139,7 +130,6 @@
     background-color: variables.$bg-color-primary;
     flex-grow: 1;
     color: white;
-    padding-bottom: variables.$comment-box-height;
 }
 
 .user {
