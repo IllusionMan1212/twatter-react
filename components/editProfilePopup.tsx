@@ -22,6 +22,7 @@ interface UpdateProfilePayload {
         };
         bio: string;
         birthday?: IBirthday;
+        isBirthdaySet: boolean;
     };
 }
 
@@ -40,6 +41,7 @@ export default function EditProfilePopup(
     const [showBirthdayFields, setShowBirthdayFields] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<IBirthday>({day: 1, month:1, year: 1});
     const [birthday, setBirthday] = useState(props.userData.birthday.Time.toString());
+    const [isBirthdaySet, setIsBirthdaySet] = useState(false);
     const [savingDisabled, setSavingDisabled] = useState(false);
 
     const handleSaveButtonClick = async () => {
@@ -76,6 +78,7 @@ export default function EditProfilePopup(
                 displayName: displayName,
                 profileImage: profileImagePayload,
                 bio: bio,
+                isBirthdaySet: isBirthdaySet,
             },
         };
 
@@ -106,6 +109,7 @@ export default function EditProfilePopup(
         setShowBirthdayFields(false);
         if (!props.userData.birthday.Valid) {
             setSelectedBirthday({day: 1, month: 1, year: 1});
+            setIsBirthdaySet(false);
         }
     };
 
@@ -113,18 +117,33 @@ export default function EditProfilePopup(
         const payload = {
             eventType: "removeBirthday",
         };
-        setSelectedBirthday(null);
+        setSelectedBirthday({
+            day: 1,
+            month: 1,
+            year: 1
+        });
+        setIsBirthdaySet(false);
         socket.send(JSON.stringify(payload));
     };
 
     useEffect(() => {
+        if (selectedBirthday?.year != 1 && selectedBirthday?.month != 1 && selectedBirthday?.day != 1) {
+            console.log("selected birthday is valid");
+            console.log(selectedBirthday);
+            setIsBirthdaySet(true);
+        }
+    }, [selectedBirthday]);
+
+    useEffect(() => {
         if (props.userData.birthday.Valid) {
+            console.log("props birthday is valid");
             setBirthday(formatBirthday(props.userData.birthday.Time.toString()));
+            setIsBirthdaySet(true);
         }
     }, [props.userData.birthday]);
 
     useEffect(() => {
-        if (props.userData.birthday) {
+        if (props.userData.birthday.Valid) {
             setSelectedBirthday({
                 year: new Date(
                     props.userData.birthday.Time.toString()
