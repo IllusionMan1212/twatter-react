@@ -92,7 +92,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
                 tokenSource.cancel();
             };
         }
-    }, [user, toast]);
+    }, [user]);
 
     return (
         <>

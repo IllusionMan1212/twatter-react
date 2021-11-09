@@ -5,7 +5,6 @@ import homeStyles from "styles/home.module.scss";
 import Head from "next/head";
 import { Plus, X } from "phosphor-react";
 import { ReactElement, useEffect, useRef, useState } from "react";
-import Loading from "components/loading";
 import Router from "next/router";
 import axios from "src/axios";
 import { useToastContext } from "src/contexts/toastContext";
@@ -26,7 +25,7 @@ interface GetReqResponse {
 
 export default function UserSetup(): ReactElement {
     const toast = useToastContext();
-    const { login } = useUserContext();
+    const { user, login } = useUserContext();
 
     const dayRef = useRef<HTMLSelectElement>(null);
     const monthRef = useRef<HTMLSelectElement>(null);
@@ -36,7 +35,6 @@ export default function UserSetup(): ReactElement {
     const [previewImage, setPreviewImage] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
     const [bio, setBio] = useState("");
-    const [loading, setLoading] = useState(true);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files[0];
@@ -122,7 +120,6 @@ export default function UserSetup(): ReactElement {
                         Router.push("/home");
                         return;
                     }
-                    setLoading(false);
                 }
             })
             .catch((err) => {
@@ -130,109 +127,106 @@ export default function UserSetup(): ReactElement {
                     err?.response?.data?.message ?? "An error has occurred",
                     4000
                 );
-                setLoading(false);
             });
-    }, [toast, login]);
+    }, []);
+
+    if (!user) return <></>;
 
     return (
         <>
             <Head>
                 <title>Setting up - Twatter</title>
             </Head>
-            {!loading ? (
-                <LayoutWide>
-                    <div className="flex justify-content-center text-white text-extra-large text-bold my-1">
-                        <p>Quick Setup</p>
-                    </div>
-                    <div className="flex flex-column align-items-center">
-                        <div className={styles.profileImageContainer}>
-                            <div
-                                className={styles.profileImage}
-                                style={{
-                                    backgroundImage: `url(${
-                                        previewImage
-                                            ? previewImage
-                                            : "/default_profile.svg"
-                                    })`,
+            <LayoutWide>
+                <div className="flex justify-content-center text-white text-extra-large text-bold my-1">
+                    <p>Quick Setup</p>
+                </div>
+                <div className="flex flex-column align-items-center">
+                    <div className={styles.profileImageContainer}>
+                        <div
+                            className={styles.profileImage}
+                            style={{
+                                backgroundImage: `url(${
+                                    previewImage
+                                        ? previewImage
+                                        : "/default_profile.svg"
+                                })`,
+                            }}
+                        ></div>
+                        <div
+                            className={`flex justify-content-center align-items-center ${styles.profileImageOverlay}`}
+                        >
+                            <input
+                                className={homeStyles.fileInput}
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png"
+                                onChange={handleChange}
+                                onClick={(e) => {
+                                    e.currentTarget.value = null;
                                 }}
-                            ></div>
+                            ></input>
+                            <Plus
+                                width="95"
+                                height="95"
+                                weight="bold"
+                                color="white"
+                            ></Plus>
+                        </div>
+                        {profileImage && (
                             <div
-                                className={`flex justify-content-center align-items-center ${styles.profileImageOverlay}`}
+                                className={`pointer ${styles.cancelProfileButton}`}
+                                onClick={handleCancelProfileImage}
                             >
-                                <input
-                                    className={homeStyles.fileInput}
-                                    type="file"
-                                    accept="image/jpeg,image/jpg,image/png"
-                                    onChange={handleChange}
-                                    onClick={(e) => {
-                                        e.currentTarget.value = null;
-                                    }}
-                                ></input>
-                                <Plus
-                                    width="95"
-                                    height="95"
-                                    weight="bold"
-                                    color="white"
-                                ></Plus>
+                                <X size="40"></X>
                             </div>
-                            {profileImage && (
-                                <div
-                                    className={`pointer ${styles.cancelProfileButton}`}
-                                    onClick={handleCancelProfileImage}
-                                >
-                                    <X size="40"></X>
-                                </div>
-                            )}
-                        </div>
-                        <p className="text-white text-large my-1">
-                            Add a profile picture
-                        </p>
+                        )}
                     </div>
-                    <div className="flex flex-column align-items-center text-white text-medium my-1">
-                        <div className={styles.birthday}>
-                            <p className="mb-3Percent">Add your birthday</p>
-                            <Birthday
-                                selectedBirthday={birthday}
-                                setSelectedBirthday={setBirthday}
-                                dayRef={dayRef}
-                                monthRef={monthRef}
-                                yearRef={yearRef}
-                            />
-                            {birthday?.day != null &&
-                                birthday?.month != null &&
-                                birthday?.year && (
-                                <div
-                                    className={`pointer ${styles.cancelBirthdayButton}`}
-                                    onClick={handleCancelBirthday}
-                                >
-                                    <X size="40"></X>
-                                </div>
-                            )}
-                        </div>
+                    <p className="text-white text-large my-1">
+                        Add a profile picture
+                    </p>
+                </div>
+                <div className="flex flex-column align-items-center text-white text-medium my-1">
+                    <div className={styles.birthday}>
+                        <p className="mb-3Percent">Add your birthday</p>
+                        <Birthday
+                            selectedBirthday={birthday}
+                            setSelectedBirthday={setBirthday}
+                            dayRef={dayRef}
+                            monthRef={monthRef}
+                            yearRef={yearRef}
+                        />
+                        {birthday?.day != null &&
+                            birthday?.month != null &&
+                            birthday?.year && (
+                            <div
+                                className={`pointer ${styles.cancelBirthdayButton}`}
+                                onClick={handleCancelBirthday}
+                            >
+                                <X size="40"></X>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex flex-column align-items-center text-white text-medium mt-2Percent">
-                        <div className={styles.bio}>
-                            <p className="mb-3Percent">Add a bio</p>
-                            <textarea
-                                placeholder="Write a short description about yourself..."
-                                maxLength={150}
-                                onInput={handleInput}
-                            ></textarea>
-                        </div>
+                </div>
+                <div className="flex flex-column align-items-center text-white text-medium mt-2Percent">
+                    <div className={styles.bio}>
+                        <p className="mb-3Percent">Add a bio</p>
+                        <textarea
+                            placeholder="Write a short description about yourself..."
+                            maxLength={150}
+                            onInput={handleInput}
+                        ></textarea>
                     </div>
-                    <div className="flex justify-content-center text-white text-medium">
-                        <button className={styles.button} onClick={handleClick}>
-                            {!profileImage &&
-                            !bio &&
-                            !(birthday?.day && birthday?.month && birthday?.year)
-                                ? "Skip"
-                                : "Finish"}
-                        </button>
-                    </div>
-                </LayoutWide>
-            ) : (
-                <Loading width="100" height="100"></Loading>
-            )}
+                </div>
+                <div className="flex justify-content-center text-white text-medium">
+                    <button className={styles.button} onClick={handleClick}>
+                        {!profileImage &&
+                        !bio &&
+                        !(birthday?.day && birthday?.month && birthday?.year)
+                            ? "Skip"
+                            : "Finish"}
+                    </button>
+                </div>
+            </LayoutWide>
         </>
     );
 }

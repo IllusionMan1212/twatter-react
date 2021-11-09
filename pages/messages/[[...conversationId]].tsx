@@ -594,442 +594,436 @@ export default function Messages(): ReactElement {
         socket
     ]);
 
+    if (!user) return <></>;
+
     return (
         <>
             <Head>
                 <title>Messages - Twatter</title>
             </Head>
-            {user ? (
-                <>
-                    <Navbar user={user}></Navbar>
-                    <div>
-                        <StatusBar user={user} title="Messages"></StatusBar>
+            <Navbar user={user}></Navbar>
+            <div>
+                <StatusBar user={user} title="Messages"/>
+                <div
+                    className={`text-white ${
+                        styles.messagesContainer
+                    } ${
+                        state.isConversationActive
+                            ? styles.messagesContainerMobile
+                            : ""
+                    }`}
+                >
+                    <div
+                        className={`${styles.messagesList} ${
+                            state.isConversationActive
+                                ? styles.messagesListMobile
+                                : ""
+                        } ${
+                            !state.conversations.length
+                                ? "justify-content-center"
+                                : ""
+                        }`}
+                    >
+                        {!conversationsLoading ? (
+                            <>
+                                {state.conversations.length ? (
+                                    <Virtuoso
+                                        data={state.conversations}
+                                        style={{ width: "100%" }}
+                                        totalCount={
+                                            state.conversations.length
+                                        }
+                                        // eslint-disable-next-line react/display-name
+                                        components={{
+                                            Footer: () => {
+                                                return (
+                                                    <>
+                                                        {!reachedEndOfConvos ? (
+                                                            <div className="py-3">
+                                                                <Loading
+                                                                    height="50"
+                                                                    width="50"
+                                                                ></Loading>
+                                                            </div>
+                                                        ) : null}
+                                                    </>
+                                                );
+                                            },
+                                        }}
+                                        endReached={
+                                            loadMoreConversations
+                                        }
+                                        itemContent={(
+                                            _,
+                                            conversation
+                                        ) => {
+                                            return (
+                                                <ConversationsListItem
+                                                    key={
+                                                        conversation.id
+                                                    }
+                                                    receiver={
+                                                        conversation.receiver
+                                                    }
+                                                    lastMessage={
+                                                        conversation.last_message.String
+                                                    }
+                                                    lastUpdated={
+                                                        conversation.last_updated
+                                                    }
+                                                    isActive={
+                                                        conversation.id ==
+                                                        state.activeConversation?.id
+                                                    }
+                                                    unreadMessages={
+                                                        conversation.unread_messages
+                                                    }
+                                                    onClick={() => {
+                                                        handleConversationClick(
+                                                            conversation
+                                                        );
+                                                    }}
+                                                ></ConversationsListItem>
+                                            );
+                                        }}
+                                    ></Virtuoso>
+                                ) : (
+                                    <div className="text-bold text-large">
+                                        It&apos;s empty in here :(
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <Loading height="50" width="50"></Loading>
+                        )}
+                    </div>
+                    {state.isConversationActive && (
                         <div
-                            className={`text-white ${
-                                styles.messagesContainer
-                            } ${
+                            className={`${styles.conversation} ${
                                 state.isConversationActive
-                                    ? styles.messagesContainerMobile
+                                    ? styles.conversationMobile
                                     : ""
                             }`}
                         >
-                            <div
-                                className={`${styles.messagesList} ${
-                                    state.isConversationActive
-                                        ? styles.messagesListMobile
-                                        : ""
-                                } ${
-                                    !state.conversations.length
-                                        ? "justify-content-center"
-                                        : ""
-                                }`}
-                            >
-                                {!conversationsLoading ? (
+                            <div className={styles.user}>
+                                <div
+                                    className={styles.backButton}
+                                    onClick={handleClickBack}
+                                >
+                                    <ArrowLeft size="30"></ArrowLeft>
+                                </div>
+                                {state.activeConversation?.username ? (
                                     <>
-                                        {state.conversations.length ? (
-                                            <Virtuoso
-                                                data={state.conversations}
-                                                style={{ width: "100%" }}
-                                                totalCount={
-                                                    state.conversations.length
-                                                }
-                                                // eslint-disable-next-line react/display-name
-                                                components={{
-                                                    Footer: () => {
-                                                        return (
-                                                            <>
-                                                                {!reachedEndOfConvos ? (
-                                                                    <div className="py-3">
-                                                                        <Loading
-                                                                            height="50"
-                                                                            width="50"
-                                                                        ></Loading>
-                                                                    </div>
-                                                                ) : null}
-                                                            </>
-                                                        );
-                                                    },
-                                                }}
-                                                endReached={
-                                                    loadMoreConversations
-                                                }
-                                                itemContent={(
-                                                    _,
-                                                    conversation
-                                                ) => {
-                                                    return (
-                                                        <ConversationsListItem
-                                                            key={
-                                                                conversation.id
-                                                            }
-                                                            receiver={
-                                                                conversation.receiver
-                                                            }
-                                                            lastMessage={
-                                                                conversation.last_message.String
-                                                            }
-                                                            lastUpdated={
-                                                                conversation.last_updated
-                                                            }
-                                                            isActive={
-                                                                conversation.id ==
-                                                                state.activeConversation?.id
-                                                            }
-                                                            unreadMessages={
-                                                                conversation.unread_messages
-                                                            }
-                                                            onClick={() => {
-                                                                handleConversationClick(
-                                                                    conversation
-                                                                );
-                                                            }}
-                                                        ></ConversationsListItem>
-                                                    );
-                                                }}
-                                            ></Virtuoso>
-                                        ) : (
-                                            <div className="text-bold text-large">
-                                                It&apos;s empty in here :(
-                                            </div>
-                                        )}
+                                        <Link
+                                            href={`/u/${state.activeConversation?.username}`}
+                                        >
+                                            <a>
+                                                <p className="text-bold text-medium">
+                                                    {
+                                                        state.activeConversation?.display_name
+                                                    }
+                                                </p>
+                                                <p
+                                                    className={
+                                                        styles.username
+                                                    }
+                                                >
+                                                    @
+                                                    {
+                                                        state.activeConversation?.username
+                                                    }
+                                                </p>
+                                            </a>
+                                        </Link>
                                     </>
                                 ) : (
-                                    <Loading height="50" width="50"></Loading>
+                                    <p className="text-bold text-large">
+                                        Deleted Account
+                                    </p>
                                 )}
                             </div>
-                            {state.isConversationActive && (
-                                <div
-                                    className={`${styles.conversation} ${
-                                        state.isConversationActive
-                                            ? styles.conversationMobile
-                                            : ""
-                                    }`}
-                                >
-                                    <div className={styles.user}>
-                                        <div
-                                            className={styles.backButton}
-                                            onClick={handleClickBack}
-                                        >
-                                            <ArrowLeft size="30"></ArrowLeft>
-                                        </div>
-                                        {state.activeConversation?.username ? (
-                                            <>
-                                                <Link
-                                                    href={`/u/${state.activeConversation?.username}`}
-                                                >
-                                                    <a>
-                                                        <p className="text-bold text-medium">
-                                                            {
-                                                                state.activeConversation?.display_name
-                                                            }
-                                                        </p>
-                                                        <p
-                                                            className={
-                                                                styles.username
-                                                            }
-                                                        >
-                                                            @
-                                                            {
-                                                                state.activeConversation?.username
-                                                            }
-                                                        </p>
-                                                    </a>
-                                                </Link>
-                                            </>
-                                        ) : (
-                                            <p className="text-bold text-large">
-                                                Deleted Account
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div
-                                        ref={messagesAreaContainerRef}
-                                        className={styles.messagesAreaContainer}
-                                    >
-                                        <Virtuoso
-                                            ref={virtuosoRef}
-                                            key={state.activeConversation?.id}
-                                            className={styles.messagesArea}
-                                            totalCount={state.messages.length}
-                                            initialTopMostItemIndex={
-                                                state.messages.length > 0
-                                                    ? state.messages.length - 1
-                                                    : 0
-                                            }
-                                            data={state.messages}
-                                            firstItemIndex={firstItemIndex}
-                                            alignToBottom
-                                            followOutput
-                                            atBottomStateChange={(bottom) => {
-                                                setAtBottom(bottom);
-                                            }}
-                                            startReached={loadMoreMessages}
-                                            // eslint-disable-next-line react/display-name
-                                            components={{
-                                                Header: () => {
-                                                    return (
-                                                        <>
-                                                            {reachedStartOfMessages ? (
-                                                                <div className="usernameGrey text-center text-bold py-3">
-                                                                    <p>
-                                                                        You have
-                                                                        reached
-                                                                        the
-                                                                        beginning
-                                                                        of this
-                                                                        conversation
-                                                                    </p>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="py-3">
-                                                                    <Loading
-                                                                        height="50"
-                                                                        width="50"
-                                                                    ></Loading>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    );
-                                                },
-                                            }}
-                                            itemContent={(index, message) => (
+                            <div
+                                ref={messagesAreaContainerRef}
+                                className={styles.messagesAreaContainer}
+                            >
+                                <Virtuoso
+                                    ref={virtuosoRef}
+                                    key={state.activeConversation?.id}
+                                    className={styles.messagesArea}
+                                    totalCount={state.messages.length}
+                                    initialTopMostItemIndex={
+                                        state.messages.length > 0
+                                            ? state.messages.length - 1
+                                            : 0
+                                    }
+                                    data={state.messages}
+                                    firstItemIndex={firstItemIndex}
+                                    alignToBottom
+                                    followOutput
+                                    atBottomStateChange={(bottom) => {
+                                        setAtBottom(bottom);
+                                    }}
+                                    startReached={loadMoreMessages}
+                                    // eslint-disable-next-line react/display-name
+                                    components={{
+                                        Header: () => {
+                                            return (
                                                 <>
-                                                    {!message.deleted ? (
-                                                        <Message
-                                                            key={message.id}
-                                                            messageId={
-                                                                message.id
-                                                            }
-                                                            messageAuthorId={
-                                                                message.author_id
-                                                            }
-                                                            receiverId={
-                                                                state.activeConversation?.receiver_id
-                                                            }
-                                                            sender={
-                                                                user.id ==
-                                                                message.author_id
-                                                            }
-                                                            sentTime={
-                                                                message.sent_time
-                                                            }
-                                                            attachment={
-                                                                message
-                                                                    .attachment
-                                                                    .url
-                                                            }
-                                                            conversationId={
-                                                                state.activeConversation?.id
-                                                            }
-                                                            setImageModal={
-                                                                setImageModal
-                                                            }
-                                                            setModalAttachment={
-                                                                setModalAttachment
-                                                            }
-                                                            parentContainerRef={
-                                                                messagesAreaContainerRef
-                                                            }
-                                                        >
-                                                            {message.content}
-                                                        </Message>
+                                                    {reachedStartOfMessages ? (
+                                                        <div className="usernameGrey text-center text-bold py-3">
+                                                            <p>
+                                                                You have
+                                                                reached
+                                                                the
+                                                                beginning
+                                                                of this
+                                                                conversation
+                                                            </p>
+                                                        </div>
                                                     ) : (
-                                                        <DeletedMessage
-                                                            key={index}
-                                                            sender={
-                                                                user.id ==
-                                                                message.author_id
-                                                            }
-                                                            sentTime={
-                                                                message.sent_time
-                                                            }
-                                                            conversationId={
-                                                                state.activeConversation?.id
-                                                            }
-                                                        />
+                                                        <div className="py-3">
+                                                            <Loading
+                                                                height="50"
+                                                                width="50"
+                                                            ></Loading>
+                                                        </div>
                                                     )}
                                                 </>
+                                            );
+                                        },
+                                    }}
+                                    itemContent={(index, message) => (
+                                        <>
+                                            {!message.deleted ? (
+                                                <Message
+                                                    key={message.id}
+                                                    messageId={
+                                                        message.id
+                                                    }
+                                                    messageAuthorId={
+                                                        message.author_id
+                                                    }
+                                                    receiverId={
+                                                        state.activeConversation?.receiver_id
+                                                    }
+                                                    sender={
+                                                        user.id ==
+                                                        message.author_id
+                                                    }
+                                                    sentTime={
+                                                        message.sent_time
+                                                    }
+                                                    attachment={
+                                                        message
+                                                            .attachment
+                                                            .url
+                                                    }
+                                                    conversationId={
+                                                        state.activeConversation?.id
+                                                    }
+                                                    setImageModal={
+                                                        setImageModal
+                                                    }
+                                                    setModalAttachment={
+                                                        setModalAttachment
+                                                    }
+                                                    parentContainerRef={
+                                                        messagesAreaContainerRef
+                                                    }
+                                                >
+                                                    {message.content}
+                                                </Message>
+                                            ) : (
+                                                <DeletedMessage
+                                                    key={index}
+                                                    sender={
+                                                        user.id ==
+                                                        message.author_id
+                                                    }
+                                                    sentTime={
+                                                        message.sent_time
+                                                    }
+                                                    conversationId={
+                                                        state.activeConversation?.id
+                                                    }
+                                                />
                                             )}
-                                        ></Virtuoso>
-                                        {newMessagesAlert && (
+                                        </>
+                                    )}
+                                ></Virtuoso>
+                                {newMessagesAlert && (
+                                    <div
+                                        className={
+                                            styles.newMessagesAlert
+                                        }
+                                        onClick={
+                                            handleNewMessagesAlertClick
+                                        }
+                                    >
+                                        New Message(s)
+                                    </div>
+                                )}
+                            </div>
+                            {typing && (
+                                <div className={styles.typing}>
+                                    {state.activeConversation.display_name} is
+                                    typing...
+                                </div>
+                            )}
+                            <div
+                                className={styles.messageInputContainer}
+                            >
+                                <div
+                                    className={`${styles.charLimit} ${
+                                        charsLeft < 0
+                                            ? styles.charLimitReached
+                                            : ""
+                                    }`}
+                                    style={{
+                                        width: `${
+                                            ((messageCharLimit -
+                                                charsLeft) *
+                                                100) /
+                                            messageCharLimit
+                                        }%`,
+                                    }}
+                                ></div>
+                                <div
+                                    className={`${styles.progressBar} ${
+                                        nowSending
+                                            ? styles.progressBarInProgress
+                                            : ""
+                                    }`}
+                                ></div>
+                                {previewImages.map((previewImage, i) => {
+                                    return (
+                                        <div
+                                            className={
+                                                styles.messageAttachment
+                                            }
+                                            key={i}
+                                        >
                                             <div
                                                 className={
-                                                    styles.newMessagesAlert
+                                                    styles.previewImage
                                                 }
-                                                onClick={
-                                                    handleNewMessagesAlertClick
-                                                }
+                                                style={{
+                                                    backgroundImage: `url("${previewImage}")`,
+                                                }}
                                             >
-                                                New Message(s)
-                                            </div>
-                                        )}
-                                    </div>
-                                    {typing && (
-                                        <div className={styles.typing}>
-                                            {state.activeConversation.display_name} is
-                                            typing...
-                                        </div>
-                                    )}
-                                    <div
-                                        className={styles.messageInputContainer}
-                                    >
-                                        <div
-                                            className={`${styles.charLimit} ${
-                                                charsLeft < 0
-                                                    ? styles.charLimitReached
-                                                    : ""
-                                            }`}
-                                            style={{
-                                                width: `${
-                                                    ((messageCharLimit -
-                                                        charsLeft) *
-                                                        100) /
-                                                    messageCharLimit
-                                                }%`,
-                                            }}
-                                        ></div>
-                                        <div
-                                            className={`${styles.progressBar} ${
-                                                nowSending
-                                                    ? styles.progressBarInProgress
-                                                    : ""
-                                            }`}
-                                        ></div>
-                                        {previewImages.map((previewImage, i) => {
-                                            return (
                                                 <div
                                                     className={
-                                                        styles.messageAttachment
+                                                        styles.previewImageClose
                                                     }
-                                                    key={i}
+                                                    onClick={(e) => {
+                                                        handlePreviewImageClose(
+                                                            e,
+                                                            i,
+                                                            previewImages,
+                                                            setPreviewImages,
+                                                            attachments,
+                                                            setAttachments,
+                                                            messageInputRef,
+                                                            setSendingAllowed
+                                                        );
+                                                    }}
                                                 >
-                                                    <div
-                                                        className={
-                                                            styles.previewImage
-                                                        }
-                                                        style={{
-                                                            backgroundImage: `url("${previewImage}")`,
-                                                        }}
-                                                    >
-                                                        <div
-                                                            className={
-                                                                styles.previewImageClose
-                                                            }
-                                                            onClick={(e) => {
-                                                                handlePreviewImageClose(
-                                                                    e,
-                                                                    i,
-                                                                    previewImages,
-                                                                    setPreviewImages,
-                                                                    attachments,
-                                                                    setAttachments,
-                                                                    messageInputRef,
-                                                                    setSendingAllowed
-                                                                );
-                                                            }}
-                                                        >
-                                                            <X weight="bold"></X>
-                                                        </div>
-                                                    </div>
+                                                    <X weight="bold"></X>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                <div
+                                    className={styles.messageInputArea}
+                                >
+                                    <span
+                                        ref={messageInputRef}
+                                        className={styles.messageInput}
+                                        contentEditable="true"
+                                        data-placeholder="Send a message..."
+                                        onInput={handleInput}
+                                        onPaste={(e) => {
+                                            handlePaste(
+                                                e,
+                                                messageCharLimit,
+                                                charsLeft,
+                                                setCharsLeft,
+                                                setSendingAllowed,
+                                                previewImages,
+                                                setPreviewImages,
+                                                attachments,
+                                                setAttachments,
+                                                toast,
+                                                1
                                             );
-                                        })}
+                                        }}
+                                        onKeyDown={handleKeyDown}
+                                        onFocus={handleFocus}
+                                    ></span>
+                                    <div
+                                        className={`flex ${styles.messageInputOptions}`}
+                                    >
                                         <div
-                                            className={styles.messageInputArea}
+                                            className={`${styles.sendMessageButton}`}
                                         >
-                                            <span
-                                                ref={messageInputRef}
-                                                className={styles.messageInput}
-                                                contentEditable="true"
-                                                data-placeholder="Send a message..."
-                                                onInput={handleInput}
-                                                onPaste={(e) => {
-                                                    handlePaste(
+                                            <ImageSquare size="30"/>
+                                            <input
+                                                className={
+                                                    styles.fileInput
+                                                }
+                                                onChange={(e) => {
+                                                    handleAttachmentChange(
                                                         e,
-                                                        messageCharLimit,
-                                                        charsLeft,
-                                                        setCharsLeft,
-                                                        setSendingAllowed,
-                                                        previewImages,
-                                                        setPreviewImages,
                                                         attachments,
                                                         setAttachments,
+                                                        previewImages,
+                                                        setPreviewImages,
+                                                        setSendingAllowed,
                                                         toast,
                                                         1
                                                     );
                                                 }}
-                                                onKeyDown={handleKeyDown}
-                                                onFocus={handleFocus}
-                                            ></span>
-                                            <div
-                                                className={`flex ${styles.messageInputOptions}`}
-                                            >
-                                                <div
-                                                    className={`${styles.sendMessageButton}`}
-                                                >
-                                                    <ImageSquare size="30"/>
-                                                    <input
-                                                        className={
-                                                            styles.fileInput
-                                                        }
-                                                        onChange={(e) => {
-                                                            handleAttachmentChange(
-                                                                e,
-                                                                attachments,
-                                                                setAttachments,
-                                                                previewImages,
-                                                                setPreviewImages,
-                                                                setSendingAllowed,
-                                                                toast,
-                                                                1
-                                                            );
-                                                        }}
-                                                        onClick={(e) => {
-                                                            e.currentTarget.value =
-                                                                null;
-                                                        }}
-                                                        type="file"
-                                                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                                    />
-                                                </div>
-                                                <button
-                                                    className={styles.button}
-                                                    disabled={
-                                                        sendingAllowed
-                                                            ? false
-                                                            : true
-                                                    }
-                                                    onClick={handleClickSend}
-                                                >
-                                                    <PaperPlane
-                                                        size="30"
-                                                        color="#6067fe"
-                                                        opacity={
-                                                            sendingAllowed
-                                                                ? "1"
-                                                                : "0.3"
-                                                        }
-                                                    ></PaperPlane>
-                                                </button>
-                                            </div>
+                                                onClick={(e) => {
+                                                    e.currentTarget.value =
+                                                        null;
+                                                }}
+                                                type="file"
+                                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                            />
                                         </div>
+                                        <button
+                                            className={styles.button}
+                                            disabled={
+                                                sendingAllowed
+                                                    ? false
+                                                    : true
+                                            }
+                                            onClick={handleClickSend}
+                                        >
+                                            <PaperPlane
+                                                size="30"
+                                                color="#6067fe"
+                                                opacity={
+                                                    sendingAllowed
+                                                        ? "1"
+                                                        : "0.3"
+                                                }
+                                            ></PaperPlane>
+                                        </button>
                                     </div>
                                 </div>
-                            )}
-                            {imageModal && (
-                                <MessageMediaModal
-                                    setImageModal={setImageModal}
-                                    attachment={modalAttachment}
-                                ></MessageMediaModal>
-                            )}
+                            </div>
                         </div>
-                    </div>
-                </>
-            ) : (
-                <>
-                    <Loading height="100" width="100"></Loading>
-                </>
-            )}
+                    )}
+                    {imageModal && (
+                        <MessageMediaModal
+                            setImageModal={setImageModal}
+                            attachment={modalAttachment}
+                        ></MessageMediaModal>
+                    )}
+                </div>
+            </div>
         </>
     );
 }

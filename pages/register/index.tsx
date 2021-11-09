@@ -9,9 +9,12 @@ import { Eye, EyeClosed } from "phosphor-react";
 import axios from "axios";
 import Router from "next/router";
 import { useToastContext } from "src/contexts/toastContext";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Register(): ReactElement {
     const toast = useToastContext();
+    const { user } = useUserContext();
+
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [form, setForm] = useState({
         username: "",
@@ -96,6 +99,8 @@ export default function Register(): ReactElement {
         }
         return true;
     };
+
+    if (user) return <></>;
 
     return (
         <>

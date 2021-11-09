@@ -6,13 +6,14 @@ import { useUserContext } from "src/contexts/userContext";
 export default function Trending(): ReactElement {
     const { user } = useUserContext();
 
+    if (!user) return <></>;
+
     return (
         <>
             <div>
                 <Navbar user={user} />
                 <div className="text-white">trending uwu owo</div>
             </div>
-            )
         </>
     );
 }

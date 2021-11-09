@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { createContext, ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import { IUser } from "src/types/general";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import useSWR from "swr";
 import Loading from "components/loading";
 import { TwatWebSocket } from "../customSocket";
@@ -23,20 +23,25 @@ const UserContextDefaultValues : UserContextType = {
 
 const UserContext = createContext<UserContextType>(UserContextDefaultValues);
 
-const protectedRoutes = [
+// you have to be signed in to access these routes.
+const signedInRoutes = [
     "/home",
     "/messages/[[...conversationId]]",
     "/settings",
     "/friends",
-    "/notifications"
+    "/trending",
+    "/notifications",
+    "/register/setting-up"
 ];
 
-const unprotectedRoutes = [
+// you have to be signed out to access these routes.
+// all routes that aren't mentioned in either array can be accessed if you're signed in or out.
+const signedOutRoutes = [
     "/",
     "/login",
     "/register",
     "/forgot-password",
-    "/reset-password",
+    "/reset-password/[token]",
 ];
 
 const fetcher = (url: string) =>
@@ -51,14 +56,12 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     const [socket, setSocket] = useState<TwatWebSocket>(null);
     const [loading, setLoading] = useState(true);
     const [reconnectInterval, setReconnectInterval] = useState<NodeJS.Timeout>(null);
+    const router = useRouter();
 
     const { data } = useSWR(
         `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
         fetcher
     );
-    const _user = data?.user;
-    const finished = Boolean(data);
-    const hasUser = Boolean(_user);
 
     const openSocket = useCallback(() => {
         let wsURL = "";
@@ -82,9 +85,10 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
                 }
             };
 
-            socket.conn.onclose = () => {
+            socket.conn.onclose = (e) => {
                 console.log("WebSocket closed");
-                if (reconnectInterval) {
+                // if there's a reconnection interval in progress or the socket was terminated normally, don't reconnect.
+                if (reconnectInterval || e.code == 1000) {
                     return;
                 }
                 const interval = setInterval(() => {
@@ -97,34 +101,25 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     }, [socket, openSocket]);
 
     useEffect(() => {
-        setLoading(true);
+        if (data) {
+            setUser(data.user);
+            setLoading(false);
+        }
+    }, [data]);
 
-        if (!finished) return;
-
-        if (hasUser) {
-            if (!socket) {
-                openSocket();
-            }
-
-            if (unprotectedRoutes.includes(Router.route)) {
-                setUser(_user);
-                Router.push("/home").then(() => {
-                    setLoading(false);
-                });
+    useEffect(() => {
+        if (user) {
+            if (signedOutRoutes.includes(Router.route)) {
+                Router.push("/home");
                 return;
             }
-            setUser(_user);
-
-        } else {
-            if (protectedRoutes.includes(Router.route)) {
-                Router.push("/login").then(() => {
-                    setLoading(false);
-                });
+        } else if (!user && data) {
+            if (signedInRoutes.includes(Router.route)) {
+                Router.push("/login");
                 return;
             }
         }
-        setLoading(false);
-    }, [finished, hasUser, setLoading, _user, openSocket]);
+    }, [user, router.route]);
 
     useEffect(() => {
         if (user && !socket) {
@@ -137,9 +132,9 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     };
 
     const logout = () => {
-        setUser(null);
-        socket.close(1000); // 1000 is normal termination
+        socket.close(1000) // 1000 is normal termination.
         setSocket(null);
+        setUser(null);
     };
 
     return (

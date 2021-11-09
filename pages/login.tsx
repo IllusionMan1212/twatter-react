@@ -8,7 +8,6 @@ import Head from "next/head";
 import { Eye, EyeClosed } from "phosphor-react";
 import React, { FormEvent, ReactElement, useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import Router from "next/router";
 import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
 import { IUser } from "src/types/general";
@@ -25,7 +24,7 @@ interface ApiResponse {
 
 export default function Login(): ReactElement {
     const toast = useToastContext();
-    const { login } = useUserContext();
+    const { user, login } = useUserContext();
 
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [form, setForm] = useState({
@@ -58,7 +57,6 @@ export default function Login(): ReactElement {
                         toast("Successfully logged in", 5000);
                         if (res.data.success) {
                             login(res.data.user);
-                            Router.push("/home");
                         }
                     })
                     .catch((err) => {
@@ -77,6 +75,8 @@ export default function Login(): ReactElement {
         }
         return true;
     };
+
+    if (user) return <></>;
 
     return (
         <>

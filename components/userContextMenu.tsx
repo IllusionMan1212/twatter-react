@@ -20,7 +20,6 @@ export default function UserContextMenu(
             .delete("/users/logout")
             .then(() => {
                 logout();
-                Router.push("/login");
                 toast("Logged out", 3000);
             })
             .catch((err) => {

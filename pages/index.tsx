@@ -5,8 +5,13 @@ import StatusBarLoggedOut from "components/statusBarLoggedOut";
 import indexStyles from "styles/index.module.scss";
 import { CurrencyCircleDollar, Fingerprint } from "phosphor-react";
 import { ReactElement } from "react";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Index(): ReactElement {
+    const { user } = useUserContext();
+
+    if (user) return <></>;
+
     return (
         <>
             <StatusBarLoggedOut></StatusBarLoggedOut>

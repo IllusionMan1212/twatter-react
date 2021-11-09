@@ -12,6 +12,7 @@ import { useToastContext } from "src/contexts/toastContext";
 import Loading from "components/loading";
 import { IUser } from "src/types/general";
 import ProfileImage from "components/post/profileImage";
+import { useUserContext } from "src/contexts/userContext";
 
 interface PostApiRequest {
     password: string;
@@ -29,6 +30,7 @@ interface GetApiResponse {
 
 export default function ResetPassword(): ReactElement {
     const toast = useToastContext();
+    const { user: currentUser } = useUserContext();
 
     const [loading, setLoading] = useState(true);
     const [passwordHidden, setPasswordHidden] = useState(true);
@@ -98,7 +100,7 @@ export default function ResetPassword(): ReactElement {
     };
 
     useEffect(() => {
-        if (router.query.token) {
+        if (router.query.token && !currentUser) {
             axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validatePasswordResetToken?token=${router.query.token}`
@@ -115,7 +117,9 @@ export default function ResetPassword(): ReactElement {
                     router.push("/forgot-password");
                 });
         }
-    }, [router, router.query, toast]);
+    }, [router, router.query]);
+
+    if (currentUser) return <></>;
 
     return (
         <>
