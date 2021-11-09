@@ -274,3 +274,11 @@
         display: none;
     }
 }
+
+.postsContainer {
+    padding-bottom: 500px;
+
+    @media (max-width: 800px) {
+        padding-bottom: 400px;
+    }
+}

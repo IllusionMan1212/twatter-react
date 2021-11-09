@@ -810,15 +810,12 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     getActiveTabPosts()
                                                                         .length
                                                                 }
+                                                                className={styles.postsContainer}
                                                                 data={getActiveTabPosts()}
                                                                 endReached={
                                                                     loadMorePosts
                                                                 }
                                                                 useWindowScroll
-                                                                overscan={{
-                                                                    main: 500,
-                                                                    reverse: 500,
-                                                                }}
                                                                 // eslint-disable-next-line react/display-name
                                                                 components={{
                                                                     Footer: () => {

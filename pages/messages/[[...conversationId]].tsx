@@ -756,6 +756,7 @@ export default function Messages(): ReactElement {
                                             ? state.messages.length - 1
                                             : 0
                                     }
+                                    overscan={10}
                                     data={state.messages}
                                     firstItemIndex={firstItemIndex}
                                     alignToBottom
