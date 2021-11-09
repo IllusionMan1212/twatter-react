@@ -1,0 +1,15 @@
+@use "styles/variables";
+
+.container {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid variables.$divider-color;
+    text-align: center;
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
+}

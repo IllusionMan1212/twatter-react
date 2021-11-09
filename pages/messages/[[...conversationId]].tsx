@@ -41,6 +41,7 @@ import { useGlobalContext } from "src/contexts/globalContext";
 import { MessagingActions } from "src/types/actions";
 import messagingReducer from "src/reducers/messagingReducer";
 import { handlePaste, handlePreviewImageClose, handleAttachmentChange } from "src/utils/eventHandlers";
+import NoActiveConversation from "components/messages/noActiveConversation";
 
 const initialState = {
     conversations: [] as IConversation[],
@@ -697,7 +698,7 @@ export default function Messages(): ReactElement {
                             <Loading height="50" width="50"></Loading>
                         )}
                     </div>
-                    {state.isConversationActive && (
+                    {state.isConversationActive ? (
                         <div
                             className={`${styles.conversation} ${
                                 state.isConversationActive
@@ -1016,7 +1017,7 @@ export default function Messages(): ReactElement {
                                 </div>
                             </div>
                         </div>
-                    )}
+                    ): <NoActiveConversation/>}
                     {imageModal && (
                         <MessageMediaModal
                             setImageModal={setImageModal}
