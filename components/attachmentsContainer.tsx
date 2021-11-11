@@ -1,10 +1,31 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { Gif } from "phosphor-react";
-import { ReactElement } from "react";
+import { ReactElement, MouseEvent, useEffect, useRef } from "react";
 import { ImageContainerProps } from "src/types/props";
 import styles from "./attachmentsContainer.module.scss";
 
 export default function AttachmentsContainer(props: ImageContainerProps): ReactElement {
+    const imagesRef = useRef<HTMLDivElement[]>([]);
+
+    const handleClick = (e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>, imgIndex: number) => {
+        e.stopPropagation();
+        if (props.post.author) {
+            window.history.pushState(null, null, `/u/${props.post.author.username}/${props.post.id}/media`);
+            props.handleMediaClick(e, props.post, imgIndex);
+        }
+    }
+
+    useEffect(() => {
+        imagesRef.current.forEach((imageRef, index) => {
+            const bgImg = new Image();
+            bgImg.src = props.post.attachments[index].url;
+            bgImg.onload = () => {
+                imageRef.style.backgroundColor = "#0000";
+                imageRef.style.backgroundImage = `url(${props.post.attachments[index].url})`;
+            };
+        });
+    }, []);
+
     return (
         <>
             {props.post.attachments?.length ? (
@@ -13,25 +34,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                         <>
                             <div className={styles.halfImageGrid}>
                                 <div
+                                    ref={(ref) => imagesRef.current[0] = ref}
                                     className={`max-w-100 ${styles.imageAttachment} ${styles.halfImageGrid2Images}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[0].url}')`,
+                                        backgroundColor: props.post.attachments[0].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                0
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 0)}
                                 >
                                     {props.post.attachments[0].type == "gif" && (
                                         <div className={styles.gif}>
@@ -42,25 +50,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                             </div>
                             <div className={styles.halfImageGrid}>
                                 <div
+                                    ref={(ref) => imagesRef.current[1] = ref}
                                     className={`max-w-100 ${styles.imageAttachment} ${styles.halfImageGrid2Images}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[1].url}')`,
+                                        backgroundColor: props.post.attachments[1].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                1
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 1)}
                                 >
                                     {props.post.attachments[1].type == "gif" && (
                                         <div className={styles.gif}>
@@ -74,25 +69,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                         <>
                             <div className={styles.halfImageGrid}>
                                 <div
+                                    ref={(ref) => imagesRef.current[0] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[0].url}')`,
+                                        backgroundColor: props.post.attachments[0].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                0
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 0)}
                                 >
                                     {props.post.attachments[0].type == "gif" && (
                                         <div className={styles.gif}>
@@ -103,25 +85,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                             </div>
                             <div className={styles.halfImageGrid}>
                                 <div
+                                    ref={(ref) => imagesRef.current[1] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[1].url}')`,
+                                        backgroundColor: props.post.attachments[1].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                1
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 1)}
                                 >
                                     {props.post.attachments[1].type == "gif" && (
                                         <div className={styles.gif}>
@@ -130,25 +99,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                     )}
                                 </div>
                                 <div
+                                    ref={(ref) => imagesRef.current[2] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[2].url}')`,
+                                        backgroundColor: props.post.attachments[2].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                2
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 2)}
                                 >
                                     {props.post.attachments[2].type == "gif" && (
                                         <div className={styles.gif}>
@@ -162,25 +118,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                         <>
                             <div className={styles.halfImageGrid}>
                                 <div
+                                    ref={(ref) => imagesRef.current[0] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[0].url}')`,
+                                        backgroundColor: props.post.attachments[0].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                0
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 0)}
                                 >
                                     {props.post.attachments[0].type == "gif" && (
                                         <div className={styles.gif}>
@@ -189,25 +132,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                     )}
                                 </div>
                                 <div
+                                    ref={(ref) => imagesRef.current[2] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[2].url}')`,
+                                        backgroundColor: props.post.attachments[2].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                2
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 2)}
                                 >
                                     {props.post.attachments[2].type == "gif" && (
                                         <div className={styles.gif}>
@@ -218,25 +148,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                             </div>
                             <div className={styles.halfImageGrid}>
                                 <div
+                                    ref={(ref) => imagesRef.current[1] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[1].url}')`,
+                                        backgroundColor: props.post.attachments[1].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                1
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 1)}
                                 >
                                     {props.post.attachments[1].type == "gif" && (
                                         <div className={styles.gif}>
@@ -245,25 +162,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                                     )}
                                 </div>
                                 <div
+                                    ref={(ref) => imagesRef.current[3] = ref}
                                     className={`max-w-100 ${styles.imageAttachment}`}
                                     style={{
-                                        backgroundImage: `url('${props.post.attachments[3].url}')`,
+                                        backgroundColor: props.post.attachments[3].bg_color,
                                     }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (props.post.author) {
-                                            window.history.pushState(
-                                                null,
-                                                null,
-                                                `/u/${props.post.author.username}/${props.post.id}/media`
-                                            );
-                                            props.handleMediaClick(
-                                                e,
-                                                props.post,
-                                                3
-                                            );
-                                        }
-                                    }}
+                                    onClick={(e) => handleClick(e, 3)}
                                 >
                                     {props.post.attachments[3].type == "gif" && (
                                         <div className={styles.gif}>
@@ -276,25 +180,12 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
                     ) : (
                         <div className={styles.halfImageGrid}>
                             <div
+                                ref={(ref) => imagesRef.current[0] = ref}
                                 className={`max-w-100 ${styles.imageAttachment}`}
                                 style={{
-                                    backgroundImage: `url('${props.post.attachments[0].url}')`,
+                                    backgroundColor: props.post.attachments[0].bg_color,
                                 }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (props.post.author) {
-                                        window.history.pushState(
-                                            null,
-                                            null,
-                                            `/u/${props.post.author.username}/${props.post.id}/media`
-                                        );
-                                        props.handleMediaClick(
-                                            e,
-                                            props.post,
-                                            0
-                                        );
-                                    }
-                                }}
+                                onClick={(e) => handleClick(e, 0)}
                             >
                                 {props.post.attachments[0].type == "gif" && (
                                     <div className={styles.gif}>

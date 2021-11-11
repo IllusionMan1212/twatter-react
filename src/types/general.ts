@@ -80,6 +80,7 @@ export interface IPost {
 interface PostAttachment {
     url: string,
     type: "image" | "gif" | "video",
+    bg_color: string,
 }
 
 export interface IAttachment {
