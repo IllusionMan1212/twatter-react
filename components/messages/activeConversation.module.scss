@@ -1,0 +1,101 @@
+@use "styles/variables";
+
+.conversation {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    z-index: 3;
+    position: relative;
+    border-top: 1px solid variables.$divider-color;
+    border-right: 1px solid variables.$divider-color;
+
+    @media (max-width: 900px) {
+        width: 100%;
+        display: none;
+    }
+}
+
+.conversationMobile {
+    @media (max-width: 900px) {
+        display: flex;
+    }
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    padding: 5px 15px;
+    border-bottom: 1px solid variables.$divider-color;
+
+    @media (max-width: 900px) {
+        padding: 15px;
+    }
+}
+
+.backButton {
+    border-radius: 55px;
+    height: 40px;
+    width: 40px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    &:active {
+        background-color: #373737;
+        cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+        display: flex;
+    }
+}
+
+.username {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.messagesAreaContainer {
+    flex-grow: 1;
+}
+
+.messagesArea {
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+
+    & > div > div {
+        padding-left: 50px;
+        padding-right: 50px;
+
+        @media (max-width: 900px) {
+            padding-left: 20px;
+            padding-right: 20px;    
+        }
+    }
+}
+
+.newMessagesAlert {
+    position: absolute;
+    bottom: 75px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background-color: #252525;
+    border: 2px solid variables.$accent-color;
+    padding: 5px 10px;
+    margin: 0 auto;
+    width: fit-content;
+    width: -moz-fit-content;
+    text-shadow: 0px 0px 5px khaki;
+    cursor: pointer;
+}
+
+.typing {
+    background-color: #6067fe;
+    padding: 5px 10px;
+}
+

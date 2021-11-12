@@ -1,4 +1,4 @@
-import { SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { IBirthday } from "src/types/general";
 
 export const timeSince = (date: string): string => {
@@ -118,7 +118,7 @@ const isLeapYear = (year: number): boolean => {
 
 export const handleBirthdayDayChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
-    setBirthday: (birthday: SetStateAction<IBirthday>) => void,
+    setBirthday: Dispatch<SetStateAction<IBirthday>>,
     birthday: IBirthday
 ): void => {
     setBirthday({
@@ -129,9 +129,9 @@ export const handleBirthdayDayChange = (
 
 export const handleBirthdayMonthChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
-    setBirthday: (birthday: SetStateAction<IBirthday>) => void,
+    setBirthday: Dispatch<SetStateAction<IBirthday>>,
     birthday: IBirthday,
-    setMaxDays: (days: SetStateAction<number>) => void
+    setMaxDays: Dispatch<SetStateAction<number>>,
 ): void => {
     setBirthday({
         ...birthday,
@@ -222,10 +222,10 @@ export const handleBirthdayMonthChange = (
 
 export const handleBirthdayYearChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
-    setBirthday: (birthday: SetStateAction<IBirthday>) => void,
+    setBirthday: Dispatch<SetStateAction<IBirthday>>,
     birthday: IBirthday,
-    setMaxDays: (days: SetStateAction<number>) => void,
-    setMaxMonths: (months: SetStateAction<number>) => void
+    setMaxDays: Dispatch<SetStateAction<number>>,
+    setMaxMonths: Dispatch<SetStateAction<number>>,
 ): void => {
     setBirthday({
         ...birthday,

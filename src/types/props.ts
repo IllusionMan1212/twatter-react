@@ -1,7 +1,9 @@
-import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent } from "react";
+import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent, Dispatch } from "react";
 import { IPost, IUser, IBirthday, IAttachment, DateAndTime, NullableString } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
+import { State } from "src/reducers/messagingReducer";
+import { MessagingAction } from "./actions";
 
 export interface ToastProps {
     text: string;
@@ -80,7 +82,7 @@ export interface ExpandedPostProps extends Omit<PostProps, "post"> {
     post: IPost;
     callback?: <T extends unknown[]>(...args: T) => void;
     nowCommenting: boolean;
-    setNowCommenting: (value: SetStateAction<boolean>) => void;
+    setNowCommenting: Dispatch<SetStateAction<boolean>>;
     comments: Array<IPost>;
     loadingComments: boolean;
 }
@@ -186,7 +188,7 @@ export interface SuggestedUserProps {
 }
 
 export interface EditProfilePopupProps {
-    setEditProfilePopup: (value: SetStateAction<boolean>) => void;
+    setEditProfilePopup: Dispatch<SetStateAction<boolean>>;
     userData: IUser;
 }
 
@@ -212,7 +214,7 @@ export interface ContextWrapperProps {
 
 export interface BirthdayProps {
     selectedBirthday: IBirthday
-    setSelectedBirthday: (birthday: SetStateAction<IBirthday>) => void;
+    setSelectedBirthday: Dispatch<SetStateAction<IBirthday>>;
     dayRef?: MutableRefObject<HTMLSelectElement>;
     monthRef?: MutableRefObject<HTMLSelectElement>;
     yearRef?: MutableRefObject<HTMLSelectElement>;
@@ -230,14 +232,41 @@ export interface CommentBoxProps {
     commentBoxRef: MutableRefObject<HTMLSpanElement>;
     charLimit: number;
     charsLeft: number;
-    setCharsLeft: (chars: SetStateAction<number>) => void;
+    setCharsLeft: Dispatch<SetStateAction<number>>;
     commentingAllowed: boolean;
-    setCommentingAllowed: (commentingAllowed: SetStateAction<boolean>) => void;
+    setCommentingAllowed: Dispatch<SetStateAction<boolean>>;
     nowCommenting: boolean;
-    setNowCommenting: (nowCommenting: SetStateAction<boolean>) => void;
+    setNowCommenting: Dispatch<SetStateAction<boolean>>;
     attachments: IAttachment[];
-    setAttachments: (attachments: SetStateAction<IAttachment[]>) => void;
+    setAttachments: Dispatch<SetStateAction<IAttachment[]>>;
     previewImages: string[];
-    setPreviewImages: (previewImages: SetStateAction<string[]>) => void;
+    setPreviewImages: Dispatch<SetStateAction<string[]>>;
     handleClick: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+}
+
+export interface ConversationsListProps {
+    state: State;
+    dispatch: Dispatch<MessagingAction>;
+}
+
+export interface MessageBoxProps {
+    state: State;
+    sendingAllowed: boolean;
+    setSendingAllowed: Dispatch<SetStateAction<boolean>>;
+    nowSending: boolean;
+    setNowSending: Dispatch<SetStateAction<boolean>>;
+    charsLeft: number;
+    setCharsLeft: Dispatch<SetStateAction<number>>;
+    messageBoxRef: MutableRefObject<HTMLSpanElement>;
+    attachments: IAttachment[];
+    setAttachments: Dispatch<SetStateAction<IAttachment[]>>;
+    previewImages: string[];
+    setPreviewImages: Dispatch<SetStateAction<string[]>>;
+}
+
+export interface ActiveConversationProps {
+    state: State;
+    dispatch: Dispatch<MessagingAction>;
+    setImageModal: Dispatch<SetStateAction<boolean>>;
+    setModalAttachment: Dispatch<SetStateAction<string>>;
 }

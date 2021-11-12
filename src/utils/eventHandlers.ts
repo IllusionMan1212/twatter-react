@@ -1,4 +1,4 @@
-import { FormEvent, MutableRefObject, SetStateAction } from "react";
+import { Dispatch, FormEvent, MutableRefObject, SetStateAction } from "react";
 import { IAttachment } from "src/types/general";
 import { fileSizeLimit, maxAttachments, supportedFileTypes } from "./variables";
 
@@ -6,12 +6,12 @@ export const handlePaste = (
     e: React.ClipboardEvent<HTMLElement>,
     charLimit: number,
     charsLeft: number,
-    setCharsLeft: (value: SetStateAction<number>) => void,
-    setPostingAllowed: (value: SetStateAction<boolean>) => void,
+    setCharsLeft: Dispatch<SetStateAction<number>>,
+    setPostingAllowed: Dispatch<SetStateAction<boolean>>,
     previewImages: Array<string>,
-    setPreviewImages: (value: SetStateAction<Array<string>>) => void,
+    setPreviewImages: Dispatch<SetStateAction<Array<string>>>,
     attachments: Array<IAttachment>,
-    setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
+    setAttachments: Dispatch<SetStateAction<Array<IAttachment>>>,
     toast: (text: string, length: number) => void,
     _maxAttachments = maxAttachments
 ): void => {
@@ -81,8 +81,8 @@ export const handleInput = (
     e: FormEvent<HTMLElement>,
     charLimit: number,
     attachments: Array<IAttachment>,
-    setPostingAllowed: (value: SetStateAction<boolean>) => void,
-    setCharsLeft: (value: SetStateAction<number>) => void
+    setPostingAllowed: Dispatch<SetStateAction<boolean>>,
+    setCharsLeft: Dispatch<SetStateAction<number>>,
 ): void => {
     if (e.currentTarget.textContent.trim().length > charLimit) {
         setPostingAllowed(false);
@@ -111,10 +111,10 @@ export const handleTextInput = (e: InputEvent): void => {
 export const handleAttachmentChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     attachments: Array<IAttachment>,
-    setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
+    setAttachments: Dispatch<SetStateAction<Array<IAttachment>>>,
     previewImages: Array<string>,
-    setPreviewImages: (value: SetStateAction<Array<string>>) => void,
-    setPostingAllowed: (value: SetStateAction<boolean>) => void,
+    setPreviewImages: Dispatch<SetStateAction<Array<string>>>,
+    setPostingAllowed: Dispatch<SetStateAction<boolean>>,
     toast: (text: string, length: number) => void,
     _maxAttachments = maxAttachments
 ): void => {
@@ -165,11 +165,11 @@ export const handlePreviewImageClose = (
     _e: React.MouseEvent<HTMLElement, MouseEvent>,
     i: number,
     previewImages: Array<string>,
-    setPreviewImages: (value: SetStateAction<Array<string>>) => void,
+    setPreviewImages: Dispatch<SetStateAction<Array<string>>>,
     attachments: Array<IAttachment>,
-    setAttachments: (value: SetStateAction<Array<IAttachment>>) => void,
+    setAttachments: Dispatch<SetStateAction<Array<IAttachment>>>,
     inputRef: MutableRefObject<HTMLElement>,
-    setPostingAllowed: (value: SetStateAction<boolean>) => void
+    setPostingAllowed: Dispatch<SetStateAction<boolean>>,
 ): void => {
     const tempPreviewImages = [...previewImages];
     tempPreviewImages.splice(i, 1);

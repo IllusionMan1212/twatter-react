@@ -13,7 +13,6 @@ function onMessageReceived(event: MessageEvent<string>) {
     that.dispatch(data.eventType, data.data);
 }
 
-
 export class TwatWebSocket {
     conn: WebSocket;
     private callbacks: ICallback = {};

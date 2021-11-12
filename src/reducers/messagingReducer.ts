@@ -1,7 +1,7 @@
 import { MessagingActions, MessagingAction } from "src/types/actions";
 import { IConversation, IMessage, IActiveConversation } from "src/types/general";
 
-interface State {
+export interface State {
     conversations: IConversation[];
     messages: IMessage[];
     activeConversation: IActiveConversation;
