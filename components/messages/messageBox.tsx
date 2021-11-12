@@ -18,8 +18,6 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>(null);
 
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
-        clearTimeout(timeoutId);
-
         if (!timeoutId) {
             const payload = {
                 eventType: "typing",
@@ -29,6 +27,13 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
                 },
             };
             socket.send(JSON.stringify(payload));
+
+            setTimeoutId(
+                setTimeout(() => {
+                    clearTimeout(timeoutId);
+                    setTimeoutId(null);
+                }, 3500)
+            );
         }
 
         if (e.currentTarget.textContent.trim().length > messageCharLimit) {
@@ -43,19 +48,6 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
         }
         props.setCharsLeft(
             messageCharLimit - e.currentTarget.textContent.trim().length
-        );
-        setTimeoutId(
-            setTimeout(() => {
-                const payload = {
-                    eventType: "stopTyping",
-                    data: {
-                        receiverId: props.state.activeConversation.receiver_id,
-                        conversationId: props.state.activeConversation.id,
-                    }
-                };
-                setTimeoutId(null);
-                socket.send(JSON.stringify(payload));
-            }, 3500)
         );
     };
 
@@ -129,14 +121,6 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
             },
         };
 
-        const typingPayload = {
-            eventType: "stopTyping",
-            data: {
-                receiverId: props.state.activeConversation.receiver_id,
-                conversationId: props.state.activeConversation.id,
-            }
-        };
-        
         clearTimeout(timeoutId);
         setTimeoutId(null);
 
@@ -146,7 +130,6 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
         props.setSendingAllowed(false);
         props.setCharsLeft(messageCharLimit);
         socket.send(JSON.stringify(messagePayload));
-        socket.send(JSON.stringify(typingPayload));
     };
 
     const handleTextInput = (e: InputEvent) => {

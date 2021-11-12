@@ -269,4 +269,10 @@ export interface ActiveConversationProps {
     dispatch: Dispatch<MessagingAction>;
     setImageModal: Dispatch<SetStateAction<boolean>>;
     setModalAttachment: Dispatch<SetStateAction<string>>;
+    atBottom: boolean;
+    setAtBottom: Dispatch<SetStateAction<boolean>>;
+    newMessagesAlert: boolean;
+    setNewMessagesAlert: Dispatch<SetStateAction<boolean>>;
+    nowSending: boolean;
+    setNowSending: Dispatch<SetStateAction<boolean>>;
 }

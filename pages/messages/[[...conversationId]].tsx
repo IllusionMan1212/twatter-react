@@ -15,6 +15,7 @@ import {
     IConversation,
     IActiveConversation,
     IMessage,
+    ISocketMessage,
 } from "src/types/general";
 import MessageMediaModal from "components/messages/messageMediaModal";
 import { useUserContext } from "src/contexts/userContext";
@@ -44,6 +45,9 @@ export default function Messages(): ReactElement {
 
     const [imageModal, setImageModal] = useState(false);
     const [modalAttachment, setModalAttachment] = useState("");
+    const [atBottom, setAtBottom] = useState(false);
+    const [newMessagesAlert, setNewMessagesAlert] = useState(false);
+    const [nowSending, setNowSending] = useState(false);
 
     const handleMarkedMessagesAsRead = useCallback(
         (payload: MarkMessagesAsReadPayload) => {
@@ -67,6 +71,91 @@ export default function Messages(): ReactElement {
             payload
         });
     }, []);
+
+    const handleMessageReceived = 
+        (msg: ISocketMessage) => {
+            if (user.id != msg.receiver_id) {
+                setNowSending(false);
+            }
+
+            let lastMessage = msg.content;
+            if (!msg.content && msg.attachment) {
+                if (msg.author_id == user.id) {
+                    lastMessage = "You sent an attachment";
+                } else {
+                    lastMessage = `${state.activeConversation.display_name} sent an attachment`;
+                }
+            }
+
+            const newConversations = state.conversations.map(
+                (conversation: IConversation) => {
+                    return conversation.id == msg.conversation_id
+                        ? {
+                            ...conversation,
+                            last_message: {
+                                String: lastMessage,
+                                Valid: true
+                            },
+                            last_updated: {
+                                Valid: true,
+                                Time: new Date(msg.sent_time),
+                            },
+                            unread_messages:
+                                state.activeConversation?.id == msg.conversation_id
+                                    ? 0
+                                    : msg.author_id == user.id
+                                        ? 0
+                                        : conversation.unread_messages + 1,
+                        }
+                        : conversation;
+                }
+            );
+            // sort conversations by latest updated conversation
+            newConversations.sort(
+                (a, b) =>
+                    new Date(b.last_updated.Time.toString()).getTime() -
+                    new Date(a.last_updated.Time.toString()).getTime()
+            );
+
+            let newMessages = [] as IMessage[];
+
+            // check if the client's active conversation is the one the message was received in
+            // this basically ensures that convos that dont have the same id as the receiving message arent updated
+            if (state.activeConversation?.id == msg.conversation_id) {
+                newMessages = newMessages.concat({
+                    id: msg.id,
+                    content: msg.content,
+                    sent_time: msg.sent_time,
+                    author_id: msg.author_id,
+                    attachment: msg.attachment,
+                    deleted: msg.deleted,
+                    conversation_id: msg.conversation_id,
+                });
+
+                if (!atBottom) {
+                    setNewMessagesAlert(true);
+                }
+
+                const payload = {
+                    eventType: "markMessagesAsRead",
+                    data: {
+                        conversationId: msg.conversation_id,
+                        userId: user.id,
+                    },
+                };
+
+                // conversation is active, so the user has read the message
+                socket.send(JSON.stringify(payload));
+            }
+
+            dispatch({
+                type: MessagingActions.RECEIVE_MESSAGE,
+                payload: {
+                    newMessages,
+                    newConversations
+                }
+            });
+        }
 
     useEffect(() => {
         // dont fetch messages if current convo id is equal to new convo id
@@ -113,17 +202,20 @@ export default function Messages(): ReactElement {
 
     useEffect(() => {
         if (socket) {
+            socket.on("message", handleMessageReceived);
             socket.on("markedMessagesAsRead", handleMarkedMessagesAsRead);
             socket.on("deleteMessage", handleDeleteMessage);
         }
 
         return () => {
             if (socket) {
+                socket.off("message", handleMessageReceived);
                 socket.off("markedMessagesAsRead", handleMarkedMessagesAsRead);
                 socket.off("deleteMessage", handleDeleteMessage);
             }
         };
     }, [
+        handleMessageReceived,
         handleMarkedMessagesAsRead,
         handleDeleteMessage,
         socket
@@ -170,6 +262,12 @@ export default function Messages(): ReactElement {
                             dispatch={dispatch}
                             setImageModal={setImageModal}
                             setModalAttachment={setModalAttachment}
+                            atBottom={atBottom}
+                            setAtBottom={setAtBottom}
+                            newMessagesAlert={newMessagesAlert}
+                            setNewMessagesAlert={setNewMessagesAlert}
+                            nowSending={nowSending}
+                            setNowSending={setNowSending}
                         />
                     ): <NoActiveConversation/>}
                     {imageModal && (

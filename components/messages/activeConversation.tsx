@@ -11,7 +11,7 @@ import Loading from "components/loading";
 import { MessagingActions } from "src/types/actions";
 import styles from "./activeConversation.module.scss";
 import { ActiveConversationProps } from "src/types/props";
-import { IAttachment, IConversation, IMessage, ISocketMessage } from "src/types/general";
+import { IAttachment, IMessage, ISocketMessage } from "src/types/general";
 import axiosInstance from "src/axios";
 import { AxiosResponse } from "axios";
 import { useToastContext } from "src/contexts/toastContext";
@@ -35,14 +35,12 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
     const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX);
     const [page, setPage] = useState(0);
     const [reachedStartOfMessages, setReachedStartOfMessages] = useState(false);
-    const [atBottom, setAtBottom] = useState(false);
-    const [newMessagesAlert, setNewMessagesAlert] = useState(false);
-    const [nowSending, setNowSending] = useState(false);
     const [typing, setTyping] = useState(false);
     const [charsLeft, setCharsLeft] = useState(messageCharLimit);
     const [sendingAllowed, setSendingAllowed] = useState(false);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>(null);
 
     pageRef.current = page;
 
@@ -52,7 +50,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
 
     const handleNewMessagesAlertClick = () => {
         scrollToBottom();
-        setNewMessagesAlert(false);
+        props.setNewMessagesAlert(false);
     };
 
     const scrollToBottom = useCallback(() => {
@@ -100,123 +98,47 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
     }, [pageRef, firstItemIndex, props.state.activeConversation?.id, getMessages]);
 
     const handleTyping = useCallback((payload: { conversationId: string }) => {
+        clearTimeout(timeoutId);
+        setTimeoutId(null);
         if (props.state.activeConversation?.id == payload.conversationId) {
             setTyping(true);
         }
-    }, [props.state.activeConversation?.id]);
 
-    const handleStopTyping = useCallback((payload: { conversationId: string }) => {
-        if (props.state.activeConversation?.id == payload.conversationId) {
-            setTyping(false);
-        }
-    }, [props.state.activeConversation?.id]);
+        setTimeoutId(
+            setTimeout(() => {
+                setTyping(false);
+            }, 4000)
+        );
+    }, [props.state.activeConversation?.id, setTyping, setTimeoutId, timeoutId]);
 
     const handleMessageReceived = useCallback(
         (msg: ISocketMessage) => {
-            if (msg.receiver_id != user.id) {
-                setNowSending(false);
+            if (user.id == msg.receiver_id) {
+                clearTimeout(timeoutId);
+                setTimeoutId(null);
+                setTyping(false);
             }
-
-            let lastMessage = msg.content;
-            if (!msg.content && msg.attachment) {
-                if (msg.author_id == user.id) {
-                    lastMessage = "You sent an attachment";
-                } else {
-                    lastMessage = `${props.state.activeConversation.display_name} sent an attachment`;
-                }
-            }
-
-            const newConversations = props.state.conversations.map(
-                (conversation: IConversation) => {
-                    return conversation.id == msg.conversation_id
-                        ? {
-                            ...conversation,
-                            last_message: {
-                                String: lastMessage,
-                                Valid: true
-                            },
-                            last_updated: {
-                                Valid: true,
-                                Time: new Date(msg.sent_time),
-                            },
-                            unread_messages:
-                                props.state.activeConversation?.id == msg.conversation_id
-                                    ? 0
-                                    : msg.author_id == user.id
-                                        ? 0
-                                        : conversation.unread_messages + 1,
-                        }
-                        : conversation;
-                }
-            );
-            // sort conversations by latest updated conversation
-            newConversations.sort(
-                (a, b) =>
-                    new Date(b.last_updated.Time.toString()).getTime() -
-                    new Date(a.last_updated.Time.toString()).getTime()
-            );
-
-            let newMessages = [] as IMessage[];
-
-            // check if the client's active conversation is the one the message was received in
-            // this basically ensures that convos that dont have the same id as the receiving message arent updated
-            if (props.state.activeConversation?.id == msg.conversation_id) {
-                newMessages = newMessages.concat({
-                    id: msg.id,
-                    content: msg.content,
-                    sent_time: msg.sent_time,
-                    author_id: msg.author_id,
-                    attachment: msg.attachment,
-                    deleted: msg.deleted,
-                    conversation_id: msg.conversation_id,
-                });
-
-                if (!atBottom) {
-                    setNewMessagesAlert(true);
-                }
-
-                const payload = {
-                    eventType: "markMessagesAsRead",
-                    data: {
-                        conversationId: msg.conversation_id,
-                        userId: user.id,
-                    },
-                };
-
-                // conversation is active, so the user has read the message
-                socket.send(JSON.stringify(payload));
-            }
-
-            props.dispatch({
-                type: MessagingActions.RECEIVE_MESSAGE,
-                payload: {
-                    newMessages,
-                    newConversations
-                }
-            });
-        },
-        [props.state.activeConversation, props.state.conversations, atBottom, socket, user?.id]
-    );
+    }, [setTyping, timeoutId])
 
     useEffect(() => {
         if (socket) {
             socket.on("message", handleMessageReceived);
             socket.on("typing", handleTyping);
-            socket.on("stopTyping", handleStopTyping);
+            // socket.on("stopTyping", handleStopTyping);
         }
 
         return () => {
             socket.off("message", handleMessageReceived);
             socket.off("typing", handleTyping);
-            socket.off("stopTyping", handleStopTyping);
+            // socket.off("stopTyping", handleStopTyping);
         };
-    }, [socket, handleMessageReceived, handleTyping, handleStopTyping]);
+    }, [socket, handleMessageReceived, handleTyping]);
 
     useEffect(() => {
-        if (atBottom) {
-            setNewMessagesAlert(false);
+        if (props.atBottom) {
+            props.setNewMessagesAlert(false);
         }
-    }, [atBottom, setNewMessagesAlert]);
+    }, [props.atBottom, props.setNewMessagesAlert]);
 
     useEffect(() => {
         setFirstItemIndex(START_INDEX);
@@ -234,6 +156,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
 
         // if we can't find the query string in our conversations, we just load the normal messages page
         if (!router.query?.conversationId?.[0]) {
+            setActiveConversationId("");
             props.dispatch({
                 type: MessagingActions.CHANGE_CONVERSATION,
                 payload: {
@@ -241,7 +164,6 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                     queryConversationId: null
                 }
             });
-            setActiveConversationId("");
             return;
         }
 
@@ -257,7 +179,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                 }
             });
         });
-    }, [router.query?.conversationId]);
+    }, [router.query?.conversationId, setActiveConversationId]);
 
     return (
         <div
@@ -306,7 +228,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                     alignToBottom
                     followOutput
                     atBottomStateChange={(bottom) => {
-                        setAtBottom(bottom);
+                        props.setAtBottom(bottom);
                     }}
                     startReached={loadMoreMessages}
                     // eslint-disable-next-line react/display-name
@@ -367,7 +289,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                         </>
                     )}
                 ></Virtuoso>
-                {newMessagesAlert && (
+                {props.newMessagesAlert && (
                     <div
                         className={styles.newMessagesAlert}
                         onClick={handleNewMessagesAlertClick}
@@ -385,8 +307,8 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                 state={props.state}
                 sendingAllowed={sendingAllowed}
                 setSendingAllowed={setSendingAllowed}
-                nowSending={nowSending}
-                setNowSending={setNowSending}
+                nowSending={props.nowSending}
+                setNowSending={props.setNowSending}
                 charsLeft={charsLeft}
                 setCharsLeft={setCharsLeft}
                 messageBoxRef={messageBoxRef}
