@@ -24,12 +24,14 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
             return;
         }
         setCanLike(false);
+
         if (!props.liked) {
             likeRef?.current?.classList.add(styles.isAnimating);
             setTimeout(() => {
                 likeRef?.current?.classList.remove(styles.isAnimating);
             }, 800);
         }
+
         const payload: LikePayload = {
             postId: props.post.id,
             likeType: props.liked ? "UNLIKE" : "LIKE",
@@ -43,13 +45,15 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
             }
         };
 
+        socket.send(JSON.stringify(socketPayload));
+
         axios.post("posts/likePost", payload)
             .then(() => {
-                socket.send(JSON.stringify(socketPayload));
                 setCanLike(true);
             })
             .catch((err) => {
                 toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                socket.send(JSON.stringify(socketPayload));
                 setCanLike(true);
             });
     };

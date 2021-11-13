@@ -124,13 +124,11 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
         if (socket) {
             socket.on("message", handleMessageReceived);
             socket.on("typing", handleTyping);
-            // socket.on("stopTyping", handleStopTyping);
         }
 
         return () => {
             socket.off("message", handleMessageReceived);
             socket.off("typing", handleTyping);
-            // socket.off("stopTyping", handleStopTyping);
         };
     }, [socket, handleMessageReceived, handleTyping]);
 
