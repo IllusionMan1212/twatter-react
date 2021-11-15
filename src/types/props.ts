@@ -293,3 +293,11 @@ export interface FriendProps {
     displayName: string;
     avatarURL: string;
 }
+
+export interface AdProps {
+    title: string;
+    description: string;
+    link: string;
+    linkText: string;
+    imageLink: string;
+}

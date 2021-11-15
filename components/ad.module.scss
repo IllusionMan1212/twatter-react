@@ -1,0 +1,68 @@
+@use "styles/variables";
+
+.outerContainer {
+    border-top: 1px solid variables.$divider-color;
+    border-bottom: 1px solid variables.$divider-color;
+    margin: 1em 0;
+
+    .innerContainer {
+        position: relative;
+        display: flex;
+        margin: 15px 0;
+        border-radius: 8px;
+        background-color: variables.$bg-color-primary;
+        overflow: hidden;
+
+        .image {
+            flex-basis: 25%;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .data {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex-basis: 75%;
+            padding: 20px;
+
+            .title {
+                font-weight: bold;
+                margin-bottom: 1em;
+                margin-right: 50px;
+            }
+
+            .description {
+                color: variables.$text-color-secondary;
+                margin-bottom: 1em;
+            }
+
+            .link {
+                text-decoration: underline;
+                color: variables.$accent-color;
+            }
+        }
+
+        .tag {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-transform: uppercase;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: variables.$bg-color-secondary;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+    }
+}
+
+
+

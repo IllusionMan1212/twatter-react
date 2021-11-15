@@ -8,8 +8,9 @@ export default function Trending(): ReactElement {
     return (
         <div className={styles.container}>
             <TrendingHeader/>
-            {new Array(3).fill(null).map(() => {
+            {new Array(3).fill(null).map((_, i) => {
                 return <TrendingItem
+                    key={i}
                     hashtag="IPhone 15"
                     description="Apple's latest IPhone has recently been released and people are freaking out about how expensive it is!"
                     link="iphone_15"

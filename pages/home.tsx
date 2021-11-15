@@ -33,6 +33,7 @@ import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import Trending from "components/trending/trending";
 import Friends from "components/friends/friends";
+import Ad from "components/ad";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
@@ -231,7 +232,7 @@ export default function Home(): ReactElement {
         [toast]
     );
 
-    const getPosts = useCallback((): Promise<IPost[] | void> => {
+    const getPosts = useCallback((): Promise<IPost[]> => {
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
         return axiosInstance
@@ -248,17 +249,18 @@ export default function Home(): ReactElement {
                 } else {
                     console.error(err);
                 }
+                return [];
             });
     }, [page]);
 
     const loadMorePosts = () => {
         setPage(page.current + 1);
         getPosts().then((newPosts) => {
-            if (!(newPosts as IPost[]).length) {
+            if (!newPosts.length) {
                 setReachedEnd(true);
                 return;
             }
-            setPosts(posts.current.concat(newPosts as IPost[]));
+            setPosts(posts.current.concat(newPosts));
         });
     };
 
@@ -284,10 +286,10 @@ export default function Home(): ReactElement {
 
     useEffect(() => {
         getPosts().then((posts) => {
-            if ((posts as IPost[])?.length < 50) {
+            if (posts?.length < 50) {
                 setReachedEnd(true);
             }
-            setPosts(posts as IPost[]);
+            setPosts(posts);
         });
         // TODO: cancel api call on return
     }, [getPosts, setPosts]);

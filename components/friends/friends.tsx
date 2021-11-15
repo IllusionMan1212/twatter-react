@@ -8,13 +8,14 @@ export default function Friends(props: FriendsProps): ReactElement {
     const { user } = useUserContext();
 
     return (
-        <div className={styles.container}>
+        <div>
             <p className={styles.header}>Friends</p>
             <p className={styles.onlineCount}>Online ({props.count})</p>
             <div className={styles.friends}>
                 {new Array(7).fill(null).map((_, i) => {
                     return (
-                        <Friend key={i}
+                        <Friend
+                            key={i}
                             username={user.username}
                             displayName={user.display_name}
                             avatarURL={user.avatar_url}
