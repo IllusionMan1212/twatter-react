@@ -33,7 +33,6 @@ import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import Trending from "components/trending/trending";
 import Friends from "components/friends/friends";
-import Ad from "components/ad";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
