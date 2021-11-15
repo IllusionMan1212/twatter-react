@@ -11,7 +11,7 @@ export default function Trending(): ReactElement {
             {new Array(3).fill(null).map(() => {
                 return <TrendingItem
                     hashtag="IPhone 15"
-                    description="Apple's latest IPhone has recently been released and people are freaking out about how expensive it is."
+                    description="Apple's latest IPhone has recently been released and people are freaking out about how expensive it is!"
                     link="iphone_15"
                 />
             })}

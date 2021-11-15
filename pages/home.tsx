@@ -32,6 +32,7 @@ import { Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import Trending from "components/trending/trending";
+import Friends from "components/friends/friends";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
@@ -336,7 +337,9 @@ export default function Home(): ReactElement {
             <div>
                 <StatusBar title="Home" user={user}/>
                 <div className={styles.content}>
-                    <div className={styles.leftSide}>friends</div>
+                    <div className={styles.leftSide}>
+                        <Friends count={20} />
+                    </div>
                     <div className={styles.center}>
                         <div
                             className={

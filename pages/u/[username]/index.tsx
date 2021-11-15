@@ -29,6 +29,7 @@ import EditProfilePopup from "components/editProfilePopup";
 import { Virtuoso } from "react-virtuoso";
 import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
+import Friends from "components/friends/friends";
 
 interface ApiRequest {
     senderId: string;
@@ -570,7 +571,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                                 <StatusBarLoggedOut></StatusBarLoggedOut>
                             )}
                             <div className={styles.content}>
-                                <div className={styles.leftSide}>friends</div>
+                                <div className={styles.leftSide}>
+                                    <Friends count={20} />
+                                </div>
                                 <div className={styles.center}>
                                     <div className="text-white">
                                         <div

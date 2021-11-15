@@ -1,3 +1,5 @@
+@use "styles/variables";
+
 .container {
     position: relative;
 }
@@ -10,4 +12,16 @@
     left: 0;
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
+}
+
+.onlineIndicator {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    width: 15px;
+    height: 15px;
+    background-color: variables.$success-color;
+    border: 3px solid variables.$base-bg-color;
+    border-radius: 5000px;
+    z-index: 1;
 }

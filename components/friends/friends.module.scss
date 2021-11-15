@@ -1,0 +1,26 @@
+@use "styles/variables";
+
+.container {
+
+}
+
+.header {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 1em;
+}
+
+.onlineCount {
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    color: variables.$text-color-secondary;
+    margin-bottom: 1.5rem;
+}
+
+.friends {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 25px;
+}
+

@@ -206,6 +206,7 @@ export interface ProfileImageProps {
     height: number;
     src: string;
     hyperlink?: string;
+    onlineIndicator?: boolean;
 }
 
 export interface ContextWrapperProps {
@@ -281,4 +282,14 @@ export interface TrendingItemProps {
     hashtag: string;
     description: string;
     link: string;
+}
+
+export interface FriendsProps {
+    count: number;
+}
+
+export interface FriendProps {
+    username: string;
+    displayName: string;
+    avatarURL: string;
 }

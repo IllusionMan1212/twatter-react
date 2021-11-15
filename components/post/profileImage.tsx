@@ -43,8 +43,11 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
                                     width: `${props.width * 0.95}px`,
                                     height: `${props.height * 0.95}px`,
                                 }}
-                            ></div>
+                            />
                         </div>
+                        {props.onlineIndicator && (
+                            <div className={styles.onlineIndicator}/>
+                        )}
                     </a>
                 </Link>
             ) : (
@@ -73,7 +76,10 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
                             width: `${props.width * 0.95}px`,
                             height: `${props.height * 0.95}px`,
                         }}
-                    ></div>
+                    />
+                    {props.onlineIndicator && (
+                        <div className={styles.onlineIndicator}/>
+                    )}
                 </div>
             )}
         </>

@@ -18,6 +18,8 @@ import useScrollRestoration from "src/hooks/useScrollRestoration";
 import { ArrowLeft } from "phosphor-react";
 import { useUserContext } from "src/contexts/userContext";
 import Router from "next/router";
+import Friends from "components/friends/friends";
+import Trending from "components/trending/trending";
 
 interface ApiResponse {
     comments: IPost[];
@@ -272,7 +274,9 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         <>
                             {renderBars(`${post.author.display_name}'s post`)}
                             <div className={styles.content}>
-                                <div className={styles.leftSide}>friends</div>
+                                <div className={styles.leftSide}>
+                                    <Friends count={20} />
+                                </div>
                                 <div className={styles.center}>
                                     <div className={styles.header}>
                                         <div
@@ -298,7 +302,9 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                         loadingComments={loadingComments}
                                     ></ExpandedPost>
                                 </div>
-                                <div className={styles.rightSide}>trending</div>
+                                <div className={styles.rightSide}>
+                                    <Trending/>
+                                </div>
                             </div>
                             {mediaModal && (
                                 <MediaModal
