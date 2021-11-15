@@ -10,11 +10,10 @@ export default function Settings(): ReactElement {
     if (!user) return <></>;
 
     return (
-        <>
+        <div>
+            <StatusBar user={user} title="Settings"></StatusBar>
             <Navbar user={user}></Navbar>
-            <div>
-                <StatusBar user={user} title="Settings"></StatusBar>
-            </div>
-        </>
+            <div className="text-white">Settings</div>
+        </div>
     );
 }

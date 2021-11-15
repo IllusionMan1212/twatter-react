@@ -31,6 +31,7 @@ import { LikePayload } from "src/types/utils";
 import { Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
+import Trending from "components/trending/trending";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
@@ -333,7 +334,7 @@ export default function Home(): ReactElement {
             </Head>
             <Navbar user={user}></Navbar>
             <div>
-                <StatusBar title="Home" user={user}></StatusBar>
+                <StatusBar title="Home" user={user}/>
                 <div className={styles.content}>
                     <div className={styles.leftSide}>friends</div>
                     <div className={styles.center}>
@@ -641,7 +642,9 @@ export default function Home(): ReactElement {
                             ></Virtuoso>
                         </div>
                     </div>
-                    <div className={styles.rightSide}>trending</div>
+                    <div className={styles.rightSide}>
+                        <Trending/>
+                    </div>
                 </div>
             </div>
             <div

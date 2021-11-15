@@ -1,0 +1,16 @@
+@use "styles/variables";
+
+.container {
+    padding: 15px 20px;
+    border-top: 2px solid variables.$divider-color;
+}
+
+.hashtag {
+    color: variables.$accent-color;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+.description {
+    font-size: 14px;
+}

@@ -2,6 +2,7 @@
 import Navbar from "components/navbar";
 import { ReactElement } from "react";
 import { useUserContext } from "src/contexts/userContext";
+import StatusBar from "components/statusBar";
 
 export default function Friends(): ReactElement {
     const { user } = useUserContext();
@@ -10,12 +11,9 @@ export default function Friends(): ReactElement {
 
     return (
         <div>
-            <Navbar
-                user={user}
-            />
-            <div className="text-white">
-                friends uwu owo
-            </div>
+            <StatusBar user={user} title="Friends"/>
+            <Navbar user={user} />
+            <div className="text-white">friends uwu owo</div>
         </div>
     );
 }

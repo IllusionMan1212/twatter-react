@@ -10,7 +10,7 @@ export default function SuggestedUsers(
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <p className="text-bold">Users you might like</p>
+                <p className="text-bold">Users You Might Like</p>
             </div>
             <div className={styles.accounts}>
                 {props.users.map((user, i) => (

@@ -276,3 +276,9 @@ export interface ActiveConversationProps {
     nowSending: boolean;
     setNowSending: Dispatch<SetStateAction<boolean>>;
 }
+
+export interface TrendingItemProps {
+    hashtag: string;
+    description: string;
+    link: string;
+}

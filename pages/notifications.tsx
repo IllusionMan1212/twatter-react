@@ -10,14 +10,10 @@ export default function Notifications(): ReactElement {
     if (!user) return <></>;
 
     return (
-        <>
+        <div>
+            <StatusBar user={user} title="Notifications"></StatusBar>
             <Navbar user={user}></Navbar>
-            <div>
-                <StatusBar
-                    user={user}
-                    title="Notifications"
-                ></StatusBar>
-            </div>
-        </>
+            <div className="text-white">Notifications</div>
+        </div>
     );
 }
