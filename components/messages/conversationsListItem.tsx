@@ -31,7 +31,7 @@ export default function ConversationsListItem(
                 )}    
             </div>
             <div className={styles.text}>
-                <p className="text-medium text-bold">
+                <p className="text-medium text-bold ellipsis">
                     {props.receiver?.display_name ?? "Deleted Account"}
                 </p>
                 <div>

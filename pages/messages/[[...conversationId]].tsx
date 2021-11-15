@@ -36,7 +36,6 @@ const initialState = {
 
 export default function Messages(): ReactElement {
     const { setUnreadMessages, setActiveConversationId } = useGlobalContext();
-
     const { user, socket } = useUserContext();
 
     const router = useRouter();
@@ -269,7 +268,7 @@ export default function Messages(): ReactElement {
                             nowSending={nowSending}
                             setNowSending={setNowSending}
                         />
-                    ): <NoActiveConversation/>}
+                    ) : <NoActiveConversation/>}
                     {imageModal && (
                         <MessageMediaModal
                             setImageModal={setImageModal}
