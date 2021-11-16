@@ -4,7 +4,7 @@ import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Loading from "components/loading";
-import Navbar from "components/navbar";
+import Navbar from "components/navbar/navbar";
 import StatusBarLoggedOut from "components/statusBarLoggedOut";
 import StatusBar from "components/statusBar";
 import styles from "styles/profilePage.module.scss";

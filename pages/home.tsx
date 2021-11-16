@@ -2,7 +2,7 @@
 import StatusBar from "components/statusBar";
 import Head from "next/head";
 import Loading from "components/loading";
-import Navbar from "components/navbar";
+import Navbar from "components/navbar/navbar";
 import styles from "styles/home.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import {

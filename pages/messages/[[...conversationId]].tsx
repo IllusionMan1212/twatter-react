@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 import StatusBar from "components/statusBar";
-import Navbar from "components/navbar";
+import Navbar from "components/navbar/navbar";
 import Head from "next/head";
 import styles from "styles/messages.module.scss";
 import {

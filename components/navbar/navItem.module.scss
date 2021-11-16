@@ -1,0 +1,22 @@
+@use "styles/variables";
+
+.navItem {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: variables.$icon-color;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.activeNavItem {
+    color: variables.$accent-color;
+}
+
+.activeProfileNavItem > :first-child {
+    border-radius: 6000px;
+    border: 2px solid variables.$accent-color;
+}

@@ -128,15 +128,12 @@ export default function EditProfilePopup(
 
     useEffect(() => {
         if (selectedBirthday?.year != 1 && selectedBirthday?.month != 1 && selectedBirthday?.day != 1) {
-            console.log("selected birthday is valid");
-            console.log(selectedBirthday);
             setIsBirthdaySet(true);
         }
     }, [selectedBirthday]);
 
     useEffect(() => {
         if (props.userData.birthday.Valid) {
-            console.log("props birthday is valid");
             setBirthday(formatBirthday(props.userData.birthday.Time.toString()));
             setIsBirthdaySet(true);
         }

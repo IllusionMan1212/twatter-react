@@ -1,17 +1,5 @@
 @use "styles/variables";
 
-.navbarItem {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: variables.$icon-color;
-
-    &:hover {
-        cursor: pointer;
-    }
-}
-
 .navbar {
     display: none;
     position: fixed;

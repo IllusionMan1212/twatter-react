@@ -1,4 +1,13 @@
-import { ChangeEvent, CSSProperties, MutableRefObject, SetStateAction, ReactNode, ForwardRefExoticComponent, Dispatch } from "react";
+import {
+    ChangeEvent,
+    CSSProperties,
+    MutableRefObject,
+    SetStateAction,
+    ReactNode,
+    ForwardRefExoticComponent,
+    Dispatch,
+    MouseEventHandler
+} from "react";
 import { IPost, IUser, IBirthday, IAttachment, DateAndTime, NullableString } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
@@ -305,4 +314,11 @@ export interface AdProps {
 export interface ShareProps {
     text: string;
     url: string;
+}
+
+export interface NavItemProps {
+    children: ReactNode;
+    to?: string;
+    as?: string;
+    onClick?: MouseEventHandler<HTMLElement>;
 }

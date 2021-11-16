@@ -7,6 +7,8 @@ import { useUserContext } from "src/contexts/userContext";
 export default function Friends(props: FriendsProps): ReactElement {
     const { user } = useUserContext();
 
+    if (!user) return null;
+
     return (
         <div>
             <p className={styles.header}>Friends</p>

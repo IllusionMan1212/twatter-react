@@ -6,11 +6,11 @@ import {
     MagnifyingGlass,
     TrendUp,
 } from "phosphor-react";
-import Router from "next/router";
 import { NavbarLoggedInProps } from "src/types/props";
 import { ReactElement, useState } from "react";
 import ProfileImage from "components/post/profileImage";
 import UserContextMenu from "components/userContextMenu";
+import NavItem from "components/navbar/navItem";
 
 export default function Navbar(
     props: NavbarLoggedInProps
@@ -19,40 +19,25 @@ export default function Navbar(
 
     return (
         <div className={`${styles.navbar}`}>
-            <div
-                className={styles.navbarItem}
-                onClick={() => {
-                    Router.push("/home");
-                }}
-            >
+            <NavItem to="/home">
                 <HouseLine size="30" weight="fill"/>
-            </div>
-            <div
-                className={styles.navbarItem}
+            </NavItem>
+            <NavItem
+                as="search"
                 onClick={() => {
                     // TODO: implement searchbar for mobile
                 }}
             >
                 <MagnifyingGlass size="30" weight="fill"/>
-            </div>
-            <div
-                className={styles.navbarItem}
-                onClick={() => {
-                    Router.push("/trending");
-                }}
-            >
+            </NavItem>
+            <NavItem to="/trending">
                 <TrendUp size="30" weight="fill"/>
-            </div>
-            <div
-                className={styles.navbarItem}
-                onClick={() => {
-                    Router.push("/friends");
-                }}
-            >
+            </NavItem>
+            <NavItem to="/friends">
                 <Users size="30" weight="fill"/>
-            </div>
-            <div
-                className={styles.navbarItem}
+            </NavItem>
+            <NavItem
+                as="profile"
                 onClick={() => {
                     setUserMenu(!userMenu);
                 }}
@@ -65,8 +50,8 @@ export default function Navbar(
                 <UserContextMenu
                     currentUser={props.user}
                     open={userMenu}
-                ></UserContextMenu>
-            </div>
+                />
+            </NavItem>
         </div>
     );
 }

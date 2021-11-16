@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import Navbar from "components/navbar";
+import Navbar from "components/navbar/navbar";
 import { ReactElement } from "react";
 import { useUserContext } from "src/contexts/userContext";
 import StatusBar from "components/statusBar";
