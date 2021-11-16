@@ -1,28 +1,44 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { createContext, ReactElement, useContext, useEffect, useState, SetStateAction, Dispatch, useCallback } from "react";
 import { useUserContext } from "./userContext";
-import { useToastContext } from "./toastContext";
-import axiosInstance from "src/axios";
+import { useToastContext } from "./toastContext"; import axiosInstance from "src/axios";
 import axios, { AxiosResponse } from "axios";
 import { ISocketMessage } from "src/types/general";
 import { ContextWrapperProps } from "src/types/props";
+import Share from "components/share/share";
+
+interface ISharer {
+    enabled: boolean;
+    text?: string;
+    url?: string;
+}
 
 interface GlobalContextType {
     unreadMessages: string[];
     setUnreadMessages: Dispatch<SetStateAction<string[]>>;
     activeConversationId: string;
     setActiveConversationId: Dispatch<SetStateAction<string>>;
+    sharer: ISharer;
+    setSharer: Dispatch<SetStateAction<ISharer>>;
 }
 
 interface ApiResponse {
     unreadMessages: string[];
 }
 
+const SharerDefaultValues: ISharer = {
+    enabled: false,
+    text: "",
+    url: "",
+}
+
 const GlobalContextDefaultValues: GlobalContextType = {
     unreadMessages: [],
     setUnreadMessages: null,
     activeConversationId: null,
-    setActiveConversationId: null
+    setActiveConversationId: null,
+    sharer: SharerDefaultValues,
+    setSharer: null,
 };
 
 const GlobalContext = createContext<GlobalContextType>(
@@ -35,6 +51,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
 
     const [unreadMessages, setUnreadMessages] = useState<string[]>([]);
     const [activeConversationId, setActiveConversationId] = useState("");
+    const [sharer, setSharer] = useState<ISharer>(SharerDefaultValues);
 
     const handleError = useCallback(
         (payload) => {
@@ -42,6 +59,21 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
         },
         [toast]
     );
+
+    useEffect(() => {
+        if (sharer.enabled) {
+            document.body.classList.add("overflow-hidden");
+            document.body.classList.remove("overflow-unset");
+        } else {
+            document.body.classList.remove("overflow-hidden");
+            document.body.classList.add("overflow-unset");
+        }
+
+        return () => {
+            document.body.classList.remove("overflow-hidden");
+            document.body.classList.add("overflow-unset");
+        };
+    }, [sharer.enabled]);
 
     const handleMessage = useCallback((msg: ISocketMessage) => {
         if (msg.author_id != user.id && activeConversationId != msg.conversation_id) {
@@ -96,8 +128,21 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
 
     return (
         <>
-            <GlobalContext.Provider value={{ unreadMessages, setUnreadMessages, activeConversationId, setActiveConversationId }}>
-                {children}
+            <GlobalContext.Provider value={{
+                unreadMessages,
+                setUnreadMessages,
+                activeConversationId,
+                setActiveConversationId,
+                sharer,
+                setSharer,
+            }}>
+                <>
+                    <Share
+                        text={sharer.text}
+                        url={sharer.url}
+                    />
+                    {children}
+                </>
             </GlobalContext.Provider>
         </>
     );

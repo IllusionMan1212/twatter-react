@@ -301,3 +301,8 @@ export interface AdProps {
     linkText: string;
     imageLink: string;
 }
+
+export interface ShareProps {
+    text: string;
+    url: string;
+}

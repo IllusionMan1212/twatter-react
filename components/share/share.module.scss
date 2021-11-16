@@ -1,0 +1,55 @@
+.container {
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 11;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.shareContainer {
+    background-color: #202020;
+    border-radius: 16px;
+    padding: 20px 25px;
+    color: white;
+    width: 40vw;
+    animation: grow 0.3s ease-out;
+
+    @media (max-width: 800px) {
+        width: 95vw;
+    }
+
+    .header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 1em;
+    }
+
+    .logos {
+        display: flex;
+        justify-content: space-around;
+
+        .logo {
+            width: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+@keyframes grow {
+    0% {
+        transform: scale(0.6);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

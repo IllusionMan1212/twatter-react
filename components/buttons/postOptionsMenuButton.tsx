@@ -9,6 +9,7 @@ import axios from "src/axios";
 import { AxiosResponse } from "axios";
 import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface ApiRequest {
     postAuthorId: string;
@@ -24,6 +25,7 @@ export default function PostOptionsMenuButton(
 ): ReactElement {
     const toast = useToastContext();
     const { socket } = useUserContext();
+    const { setSharer } = useGlobalContext();
 
     const [optionsMenu, setOptionsMenu] = useState(false);
     const [offset, setOffset] = useState(-1);
@@ -35,18 +37,24 @@ export default function PostOptionsMenuButton(
 
     const handleShare = () => {
         setOptionsMenu(!optionsMenu);
+        const url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`
+        const title = `${props.postAuthorUsername}'s post - Twatter`
+
         if (navigator.share) {
             navigator.share({
-                url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`,
-                title: `${props.postAuthorUsername}'s post - Twatter`,
+                url: url,
+                title: title,
             }).then(() => {
                 console.log("shared successfully");
             }).catch(() => {
                 console.log("error while sharing");
             });
         } else {
-            // TODO: fallback share popup
-            console.log("cant share, fallback sharing popup coming soon");
+            setSharer({
+                enabled: true,
+                text: title,
+                url: url
+            });
         }
     };
 
