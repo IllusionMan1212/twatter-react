@@ -22,12 +22,7 @@ export default function Navbar(
             <NavItem to="/home">
                 <HouseLine size="30" weight="fill"/>
             </NavItem>
-            <NavItem
-                as="search"
-                onClick={() => {
-                    // TODO: implement searchbar for mobile
-                }}
-            >
+            <NavItem to="/search">
                 <MagnifyingGlass size="30" weight="fill"/>
             </NavItem>
             <NavItem to="/trending">

@@ -11,7 +11,6 @@ export default function NavItem(props: NavItemProps): ReactElement {
 
     const isActive = router.asPath === props.to
     const isProfileNavItemActive = router.asPath === `/u/${user.username}` && props.as === "profile"
-    // const isSearchActive = false && props.as === "search"; // TODO:
 
     return (
         <>
