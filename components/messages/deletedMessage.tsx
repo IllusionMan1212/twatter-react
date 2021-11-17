@@ -1,13 +1,12 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { DeletedMessageProps } from "src/types/props";
 import messageStyles from "components/messages/message.module.scss";
 import styles from "./deletedMessage.module.scss";
 import { formatMessageTime } from "src/utils/functions";
+import DateTime from "components/datetime";
 
 export default function DeletedMessage(props: DeletedMessageProps): ReactElement {
-    const [sentTime] = useState(formatMessageTime(props.sentTime));
-
     return (
         <div className={messageStyles.messageContainer}>
             <div
@@ -21,15 +20,11 @@ export default function DeletedMessage(props: DeletedMessageProps): ReactElement
                     <i>This Message Was Deleted</i>
                 </div>
             </div>
-            <div
-                className={`${
-                    props.sender
-                        ? messageStyles.senderTime
-                        : messageStyles.recipientTime
-                }`}
-            >
-                {sentTime}
-            </div>
+            <DateTime
+                datetime={props.sentTime}
+                formattingFunction={formatMessageTime}
+                className={props.sender ? messageStyles.senderTime : messageStyles.recipientTime}
+            />
         </div>
     );
 }

@@ -22,6 +22,7 @@ import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
 import { AxiosResponse } from "axios";
 import CommentBox from "components/commentBox/commentBox";
+import DateTime from "components/datetime";
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
     const toast = useToastContext();
@@ -295,9 +296,11 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             liked={postLiked}
                         ></LikeButton>
                     </div>
-                    <p className={styles.date}>
-                        {formatDate(props.modalData.post.created_at)}
-                    </p>
+                    <DateTime
+                        datetime={props.modalData.post.created_at}
+                        formattingFunction={formatDate}
+                        className={styles.date}
+                    />
                 </div>
                 <div ref={parentContainerRef} className={styles.modalPostComments}>
                     {!commentsLoading ? (

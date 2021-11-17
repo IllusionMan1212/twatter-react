@@ -11,6 +11,7 @@ import CommentButton from "components/buttons/commentButton";
 import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
 import ReplyingTo from "./replyingTo";
+import DateTime from "components/datetime";
 
 export default function Post(props: PostProps): ReactElement {
     const handleCommentButtonClick = () => {
@@ -89,11 +90,11 @@ export default function Post(props: PostProps): ReactElement {
                     ></AttachmentsContainer>
                 </div>
                 <div className={styles.footer}>
-                    <div
+                    <DateTime
+                        datetime={props.post.created_at}
+                        formattingFunction={timeSince}
                         className={`flex align-items-end text-small ${styles.postDate}`}
-                    >
-                        {timeSince(props.post.created_at)}
-                    </div>
+                    />
                     <div className="flex gap-1 justify-content-end">
                         <CommentButton
                             post={props.post}

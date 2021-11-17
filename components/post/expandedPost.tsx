@@ -20,6 +20,7 @@ import { useUserContext } from "src/contexts/userContext";
 import Loading from "components/loading";
 import ReplyingTo from "./replyingTo";
 import CommentBox from "components/commentBox/commentBox";
+import DateTime from "components/datetime";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
     const { socket } = useUserContext();
@@ -159,11 +160,11 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     </div>
                 </div>
                 <div className={styles.postFooter}>
-                    <div
+                    <DateTime
+                        datetime={props.post.created_at}
+                        formattingFunction={formatDate}
                         className={`flex align-items-end text-small ${postStyles.postDate}`}
-                    >
-                        {formatDate(props.post.created_at)}
-                    </div>
+                    />
                     <div className="flex gap-1">
                         <CommentButton
                             post={props.post}

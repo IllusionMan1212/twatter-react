@@ -168,6 +168,7 @@
 .composePostMobile {
     @media (max-width: 800px) {
         display: flex;
+        border-top: 1px solid variables.$divider-color;
     }
 }
 

@@ -1,13 +1,12 @@
 /* eslint-disable react/react-in-jsx-scope */
 import styles from "./message.module.scss";
 import { MessageProps } from "src/types/props";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { formatMessageTime } from "src/utils/functions";
 import MessageOptionsMenuButton from "components/messages/messageOptionsMenuButton";
+import DateTime from "components/datetime";
 
 export default function Message(props: MessageProps): ReactElement {
-    const [sentTime] = useState(formatMessageTime(props.sentTime));
-
     const handleClick = () => {
         window.history.pushState(null, null, `${props.conversationId}/media`);
         props.setImageModal(true);
@@ -50,13 +49,11 @@ export default function Message(props: MessageProps): ReactElement {
                     />
                 )}
             </div>
-            <div
-                className={`${
-                    props.sender ? styles.senderTime : styles.recipientTime
-                }`}
-            >
-                {sentTime}
-            </div>
+            <DateTime
+                datetime={props.sentTime}
+                formattingFunction={formatMessageTime}
+                className={props.sender ? styles.senderTime : styles.recipientTime}
+            />
         </div>
     );
 }

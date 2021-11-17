@@ -12,6 +12,7 @@ import postStyles from "components/post/post.module.scss";
 import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "components/post/profileImage";
+import DateTime from "components/datetime";
 
 export default function MediaModalComment(props: CommentProps): ReactElement {
 
@@ -65,11 +66,11 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                 ></AttachmentsContainer>
             </div>
             <div className={postStyles.footer}>
-                <div
+                <DateTime
+                    datetime={props.comment.created_at}
+                    formattingFunction={timeSince}
                     className={`flex align-items-end text-small ${styles.commentDate}`}
-                >
-                    {timeSince(props.comment.created_at)}
-                </div>
+                />
                 <div className="flex gap-1 justify-content-end">
                     <CommentButton
                         post={props.comment}

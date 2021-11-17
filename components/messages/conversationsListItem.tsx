@@ -4,6 +4,7 @@ import { ConversationsListItemProps } from "src/types/props";
 import { ReactElement } from "react";
 import ProfileImage from "components/post/profileImage";
 import { timeSince } from "src/utils/functions";
+import DateTime from "components/datetime";
 
 export default function ConversationsListItem(
     props: ConversationsListItemProps
@@ -45,9 +46,11 @@ export default function ConversationsListItem(
                 </div>
             </div>
             {props.lastUpdated.Valid && (
-                <div className={styles.date}>
-                    <p>{timeSince(props.lastUpdated.Time.toString())}</p>
-                </div>
+                <DateTime
+                    datetime={props.lastUpdated.Time.toString()}
+                    formattingFunction={timeSince}
+                    className={styles.date}
+                />
             )}
             <div>
                 {props.unreadMessages != 0 && (

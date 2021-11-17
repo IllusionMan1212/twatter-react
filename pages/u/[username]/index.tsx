@@ -30,6 +30,7 @@ import { Virtuoso } from "react-virtuoso";
 import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
 import Friends from "components/friends/friends";
+import DateTime from "components/datetime";
 
 interface ApiRequest {
     senderId: string;
@@ -80,7 +81,6 @@ export default function Profile(props: ProfileProps): ReactElement {
     const [mediaPage, setMediaPage] = useLatestState(0);
     const [postsCount, setPostsCount] = useState(0);
 
-    const [creationDate, setCreationDate] = useState(user?.created_at);
     const [birthday, setBirthday] = useState(user?.birthday.Time.toString());
 
     const handleMediaClick = (
@@ -151,10 +151,6 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
         }
     };
-
-    useEffect(() => {
-        setCreationDate(formatJoinDate(user?.created_at));
-    }, [user?.created_at]);
 
     useEffect(() => {
         if (user?.birthday.Valid) {
@@ -742,7 +738,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         ></Calendar>
                                                         <p className="mt-1Percent">
                                                             Member since{" "}
-                                                            {creationDate}
+                                                            <DateTime
+                                                                datetime={props.user.created_at}
+                                                                formattingFunction={formatJoinDate}
+                                                                style={{ display: "inline" }}
+                                                            />
                                                         </p>
                                                     </div>
                                                 </div>
