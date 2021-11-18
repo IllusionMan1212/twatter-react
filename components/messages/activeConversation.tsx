@@ -127,8 +127,10 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
         }
 
         return () => {
-            socket.off("message", handleMessageReceived);
-            socket.off("typing", handleTyping);
+            if (socket) {
+                socket.off("message", handleMessageReceived);
+                socket.off("typing", handleTyping);
+            }
         };
     }, [socket, handleMessageReceived, handleTyping]);
 
