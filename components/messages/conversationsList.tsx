@@ -3,7 +3,7 @@ import { Virtuoso } from "react-virtuoso";
 import Loading from "components/loading";
 import ConversationsListItem from "components/messages/conversationsListItem";
 import { IConversation } from "src/types/general";
-import { MessagingActions } from "src/types/actions";
+import { MessagingActions } from "src/actions/messagingActions";
 import { useUserContext } from "src/contexts/userContext";
 import { useRouter } from "next/router";
 import { ConversationsListProps } from "src/types/props";

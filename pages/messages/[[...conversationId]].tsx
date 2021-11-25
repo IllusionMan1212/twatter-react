@@ -21,7 +21,7 @@ import MessageMediaModal from "components/messages/messageMediaModal";
 import { useUserContext } from "src/contexts/userContext";
 import { DeleteMessagePayload, MarkMessagesAsReadPayload } from "src/types/socketEvents";
 import { useGlobalContext } from "src/contexts/globalContext";
-import { MessagingActions } from "src/types/actions";
+import { MessagingActions } from "src/actions/messagingActions";
 import messagingReducer from "src/reducers/messagingReducer";
 import ConversationsList from "components/messages/conversationsList";
 import NoActiveConversation from "components/messages/noActiveConversation";

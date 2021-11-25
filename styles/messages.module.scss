@@ -6,12 +6,10 @@
     display: flex;
     align-items: stretch;
     max-height: calc(100vh - variables.$status-bar-height - 1em);
-    margin-top: 1em;
-    position: relative;
 
     @media (max-width: 900px) {
-        height: calc(100vh - variables.$status-bar-height-mobile - 51px);
-        max-height: calc(100vh - variables.$status-bar-height-mobile - 51px);
+        height: calc(100vh - variables.$status-bar-height-mobile - variables.$nav-bar-height);
+        max-height: calc(100vh - variables.$status-bar-height-mobile - variables.$nav-bar-height);
         margin: 0;
     }
 }

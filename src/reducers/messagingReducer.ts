@@ -1,14 +1,14 @@
-import { MessagingActions, MessagingAction } from "src/types/actions";
+import { MessagingActions, MessagingAction } from "src/actions/messagingActions";
 import { IConversation, IMessage, IActiveConversation } from "src/types/general";
 
-export interface State {
+export interface MessagingState {
     conversations: IConversation[];
     messages: IMessage[];
     activeConversation: IActiveConversation;
     isConversationActive: boolean;
 }
 
-export default function messagingReducer(state: State, action: MessagingAction): State {
+export default function messagingReducer(state: MessagingState, action: MessagingAction): MessagingState {
     switch (action.type) {
     case MessagingActions.CHANGE_CONVERSATION:
         if (!action.payload.queryConversationId) {

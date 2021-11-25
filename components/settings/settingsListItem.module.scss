@@ -1,0 +1,40 @@
+@use "styles/variables";
+
+.container {
+    padding: 20px 30px;
+    display: flex;
+    grid-gap: 20px;
+    align-items: center;
+    border-bottom: 1px solid variables.$divider-color;
+
+    @media (hover: hover) {
+        &:hover:not(.active) {
+            background-color: variables.$bg-color-primary;
+            cursor: pointer;
+        }
+    }
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        grid-gap: 10px;
+
+        .title {
+            font-size: 24px;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+    }
+
+    &:active {
+        background-color: variables.$bg-color-primary;
+    }
+
+    &.active {
+        background-color: rgba(96, 103, 254, 0.55);
+    }
+}
+

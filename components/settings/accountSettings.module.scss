@@ -1,0 +1,23 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 2em;
+    align-items: center;
+
+    .setting {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .option {
+            color: #838383;
+            font-size: 18px;
+        }
+    }
+}

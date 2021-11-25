@@ -1,0 +1,19 @@
+@use "styles/variables";
+
+.container {
+    color: white;
+    height: calc(100vh - variables.$status-bar-height - 1em);
+    max-height: calc(100vh - variables.$status-bar-height - 1em);
+    display: flex;
+    align-items: stretch;
+    position: relative;
+    width: 100%;
+    border: 1px solid variables.$divider-color;
+
+    @media (max-width: 800px) {
+        height: calc(100vh - variables.$status-bar-height-mobile - variables.$nav-bar-height);
+        max-height: calc(100vh - variables.$status-bar-height-mobile - variables.$nav-bar-height);
+        border: unset;
+        border-top: 1px solid variables.$divider-color;
+    }
+}

@@ -1,0 +1,57 @@
+@use "styles/variables";
+
+.container {
+    border-left: 1px solid variables.$divider-color;
+    width: 65%;
+    
+    @media (max-width: 800px) {
+        display: none;
+        position: fixed;
+        top: 0;
+        bottom: variables.$nav-bar-height;
+        right: 0;
+        z-index: 7;
+        width: 100%;
+        height: calc(100% - variables.$nav-bar-height);
+        background-color: variables.$base-bg-color;
+
+        &.active {
+            display: initial;
+        }
+    }
+
+    .header {
+        align-items: center;
+        grid-gap: 10px;
+        padding: 15px 0px;
+        display: none;
+
+        .backButton {
+            display: flex;
+            border-radius: 55px;
+            min-height: 40px;
+            min-width: 40px;
+            justify-content: center;
+            align-items: center;
+            margin-left: 1em;
+
+            &:active {
+                background-color: #373737;
+                cursor: pointer;
+            }
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 800px) {
+            display: flex;
+        }
+    }
+
+    .body {
+        padding: 35px 20px;
+    }
+}

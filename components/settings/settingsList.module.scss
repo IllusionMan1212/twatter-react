@@ -1,0 +1,9 @@
+.container {
+    height: 100%;
+    width: 35%;
+    overflow-y: scroll;
+
+    @media (max-width: 800px) {
+        width: 100%;
+    }
+}

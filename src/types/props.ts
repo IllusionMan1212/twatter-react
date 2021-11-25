@@ -6,13 +6,16 @@ import {
     ReactNode,
     ForwardRefExoticComponent,
     Dispatch,
-    MouseEventHandler
+    MouseEventHandler,
+    RefAttributes
 } from "react";
 import { IPost, IUser, IBirthday, IAttachment, DateAndTime, NullableString } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
-import { State } from "src/reducers/messagingReducer";
-import { MessagingAction } from "./actions";
+import { MessagingState } from "src/reducers/messagingReducer";
+import { MessagingAction } from "src/actions/messagingActions";
+import { SettingsAction } from "src/actions/settingsActions";
+import { SettingsState } from "src/reducers/settingsReducer";
 
 export interface ToastProps {
     text: string;
@@ -255,12 +258,12 @@ export interface CommentBoxProps {
 }
 
 export interface ConversationsListProps {
-    state: State;
+    state: MessagingState;
     dispatch: Dispatch<MessagingAction>;
 }
 
 export interface MessageBoxProps {
-    state: State;
+    state: MessagingState;
     sendingAllowed: boolean;
     setSendingAllowed: Dispatch<SetStateAction<boolean>>;
     nowSending: boolean;
@@ -275,7 +278,7 @@ export interface MessageBoxProps {
 }
 
 export interface ActiveConversationProps {
-    state: State;
+    state: MessagingState;
     dispatch: Dispatch<MessagingAction>;
     setImageModal: Dispatch<SetStateAction<boolean>>;
     setModalAttachment: Dispatch<SetStateAction<string>>;
@@ -321,4 +324,26 @@ export interface NavItemProps {
     to?: string;
     as?: string;
     onClick?: MouseEventHandler<HTMLElement>;
+}
+
+export interface SettingsListItemProps {
+    title: string;
+    description: string;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+    onClick: MouseEventHandler<HTMLElement>;
+    isActive: boolean;
+}
+
+export interface SwitchProps {
+    name?: string;
+    disabled?: boolean;
+}
+
+export interface SettingsListProps {
+    state: SettingsState;
+    dispatch: Dispatch<SettingsAction>;
+}
+
+export interface SettingsAreaProps {
+    state: SettingsState;
 }

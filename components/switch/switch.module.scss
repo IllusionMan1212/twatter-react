@@ -1,0 +1,49 @@
+@use "styles/variables";
+
+.switch {
+    cursor: pointer;
+
+    input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 3rem;
+        height: 1.5rem;
+        background: variables.$bg-color-primary;
+        outline: none;
+        vertical-align: middle;
+        position: relative;
+        cursor: pointer;
+        transition: border .15s ease;
+        order: -1;
+
+        &:after {
+            content: "";
+            position: absolute;
+            left: .125rem;
+            top: .125rem;
+            width: calc(1.25rem - 2px);
+            height: calc(1.25rem - 2px);
+            background: #888888;
+            transition: background .25s ease,
+                left .15s ease;
+        }
+
+        &:checked {
+            &::after {
+                background: variables.$accent-color;
+                left: 1.625rem;
+            }
+        }
+
+        &:focus-visible:not([disabled]),
+
+        &[disabled] {
+            cursor: not-allowed;
+        }
+    }
+
+    &.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}

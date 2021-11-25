@@ -8,7 +8,7 @@ import MessageBox from "components/messages/messageBox";
 import { VirtuosoHandle, Virtuoso } from "react-virtuoso";
 import { useUserContext } from "src/contexts/userContext";
 import Loading from "components/loading";
-import { MessagingActions } from "src/types/actions";
+import { MessagingActions } from "src/actions/messagingActions";
 import styles from "./activeConversation.module.scss";
 import { ActiveConversationProps } from "src/types/props";
 import { IAttachment, IMessage, ISocketMessage } from "src/types/general";
