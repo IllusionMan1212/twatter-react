@@ -9,6 +9,7 @@ export default function Switch(props: SwitchProps): ReactElement {
                 type="checkbox"
                 name={props.name}
                 disabled={props.disabled}
+                checked={props.checked}
             />
         </div>
     )

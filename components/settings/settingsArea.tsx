@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import AccountSettings from "components/settings/accountSettings";
+import AccountSettings from "components/settings/account/accountSettings";
 import PrivacySettings from "components/settings/privacySettings";
 import NotificationsSettings from "components/settings/notificationsSettings";
 import SecuritySettings from "components/settings/securitySettings";
@@ -9,7 +9,7 @@ import { SettingsAreaProps } from "src/types/props";
 import { ArrowLeft } from "phosphor-react";
 import Router from "next/router";
 
-export default function SettingsArea({ state }: SettingsAreaProps): ReactElement {
+export default function SettingsArea({ state, dispatch }: SettingsAreaProps): ReactElement {
     const handleClick = () => {
         Router.back();
     }
@@ -25,7 +25,7 @@ export default function SettingsArea({ state }: SettingsAreaProps): ReactElement
                         <p className={styles.title}>Account</p>
                     </div>
                     <div className={styles.body}>
-                        <AccountSettings/>
+                        <AccountSettings dispatch={dispatch}/>
                     </div>
                 </>
             ) : state.activeSettingsItem == SettingsItems.Privacy ? (

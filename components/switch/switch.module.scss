@@ -8,19 +8,23 @@
         -moz-appearance: none;
         width: 3rem;
         height: 1.5rem;
-        background: variables.$bg-color-primary;
+        background: variables.$bg-color-secondary;
         outline: none;
         vertical-align: middle;
         position: relative;
         cursor: pointer;
         transition: border .15s ease;
         order: -1;
+        -webkit-user-select: none;  
+        -moz-user-select: none;    
+        -ms-user-select: none;      
+        user-select: none;
 
         &:after {
             content: "";
             position: absolute;
-            left: .125rem;
-            top: .125rem;
+            left: .25rem;
+            top: .2rem;
             width: calc(1.25rem - 2px);
             height: calc(1.25rem - 2px);
             background: #888888;

@@ -337,6 +337,7 @@ export interface SettingsListItemProps {
 export interface SwitchProps {
     name?: string;
     disabled?: boolean;
+    checked?: boolean;
 }
 
 export interface SettingsListProps {
@@ -346,4 +347,13 @@ export interface SettingsListProps {
 
 export interface SettingsAreaProps {
     state: SettingsState;
+    dispatch: Dispatch<SettingsAction>;
+}
+
+export interface AccountSettingsProps {
+    dispatch: Dispatch<SettingsAction>;
+}
+
+export interface SettingsPopupProps {
+    dispatch: Dispatch<SettingsAction>;
 }

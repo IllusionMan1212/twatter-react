@@ -1,7 +1,10 @@
+import { FunctionComponent } from "react";
 import { SettingsItems } from "src/reducers/settingsReducer";
+import { SettingsPopupProps } from "src/types/props";
 
 export enum SettingsActions {
     CHANGE_SETTINGS = 1,
+    TOGGLE_POPUP,
 }
 
 interface ChangeSettingsAction {
@@ -11,4 +14,12 @@ interface ChangeSettingsAction {
     }
 }
 
-export type SettingsAction = ChangeSettingsAction
+interface TogglePopupAction {
+    type: SettingsActions.TOGGLE_POPUP,
+    payload: {
+        popupEnabled: boolean,
+        popupComponent: FunctionComponent<SettingsPopupProps>
+    }
+}
+
+export type SettingsAction = ChangeSettingsAction | TogglePopupAction
