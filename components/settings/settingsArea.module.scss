@@ -14,6 +14,7 @@
         width: 100%;
         height: calc(100% - variables.$nav-bar-height);
         background-color: variables.$base-bg-color;
+        border-left: unset;
 
         &.active {
             display: initial;
@@ -53,5 +54,9 @@
 
     .body {
         padding: 35px 20px;
+
+        @media (max-width: 800px) {
+            padding: 10px 20px;
+        }
     }
 }

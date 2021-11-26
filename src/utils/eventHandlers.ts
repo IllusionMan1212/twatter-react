@@ -68,12 +68,14 @@ export const handleKeyDown = (
 
         if (!ref.current.textContent.length) return;
 
-        document.execCommand("insertLineBreak");
-
-        e.ctrlKey &&
+        if (e.ctrlKey) {
             handleClick(
                 (e as unknown) as React.MouseEvent<HTMLElement, MouseEvent>
             );
+            return;
+        }
+
+        document.execCommand("insertLineBreak");
     }
 };
 
