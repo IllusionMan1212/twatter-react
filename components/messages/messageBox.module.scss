@@ -126,7 +126,7 @@
     z-index: 1;
 
     &:hover:not(:disabled) {
-        background-color: #373737;
+        background-color: variables.$icon-hover-bg-color;
         cursor: pointer;
     }
 }
@@ -149,7 +149,7 @@
     border-radius: 55px;
 
     &:hover:not(:disabled) {
-        background-color: #373737;
+        background-color: variables.$icon-hover-bg-color;
         cursor: pointer;
     }
 }
