@@ -1,3 +1,5 @@
+@use "styles/variables";
+
 .container {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 10;
@@ -64,7 +66,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 2000px;
+    border-radius: variables.$border-round;
 
     @media (hover: hover) {
         &:hover {
@@ -90,7 +92,7 @@
 .iconBackground {
     width: 36px;
     height: 36px;
-    border-radius: 2000px;
+    border-radius: variables.$border-round;
     background-color: #37373788;
     display: flex;
     justify-content: center;

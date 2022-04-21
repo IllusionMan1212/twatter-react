@@ -9,6 +9,7 @@
     border-bottom: 1px solid variables.$divider-color;
     border-top: 1px solid variables.$divider-color;
     position: relative;
+    align-items: center;
 
     @media (hover: hover) {
         &:hover:not(.active) {
@@ -48,6 +49,7 @@
     flex-direction: column;
     margin-left: 1em;
     max-width: 60%;
+    overflow: hidden;
 }
 
 .date {
@@ -55,7 +57,10 @@
     justify-content: flex-end;
     flex-grow: 1;
     color: #999;
-    font-size: 0.9em;
+    font-size: 0.8em;
+    align-self: flex-start;
+    white-space: nowrap;
+    margin-left: 1em;
 }
 
 .unreadMessages {

@@ -17,7 +17,7 @@ export default function DeletedMessage(props: DeletedMessageProps): ReactElement
                 }`}
             >
                 <div className={messageStyles.content}>
-                    <i>This Message Was Deleted</i>
+                    <i>Deleted Message</i>
                 </div>
             </div>
             <DateTime

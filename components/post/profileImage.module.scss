@@ -9,7 +9,7 @@
 
 .placeholder {
     background: #AAA;
-    border-radius: 2000px;
+    border-radius: variables.$border-round;
     position: absolute;
     top: 0;
     left: 0;
@@ -25,6 +25,6 @@
     height: 15px;
     background-color: variables.$success-color;
     border: 3px solid variables.$base-bg-color;
-    border-radius: 5000px;
+    border-radius: variables.$border-round;
     z-index: 1;
 }

@@ -1,3 +1,5 @@
+@use "styles/variables";
+
 .recipientMessage {
     background-color: transparent;
     justify-self: flex-start;
@@ -7,7 +9,7 @@
     display: flex;
     flex-direction: column;
     color: rgb(150, 150, 150);
-    border-radius: 2000px;
+    border-radius: variables.$border-round;
     border: 1px solid;
 }
 
@@ -20,6 +22,6 @@
     display: flex;
     flex-direction: column;
     color: rgb(150, 150, 150);
-    border-radius: 2000px;
+    border-radius: variables.$border-round;
     border: 1px solid;
 }

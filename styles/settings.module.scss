@@ -2,8 +2,8 @@
 
 .container {
     color: white;
-    height: calc(100vh - variables.$status-bar-height - 1em);
-    max-height: calc(100vh - variables.$status-bar-height - 1em);
+    height: calc(100vh - variables.$status-bar-height);
+    max-height: calc(100vh - variables.$status-bar-height);
     display: flex;
     align-items: stretch;
     position: relative;

@@ -2,10 +2,10 @@
 
 .messagesContainer {
     width: 100%;
-    height: calc(100vh - variables.$status-bar-height - 1em);
+    height: calc(100vh - variables.$status-bar-height);
     display: flex;
     align-items: stretch;
-    max-height: calc(100vh - variables.$status-bar-height - 1em);
+    max-height: calc(100vh - variables.$status-bar-height);
 
     @media (max-width: 900px) {
         height: calc(100vh - variables.$status-bar-height-mobile - variables.$nav-bar-height);

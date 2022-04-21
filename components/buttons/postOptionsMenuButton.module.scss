@@ -1,3 +1,5 @@
+@use "styles/variables";
+
 .optionsButton {
     position: relative;
     width: 30px;
@@ -8,7 +10,7 @@
     -webkit-user-drag: none;
 
     &:hover:not(:focus) {
-        background-color: #EEE2;
+        background-color: variables.$icon-hover-bg-color;
         border-radius: 55px;
     }
 }
