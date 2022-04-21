@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import axios, { AxiosResponse } from "axios";
 import Head from "next/head";
 import { ReactElement, useState } from "react";
@@ -6,7 +5,7 @@ import LayoutRegular from "components/layouts/layoutRegular";
 import { useToastContext } from "src/contexts/toastContext";
 import registerLoginStyles from "styles/register-login.module.scss";
 import styles from "styles/forgot-password.module.scss";
-import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import { useUserContext } from "src/contexts/userContext";
 
 interface ApiRequest {

@@ -1,9 +1,8 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import Loading from "components/loading";
 import { useRouter } from "next/router";
-import StatusBarLoggedOut from "components/statusBarLoggedOut";
-import StatusBar from "components/statusBar";
+import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
+import StatusBar from "components/statusBar/statusBar";
 import axios, { AxiosResponse } from "axios";
 import ExpandedPost from "components/post/expandedPost";
 import styles from "components/post/expandedPost.module.scss";
@@ -64,11 +63,10 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 {currentUser ? (
                     <StatusBar
                         title={title}
-                        user={currentUser}
                         backButton={true}
-                    ></StatusBar>
+                    />
                 ) : (
-                    <StatusBarLoggedOut />
+                    <StatusBarLoggedOut/>
                 )}
             </>
         );
@@ -243,6 +241,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 openGraph={{
                     title: `${props.post?.author.display_name}'s Post - Twatter`,
                     description: props.post?.content,
+                    // TODO: change this
                     url: `https://twatter.illusionman1212.me/u/${props.post?.author.username}/${props.post?.id}`,
                     type: "article",
                     article: {

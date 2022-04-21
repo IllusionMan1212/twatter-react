@@ -32,12 +32,10 @@ export interface NavbarLoggedInProps {
 
 export interface StatusBarProps {
     title: string;
-    user: IUser;
     backButton?: boolean;
 }
 
 export interface UserContextMenuProps {
-    currentUser: IUser;
     open: boolean;
 }
 

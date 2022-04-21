@@ -1,5 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
-import StatusBar from "components/statusBar";
+import StatusBar from "components/statusBar/statusBar";
 import Navbar from "components/navbar/navbar";
 import Head from "next/head";
 import styles from "styles/messages.module.scss";
@@ -229,7 +228,7 @@ export default function Messages(): ReactElement {
             </Head>
             <Navbar user={user}></Navbar>
             <div>
-                <StatusBar user={user} title="Messages"/>
+                <StatusBar title="Messages"/>
                 <div
                     className={`text-white ${
                         styles.messagesContainer

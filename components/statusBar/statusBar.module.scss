@@ -99,9 +99,25 @@
 }
 
 .messages, .notifs {
-    display: inline;
+    display: flex;
     position: relative;
     cursor: pointer;
+    padding: 8px;
+    border-radius: variables.$border-round;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: variables.$icon-hover-bg-color;
+        }
+    }
+
+    &:active {
+        background-color: variables.$icon-hover-bg-color;
+    }
+}
+
+.notifs {
+    margin-right: calc(1em - 8px);
 }
 
 .unreadBubble {

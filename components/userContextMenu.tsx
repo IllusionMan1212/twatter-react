@@ -13,7 +13,7 @@ export default function UserContextMenu(
     props: UserContextMenuProps
 ): ReactElement {
     const toast = useToastContext();
-    const { logout } = useUserContext();
+    const { user, logout } = useUserContext();
 
     const _logout = () => {
         axios
@@ -59,15 +59,15 @@ export default function UserContextMenu(
                     <ProfileImage
                         width={35}
                         height={35}
-                        src={props.currentUser.avatar_url}
+                        src={user.avatar_url}
                     />{" "}
-                    {props.currentUser.display_name}
+                    {user.display_name}
                 </div>
                 <div>
                     <div
                         className={styles.menuItem}
                         onClick={() =>
-                            Router.push(`/u/${props.currentUser.username}`)
+                            Router.push(`/u/${user.username}`)
                         }
                     >
                         <UserCircle size={25}/>

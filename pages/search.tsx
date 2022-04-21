@@ -1,7 +1,7 @@
 import Navbar from "components/navbar/navbar";
 import { ReactElement } from "react";
 import { useUserContext } from "src/contexts/userContext";
-import StatusBar from "components/statusBar";
+import StatusBar from "components/statusBar/statusBar";
 import Search from "components/search";
 
 export default function SearchPage(): ReactElement {
@@ -11,7 +11,7 @@ export default function SearchPage(): ReactElement {
 
     return (
         <div>
-            <StatusBar user={user} title="Search"/>
+            <StatusBar title="Search"/>
             <Navbar user={user} />
             <Search/>
         </div>

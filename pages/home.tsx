@@ -1,5 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
-import StatusBar from "components/statusBar";
+import StatusBar from "components/statusBar/statusBar";
 import Head from "next/head";
 import Loading from "components/loading";
 import Navbar from "components/navbar/navbar";
@@ -38,7 +37,6 @@ export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
 
     const composePostRef = useRef<HTMLSpanElement>(null);
-    const composePostButtonMobileRef = useRef<HTMLDivElement>(null);
     const inputContainerMobileRef = useRef<HTMLDivElement>(null);
 
     const toast = useToastContext();
@@ -336,7 +334,7 @@ export default function Home(): ReactElement {
             </Head>
             <Navbar user={user}></Navbar>
             <div>
-                <StatusBar title="Home" user={user}/>
+                <StatusBar title="Home"/>
                 <div className={styles.content}>
                     <div className={styles.leftSide}>
                         <Friends count={20} />
@@ -652,7 +650,6 @@ export default function Home(): ReactElement {
                 </div>
             </div>
             <div
-                ref={composePostButtonMobileRef}
                 className={`text-white flex justify-content-center align-items-center ${
                     mobileCompose
                         ? styles.composePostMobileButtonActive

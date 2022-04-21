@@ -1,17 +1,19 @@
-/* eslint-disable react/react-in-jsx-scope */
 import styles from "./statusBar.module.scss";
-import Router from "next/router";
 import Search from "components/search";
-import { ChatsTeardrop, ArrowLeft, Bell } from "phosphor-react";
+import { ArrowLeft } from "phosphor-react";
 import UserContextMenu from "components/userContextMenu";
 import { ReactElement, useState, useEffect } from "react";
 import { StatusBarProps } from "src/types/props";
 import ProfileImage from "components/post/profileImage";
 import { useGlobalContext } from "src/contexts/globalContext";
 import Link from "next/link";
+import { useUserContext } from "src/contexts/userContext";
+import MessagesButton from "components/statusBar/messagesButton";
+import NotificationsButton from "components/statusBar/notificationsButton";
 
 export default function StatusBar(props: StatusBarProps): ReactElement {
     const { unreadMessages } = useGlobalContext();
+    const { user } = useUserContext();
 
     const [userMenu, setUserMenu] = useState(false);
     const [unreadNotifications] = useState(0);
@@ -62,42 +64,8 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                 <Search></Search>
             </div>
             <div className={`ml-auto flex align-items-center ${styles.messagesAndNotifs}`}>
-                <div
-                    className={styles.messages}
-                    onClick={() => {
-                        Router.push("/messages", null, {
-                            shallow: true,
-                        });
-                    }}
-                >
-                    <ChatsTeardrop
-                        className={`mr-1 ${styles.icon}`}
-                        size="25"
-                        weight="fill"
-                    ></ChatsTeardrop>
-                    {unreadMessages.length != 0 && (
-                        <div className={styles.unreadBubble}>
-                            {unreadMessages.length > 99 ? "99+" : unreadMessages.length}
-                        </div>
-                    )}
-                </div>
-                <div className={styles.notifs}>
-                    <Bell
-                        className={`mr-1 ${styles.icon}`}
-                        size="25"
-                        onClick={() => {
-                            Router.push("/notifications", null, {
-                                shallow: true,
-                            });
-                        }}
-                        weight="fill"
-                    ></Bell>
-                    {unreadNotifications != 0 && (
-                        <div className={styles.unreadBubble}>
-                            {unreadNotifications > 99 ? "99+" : unreadNotifications}
-                        </div>
-                    )}
-                </div>
+                <MessagesButton unreadMessages={unreadMessages.length} />
+                <NotificationsButton unreadNotifications={unreadNotifications} />
                 <div
                     className={`flex align-items-center ${styles.user}`}
                     onClick={() => {
@@ -107,10 +75,9 @@ export default function StatusBar(props: StatusBarProps): ReactElement {
                     <ProfileImage
                         width={38}
                         height={38}
-                        src={props.user.avatar_url}
+                        src={user.avatar_url}
                     />
                     <UserContextMenu
-                        currentUser={props.user}
                         open={userMenu}
                     ></UserContextMenu>
                 </div>

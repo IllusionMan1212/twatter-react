@@ -1,5 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
-import StatusBar from "components/statusBar";
+import StatusBar from "components/statusBar/statusBar";
 import Navbar from "components/navbar/navbar";
 import { ReactElement } from "react";
 import { useUserContext } from "src/contexts/userContext";
@@ -11,7 +10,7 @@ export default function Notifications(): ReactElement {
 
     return (
         <div>
-            <StatusBar user={user} title="Notifications"></StatusBar>
+            <StatusBar title="Notifications"/>
             <Navbar user={user}></Navbar>
             <div className="text-white">Notifications</div>
         </div>

@@ -1,12 +1,11 @@
-/* eslint-disable react/react-in-jsx-scope */
 import axios, { AxiosResponse } from "axios";
 import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Loading from "components/loading";
 import Navbar from "components/navbar/navbar";
-import StatusBarLoggedOut from "components/statusBarLoggedOut";
-import StatusBar from "components/statusBar";
+import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
+import StatusBar from "components/statusBar/statusBar";
 import styles from "styles/profilePage.module.scss";
 import Post from "components/post/post";
 import {
@@ -533,7 +532,7 @@ export default function Profile(props: ProfileProps): ReactElement {
             <NextSeo
                 title={
                     props.user
-                        ? `${props.user.display_name} (@${props.user.username})`
+                        ? `${props.user.display_name} (@${props.user.username}) - Twatter`
                         : "Profile - Twatter"
                 }
                 description={props.user?.bio}
@@ -542,6 +541,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                         ? `${props.user.display_name} (@${props.user.username})`
                         : "Profile - Twatter",
                     description: props.user?.bio,
+                    // TODO: change this
                     url: `https://twatter.illusionman1212.me/u/${props.user?.username}`,
                     type: "profile",
                     profile: {
@@ -561,10 +561,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                             {currentUser ? (
                                 <StatusBar
                                     title={user.display_name}
-                                    user={currentUser}
                                 ></StatusBar>
                             ) : (
-                                <StatusBarLoggedOut></StatusBarLoggedOut>
+                                <StatusBarLoggedOut/>
                             )}
                             <div className={styles.content}>
                                 <div className={styles.leftSide}>
@@ -755,7 +754,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                         users={new Array(
                                                             3
                                                         ).fill(props.user)}
-                                                    ></SuggestedUsers>
+                                                    />
                                                 </div>
                                                 <div
                                                     className={styles.userPosts}
@@ -808,6 +807,31 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     </div>
                                                     {!postsLoading ? (
                                                         <>
+                                                            {getActiveTabPosts()
+                                                                .length == 0 &&
+                                                                getActiveReachedEnd() && (
+                                                                <div
+                                                                    className="flex justify-content-center"
+                                                                    style={{
+                                                                        padding:
+                                                                            "20px",
+                                                                    }}
+                                                                >
+                                                                    <p>
+                                                                        @
+                                                                        {
+                                                                            user.username
+                                                                        }{" "}
+                                                                        doesn&apos;t
+                                                                        have
+                                                                        any
+                                                                        posts
+                                                                        under
+                                                                        this
+                                                                        tab.
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                             <Virtuoso
                                                                 totalCount={
                                                                     getActiveTabPosts()
@@ -863,31 +887,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     ></Post>
                                                                 )}
                                                             ></Virtuoso>
-                                                            {getActiveTabPosts()
-                                                                .length == 0 &&
-                                                                getActiveReachedEnd() && (
-                                                                <div
-                                                                    className="flex justify-content-center"
-                                                                    style={{
-                                                                        padding:
-                                                                            "20px",
-                                                                    }}
-                                                                >
-                                                                    <p>
-                                                                        @
-                                                                        {
-                                                                            user.username
-                                                                        }{" "}
-                                                                        doesn&apos;t
-                                                                        have
-                                                                        any
-                                                                        posts
-                                                                        under
-                                                                        this
-                                                                        tab.
-                                                                    </p>
-                                                                </div>
-                                                            )}
                                                         </>
                                                     ) : (
                                                         <Loading
@@ -933,7 +932,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                     <Navbar user={currentUser}></Navbar>
                                     <StatusBar
                                         title="Not Found"
-                                        user={currentUser}
                                     ></StatusBar>
                                 </div>
                             ) : (

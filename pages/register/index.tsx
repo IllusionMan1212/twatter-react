@@ -1,5 +1,5 @@
 import LayoutRegular from "components/layouts/layoutRegular";
-import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import styles from "styles/register-login.module.scss";
 import indexStyles from "styles/index.module.scss";
 import Link from "next/link";

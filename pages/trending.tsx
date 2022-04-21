@@ -1,8 +1,7 @@
-/* eslint-disable react/react-in-jsx-scope */
 import Navbar from "components/navbar/navbar";
 import { ReactElement } from "react";
 import { useUserContext } from "src/contexts/userContext";
-import StatusBar from "components/statusBar";
+import StatusBar from "components/statusBar/statusBar";
 
 export default function Trending(): ReactElement {
     const { user } = useUserContext();
@@ -11,7 +10,7 @@ export default function Trending(): ReactElement {
 
     return (
         <div>
-            <StatusBar user={user} title="Trending" />
+            <StatusBar title="Trending" />
             <Navbar user={user} />
             <div className="text-white">trending uwu owo</div>
         </div>

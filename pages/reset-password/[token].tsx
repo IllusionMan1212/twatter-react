@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import Head from "next/head";
 import axios, { AxiosResponse } from "axios";
 import { FormEvent, ReactElement, useEffect, useState } from "react";
@@ -6,7 +5,7 @@ import { useRouter } from "next/router";
 import LayoutRegular from "components/layouts/layoutRegular";
 import registerStyles from "styles/register-login.module.scss";
 import forgotPassStyles from "styles/forgot-password.module.scss";
-import StatusBarLoggedOut from "components/statusBarLoggedOut";
+import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import { EyeClosed, Eye } from "phosphor-react";
 import { useToastContext } from "src/contexts/toastContext";
 import Loading from "components/loading";

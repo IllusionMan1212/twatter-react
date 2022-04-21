@@ -20,11 +20,13 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                     title: "Twatter",
                     description: "A Social platform to bring people together",
                     type: "website",
+                    // TODO: change this
                     url: "https://twatter.illusionman1212.me",
                     site_name: "Twatter",
                     locale: "en_US",
                     images: [
                         {
+                            // TODO: change this
                             url: "https://twatter.illusionman1212.me/android-chrome-192x192.png",
                         },
                     ]

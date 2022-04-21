@@ -1,8 +1,7 @@
-/* eslint-disable react/react-in-jsx-scope */
 import Navbar from "components/navbar/navbar";
 import { ReactElement } from "react";
 import { useUserContext } from "src/contexts/userContext";
-import StatusBar from "components/statusBar";
+import StatusBar from "components/statusBar/statusBar";
 
 export default function Friends(): ReactElement {
     const { user } = useUserContext();
@@ -11,7 +10,7 @@ export default function Friends(): ReactElement {
 
     return (
         <div>
-            <StatusBar user={user} title="Friends"/>
+            <StatusBar title="Friends"/>
             <Navbar user={user} />
             <div className="text-white">friends uwu owo</div>
         </div>

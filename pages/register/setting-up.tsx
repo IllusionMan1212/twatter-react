@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import LayoutWide from "components/layouts/layout_wide";
 import styles from "styles/setting-up.module.scss";
 import homeStyles from "styles/home.module.scss";
@@ -32,8 +31,8 @@ export default function UserSetup(): ReactElement {
     const yearRef = useRef<HTMLSelectElement>(null);
 
     const [birthday, setBirthday] = useState<IBirthday>(null);
-    const [previewImage, setPreviewImage] = useState(null);
-    const [profileImage, setProfileImage] = useState(null);
+    const [previewImage, setPreviewImage] = useState<string>(null);
+    const [profileImage, setProfileImage] = useState<File>(null);
     const [bio, setBio] = useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

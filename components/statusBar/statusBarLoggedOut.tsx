@@ -1,5 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
-import LayoutRegular from "./layouts/layoutRegular";
+import LayoutRegular from "components/layouts/layoutRegular";
 import styles from "./statusBarLoggedOut.module.scss";
 import Link from "next/link";
 import { ReactElement } from "react";
