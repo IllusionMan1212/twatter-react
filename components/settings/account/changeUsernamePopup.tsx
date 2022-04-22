@@ -4,6 +4,7 @@ import { SettingsActions } from "src/actions/settingsActions";
 import { ButtonType, SettingsPopupProps } from "src/types/props";
 import { useUserContext } from "src/contexts/userContext";
 import Button from "components/buttons/button";
+import axiosInstance from "src/axios";
 
 export default function ChangeUsernamePopup({ dispatch }: SettingsPopupProps): ReactElement {
     const { user } = useUserContext();
@@ -16,11 +17,21 @@ export default function ChangeUsernamePopup({ dispatch }: SettingsPopupProps): R
                 popupComponent: null
             }
         });
-    }
+    };
 
     const handleClickConfirm = () => {
-        console.log("TODO");
-    }
+        // TODO:
+        const payload = {
+        };
+
+        axiosInstance.post("users/changeUsername", payload)
+            .then(() => {
+                console.log("todo");
+            })
+            .catch(() => {
+                console.log("todo");
+            });
+    };
 
     return (
         <div className={styles.popupContainer} onClick={handleClickOutside}>
@@ -31,7 +42,7 @@ export default function ChangeUsernamePopup({ dispatch }: SettingsPopupProps): R
                 <div className={styles.body}>
                     <div className={styles.input}>
                         <label>New Username</label>
-                        <input value={user.username}/>
+                        <input minLength={3} maxLength={16} defaultValue={user.username}/>
                     </div>
                     <div className={styles.input}>
                         <label>Current Password</label>
@@ -46,5 +57,5 @@ export default function ChangeUsernamePopup({ dispatch }: SettingsPopupProps): R
                 </div>
             </div>
         </div>
-    )
+    );
 }
