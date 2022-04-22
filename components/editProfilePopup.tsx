@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { PencilSimple, Repeat } from "phosphor-react";
 import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import { ButtonType, EditProfilePopupProps } from "src/types/props";
@@ -7,41 +6,43 @@ import Button from "./buttons/button";
 import styles from "./editProfilePopup.module.scss";
 import homeStyles from "styles/home.module.scss";
 import { useToastContext } from "src/contexts/toastContext";
-import { IAttachment, IBirthday } from "src/types/general";
+import { DateAndTime, IAttachment, IBirthday } from "src/types/general";
 import { useUserContext } from "src/contexts/userContext";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 import Birthday from "components/birthday/birthday";
+import axiosInstance from "src/axios";
+import { AxiosResponse } from "axios";
 
-interface UpdateProfilePayload {
-    eventType: string;
+interface ApiResponse {
+    message: string;
+    status: number;
+    success: boolean;
     data: {
+        userId: string;
         displayName: string;
-        profileImage: {
-            mimetype: string;
-            data: string;
-        };
         bio: string;
-        birthday?: IBirthday;
-        isBirthdaySet: boolean;
-    };
+        profileImage: string;
+        profileImageMimetype: string;
+        birthday: DateAndTime;
+    }
 }
 
 export default function EditProfilePopup(
     props: EditProfilePopupProps
 ): ReactElement {
     const toast = useToastContext();
-    const { socket } = useUserContext();
+    const { user, socket } = useUserContext();
 
     const [previewImage, setPreviewImage] = useState<string>(null);
     const [profileImage, setProfileImage] = useState<IAttachment>(null);
     const [displayName, setDisplayName] = useState<string>(
-        props.userData.display_name
+        user.display_name
     );
-    const [bio, setBio] = useState<string>(props.userData.bio);
+    const [bio, setBio] = useState<string>(user.bio);
     const [showBirthdayFields, setShowBirthdayFields] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<IBirthday>({day: 1, month:1, year: 1});
-    const [birthday, setBirthday] = useState(props.userData.birthday.Time.toString());
-    const [isBirthdaySet, setIsBirthdaySet] = useState(false);
+    const [birthday, setBirthday] = useState(user.birthday.Time.toString());
+    const [isBirthdaySet, setIsBirthdaySet] = useState("false");
     const [savingDisabled, setSavingDisabled] = useState(false);
 
     const handleSaveButtonClick = async () => {
@@ -58,36 +59,34 @@ export default function EditProfilePopup(
             return;
         }
 
-        const profileImagePayload = {
-            mimetype: "",
-            data: ""
-        };
+        const payload: FormData = new FormData();
+        payload.append("displayName", displayName);
+        payload.append("bio", bio);
+        payload.append("isBirthdaySet", isBirthdaySet);
 
         if (profileImage) {
-            const profileImageBuf = await profileImage.data.arrayBuffer();
-            const imageDataArr = new Uint8Array(profileImageBuf);
-            const profileImageData = Buffer.from(imageDataArr).toString("base64");
-
-            profileImagePayload.mimetype = profileImage.mimetype;
-            profileImagePayload.data = profileImageData;
+            payload.append("profileImage", profileImage.data);
         }
-
-        const payload: UpdateProfilePayload = {
-            eventType: "updateProfile",
-            data: {
-                displayName: displayName,
-                profileImage: profileImagePayload,
-                bio: bio,
-                isBirthdaySet: isBirthdaySet,
-            },
-        };
 
         if (selectedBirthday?.day && selectedBirthday?.month && selectedBirthday?.year) {
-            payload.data.birthday = selectedBirthday;
+            payload.append("birthday_day", selectedBirthday.day.toString());
+            payload.append("birthday_month", selectedBirthday.month.toString());
+            payload.append("birthday_year", selectedBirthday.year.toString());
         }
 
-        socket.send(JSON.stringify(payload));
-        props.setEditProfilePopup(false);
+        axiosInstance.post<FormData, AxiosResponse<ApiResponse>>("users/updateProfile", payload)
+            .then((res) => {
+                props.setEditProfilePopup(false);
+
+                const socketPayload = {
+                    eventType: "updateProfile",
+                    data: res.data.data
+                };
+                socket.send(JSON.stringify(socketPayload));
+            })
+            .catch((err) => {
+                toast(err?.response?.data?.message || "An error has occurred", 3000);
+            });
     };
 
     const handleProfileImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -107,54 +106,65 @@ export default function EditProfilePopup(
 
     const handleCancelBirthday = () => {
         setShowBirthdayFields(false);
-        if (!props.userData.birthday.Valid) {
+        if (!user.birthday.Valid) {
             setSelectedBirthday({day: 1, month: 1, year: 1});
-            setIsBirthdaySet(false);
+            setIsBirthdaySet("false");
         }
     };
 
     const handleRemoveBirthday = () => {
-        const payload = {
-            eventType: "removeBirthday",
-        };
-        setSelectedBirthday({
-            day: 1,
-            month: 1,
-            year: 1
-        });
-        setIsBirthdaySet(false);
-        socket.send(JSON.stringify(payload));
+        axiosInstance.delete("users/removeBirthday")
+            .then(() => {
+                setSelectedBirthday({
+                    day: 1,
+                    month: 1,
+                    year: 1
+                });
+                setIsBirthdaySet("false");
+
+                const payload = {
+                    eventType: "birthdayRemoved",
+                    data: {
+                        userId: user.id
+                    }
+                };
+                socket.send(JSON.stringify(payload));
+            })
+            .catch((err) => {
+                toast(err?.response?.data?.message || "An error has occurred", 3000);
+            });
+
     };
 
     useEffect(() => {
         if (selectedBirthday?.year != 1 && selectedBirthday?.month != 1 && selectedBirthday?.day != 1) {
-            setIsBirthdaySet(true);
+            setIsBirthdaySet("true");
         }
     }, [selectedBirthday]);
 
     useEffect(() => {
-        if (props.userData.birthday.Valid) {
-            setBirthday(formatBirthday(props.userData.birthday.Time.toString()));
-            setIsBirthdaySet(true);
+        if (user.birthday.Valid) {
+            setBirthday(formatBirthday(user.birthday.Time.toString()));
+            setIsBirthdaySet("true");
         }
-    }, [props.userData.birthday]);
+    }, [user.birthday]);
 
     useEffect(() => {
-        if (props.userData.birthday.Valid) {
+        if (user.birthday.Valid) {
             setSelectedBirthday({
                 year: new Date(
-                    props.userData.birthday.Time.toString()
+                    user.birthday.Time.toString()
                 ).getUTCFullYear(),
                 month:
                     new Date(
-                        props.userData.birthday.Time.toString()
+                        user.birthday.Time.toString()
                     ).getUTCMonth() + 1,
                 day: new Date(
-                    props.userData.birthday.Time.toString()
+                    user.birthday.Time.toString()
                 ).getUTCDate(),
             });
         }
-    }, [props.userData.birthday]);
+    }, [user.birthday]);
 
     return (
         <div
@@ -170,11 +180,11 @@ export default function EditProfilePopup(
                         <div className={styles.profileImageContainer}>
                             <img
                                 src={`${
-                                    props.userData.avatar_url ==
+                                    user.avatar_url ==
                                     "default_profile.svg" && !previewImage
                                         ? "/"
                                         : ""
-                                }${previewImage ?? props.userData.avatar_url}`}
+                                }${previewImage ?? user.avatar_url}`}
                                 className={`round ${styles.profileImage}`}
                                 alt="Profile Image"
                             />
@@ -197,7 +207,7 @@ export default function EditProfilePopup(
                                 </p>
                                 <input
                                     className={styles.inputs}
-                                    defaultValue={props.userData.display_name}
+                                    defaultValue={user.display_name}
                                     maxLength={16}
                                     max={16}
                                     onChange={(e) => {
@@ -217,7 +227,7 @@ export default function EditProfilePopup(
                             <textarea
                                 className={styles.bio}
                                 rows={3}
-                                defaultValue={props.userData.bio}
+                                defaultValue={user.bio}
                                 maxLength={150}
                                 onChange={(e) => setBio(e.target.value)}
                             />
@@ -231,7 +241,7 @@ export default function EditProfilePopup(
                                 onClick={() => setShowBirthdayFields(true)}
                             >
                                 <p>
-                                    {props.userData.birthday.Valid
+                                    {user.birthday.Valid
                                         ? birthday
                                         : "No birthday set yet"}
                                 </p>
@@ -247,7 +257,7 @@ export default function EditProfilePopup(
                                         selectedBirthday={selectedBirthday}
                                         setSelectedBirthday={setSelectedBirthday}
                                     />
-                                    {props.userData.birthday.Valid && (
+                                    {user.birthday.Valid && (
                                         <Button
                                             text="Remove Birthday"
                                             size={10}

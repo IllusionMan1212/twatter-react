@@ -193,7 +193,6 @@ export interface SuggestedUserProps {
 
 export interface EditProfilePopupProps {
     setEditProfilePopup: Dispatch<SetStateAction<boolean>>;
-    userData: IUser;
 }
 
 export interface CheckboxProps {

@@ -30,6 +30,7 @@ import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
 import Friends from "components/friends/friends";
 import DateTime from "components/datetime";
+import { useSWRConfig } from "swr";
 
 interface ApiRequest {
     senderId: string;
@@ -52,6 +53,7 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const toast = useToastContext();
     const { user: currentUser, socket } = useUserContext();
+    const { mutate } = useSWRConfig();
 
     const parentContainerRef = useRef(null);
 
@@ -293,8 +295,8 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     const handleBirthdayRemoved = useCallback(
-        (userIdObj) => {
-            const userId = userIdObj.id;
+        (data : { userId: string }) => {
+            const userId = data.userId;
             if (currentUser?.id == userId && userId == user.id) {
                 setUser({
                     ...user,
@@ -303,9 +305,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                         Valid: false,
                     },
                 });
+
+                mutate(`${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`);
             }
         },
-        [currentUser?.id, user]
+        [currentUser, user, mutate]
     );
 
     // this also needs proper change
@@ -315,9 +319,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                 currentUser?.id == payload.userId &&
                 payload.userId == user.id
             ) {
+                console.log("inside socket event");
+                console.log(payload);
                 let avatar_url: string = null;
-                if (payload.profileImage) {
-                    const base64Image = "data:image/png;base64,".concat(
+                if (payload.profileImage && payload.profileImageMimetype) {
+                    const base64Image = `data:${payload.profileImageMimetype};base64,`.concat(
                         payload.profileImage
                     );
                     avatar_url = base64Image;
@@ -327,6 +333,11 @@ export default function Profile(props: ProfileProps): ReactElement {
                     });
                     currentUser.avatar_url = avatar_url;
                 }
+
+                getActiveTabPosts().map((post) => {
+                    post.author.display_name = payload.displayName;
+                });
+
                 setUser({
                     ...user,
                     display_name: payload.displayName,
@@ -335,8 +346,10 @@ export default function Profile(props: ProfileProps): ReactElement {
                     avatar_url: avatar_url ?? user.avatar_url,
                 });
             }
+
+            mutate(`${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`);
         },
-        [currentUser, user, getActiveTabPosts]
+        [currentUser, user, getActiveTabPosts, mutate]
     );
 
     const getPosts = useCallback(
@@ -736,14 +749,14 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                             }
                                                             size="32"
                                                         ></Calendar>
-                                                        <p className="mt-1Percent">
+                                                        <div className="mt-1Percent">
                                                             Member since{" "}
                                                             <DateTime
-                                                                datetime={props.user.created_at}
+                                                                datetime={props.user?.created_at}
                                                                 formattingFunction={formatJoinDate}
                                                                 style={{ display: "inline" }}
                                                             />
-                                                        </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div
@@ -919,7 +932,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                             {editProfilePopup && (
                                 <EditProfilePopup
                                     setEditProfilePopup={setEditProfilePopup}
-                                    userData={user}
                                 ></EditProfilePopup>
                             )}
                         </>
