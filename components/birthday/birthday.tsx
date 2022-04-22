@@ -93,7 +93,8 @@ export default function Birthday(props: BirthdayProps): ReactElement {
                             {year - i}
                         </option>
                     );
-                })} </select>
+                })}
+            </select>
         </div>
     );
 }
