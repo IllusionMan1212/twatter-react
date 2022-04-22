@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  twatter-react:
+    image: node:16-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+      - 3000:3000
+    working_dir: /twatter-react
+    volumes:
+      - ./:/twatter-react
+    environment:
+      NEXT_PUBLIC_DOMAIN_URL: http://localhost:3001
+      NEXT_PUBLIC_DOMAIN: localhost:3001
+      NEXT_PUBLIC_FRONTEND_URL: http://localhost:3000
+      NEXT_PUBLIC_DOMAIN_URL_SERVER_SIDE: http://twatter-server:3001
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+    networks:
+      - twatter
+
+networks:
+  twatter:
+    name: twatter

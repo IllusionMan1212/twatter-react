@@ -967,12 +967,12 @@ export default function Profile(props: ProfileProps): ReactElement {
 
 export async function getServerSideProps(
     context: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<{ user: IUser }>> {
+): Promise<GetServerSidePropsResult<ProfileProps>> {
     let user: IUser = null;
 
     try {
-        const res = await axios.get<{ user: IUser }>(
-            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/getUserData?username=${context.params.username}`,
+        const res = await axios.get<ProfileProps>(
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL_SERVER_SIDE}/users/getUserData?username=${context.params.username}`,
             { withCredentials: true }
         );
         user = res.data.user;

@@ -11,7 +11,7 @@ import { IUser, IPost } from "src/types/general";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
-import { GetServerSidePropsContext } from "next";
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { UserPostProps } from "src/types/props";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
 import { ArrowLeft } from "phosphor-react";
@@ -339,19 +339,15 @@ export default function UserPost(props: UserPostProps): ReactElement {
     );
 }
 
-interface ServerSideResponse {
-    post: IPost;
-}
-
 export async function getServerSideProps(
     context: GetServerSidePropsContext
-): Promise<{ props: { post: IPost } }> {
+): Promise<GetServerSidePropsResult<UserPostProps>> {
     let res = null;
     let post: IPost = null;
 
     try {
-        res = await axios.get<ServerSideResponse>(
-            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
+        res = await axios.get<UserPostProps>(
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL_SERVER_SIDE}/posts/getPost?username=${context.params.username}&postId=${context.params.postId[0]}`,
             {
                 withCredentials: true,
                 // cookies aren't being sent automatically here for some reason
