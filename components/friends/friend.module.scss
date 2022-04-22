@@ -1,7 +1,22 @@
+@use "styles/variables";
+
 .container {
     display: flex;
     grid-gap: 10px;
     justify-content: flex-start;
     align-items: center;
+    border-radius: variables.$border-round;
+    transform: translateX(-8px);
+    padding: 8px;
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: variables.$bg-color-secondary;
+        }
+    }
+
+    &:active {
+        background-color: variables.$bg-color-secondary;
+    }
 }
 

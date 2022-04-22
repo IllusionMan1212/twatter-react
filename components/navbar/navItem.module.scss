@@ -19,4 +19,9 @@
 .activeProfileNavItem > :first-child {
     border-radius: 6000px;
     border: 2px solid variables.$accent-color;
+
+    :first-child {
+        width: 26px;
+        height: 26px;
+    }
 }
