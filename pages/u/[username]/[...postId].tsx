@@ -291,7 +291,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                     </div>
                                     <ExpandedPost
                                         key={post.id}
-                                        currentUser={currentUser}
                                         post={post}
                                         handleMediaClick={handleMediaClick}
                                         callback={() => Router.back()}

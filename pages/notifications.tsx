@@ -11,7 +11,7 @@ export default function Notifications(): ReactElement {
     return (
         <div>
             <StatusBar title="Notifications"/>
-            <Navbar user={user}></Navbar>
+            <Navbar/>
             <div className="text-white">Notifications</div>
         </div>
     );

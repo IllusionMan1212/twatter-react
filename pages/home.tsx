@@ -332,7 +332,7 @@ export default function Home(): ReactElement {
             <Head>
                 <title>Home - Twatter</title>
             </Head>
-            <Navbar user={user}></Navbar>
+            <Navbar/>
             <div>
                 <StatusBar title="Home"/>
                 <div className={styles.content}>
@@ -635,7 +635,6 @@ export default function Home(): ReactElement {
                                     <Post
                                         key={post.id}
                                         post={post}
-                                        currentUser={user}
                                         handleMediaClick={
                                             handleMediaClick
                                         }

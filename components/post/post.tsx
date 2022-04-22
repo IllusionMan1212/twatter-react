@@ -12,8 +12,11 @@ import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
 import ReplyingTo from "./replyingTo";
 import DateTime from "components/datetime";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function Post(props: PostProps): ReactElement {
+    const { user } = useUserContext();
+
     const handleCommentButtonClick = () => {
         // TODO: open a modal where you can comment on the post
         Router.push(`/u/${props.post.author.username}/${props.post.id}`);
@@ -79,7 +82,7 @@ export default function Post(props: PostProps): ReactElement {
                     postId={props.post.id}
                     postAuthorId={props.post.author?.id}
                     postAuthorUsername={props.post.author?.username}
-                    currentUserId={props.currentUser?.id}
+                    currentUserId={user?.id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
                 <div className={`ml-1 ${styles.postText}`}>
@@ -102,7 +105,7 @@ export default function Post(props: PostProps): ReactElement {
                         ></CommentButton>
                         <LikeButton
                             post={props.post}
-                            currentUserId={props.currentUser?.id}
+                            currentUserId={user?.id}
                             likes={props.post.likes}
                             liked={props.post.liked}
                         ></LikeButton>

@@ -13,8 +13,10 @@ import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "components/post/profileImage";
 import DateTime from "components/datetime";
+import { useUserContext } from "src/contexts/userContext";
 
 export default function MediaModalComment(props: CommentProps): ReactElement {
+    const { user } = useUserContext();
 
     const handleCommentButtonClickOnComment = (
         commentId: string,
@@ -54,7 +56,7 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                     postId={props.comment.id}
                     postAuthorId={props.comment.author?.id}
                     postAuthorUsername={props.comment.author?.username}
-                    currentUserId={props.currentUser?.id}
+                    currentUserId={user?.id}
                     parentContainerRef={props.parentContainerRef}
                 ></PostOptionsMenuButton>
             </div>
@@ -83,7 +85,7 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                     ></CommentButton>
                     <LikeButton
                         post={props.comment}
-                        currentUserId={props.currentUser?.id}
+                        currentUserId={user?.id}
                         likes={props.comment.likes}
                         liked={props.comment.liked}
                     ></LikeButton>

@@ -12,7 +12,7 @@ export default function SearchPage(): ReactElement {
     return (
         <div>
             <StatusBar title="Search"/>
-            <Navbar user={user} />
+            <Navbar/>
             <Search/>
         </div>
     );

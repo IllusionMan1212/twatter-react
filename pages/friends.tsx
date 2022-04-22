@@ -11,7 +11,7 @@ export default function Friends(): ReactElement {
     return (
         <div>
             <StatusBar title="Friends"/>
-            <Navbar user={user} />
+            <Navbar/>
             <div className="text-white">friends uwu owo</div>
         </div>
     );

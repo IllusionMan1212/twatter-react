@@ -24,7 +24,7 @@ export default function Settings(): ReactElement {
     return (
         <>
             <NextSeo title="Settings - Twatter"/>
-            <Navbar user={user}/>
+            <Navbar/>
             <StatusBar title="Settings"/>
             <div className={styles.container}>
                 <SettingsList state={state} dispatch={dispatch}/>

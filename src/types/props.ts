@@ -26,10 +26,6 @@ export interface LoadingProps {
     height: string;
 }
 
-export interface NavbarLoggedInProps {
-    user: IUser;
-}
-
 export interface StatusBarProps {
     title: string;
     backButton?: boolean;
@@ -77,7 +73,6 @@ export interface MessageMediaModalProps {
 
 export interface PostProps {
     post: IPost;
-    currentUser?: IUser;
     handleMediaClick: (
         e: React.MouseEvent<HTMLElement, MouseEvent>,
         post: IPost,
@@ -155,7 +150,6 @@ export interface CommentButtonProps {
 
 export interface CommentProps {
     comment: IPost;
-    currentUser?: IUser;
     handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: IPost, index: number) => void;
 
     // ref of container that the menu shouldn't pop out of

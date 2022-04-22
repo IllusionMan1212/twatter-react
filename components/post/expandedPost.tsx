@@ -23,7 +23,7 @@ import CommentBox from "components/commentBox/commentBox";
 import DateTime from "components/datetime";
 
 export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
-    const { socket } = useUserContext();
+    const { user, socket } = useUserContext();
 
     const commentBoxRef = useRef<HTMLSpanElement>(null);
     const parentContainerRef = useRef<HTMLDivElement>(null);
@@ -71,7 +71,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
             data: {
                 content: content,
                 contentLength: commentBoxRef?.current?.textContent.length,
-                author: props.currentUser,
+                author: user,
                 attachments: attachmentsToSend,
                 replying_to: props.post.id
             },
@@ -146,7 +146,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         postId={props.post.id}
                         postAuthorId={props.post.author.id}
                         postAuthorUsername={props.post.author.username}
-                        currentUserId={props.currentUser?.id}
+                        currentUserId={user?.id}
                         deleteCallback={props.callback}
                     ></PostOptionsMenuButton>
                     <div
@@ -172,7 +172,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         ></CommentButton>
                         <LikeButton
                             post={props.post}
-                            currentUserId={props.currentUser?.id}
+                            currentUserId={user?.id}
                             likes={props.post.likes}
                             liked={props.post.liked}
                         ></LikeButton>
@@ -188,7 +188,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                             <Comment
                                 key={comment.id}
                                 comment={comment}
-                                currentUser={props.currentUser}
                                 handleMediaClick={props.handleMediaClick}
                                 parentContainerRef={parentContainerRef}
                             ></Comment>
@@ -196,7 +195,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                     })
                 )}
             </div>
-            {props.currentUser && (
+            {user && (
                 <CommentBox
                     commentBoxRef={commentBoxRef}
                     charLimit={postCharLimit}

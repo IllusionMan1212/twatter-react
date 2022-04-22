@@ -130,10 +130,10 @@ export default function Profile(props: ProfileProps): ReactElement {
         activeTab.current = Tabs.PostsAndComments;
         if (!postsAndComments.current.length && !commentsReachedEnd) {
             getPosts(commentsPage.current, "comments").then((newPosts) => {
-                if ((newPosts as IPost[]).length < 50) {
+                if (newPosts.length < 50) {
                     setCommentsReachedEnd(true);
                 }
-                setPostsAndComments(newPosts as IPost[]);
+                setPostsAndComments(newPosts);
             });
         }
     };
@@ -143,10 +143,10 @@ export default function Profile(props: ProfileProps): ReactElement {
         activeTab.current = Tabs.MediaPosts;
         if (!mediaPosts.current.length && !mediaReachedEnd) {
             getPosts(mediaPage.current, "media").then((newPosts) => {
-                if ((newPosts as IPost[]).length < 50) {
+                if (newPosts.length < 50) {
                     setMediaReachedEnd(true);
                 }
-                setMediaPosts(newPosts as IPost[]);
+                setMediaPosts(newPosts);
             });
         }
     };
@@ -340,7 +340,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 
     const getPosts = useCallback(
-        (page: number, postsType: string): Promise<IPost[] | void> => {
+        (page: number, postsType: string): Promise<IPost[]> => {
             return axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getPosts/${page}/${props.user.id}?type=${postsType}`,
@@ -357,6 +357,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                         err?.response?.data?.message || "An error has occurred",
                         3000
                     );
+                    return [];
                 });
         },
         [props.user?.id, toast]
@@ -383,11 +384,11 @@ export default function Profile(props: ProfileProps): ReactElement {
             }
             setPostsPage(postsPage.current + 1);
             getPosts(postsPage.current, "posts").then((newPosts) => {
-                if (!(newPosts as IPost[]).length) {
+                if (!newPosts.length) {
                     setPostsReachedEnd(true);
                     return;
                 }
-                setPosts(posts.current.concat(newPosts as IPost[]));
+                setPosts(posts.current.concat(newPosts));
             });
             break;
         case Tabs.PostsAndComments:
@@ -398,12 +399,12 @@ export default function Profile(props: ProfileProps): ReactElement {
             }
             setCommentsPage(commentsPage.current + 1);
             getPosts(commentsPage.current, "comments").then((newPosts) => {
-                if (!(newPosts as IPost[]).length) {
+                if (!newPosts.length) {
                     setCommentsReachedEnd(true);
                     return;
                 }
                 setPostsAndComments(
-                    postsAndComments.current.concat(newPosts as IPost[])
+                    postsAndComments.current.concat(newPosts)
                 );
             });
             break;
@@ -415,11 +416,11 @@ export default function Profile(props: ProfileProps): ReactElement {
             }
             setMediaPage(mediaPage.current + 1);
             getPosts(mediaPage.current, "media").then((newPosts) => {
-                if (!(newPosts as IPost[]).length) {
+                if (!newPosts.length) {
                     setMediaReachedEnd(true);
                     return;
                 }
-                setMediaPosts(mediaPosts.current.concat(newPosts as IPost[]));
+                setMediaPosts(mediaPosts.current.concat(newPosts));
             });
             break;
         }
@@ -460,7 +461,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setPostsCount(postsCount);
             });
             getPosts(postsPage.current, "posts").then((posts) => {
-                setPosts(posts as IPost[]);
+                setPosts(posts);
                 setPostsLoading(false);
             });
         } else {
@@ -495,7 +496,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 setPostsCount(count);
             });
             getPosts(postsPage.current, "posts").then((posts) => {
-                setPosts(posts as IPost[]);
+                setPosts(posts);
                 setPostsLoading(false);
             });
         }
@@ -872,9 +873,6 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                         key={
                                                                             post.id
                                                                         }
-                                                                        currentUser={
-                                                                            currentUser
-                                                                        }
                                                                         handleMediaClick={
                                                                             handleMediaClick
                                                                         }
@@ -910,7 +908,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                 </div>
                             </div>
                             {currentUser && (
-                                <Navbar user={currentUser}></Navbar>
+                                <Navbar/>
                             )}
                             {mediaModal && (
                                 <MediaModal
@@ -929,7 +927,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                         <>
                             {currentUser ? (
                                 <div>
-                                    <Navbar user={currentUser}></Navbar>
+                                    <Navbar/>
                                     <StatusBar
                                         title="Not Found"
                                     ></StatusBar>

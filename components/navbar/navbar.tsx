@@ -6,15 +6,15 @@ import {
     MagnifyingGlass,
     TrendUp,
 } from "phosphor-react";
-import { NavbarLoggedInProps } from "src/types/props";
 import { ReactElement, useState } from "react";
 import ProfileImage from "components/post/profileImage";
 import UserContextMenu from "components/userContextMenu";
 import NavItem from "components/navbar/navItem";
+import { useUserContext } from "src/contexts/userContext";
 
-export default function Navbar(
-    props: NavbarLoggedInProps
-): ReactElement {
+export default function Navbar(): ReactElement {
+    const { user } = useUserContext();
+
     const [userMenu, setUserMenu] = useState(false);
 
     return (
@@ -40,10 +40,9 @@ export default function Navbar(
                 <ProfileImage
                     width={30}
                     height={30}
-                    src={props.user.avatar_url}
+                    src={user.avatar_url}
                 />
                 <UserContextMenu
-                    currentUser={props.user}
                     open={userMenu}
                 />
             </NavItem>

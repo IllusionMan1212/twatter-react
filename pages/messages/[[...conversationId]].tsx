@@ -226,7 +226,7 @@ export default function Messages(): ReactElement {
             <Head>
                 <title>Messages - Twatter</title>
             </Head>
-            <Navbar user={user}></Navbar>
+            <Navbar/>
             <div>
                 <StatusBar title="Messages"/>
                 <div

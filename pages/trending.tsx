@@ -11,7 +11,7 @@ export default function Trending(): ReactElement {
     return (
         <div>
             <StatusBar title="Trending" />
-            <Navbar user={user} />
+            <Navbar/>
             <div className="text-white">trending uwu owo</div>
         </div>
     );
