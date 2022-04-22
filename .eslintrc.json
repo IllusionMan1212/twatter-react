@@ -13,7 +13,6 @@
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
-        "plugin:react-hooks/recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:cypress/recommended",
         "next"
@@ -29,7 +28,6 @@
     "plugins": [
         "react",
         "@typescript-eslint",
-        "react-hooks",
         "cypress"
     ],
     "rules": {
@@ -48,9 +46,7 @@
         "semi": [
             "error",
             "always"
-        ],
-        "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "warn"
+        ]
     },
     "overrides": [{
         "files": ["*.js"],

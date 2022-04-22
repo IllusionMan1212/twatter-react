@@ -11,8 +11,8 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
     const router = useRouter();
 
     const handleClick = (item: SettingsItems) => {
-        router.push(`/settings#${item}`)
-    }
+        router.push(`/settings#${item}`);
+    };
 
     const handleHashChange = (asPath: string) => {
         switch (asPath) {
@@ -22,7 +22,7 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
                 payload: {
                     activeSettingsItem: SettingsItems.Account
                 }
-            })
+            });
             break;
         case "/settings#privacy":
             dispatch({
@@ -30,7 +30,7 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
                 payload: {
                     activeSettingsItem: SettingsItems.Privacy
                 }
-            })
+            });
             break;
         case "/settings#notifications":
             dispatch({
@@ -38,7 +38,7 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
                 payload: {
                     activeSettingsItem: SettingsItems.Notifications
                 }
-            })
+            });
             break;
         case "/settings#security":
             dispatch({
@@ -46,7 +46,7 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
                 payload: {
                     activeSettingsItem: SettingsItems.Security
                 }
-            })
+            });
             break;
         default:
             dispatch({
@@ -54,18 +54,18 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
                 payload: {
                     activeSettingsItem: SettingsItems.None
                 }
-            })
+            });
             break;
         }
         return true;
-    }
+    };
 
     useEffect(() => {
-        router.events.on("hashChangeComplete", handleHashChange)
+        router.events.on("hashChangeComplete", handleHashChange);
 
         return () => {
-            router.events.off("hashChangeComplete", handleHashChange)
-        }
+            router.events.off("hashChangeComplete", handleHashChange);
+        };
     }, []);
 
     return (
@@ -99,5 +99,5 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
                 isActive={state.activeSettingsItem == SettingsItems.Security}
             />
         </div>
-    )
+    );
 }

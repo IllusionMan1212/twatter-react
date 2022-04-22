@@ -118,7 +118,8 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                 setTimeoutId(null);
                 setTyping(false);
             }
-    }, [setTyping, timeoutId])
+        }, [setTyping, timeoutId]
+    );
 
     useEffect(() => {
         if (socket) {

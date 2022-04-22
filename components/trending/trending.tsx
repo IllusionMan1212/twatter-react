@@ -14,9 +14,9 @@ export default function Trending(): ReactElement {
                     hashtag="IPhone 15"
                     description="Apple's latest IPhone has recently been released and people are freaking out about how expensive it is!"
                     link="iphone_15"
-                />
+                />;
             })}
             <TrendingFooter/>
         </div>
-    )
+    );
 }

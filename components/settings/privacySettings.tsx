@@ -18,8 +18,8 @@ export default function PrivacySettings(): ReactElement {
                 </div>
             </div>
             <div>
-                <h2>NOTE: These settings don't do anything yet</h2>
+                <h2>NOTE: These settings don&apos;t do anything yet</h2>
             </div>
         </div>
-    )
+    );
 }

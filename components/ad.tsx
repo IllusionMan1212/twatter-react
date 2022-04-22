@@ -12,12 +12,12 @@ export default function Ad(props: AdProps): ReactElement {
                 <div className={styles.data}>
                     <div className={styles.title}>{props.title}</div>
                     <div className={styles.description}>{props.description}</div>
-                    <a className={styles.link} href={props.link} target="_blank">
+                    <a className={styles.link} href={props.link} target="_blank" rel="noreferrer">
                         <div>{props.linkText}</div>
                     </a>
                 </div>
                 <div className={styles.tag}>Ad</div>
             </div>
         </div>
-    )
+    );
 }

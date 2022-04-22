@@ -12,7 +12,7 @@ const initialState: SettingsState = {
     activeSettingsItem: SettingsItems.None,
     popupEnabled: false,
     popupComponent: null,
-}
+};
 
 export default function Settings(): ReactElement {
     const { user } = useUserContext();

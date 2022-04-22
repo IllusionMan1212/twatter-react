@@ -95,7 +95,7 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
         }
     }, [user]);
 
-    if (conversationsLoading) return <Loading width="50" height="50"/>
+    if (conversationsLoading) return <Loading width="50" height="50"/>;
 
     return (
         <>

@@ -18,5 +18,5 @@ export default function SettingsListItem(props: SettingsListItemProps): ReactEle
                 <div className={styles.description}>{props.description}</div>
             </div>
         </div>
-    )
+    );
 }

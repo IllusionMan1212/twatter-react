@@ -6,5 +6,5 @@ export default function TrendingHeader(): ReactElement {
         <div className={styles.container}>
             <p className={styles.text}>Trending Right Now</p>
         </div>
-    )
+    );
 }

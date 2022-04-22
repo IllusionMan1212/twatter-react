@@ -17,5 +17,5 @@ export default function TrendingItem(props: TrendingItemProps): ReactElement {
                 {props.description}
             </div>
         </div>
-    )
+    );
 }

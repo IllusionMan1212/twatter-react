@@ -13,11 +13,11 @@ export default function DeleteAccountPopup({ dispatch }: SettingsPopupProps): Re
                 popupComponent: null
             }
         });
-    }
+    };
 
     const handleClickConfirm = () => {
         console.log("TODO");
-    }
+    };
 
     return (
         <div className={styles.popupContainer} onClick={handleClickOutside}>
@@ -27,7 +27,7 @@ export default function DeleteAccountPopup({ dispatch }: SettingsPopupProps): Re
                 </div>
                 <div className={styles.body}>
                     <div className={styles.deletionWarning}>Are you sure you want to delete your account?</div>
-                    <div className={styles.deletionWarning}>This will remove all your data and you won't be able to recover your account.</div>
+                    <div className={styles.deletionWarning}>This will remove all your data and you won&apos;t be able to recover your account.</div>
                     <div className={styles.input}>
                         <label>Current Password</label>
                         <input/>
@@ -41,5 +41,5 @@ export default function DeleteAccountPopup({ dispatch }: SettingsPopupProps): Re
                 </div>
             </div>
         </div>
-    )
+    );
 }

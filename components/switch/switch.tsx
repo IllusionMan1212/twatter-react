@@ -12,5 +12,5 @@ export default function Switch(props: SwitchProps): ReactElement {
                 checked={props.checked}
             />
         </div>
-    )
+    );
 }

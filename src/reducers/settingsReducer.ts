@@ -24,12 +24,12 @@ export function settingsReducer(state: SettingsState, action: SettingsAction): S
             activeSettingsItem: action.payload.activeSettingsItem,
             popupEnabled: false,
             popupComponent: null
-        }
+        };
     case SettingsActions.TOGGLE_POPUP:
         return {
             ...state,
             popupEnabled: action.payload.popupEnabled,
             popupComponent: action.payload.popupComponent,
-        }
+        };
     }
 }

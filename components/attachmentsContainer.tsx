@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { Gif } from "phosphor-react";
 import { ReactElement, MouseEvent, useEffect, useRef } from "react";
 import { ImageContainerProps } from "src/types/props";
@@ -13,7 +12,7 @@ export default function AttachmentsContainer(props: ImageContainerProps): ReactE
             window.history.pushState(null, null, `/u/${props.post.author.username}/${props.post.id}/media`);
             props.handleMediaClick(e, props.post, imgIndex);
         }
-    }
+    };
 
     useEffect(() => {
         imagesRef.current.forEach((imageRef, index) => {

@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useState } from "react";
 import styles from "./postOptionsMenuButton.module.scss";
 import ContextMenu from "components/contextMenu/contextMenu";
@@ -37,8 +36,8 @@ export default function PostOptionsMenuButton(
 
     const handleShare = () => {
         setOptionsMenu(!optionsMenu);
-        const url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`
-        const title = `${props.postAuthorUsername}'s post - Twatter`
+        const url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/u/${props.postAuthorUsername}/${props.postId}`;
+        const title = `${props.postAuthorUsername}'s post - Twatter`;
 
         if (navigator.share) {
             navigator.share({

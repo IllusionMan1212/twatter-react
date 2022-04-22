@@ -310,9 +310,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     <MediaModalComment
                                         key={comment.id}
                                         comment={comment}
-                                        currentUser={
-                                            props.modalData.currentUser
-                                        }
                                         handleMediaClick={
                                             props.handleMediaClick
                                         }

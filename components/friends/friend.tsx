@@ -19,5 +19,5 @@ export default function Friend(props: FriendProps): ReactElement {
                 </div>
             </a>
         </Link>
-    )
+    );
 }

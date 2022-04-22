@@ -153,7 +153,7 @@ export default function Messages(): ReactElement {
                     newConversations
                 }
             });
-        }
+        };
 
     useEffect(() => {
         // dont fetch messages if current convo id is equal to new convo id
@@ -249,10 +249,10 @@ export default function Messages(): ReactElement {
                                 : ""
                         }`}
                     >
-                       <ConversationsList
-                           state={state}
-                           dispatch={dispatch}
-                       />
+                        <ConversationsList
+                            state={state}
+                            dispatch={dispatch}
+                        />
                     </div>
                     {state.isConversationActive ? (
                         <ActiveConversation

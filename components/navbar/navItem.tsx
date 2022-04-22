@@ -9,8 +9,8 @@ export default function NavItem(props: NavItemProps): ReactElement {
     const { user } = useUserContext();
     const router = useRouter();
 
-    const isActive = router.asPath === props.to
-    const isProfileNavItemActive = router.asPath === `/u/${user.username}` && props.as === "profile"
+    const isActive = router.asPath === props.to;
+    const isProfileNavItemActive = router.asPath === `/u/${user.username}` && props.as === "profile";
 
     return (
         <>
@@ -31,5 +31,5 @@ export default function NavItem(props: NavItemProps): ReactElement {
                 </div>
             )}
         </>
-    )
+    );
 }

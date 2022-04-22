@@ -7,7 +7,7 @@ interface DateTimeProps {
     style?: CSSProperties;
 }
 
-const DateTime = memo((props: DateTimeProps) => {
+const DateTime = memo(function DateTime(props: DateTimeProps) {
     return (
         <div className={props.className} style={props.style}>
             {props.formattingFunction(props.datetime)}

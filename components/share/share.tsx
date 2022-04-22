@@ -20,17 +20,17 @@ export default function Share(props: ShareProps): ReactElement {
                     >
                         <div className={styles.header}>Share On</div>
                         <div className={styles.logos}>
-                            <a href={`https://facebook.com/sharer/sharer.php?u=${props.url}`} target="_blank">
+                            <a href={`https://facebook.com/sharer/sharer.php?u=${props.url}`} target="_blank" rel="noreferrer" >
                                 <div className={styles.logo}>
                                     <FacebookLogo
                                         color="#656BEE"
                                         weight="fill"
                                         size={52}
-                                        />
+                                    />
                                     <p>Facebook</p>
                                 </div>
                             </a>
-                            <a href={`https://reddit.com/submit?title=${props.text}&url=${props.url}`} target="_blank">
+                            <a href={`https://reddit.com/submit?title=${props.text}&url=${props.url}`} target="_blank" rel="noreferrer">
                                 <div className={styles.logo}>
                                     <RedditLogo
                                         color="#FF965B"
@@ -40,7 +40,7 @@ export default function Share(props: ShareProps): ReactElement {
                                     <p>Reddit</p>
                                 </div>
                             </a>
-                            <a href={`https://twitter.com/share?text=${props.text}&url=${props.url}`} target="_blank">
+                            <a href={`https://twitter.com/share?text=${props.text}&url=${props.url}`} target="_blank" rel="noreferrer">
                                 <div className={styles.logo}>
                                     <TwitterLogo
                                         color="#31A8FF"
@@ -55,5 +55,5 @@ export default function Share(props: ShareProps): ReactElement {
                 </div>
             )}
         </>
-    )
+    );
 }

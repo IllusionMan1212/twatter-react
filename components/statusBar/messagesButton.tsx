@@ -5,7 +5,7 @@ import { ChatsTeardrop } from "phosphor-react";
 
 interface Props {
     unreadMessages: number;
-};
+}
 
 export default function MessagesButton({ unreadMessages }: Props): ReactElement {
     return (

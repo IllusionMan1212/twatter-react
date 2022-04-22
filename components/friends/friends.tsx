@@ -22,9 +22,9 @@ export default function Friends(props: FriendsProps): ReactElement {
                             displayName={user.display_name}
                             avatarURL={user.avatar_url}
                         />
-                    )
+                    );
                 })}
             </div>
         </div>
-    )
+    );
 }

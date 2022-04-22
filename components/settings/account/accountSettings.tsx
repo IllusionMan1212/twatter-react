@@ -20,7 +20,7 @@ export default function AccountSettings({ dispatch }: AccountSettingsProps): Rea
                 popupComponent: ChangeUsernamePopup
             }
         });
-    }
+    };
 
     const handleChangePassword = () => {
         dispatch({
@@ -30,7 +30,7 @@ export default function AccountSettings({ dispatch }: AccountSettingsProps): Rea
                 popupComponent: ChangePasswordPopup
             }
         });
-    }
+    };
 
     const handleDeleteAccount = () => {
         dispatch({
@@ -40,7 +40,7 @@ export default function AccountSettings({ dispatch }: AccountSettingsProps): Rea
                 popupComponent: DeleteAccountPopup
             }
         });
-    }
+    };
 
     return (
         <div className={styles.settingsContainer}>
@@ -71,5 +71,5 @@ export default function AccountSettings({ dispatch }: AccountSettingsProps): Rea
                 handleClick={handleDeleteAccount}
             />
         </div>
-    )
+    );
 }

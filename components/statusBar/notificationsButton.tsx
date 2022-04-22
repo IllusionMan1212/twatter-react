@@ -5,7 +5,7 @@ import { Bell } from "phosphor-react";
 
 interface Props {
     unreadNotifications: number;
-};
+}
 
 export default function NotificationsButton({ unreadNotifications }: Props): ReactElement {
     return (

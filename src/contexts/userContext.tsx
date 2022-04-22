@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { createContext, ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import { IUser } from "src/types/general";
 import Router, { useRouter } from "next/router";
@@ -132,7 +131,7 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     };
 
     const logout = () => {
-        socket.close(1000) // 1000 is normal termination.
+        socket.close(1000); // 1000 is normal termination.
         setSocket(null);
         setUser(null);
     };

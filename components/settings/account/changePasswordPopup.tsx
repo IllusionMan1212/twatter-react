@@ -13,11 +13,11 @@ export default function ChangePasswordPopup({ dispatch }: SettingsPopupProps): R
                 popupComponent: null
             }
         });
-    }
+    };
 
     const handleClickConfirm = () => {
         console.log("TODO");
-    }
+    };
 
     return (
         <div className={styles.popupContainer} onClick={handleClickOutside}>
@@ -47,5 +47,5 @@ export default function ChangePasswordPopup({ dispatch }: SettingsPopupProps): R
                 </div>
             </div>
         </div>
-    )
+    );
 }

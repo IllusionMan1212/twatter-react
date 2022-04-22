@@ -6,7 +6,7 @@ import { ReactElement } from "react";
 export default function StatusBarLoggedOut(): ReactElement {
     return (
         <LayoutRegular>
-            <Link href="/">
+            <Link href="/" passHref>
                 <div className="text-white">
                     <p className={`text-large ${styles.header}`}>
                         <a className={styles.links}>Twatter</a>

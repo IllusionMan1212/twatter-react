@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { createContext, ReactElement, useContext, useEffect, useState, SetStateAction, Dispatch, useCallback } from "react";
 import { useUserContext } from "./userContext";
 import { useToastContext } from "./toastContext"; import axiosInstance from "src/axios";
@@ -30,7 +29,7 @@ const SharerDefaultValues: ISharer = {
     enabled: false,
     text: "",
     url: "",
-}
+};
 
 const GlobalContextDefaultValues: GlobalContextType = {
     unreadMessages: [],

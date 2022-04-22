@@ -6,7 +6,7 @@ import styles from "./common.module.scss";
 export default function SecuritySettings(): ReactElement {
     const handleClick = () => {
         // TODO: 2FA
-    }
+    };
 
     return (
         <div className={styles.settingsContainer}>
@@ -17,8 +17,8 @@ export default function SecuritySettings(): ReactElement {
                 handleClick={handleClick}
             />
             <div>
-                <h2>NOTE: These settings don't do anything yet</h2>
+                <h2>NOTE: These settings don&apos;t do anything yet</h2>
             </div>
         </div>
-    )
+    );
 }

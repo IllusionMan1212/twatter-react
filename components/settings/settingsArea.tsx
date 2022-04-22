@@ -12,7 +12,7 @@ import Router from "next/router";
 export default function SettingsArea({ state, dispatch }: SettingsAreaProps): ReactElement {
     const handleClick = () => {
         Router.back();
-    }
+    };
 
     return (
         <div className={`${styles.container} ${state.activeSettingsItem != SettingsItems.None && styles.active}`}>
@@ -66,5 +66,5 @@ export default function SettingsArea({ state, dispatch }: SettingsAreaProps): Re
                 </>
             ) : null}
         </div>
-    )
+    );
 }
