@@ -41,7 +41,7 @@
 }
 
 .messageAttachment {
-    padding: 20px 0;
+    padding: 20px 5px;
 }
 
 .previewImage {
@@ -52,6 +52,14 @@
     background-position: center;
     border-radius: 8px;
     position: relative;
+}
+
+.previewImageOverlay {
+    height: 100%;
+    width: 100%;
+    background-color: #2228;
+    border-radius: 4px;
+    border: 1px solid #EEE2;
 }
 
 .previewImageClose {
@@ -66,6 +74,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    color: white;
 }
 
 .messageInputArea {

@@ -188,6 +188,9 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
                             }}
                         >
                             <div
+                                className={`${styles.previewImageOverlay}`}
+                            ></div>
+                            <div
                                 className={styles.previewImageClose}
                                 onClick={(e) => {
                                     handlePreviewImageClose(

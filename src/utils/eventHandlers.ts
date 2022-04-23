@@ -129,7 +129,7 @@ export const handleAttachmentChange = (
         return;
     }
 
-    if (files.length > maxAttachments) {
+    if (files.length > _maxAttachments || (files.length + attachments.length) > _maxAttachments) {
         toast(`You can only upload up to ${_maxAttachments} image(s)`, 4000);
         return;
     }
@@ -143,8 +143,8 @@ export const handleAttachmentChange = (
             continue;
         }
         if (
-            attachments.length < maxAttachments &&
-            previewImages.length < maxAttachments
+            attachments.length < _maxAttachments &&
+            previewImages.length < _maxAttachments
         ) {
             validFiles.push({
                 data: files[i],

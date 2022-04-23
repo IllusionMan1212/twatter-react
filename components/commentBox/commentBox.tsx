@@ -49,6 +49,9 @@ export default function CommentBox(props: CommentBoxProps): ReactElement {
                                         }}
                                     >
                                         <div
+                                            className={`${styles.previewImageOverlay}`}
+                                        ></div>
+                                        <div
                                             className={styles.previewImageClose}
                                             onClick={(e) =>
                                                 handlePreviewImageClose(
