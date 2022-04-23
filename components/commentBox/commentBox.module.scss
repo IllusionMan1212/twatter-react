@@ -8,6 +8,10 @@
     overflow: clip;
     z-index: 1;
     bottom: 0;
+
+    @media (max-width: 800px) {
+        bottom: variables.$nav-bar-height;
+    }
 }
 
 .messageInputArea {

@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import Loading from "components/loading";
 import { useRouter } from "next/router";
 import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import StatusBar from "components/statusBar/statusBar";
@@ -19,6 +18,7 @@ import { useUserContext } from "src/contexts/userContext";
 import Router from "next/router";
 import Friends from "components/friends/friends";
 import Trending from "components/trending/trending";
+import Navbar from "components/navbar/navbar";
 
 interface ApiResponse {
     comments: IPost[];
@@ -32,7 +32,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
     const { user: currentUser, socket } = useUserContext();
 
     const [notFound, setNotFound] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [post, setPost] = useState<IPost>(null);
     const [modalData, setModalData] = useState({
         post: null as IPost,
@@ -58,16 +57,12 @@ export default function UserPost(props: UserPostProps): ReactElement {
     };
 
     const renderBars = (title: string): ReactElement => {
+        if (!currentUser) return <StatusBarLoggedOut />;
+
         return (
             <>
-                {currentUser ? (
-                    <StatusBar
-                        title={title}
-                        backButton={true}
-                    />
-                ) : (
-                    <StatusBarLoggedOut/>
-                )}
+                <StatusBar title={title} backButton={true} />
+                <Navbar />
             </>
         );
     };
@@ -88,21 +83,16 @@ export default function UserPost(props: UserPostProps): ReactElement {
         [toast]
     );
 
-    const handleCommentDelete = useCallback(
-        (commentIdObj) => {
-            const commentId = commentIdObj.postId;
-            setPost((post) => {
-                post.comments--;
-                return post;
-            });
-            setComments(comments => {
-                return comments.filter(
-                    (comment) => comment.id != commentId
-                );
-            });
-        },
-        []
-    );
+    const handleCommentDelete = useCallback((commentIdObj) => {
+        const commentId = commentIdObj.postId;
+        setPost((post) => {
+            post.comments--;
+            return post;
+        });
+        setComments((comments) => {
+            return comments.filter((comment) => comment.id != commentId);
+        });
+    }, []);
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
@@ -111,13 +101,13 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     setPost({
                         ...post,
                         likes: post.likes + 1,
-                        liked: true
+                        liked: true,
                     });
                 } else if (payload.likeType == "UNLIKE") {
                     setPost({
                         ...post,
                         likes: post.likes - 1,
-                        liked: false
+                        liked: false,
                     });
                 }
             } else {
@@ -135,7 +125,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         }
                         return comment;
                     });
-                });        
+                });
             }
         },
         [post]
@@ -197,11 +187,9 @@ export default function UserPost(props: UserPostProps): ReactElement {
             }
             if (props.post) {
                 setNotFound(false);
-                setLoading(false);
                 setPost(props.post);
             } else {
                 setNotFound(true);
-                setLoading(false);
             }
         }
     }, [props.post, router]);
@@ -228,6 +216,17 @@ export default function UserPost(props: UserPostProps): ReactElement {
             setMediaModal(false);
         };
     });
+
+    if (notFound) {
+        return (
+            <>
+                {renderBars("Not Found")}
+                <div className={`text-white ${styles.postNotFound}`}>
+                    <div className="text-bold text-large">Post Not Found</div>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
@@ -267,74 +266,51 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     ],
                 }}
             />
-            {!loading ? (
-                <>
-                    {!notFound && post ? (
-                        <>
-                            {renderBars(`${post.author.display_name}'s post`)}
-                            <div className={styles.content}>
-                                <div className={styles.leftSide}>
-                                    <Friends count={20} />
-                                </div>
-                                <div className={styles.center}>
-                                    <div className={styles.header}>
-                                        <div
-                                            className={styles.backButton}
-                                            onClick={() => history.back()}
-                                        >
-                                            <ArrowLeft size="30"></ArrowLeft>
-                                        </div>
-                                        <p>
-                                            {post.author.display_name}&apos;s
-                                            post
-                                        </p>
+            <>
+                {post && (
+                    <>
+                        {renderBars(`${post.author.display_name}'s post`)}
+                        <div className={styles.content}>
+                            <div className={styles.leftSide}>
+                                <Friends count={20} />
+                            </div>
+                            <div className={styles.center}>
+                                <div className={styles.header}>
+                                    <div
+                                        className={styles.backButton}
+                                        onClick={() => history.back()}
+                                    >
+                                        <ArrowLeft size="30" />
                                     </div>
-                                    <ExpandedPost
-                                        key={post.id}
-                                        post={post}
-                                        handleMediaClick={handleMediaClick}
-                                        callback={() => Router.back()}
-                                        nowCommenting={nowCommenting}
-                                        setNowCommenting={setNowCommenting}
-                                        comments={comments}
-                                        loadingComments={loadingComments}
-                                    ></ExpandedPost>
+                                    <p>
+                                        {post.author.display_name}&apos;s post
+                                    </p>
                                 </div>
-                                <div className={styles.rightSide}>
-                                    <Trending/>
-                                </div>
-                            </div>
-                            {mediaModal && (
-                                <MediaModal
-                                    modalData={modalData}
-                                    goBackTwice={true}
+                                <ExpandedPost
+                                    key={post.id}
+                                    post={post}
                                     handleMediaClick={handleMediaClick}
-                                ></MediaModal>
-                            )}
-                        </>
-                    ) : notFound ? (
-                        <>
-                            {renderBars("Not Found")}
-                            <div
-                                className={`text-white ${styles.postNotFound}`}
-                            >
-                                <div className="text-bold text-large">
-                                    Post Not Found
-                                </div>
+                                    callback={() => Router.back()}
+                                    nowCommenting={nowCommenting}
+                                    setNowCommenting={setNowCommenting}
+                                    comments={comments}
+                                    loadingComments={loadingComments}
+                                ></ExpandedPost>
                             </div>
-                        </>
-                    ) : (
-                        !post && (
-                            <>
-                                {renderBars("Loading")}
-                                <Loading height="100" width="100"></Loading>
-                            </>
-                        )
-                    )}
-                </>
-            ) : (
-                <Loading height="100" width="100"></Loading>
-            )}
+                            <div className={styles.rightSide}>
+                                <Trending />
+                            </div>
+                        </div>
+                        {mediaModal && (
+                            <MediaModal
+                                modalData={modalData}
+                                goBackTwice={true}
+                                handleMediaClick={handleMediaClick}
+                            ></MediaModal>
+                        )}
+                    </>
+                )}
+            </>
         </>
     );
 }
@@ -356,8 +332,8 @@ export async function getServerSideProps(
                 withCredentials: true,
                 // cookies aren't being sent automatically here for some reason
                 headers: {
-                    Cookie: `session=${context.req.cookies.session}`
-                }
+                    Cookie: `session=${context.req.cookies.session}`,
+                },
             }
         );
         post = res.data.post;

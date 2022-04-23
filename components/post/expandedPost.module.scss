@@ -130,6 +130,10 @@
     background-color: variables.$bg-color-primary;
     flex-grow: 1;
     color: white;
+
+    @media (max-width: 800px) {
+        margin-bottom: variables.$nav-bar-height;
+    }
 }
 
 .user {
