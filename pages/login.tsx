@@ -1,5 +1,4 @@
 import LayoutRegular from "components/layouts/layoutRegular";
-import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import styles from "styles/register-login.module.scss";
 import indexStyles from "styles/index.module.scss";
 import Link from "next/link";
@@ -75,14 +74,13 @@ export default function Login(): ReactElement {
         return true;
     };
 
-    if (user) return <></>;
+    if (user) return null;
 
     return (
         <>
             <Head>
                 <title>Log in - Twatter</title>
             </Head>
-            <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
                 <div className="text-white text-bold text-center my-3">
                     <p className="text-extra-large">Log In</p>

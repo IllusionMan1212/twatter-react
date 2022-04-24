@@ -1,7 +1,5 @@
-import StatusBar from "components/statusBar/statusBar";
 import Head from "next/head";
 import Loading from "components/loading";
-import Navbar from "components/navbar/navbar";
 import styles from "styles/home.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -35,11 +33,10 @@ import Friends from "components/friends/friends";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
+    const toast = useToastContext();
 
     const composePostRef = useRef<HTMLSpanElement>(null);
     const inputContainerMobileRef = useRef<HTMLDivElement>(null);
-
-    const toast = useToastContext();
 
     const [postingAllowed, setPostingAllowed] = useState(false);
     const [charsLeft, setCharsLeft] = useState(postCharLimit);
@@ -325,16 +322,14 @@ export default function Home(): ReactElement {
         };
     }, [mobileCompose, mediaModal]);
 
-    if (!user) return <></>;
+    if (!user) return null;
 
     return (
         <>
             <Head>
                 <title>Home - Twatter</title>
             </Head>
-            <Navbar/>
             <div>
-                <StatusBar title="Home"/>
                 <div className={styles.content}>
                     <div className={styles.leftSide}>
                         <Friends count={20} />

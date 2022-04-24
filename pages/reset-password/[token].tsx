@@ -5,10 +5,8 @@ import { useRouter } from "next/router";
 import LayoutRegular from "components/layouts/layoutRegular";
 import registerStyles from "styles/register-login.module.scss";
 import forgotPassStyles from "styles/forgot-password.module.scss";
-import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import { EyeClosed, Eye } from "phosphor-react";
 import { useToastContext } from "src/contexts/toastContext";
-import Loading from "components/loading";
 import { IUser } from "src/types/general";
 import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
@@ -31,7 +29,6 @@ export default function ResetPassword(): ReactElement {
     const toast = useToastContext();
     const { user: currentUser } = useUserContext();
 
-    const [loading, setLoading] = useState(true);
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [newPassword, setNewPassword] = useState({
         password: "",
@@ -105,7 +102,6 @@ export default function ResetPassword(): ReactElement {
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validatePasswordResetToken?token=${router.query.token}`
                 )
                 .then((res: AxiosResponse<GetApiResponse>) => {
-                    setLoading(false);
                     setUser(res.data.user);
                 })
                 .catch(() => {
@@ -118,93 +114,88 @@ export default function ResetPassword(): ReactElement {
         }
     }, [router, router.query]);
 
-    if (currentUser) return <></>;
+    if (currentUser) return null;
 
     return (
         <>
             <Head>
                 <title>Reset Password - Twatter</title>
             </Head>
-            <StatusBarLoggedOut></StatusBarLoggedOut>
-            {!loading ? (
-                <LayoutRegular>
-                    <div className="text-white text-bold text-center mb-3 mt-1">
-                        <p className="text-extra-large">Reset Password</p>
-                    </div>
-                    <div className="flex flex-column align-items-center justify-content-center">
-                        {user && (
-                            <div className="text-white flex gap-1 justify-content-center align-items-center mb-2">
-                                <ProfileImage
-                                    height={60}
-                                    width={60}
-                                    src={user.avatar_url}
-                                />
-                                <div>
-                                    <p>{user.display_name}</p>
-                                    <p
-                                        style={{
-                                            color: "#555",
-                                            fontSize: "0.9em",
-                                        }}
-                                    >
-                                        @{user.username}
-                                    </p>
-                                </div>
+            <LayoutRegular>
+                <div className="text-white text-bold text-center mb-3 mt-1">
+                    <p className="text-extra-large">Reset Password</p>
+                </div>
+                <div className="flex flex-column align-items-center justify-content-center">
+                    {user && (
+                        <div className="text-white flex gap-1 justify-content-center align-items-center mb-2">
+                            <ProfileImage
+                                height={60}
+                                width={60}
+                                src={user.avatar_url}
+                            />
+                            <div>
+                                <p>{user.display_name}</p>
+                                <p
+                                    style={{
+                                        color: "#555",
+                                        fontSize: "0.9em",
+                                    }}
+                                >
+                                    @{user.username}
+                                </p>
                             </div>
-                        )}
-                        <form
-                            className="flex flex-column justify-content-center max-w-100"
-                            onSubmit={handleSubmit}
-                        >
-                            <div className="position-relative">
-                                <input
-                                    id="password"
-                                    className={`text-medium text-thin max-w-100 ${registerStyles.input}`}
-                                    type={passwordHidden ? "password" : "text"}
-                                    placeholder="New Password"
-                                    name="password"
-                                    minLength={8}
-                                    autoComplete="off"
-                                    onChange={handleChange}
-                                />
-                                {passwordHidden ? (
-                                    <EyeClosed
-                                        id="unhide"
-                                        className={`${registerStyles.icon}`}
-                                        size="32"
-                                        xlinkTitle="Unhide Password"
-                                        onClick={() => setPasswordHidden(false)}
-                                    ></EyeClosed>
-                                ) : (
-                                    <Eye
-                                        id="hide"
-                                        className={`${registerStyles.icon}`}
-                                        size="32"
-                                        xlinkTitle="Hide Password"
-                                        onClick={() => setPasswordHidden(true)}
-                                    ></Eye>
-                                )}
-                            </div>
+                        </div>
+                    )}
+                    <form
+                        className="flex flex-column justify-content-center max-w-100"
+                        onSubmit={handleSubmit}
+                    >
+                        <div className="position-relative">
                             <input
-                                className={`text-medium text-thin my-1 ${registerStyles.input}`}
+                                id="password"
+                                className={`text-medium text-thin max-w-100 ${registerStyles.input}`}
                                 type={passwordHidden ? "password" : "text"}
-                                placeholder="Confirm Password"
-                                name="confirm_password"
+                                placeholder="New Password"
+                                name="password"
                                 minLength={8}
                                 autoComplete="off"
                                 onChange={handleChange}
                             />
-                            <button
-                                className={`text-medium mt-1 ${forgotPassStyles.button}`}
-                            >
-                                Reset
-                            </button>
-                        </form>
-                    </div>
-                </LayoutRegular>
-            ) : (
-                <Loading width="100" height="100"></Loading>
-            )}
+                            {passwordHidden ? (
+                                <EyeClosed
+                                    id="unhide"
+                                    className={`${registerStyles.icon}`}
+                                    size="32"
+                                    xlinkTitle="Unhide Password"
+                                    onClick={() => setPasswordHidden(false)}
+                                ></EyeClosed>
+                            ) : (
+                                <Eye
+                                    id="hide"
+                                    className={`${registerStyles.icon}`}
+                                    size="32"
+                                    xlinkTitle="Hide Password"
+                                    onClick={() => setPasswordHidden(true)}
+                                ></Eye>
+                            )}
+                        </div>
+                        <input
+                            className={`text-medium text-thin my-1 ${registerStyles.input}`}
+                            type={passwordHidden ? "password" : "text"}
+                            placeholder="Confirm Password"
+                            name="confirm_password"
+                            minLength={8}
+                            autoComplete="off"
+                            onChange={handleChange}
+                        />
+                        <button
+                            className={`text-medium mt-1 ${forgotPassStyles.button}`}
+                        >
+                            Reset
+                        </button>
+                    </form>
+                </div>
+            </LayoutRegular>
         </>
     );
 }

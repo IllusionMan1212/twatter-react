@@ -5,14 +5,15 @@ import Head from "next/head";
 import { Plus, X } from "phosphor-react";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import Router from "next/router";
-import axios from "src/axios";
+import axiosInstance from "src/axios";
 import { useToastContext } from "src/contexts/toastContext";
 import { IBirthday } from "src/types/general";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { IUser } from "src/types/general";
 import Birthday from "components/birthday/birthday";
+import { GetServerSidePropsContext } from "next";
 
 interface PostReqResponse {
     message: string;
@@ -22,7 +23,11 @@ interface GetReqResponse {
     user: IUser;
 }
 
-export default function UserSetup(): ReactElement {
+interface UserSetupProps {
+    user: IUser;
+}
+
+export default function UserSetup(props: UserSetupProps): ReactElement {
     const toast = useToastContext();
     const { user, login } = useUserContext();
 
@@ -76,7 +81,7 @@ export default function UserSetup(): ReactElement {
         payload.append("birthday_month", birthday_month);
         payload.append("birthday_day", birthday_day);
         payload.append("profileImage", profileImage);
-        axios
+        axiosInstance
             .post<FormData, AxiosResponse<PostReqResponse>>("users/initialSetup", payload)
             .then((res) => {
                 toast(res.data.message, 4000);
@@ -107,29 +112,12 @@ export default function UserSetup(): ReactElement {
     };
 
     useEffect(() => {
-        axios
-            .get(
-                `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
-                { withCredentials: true }
-            )
-            .then((res: AxiosResponse<GetReqResponse>) => {
-                if (res.data.user) {
-                    login(res.data.user);
-                    if (res.data.user.finished_setup == true) {
-                        Router.push("/home");
-                        return;
-                    }
-                }
-            })
-            .catch((err) => {
-                toast(
-                    err?.response?.data?.message ?? "An error has occurred",
-                    4000
-                );
-            });
-    }, []);
+        if (props.user) {
+            login(props.user);
+        }
+    }, [props.user]);
 
-    if (!user) return <></>;
+    if (!user) return null;
 
     return (
         <>
@@ -228,4 +216,46 @@ export default function UserSetup(): ReactElement {
             </LayoutWide>
         </>
     );
+}
+
+export async function getServerSideProps(
+    context: GetServerSidePropsContext
+) {
+    let res = null;
+    let user: IUser = null;
+
+    try {
+        res = await axios.get<GetReqResponse>(
+            `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
+            {
+                withCredentials: true,
+                headers: {
+                    Cookie: `session=${context.req.cookies.session}`,
+                },
+            }
+        );
+        user = res.data.user;
+    } catch (err) {
+        console.error(err);
+    }
+
+    if (!user) {
+        return {
+            redirect: {
+                destination: "/login",
+            }
+        };
+    }
+
+    if (user.finished_setup) {
+        return {
+            redirect: {
+                destination: "/home",
+            }
+        };
+    }
+
+    return {
+        props: { user: user },
+    };
 }

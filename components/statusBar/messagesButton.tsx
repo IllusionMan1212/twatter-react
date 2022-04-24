@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import styles from "./statusBar.module.scss";
+import styles from "./statusBarLoggedIn.module.scss";
 import Router from "next/router";
 import { ChatsTeardrop } from "phosphor-react";
 

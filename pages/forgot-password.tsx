@@ -5,7 +5,6 @@ import LayoutRegular from "components/layouts/layoutRegular";
 import { useToastContext } from "src/contexts/toastContext";
 import registerLoginStyles from "styles/register-login.module.scss";
 import styles from "styles/forgot-password.module.scss";
-import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import { useUserContext } from "src/contexts/userContext";
 
 interface ApiRequest {
@@ -59,14 +58,13 @@ export default function ForgotPassword(): ReactElement {
         }
     };
 
-    if (user) return <></>;
+    if (user) return null;
 
     return (
         <>
             <Head>
                 <title>Forgot password - Twatter</title>
             </Head>
-            <StatusBarLoggedOut/>
             <LayoutRegular>
                 <div className="text-white text-bold text-center my-3">
                     <p className="text-extra-large">Forgot your password?</p>

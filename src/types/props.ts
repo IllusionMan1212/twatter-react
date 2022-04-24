@@ -26,15 +26,6 @@ export interface LoadingProps {
     height: string;
 }
 
-export interface StatusBarProps {
-    title: string;
-    backButton?: boolean;
-}
-
-export interface UserContextMenuProps {
-    open: boolean;
-}
-
 export interface MessageProps {
     messageId: string;
     messageAuthorId: string;

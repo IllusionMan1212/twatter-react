@@ -1,7 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
-import StatusBar from "components/statusBar/statusBar";
 import axios, { AxiosResponse } from "axios";
 import ExpandedPost from "components/post/expandedPost";
 import styles from "components/post/expandedPost.module.scss";
@@ -18,7 +16,7 @@ import { useUserContext } from "src/contexts/userContext";
 import Router from "next/router";
 import Friends from "components/friends/friends";
 import Trending from "components/trending/trending";
-import Navbar from "components/navbar/navbar";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface ApiResponse {
     comments: IPost[];
@@ -29,6 +27,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
     useScrollRestoration(router);
 
     const toast = useToastContext();
+    const { setStatusBarTitle } = useGlobalContext();
     const { user: currentUser, socket } = useUserContext();
 
     const [notFound, setNotFound] = useState(null);
@@ -54,17 +53,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
             currentUser: currentUser,
         });
         setMediaModal(true);
-    };
-
-    const renderBars = (title: string): ReactElement => {
-        if (!currentUser) return <StatusBarLoggedOut />;
-
-        return (
-            <>
-                <StatusBar title={title} backButton={true} />
-                <Navbar />
-            </>
-        );
     };
 
     const handleComment = useCallback(
@@ -135,6 +123,8 @@ export default function UserPost(props: UserPostProps): ReactElement {
         setComments([]);
         setLoadingComments(true);
         if (props.post) {
+            setStatusBarTitle(`${props.post.author.display_name}'s post`);
+
             axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getComments/${props.post.id}`,
@@ -218,13 +208,12 @@ export default function UserPost(props: UserPostProps): ReactElement {
     });
 
     if (notFound) {
+        setStatusBarTitle("Not Found");
+
         return (
-            <>
-                {renderBars("Not Found")}
-                <div className={`text-white ${styles.postNotFound}`}>
-                    <div className="text-bold text-large">Post Not Found</div>
-                </div>
-            </>
+            <div className={`text-white ${styles.postNotFound}`}>
+                <div className="text-bold text-large">Post Not Found</div>
+            </div>
         );
     }
 
@@ -269,7 +258,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
             <>
                 {post && (
                     <>
-                        {renderBars(`${post.author.display_name}'s post`)}
                         <div className={styles.content}>
                             <div className={styles.leftSide}>
                                 <Friends count={20} />
@@ -340,6 +328,8 @@ export async function getServerSideProps(
     } catch (err) {
         console.error(err);
     }
+
+    console.log(res);
 
     return {
         props: { post: post },

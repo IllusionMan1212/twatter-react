@@ -33,9 +33,7 @@ export default function ReplyingTo(props: ReplyingToProps): ReactElement {
                         </span>
                         {props.content.Valid && (
                             <span className={styles.content}>
-                                &quot;
                                 {props.content.String}
-                                &quot;
                             </span>
                         )}
                     </div>

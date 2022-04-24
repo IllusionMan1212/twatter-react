@@ -1,5 +1,3 @@
-import StatusBar from "components/statusBar/statusBar";
-import Navbar from "components/navbar/navbar";
 import Head from "next/head";
 import styles from "styles/messages.module.scss";
 import {
@@ -34,7 +32,7 @@ const initialState = {
 };
 
 export default function Messages(): ReactElement {
-    const { setUnreadMessages, setActiveConversationId } = useGlobalContext();
+    const { setUnreadMessages, setActiveConversationId, setStatusBarTitle } = useGlobalContext();
     const { user, socket } = useUserContext();
 
     const router = useRouter();
@@ -219,16 +217,18 @@ export default function Messages(): ReactElement {
         socket
     ]);
 
-    if (!user) return <></>;
+    useEffect(() => {
+        setStatusBarTitle("Messages");
+    }, []);
+
+    if (!user) return null;
 
     return (
         <>
             <Head>
                 <title>Messages - Twatter</title>
             </Head>
-            <Navbar/>
             <div>
-                <StatusBar title="Messages"/>
                 <div
                     className={`text-white ${
                         styles.messagesContainer

@@ -1,13 +1,18 @@
 /* eslint-disable react/react-in-jsx-scope */
 import axios from "src/axios";
 import Router from "next/router";
-import { ReactElement, useEffect } from "react";
+import { Dispatch, ReactElement, SetStateAction, useEffect } from "react";
 import { useToastContext } from "src/contexts/toastContext";
-import { UserContextMenuProps } from "src/types/props";
 import styles from "./userContextMenu.module.scss";
 import { Gear, SignOut, UserCircle, Bug } from "phosphor-react";
 import ProfileImage from "./post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
+import Link from "next/link";
+
+export interface UserContextMenuProps {
+    open: boolean;
+    setUserMenu: Dispatch<SetStateAction<boolean>>;
+}
 
 export default function UserContextMenu(
     props: UserContextMenuProps
@@ -64,34 +69,50 @@ export default function UserContextMenu(
                     {user.display_name}
                 </div>
                 <div>
+                    <Link href={`/u/${user.username}`}>
+                        <a>
+                            <div
+                                className={styles.menuItem}
+                                onClick={() => {
+                                    Router.push(`/u/${user.username}`);
+                                    props.setUserMenu(false);
+                                }}
+                            >
+                                <UserCircle size={25}/>
+                                <p>Profile</p>
+                            </div>
+                        </a>
+                    </Link>
+                    <a href="https://github.com/illusionman1212/twatter/issues" target="_blank" rel="noreferrer">
+                        <div
+                            className={styles.menuItem}
+                            onClick={() => {
+                                props.setUserMenu(false);
+                            }}
+                        >
+                            <Bug size={25}/>
+                            <p>Report a bug</p>
+                        </div>
+                    </a>
+                    <Link href="/settings">
+                        <a>
+                            <div
+                                className={styles.menuItem}
+                                onClick={() => {
+                                    props.setUserMenu(false);
+                                }}
+                            >
+                                <Gear size={25}/>
+                                <p>Settings</p>
+                            </div>
+                        </a>
+                    </Link>
                     <div
                         className={styles.menuItem}
-                        onClick={() =>
-                            Router.push(`/u/${user.username}`)
-                        }
-                    >
-                        <UserCircle size={25}/>
-                        <p>Profile</p>
-                    </div>
-                    <div
-                        className={styles.menuItem}
-                        onClick={() => window.location.href = "https://github.com/illusionman1212/twatter/issues"}
-                    >
-                        <Bug size={25}/>
-                        <p>Report a bug</p>
-                    </div>
-                    <div
-                        className={styles.menuItem}
-                        onClick={() => 
-                            Router.push("/settings")
-                        }
-                    >
-                        <Gear size={25}/>
-                        <p>Settings</p>
-                    </div>
-                    <div
-                        className={styles.menuItem}
-                        onClick={() => _logout()}
+                        onClick={() => {
+                            _logout();
+                            props.setUserMenu(false);
+                        }}
                     >
                         <SignOut size={25}/>
                         <p>Logout</p>

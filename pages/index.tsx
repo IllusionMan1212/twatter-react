@@ -1,6 +1,5 @@
 import Link from "next/link";
 import LayoutRegular from "components/layouts/layoutRegular";
-import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
 import indexStyles from "styles/index.module.scss";
 import { CurrencyCircleDollar, Fingerprint } from "phosphor-react";
 import { ReactElement } from "react";
@@ -9,11 +8,10 @@ import { useUserContext } from "src/contexts/userContext";
 export default function Index(): ReactElement {
     const { user } = useUserContext();
 
-    if (user) return <></>;
+    if (user) return null;
 
     return (
         <>
-            <StatusBarLoggedOut></StatusBarLoggedOut>
             <LayoutRegular>
                 <div className="text-white">
                     <div className="mt-3 vh-100 text-center">

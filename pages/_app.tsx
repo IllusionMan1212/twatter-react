@@ -1,7 +1,6 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
 import React, { ReactElement } from "react";
-import { ToastWrapper } from "src/contexts/toastContext";
 import { NextSeo } from "next-seo";
 import { UserWrapper } from "src/contexts/userContext";
 import { GlobalWrapper } from "src/contexts/globalContext";
@@ -89,11 +88,9 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                 <meta name="theme-color" content="#6067fe" />
             </Head>
             <UserWrapper>
-                <ToastWrapper>
-                    <GlobalWrapper>
-                        <Component {...pageProps} />
-                    </GlobalWrapper>
-                </ToastWrapper>
+                <GlobalWrapper>
+                    <Component {...pageProps} />
+                </GlobalWrapper>
             </UserWrapper>
         </>
     );

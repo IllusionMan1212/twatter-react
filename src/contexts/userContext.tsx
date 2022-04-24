@@ -30,7 +30,6 @@ const signedInRoutes = [
     "/friends",
     "/trending",
     "/notifications",
-    "/register/setting-up"
 ];
 
 // you have to be signed out to access these routes.

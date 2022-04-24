@@ -219,6 +219,7 @@ export default function EditProfilePopup(
                                 rows={3}
                                 defaultValue={props.userData.bio}
                                 maxLength={150}
+                                placeholder="Talk about yourself..."
                                 onChange={(e) => setBio(e.target.value)}
                             />
                         </div>

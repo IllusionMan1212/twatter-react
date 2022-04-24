@@ -144,9 +144,8 @@ export const handleBirthdayMonthChange = (
     const currentDay = today.getUTCDate();
 
     if (birthday.year == currentYear) {
-        console.log("month: " + e.target.value);
         if (Number(e.target.value) == currentMonth) {
-            if (birthday.day >= currentDay) {
+            if (birthday?.day >= currentDay) {
                 setBirthday({
                     ...birthday,
                     day: null,
@@ -237,7 +236,7 @@ export const handleBirthdayYearChange = (
     const currentMonth = today.getUTCMonth() + 1;
 
     if (Number(e.target.value) == currentYear) {
-        if (birthday.month > currentMonth) {
+        if (birthday?.month > currentMonth) {
             setBirthday({
                 ...birthday,
                 month: null,

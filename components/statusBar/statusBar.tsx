@@ -1,87 +1,45 @@
-import styles from "./statusBar.module.scss";
-import Search from "components/search";
-import { ArrowLeft } from "phosphor-react";
-import UserContextMenu from "components/userContextMenu";
-import { ReactElement, useState, useEffect } from "react";
-import { StatusBarProps } from "src/types/props";
-import ProfileImage from "components/post/profileImage";
-import { useGlobalContext } from "src/contexts/globalContext";
-import Link from "next/link";
+import { ReactElement, useEffect, useState } from "react";
 import { useUserContext } from "src/contexts/userContext";
-import MessagesButton from "components/statusBar/messagesButton";
-import NotificationsButton from "components/statusBar/notificationsButton";
+import StatusBarLoggedIn from "components/statusBar/statusBarLoggedIn";
+import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
+import { useRouter } from "next/router";
 
-export default function StatusBar(props: StatusBarProps): ReactElement {
-    const { unreadMessages } = useGlobalContext();
+interface StatusBarProps {
+    title: string;
+}
+
+const statusBarBackButtonRoutes = [
+    "/u/[username]/[...postId]",
+];
+
+const noBarRoutes = [
+    "/404",
+    "/register/setting-up"
+];
+
+export default function StatusBar({ title }: StatusBarProps): ReactElement {
     const { user } = useUserContext();
+    const router = useRouter();
 
-    const [userMenu, setUserMenu] = useState(false);
-    const [unreadNotifications] = useState(0);
-    const [windowWidth, setWindowWidth] = useState(window?.innerWidth);
-
-    const handleClickBack = () => {
-        history.back();
-    };
-
-    const handleResize = () => {
-        setWindowWidth(window.innerWidth);
-    };
+    const [backButton, setBackButton] = useState(false);
+    const [showBar, setShowBar] = useState(false);
 
     useEffect(() => {
-        window.addEventListener("resize", handleResize);
+        if (noBarRoutes.includes(router.route)) {
+            setShowBar(false);
+        } else {
+            setShowBar(true);
+        }
 
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
+        if (statusBarBackButtonRoutes.includes(router.route)) {
+            setBackButton(true);
+        } else {
+            setBackButton(false);
+        }
+    }, [router.route]);
 
-    return (
-        <div
-            className={`flex text-white align-items-center ${styles.statusBar}`}
-        >
-            {props.backButton && (
-                <div
-                    className={styles.backButton}
-                    onClick={handleClickBack}
-                >
-                    <ArrowLeft size="30"></ArrowLeft>
-                </div>
-            )}
-            <div
-                className={`flex align-items-center ${styles.title}`}
-            >
-                {windowWidth > 800 ? (
-                    <Link href="/home">
-                        <a>
-                            <p className="text-bold ellipsis">Twatter</p>
-                        </a>
-                    </Link>
-                ): (
-                    <p className="text-bold ellipsis">{props.title}</p>
-                )}
-            </div>
-            <div className={styles.search}>
-                <Search></Search>
-            </div>
-            <div className={`ml-auto flex align-items-center ${styles.messagesAndNotifs}`}>
-                <MessagesButton unreadMessages={unreadMessages.length} />
-                <NotificationsButton unreadNotifications={unreadNotifications} />
-                <div
-                    className={`flex align-items-center ${styles.user}`}
-                    onClick={() => {
-                        setUserMenu(!userMenu);
-                    }}
-                >
-                    <ProfileImage
-                        width={38}
-                        height={38}
-                        src={user.avatar_url}
-                    />
-                    <UserContextMenu
-                        open={userMenu}
-                    ></UserContextMenu>
-                </div>
-            </div>
-        </div>
-    );
+    if (!user) return <StatusBarLoggedOut />;
+    if (!showBar) return null;
+
+    return <StatusBarLoggedIn title={title} backButton={backButton} />;
 }

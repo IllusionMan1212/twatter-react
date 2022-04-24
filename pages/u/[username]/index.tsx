@@ -3,9 +3,6 @@ import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import Loading from "components/loading";
-import Navbar from "components/navbar/navbar";
-import StatusBarLoggedOut from "components/statusBar/statusBarLoggedOut";
-import StatusBar from "components/statusBar/statusBar";
 import styles from "styles/profilePage.module.scss";
 import Post from "components/post/post";
 import {
@@ -30,6 +27,7 @@ import useLatestState from "src/hooks/useLatestState";
 import { useUserContext } from "src/contexts/userContext";
 import Friends from "components/friends/friends";
 import DateTime from "components/datetime";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface ApiRequest {
     senderId: string;
@@ -52,11 +50,11 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     const toast = useToastContext();
     const { user: currentUser, socket } = useUserContext();
+    const { setStatusBarTitle } = useGlobalContext();
 
     const parentContainerRef = useRef(null);
 
     const [notFound, setNotFound] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useLatestState<Array<IPost>>([]);
     const [postsAndComments, setPostsAndComments] = useLatestState<
         Array<IPost>
@@ -104,7 +102,10 @@ export default function Profile(props: ProfileProps): ReactElement {
             receiverId: user.id,
         };
         axiosInstance
-            .post<ApiRequest, AxiosResponse<ApiResponse>>("/messaging/startConversation", payload)
+            .post<ApiRequest, AxiosResponse<ApiResponse>>(
+                "/messaging/startConversation",
+                payload
+            )
             .then((res) => {
                 router.push(`/messages/${res.data.conversationId}`);
             })
@@ -455,8 +456,8 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (props.user) {
+            setStatusBarTitle(props.user.display_name);
             setNotFound(false);
-            setLoading(false);
             getPostsCount().then((postsCount) => {
                 setPostsCount(postsCount);
             });
@@ -466,7 +467,6 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
         } else {
             setNotFound(true);
-            setLoading(false);
         }
     }, []);
 
@@ -489,7 +489,6 @@ export default function Profile(props: ProfileProps): ReactElement {
             postsPage.current = 0;
             commentsPage.current = 0;
             mediaPage.current = 0;
-            setLoading(false);
             setNotFound(false);
 
             getPostsCount().then((count) => {
@@ -503,7 +502,6 @@ export default function Profile(props: ProfileProps): ReactElement {
         if (!props.user) {
             setUser(null);
             setNotFound(true);
-            setLoading(false);
         }
     }, [user, props.user, getPosts]);
 
@@ -527,6 +525,29 @@ export default function Profile(props: ProfileProps): ReactElement {
             setMediaModal(false);
         };
     });
+
+    if (notFound) {
+        setStatusBarTitle("Not Found");
+
+        return (
+            <div className={`${styles.container} text-white`}>
+                <div className={styles.scrollableArea}>
+                    <div className={styles.user}>
+                        <div className={styles.userInfo}>
+                            <div
+                                className={`round ${styles.userImage} ${styles.userImageNotFound}`}
+                            ></div>
+                            <div>
+                                <p className={`${styles.display_name} text-bold`}>
+                                    User Doesn&apos;t Exist
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -555,412 +576,351 @@ export default function Profile(props: ProfileProps): ReactElement {
                     ],
                 }}
             />
-            {!loading ? (
-                <>
-                    {!notFound && user ? (
-                        <>
-                            {currentUser ? (
-                                <StatusBar
-                                    title={user.display_name}
-                                ></StatusBar>
-                            ) : (
-                                <StatusBarLoggedOut/>
-                            )}
-                            <div className={styles.content}>
-                                <div className={styles.leftSide}>
-                                    <Friends count={20} />
-                                </div>
-                                <div className={styles.center}>
-                                    <div className="text-white">
-                                        <div
-                                            ref={parentContainerRef}
-                                            className={`${styles.container}`}
-                                        >
-                                            <div
-                                                className={
-                                                    styles.scrollableArea
-                                                }
-                                            >
-                                                <div className={styles.user}>
-                                                    <div
-                                                        className={
-                                                            styles.userInfo
-                                                        }
-                                                    >
-                                                        <div
-                                                            className={`round ${styles.userImage}`}
-                                                            style={{
-                                                                backgroundImage: `url("${
-                                                                    user.avatar_url ==
-                                                                    "default_profile.svg"
-                                                                        ? "/"
-                                                                        : ""
-                                                                }${
-                                                                    user.avatar_url
-                                                                }")`,
-                                                            }}
-                                                        ></div>
-                                                        <div>
-                                                            <p
-                                                                className={`${styles.display_name} text-bold`}
-                                                            >
-                                                                {
-                                                                    user.display_name
-                                                                }
-                                                            </p>
-                                                            <p
-                                                                className={`usernameGrey ${styles.username}`}
-                                                            >
-                                                                @{user.username}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        className={
-                                                            styles.userStats
-                                                        }
-                                                    >
-                                                        {currentUser?.id !=
-                                                        user.id ? (
-                                                                <div
-                                                                    className={
-                                                                        styles.userButtons
-                                                                    }
-                                                                >
-                                                                    {currentUser && (
-                                                                        <div
-                                                                            className="pointer"
-                                                                            onClick={
-                                                                                handleMessageClick
-                                                                            }
-                                                                        >
-                                                                            <ChatTeardropText
-                                                                                color="#6067FE"
-                                                                                size="40"
-                                                                                weight="fill"
-                                                                            ></ChatTeardropText>
-                                                                        </div>
-                                                                    )}
-                                                                    <Button
-                                                                        text="Follow"
-                                                                        size={10}
-                                                                        type={
-                                                                            ButtonType.Regular
-                                                                        }
-                                                                        handleClick={
-                                                                            handleFollowClick
-                                                                        }
-                                                                    ></Button>
-                                                                </div>
-                                                            ) : (
-                                                                <Button
-                                                                    text="Edit Profile"
-                                                                    size={10}
-                                                                    type={
-                                                                        ButtonType.Regular
-                                                                    }
-                                                                    handleClick={() =>
-                                                                        setEditProfilePopup(
-                                                                            true
-                                                                        )
-                                                                    }
-                                                                ></Button>
-                                                            )}
-                                                        <div
-                                                            className={
-                                                                styles.statsContainer
-                                                            }
-                                                        >
-                                                            <span>
-                                                                <span className="text-bold">
-                                                                    {formatBigNumbers(
-                                                                        postsCount
-                                                                    )}
-                                                                </span>{" "}
-                                                                Posts
-                                                            </span>{" "}
-                                                            <span>
-                                                                <span className="text-bold">
-                                                                    {formatBigNumbers(
-                                                                        0
-                                                                    )}
-                                                                </span>{" "}
-                                                                Following
-                                                            </span>{" "}
-                                                            <span>
-                                                                <span className="text-bold">
-                                                                    {formatBigNumbers(
-                                                                        0
-                                                                    )}
-                                                                </span>{" "}
-                                                                Followers
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
+            <>
+                {user && (
+                    <>
+                        <div className={styles.content}>
+                            <div className={styles.leftSide}>
+                                <Friends count={20} />
+                            </div>
+                            <div className={styles.center}>
+                                <div className="text-white">
+                                    <div
+                                        ref={parentContainerRef}
+                                        className={`${styles.container}`}
+                                    >
+                                        <div className={styles.scrollableArea}>
+                                            <div className={styles.user}>
                                                 <div
-                                                    className={
-                                                        styles.userExtraInfo
-                                                    }
+                                                    className={styles.userInfo}
                                                 >
-                                                    {user.bio && (
-                                                        <div className="flex gap-1">
-                                                            <Note
-                                                                className={
-                                                                    styles.icon
-                                                                }
-                                                                size="32"
-                                                            ></Note>
-                                                            <p className="mt-1Percent">
-                                                                {user.bio}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                    {user.birthday.Valid && (
-                                                        <div className="flex gap-1">
-                                                            <Gift
-                                                                className={
-                                                                    styles.icon
-                                                                }
-                                                                size="32"
-                                                            ></Gift>
-                                                            <p className="mt-1Percent">
-                                                                {birthday}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                    <div className="flex gap-1">
-                                                        <Calendar
-                                                            className={
-                                                                styles.icon
-                                                            }
-                                                            size="32"
-                                                        ></Calendar>
-                                                        <p className="mt-1Percent">
-                                                            Member since{" "}
-                                                            <DateTime
-                                                                datetime={props.user.created_at}
-                                                                formattingFunction={formatJoinDate}
-                                                                style={{ display: "inline" }}
-                                                            />
+                                                    <div
+                                                        className={`round ${styles.userImage}`}
+                                                        style={{
+                                                            backgroundImage: `url("${
+                                                                user.avatar_url ==
+                                                                "default_profile.svg"
+                                                                    ? "/"
+                                                                    : ""
+                                                            }${
+                                                                user.avatar_url
+                                                            }")`,
+                                                        }}
+                                                    ></div>
+                                                    <div>
+                                                        <p
+                                                            className={`${styles.display_name} text-bold`}
+                                                        >
+                                                            {user.display_name}
+                                                        </p>
+                                                        <p
+                                                            className={`usernameGrey ${styles.username}`}
+                                                        >
+                                                            @{user.username}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <div
-                                                    className={
-                                                        styles.suggestedUsersMobile
-                                                    }
+                                                    className={styles.userStats}
                                                 >
-                                                    <SuggestedUsers
-                                                        users={new Array(
-                                                            3
-                                                        ).fill(props.user)}
-                                                    />
-                                                </div>
-                                                <div
-                                                    className={styles.userPosts}
-                                                >
-                                                    <div
-                                                        className={styles.tabs}
-                                                    >
-                                                        <div
-                                                            className={`pointer ${
-                                                                styles.postsTab
-                                                            } ${
-                                                                activeTab.current ==
-                                                                    Tabs.Posts &&
-                                                                styles.activeTab
-                                                            }`}
-                                                            onClick={
-                                                                handlePostsTabClick
-                                                            }
-                                                        >
-                                                            Posts
-                                                        </div>
-                                                        <div
-                                                            className={`pointer ${
-                                                                styles.postsAndCommentsTab
-                                                            } ${
-                                                                activeTab.current ==
-                                                                    Tabs.PostsAndComments &&
-                                                                styles.activeTab
-                                                            }`}
-                                                            onClick={
-                                                                handleAllTabClick
-                                                            }
-                                                        >
-                                                            Posts &amp; Comments
-                                                        </div>
-                                                        <div
-                                                            className={`pointer ${
-                                                                styles.mediaTab
-                                                            } ${
-                                                                activeTab.current ==
-                                                                    Tabs.MediaPosts &&
-                                                                styles.activeTab
-                                                            }`}
-                                                            onClick={
-                                                                handleMediaTabClick
-                                                            }
-                                                        >
-                                                            Media
-                                                        </div>
-                                                    </div>
-                                                    {!postsLoading ? (
-                                                        <>
-                                                            {getActiveTabPosts()
-                                                                .length == 0 &&
-                                                                getActiveReachedEnd() && (
-                                                                <div
-                                                                    className="flex justify-content-center"
-                                                                    style={{
-                                                                        padding:
-                                                                            "20px",
-                                                                    }}
-                                                                >
-                                                                    <p>
-                                                                        @
-                                                                        {
-                                                                            user.username
-                                                                        }{" "}
-                                                                        doesn&apos;t
-                                                                        have
-                                                                        any
-                                                                        posts
-                                                                        under
-                                                                        this
-                                                                        tab.
-                                                                    </p>
-                                                                </div>
-                                                            )}
-                                                            <Virtuoso
-                                                                totalCount={
-                                                                    getActiveTabPosts()
-                                                                        .length
+                                                    {currentUser?.id !=
+                                                    user.id ? (
+                                                            <div
+                                                                className={
+                                                                    styles.userButtons
                                                                 }
-                                                                className={styles.postsContainer}
-                                                                data={getActiveTabPosts()}
-                                                                endReached={
-                                                                    loadMorePosts
-                                                                }
-                                                                useWindowScroll
-                                                                // eslint-disable-next-line react/display-name
-                                                                components={{
-                                                                    Footer: () => {
-                                                                        return (
-                                                                            <>
-                                                                                {!getActiveReachedEnd() && (
-                                                                                    <div
-                                                                                        className={
-                                                                                            styles.loadingContainer
-                                                                                        }
-                                                                                    >
-                                                                                        <Loading
-                                                                                            height="50"
-                                                                                            width="50"
-                                                                                        ></Loading>
-                                                                                    </div>
-                                                                                )}
-                                                                            </>
-                                                                        );
-                                                                    },
-                                                                }}
-                                                                itemContent={(
-                                                                    _index,
-                                                                    post
-                                                                ) => (
-                                                                    <Post
-                                                                        key={
-                                                                            post.id
+                                                            >
+                                                                {currentUser && (
+                                                                    <div
+                                                                        className="pointer"
+                                                                        onClick={
+                                                                            handleMessageClick
                                                                         }
-                                                                        handleMediaClick={
-                                                                            handleMediaClick
-                                                                        }
-                                                                        post={
-                                                                            post
-                                                                        }
-                                                                        parentContainerRef={
-                                                                            parentContainerRef
-                                                                        }
-                                                                    ></Post>
+                                                                    >
+                                                                        <ChatTeardropText
+                                                                            color="#6067FE"
+                                                                            size="40"
+                                                                            weight="fill"
+                                                                        ></ChatTeardropText>
+                                                                    </div>
                                                                 )}
-                                                            ></Virtuoso>
-                                                        </>
-                                                    ) : (
-                                                        <Loading
-                                                            height="50"
-                                                            width="50"
-                                                        ></Loading>
-                                                    )}
+                                                                <Button
+                                                                    text="Follow"
+                                                                    size={10}
+                                                                    type={
+                                                                        ButtonType.Regular
+                                                                    }
+                                                                    handleClick={
+                                                                        handleFollowClick
+                                                                    }
+                                                                ></Button>
+                                                            </div>
+                                                        ) : (
+                                                            <Button
+                                                                text="Edit Profile"
+                                                                size={10}
+                                                                type={
+                                                                    ButtonType.Regular
+                                                                }
+                                                                handleClick={() =>
+                                                                    setEditProfilePopup(
+                                                                        true
+                                                                    )
+                                                                }
+                                                            />
+                                                        )}    
+                                                    <div
+                                                        className={
+                                                            styles.statsContainer
+                                                        }
+                                                    >
+                                                        <span>
+                                                            <span className="text-bold">
+                                                                {formatBigNumbers(
+                                                                    postsCount
+                                                                )}
+                                                            </span>{" "}
+                                                            Posts
+                                                        </span>{" "}
+                                                        <span>
+                                                            <span className="text-bold">
+                                                                {formatBigNumbers(
+                                                                    0
+                                                                )}
+                                                            </span>{" "}
+                                                            Following
+                                                        </span>{" "}
+                                                        <span>
+                                                            <span className="text-bold">
+                                                                {formatBigNumbers(
+                                                                    0
+                                                                )}
+                                                            </span>{" "}
+                                                            Followers
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={styles.rightSide}>
-                                    <div
-                                        className={styles.suggestedUsersDesktop}
-                                    >
-                                        <SuggestedUsers
-                                            users={new Array(5).fill(user)}
-                                        ></SuggestedUsers>
-                                    </div>
-                                </div>
-                            </div>
-                            {currentUser && (
-                                <Navbar/>
-                            )}
-                            {mediaModal && (
-                                <MediaModal
-                                    modalData={modalData}
-                                    handleMediaClick={handleMediaClick}
-                                ></MediaModal>
-                            )}
-                            {editProfilePopup && (
-                                <EditProfilePopup
-                                    setEditProfilePopup={setEditProfilePopup}
-                                    userData={user}
-                                ></EditProfilePopup>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            {currentUser ? (
-                                <div>
-                                    <Navbar/>
-                                    <StatusBar
-                                        title="Not Found"
-                                    ></StatusBar>
-                                </div>
-                            ) : (
-                                <StatusBarLoggedOut></StatusBarLoggedOut>
-                            )}
-                            <div className="text-white">
-                                <div className={`${styles.container}`}>
-                                    <div className={styles.scrollableArea}>
-                                        <div className={styles.user}>
-                                            <div className={styles.userInfo}>
-                                                <div
-                                                    className={`round ${styles.userImage} ${styles.userImageNotFound}`}
-                                                ></div>
-                                                <div>
-                                                    <p
-                                                        className={`${styles.display_name} text-bold`}
-                                                    >
-                                                        User Doesn&apos;t Exist
+                                            <div
+                                                className={styles.userExtraInfo}
+                                            >
+                                                {user.bio && (
+                                                    <div className="flex gap-1">
+                                                        <Note
+                                                            className={
+                                                                styles.icon
+                                                            }
+                                                            size="32"
+                                                        ></Note>
+                                                        <p className="mt-1Percent">
+                                                            {user.bio}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                {user.birthday.Valid && (
+                                                    <div className="flex gap-1">
+                                                        <Gift
+                                                            className={
+                                                                styles.icon
+                                                            }
+                                                            size="32"
+                                                        ></Gift>
+                                                        <p className="mt-1Percent">
+                                                            {birthday}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                <div className="flex gap-1">
+                                                    <Calendar
+                                                        className={styles.icon}
+                                                        size="32"
+                                                    ></Calendar>
+                                                    <p className="mt-1Percent">
+                                                        Member since{" "}
+                                                        <DateTime
+                                                            datetime={
+                                                                user.created_at
+                                                            }
+                                                            formattingFunction={
+                                                                formatJoinDate
+                                                            }
+                                                            style={{
+                                                                display:
+                                                                    "inline",
+                                                            }}
+                                                        />
                                                     </p>
                                                 </div>
                                             </div>
+                                            <div
+                                                className={
+                                                    styles.suggestedUsersMobile
+                                                }
+                                            >
+                                                <SuggestedUsers
+                                                    users={new Array(3).fill(
+                                                        props.user
+                                                    )}
+                                                />
+                                            </div>
+                                            <div className={styles.userPosts}>
+                                                <div className={styles.tabs}>
+                                                    <div
+                                                        className={`pointer ${
+                                                            styles.postsTab
+                                                        } ${
+                                                            activeTab.current ==
+                                                                Tabs.Posts &&
+                                                            styles.activeTab
+                                                        }`}
+                                                        onClick={
+                                                            handlePostsTabClick
+                                                        }
+                                                    >
+                                                        Posts
+                                                    </div>
+                                                    <div
+                                                        className={`pointer ${
+                                                            styles.postsAndCommentsTab
+                                                        } ${
+                                                            activeTab.current ==
+                                                                Tabs.PostsAndComments &&
+                                                            styles.activeTab
+                                                        }`}
+                                                        onClick={
+                                                            handleAllTabClick
+                                                        }
+                                                    >
+                                                        Posts &amp; Comments
+                                                    </div>
+                                                    <div
+                                                        className={`pointer ${
+                                                            styles.mediaTab
+                                                        } ${
+                                                            activeTab.current ==
+                                                                Tabs.MediaPosts &&
+                                                            styles.activeTab
+                                                        }`}
+                                                        onClick={
+                                                            handleMediaTabClick
+                                                        }
+                                                    >
+                                                        Media
+                                                    </div>
+                                                </div>
+                                                {!postsLoading ? (
+                                                    <>
+                                                        {getActiveTabPosts()
+                                                            .length == 0 &&
+                                                            getActiveReachedEnd() && (
+                                                            <div
+                                                                className="flex justify-content-center"
+                                                                style={{
+                                                                    padding:
+                                                                        "20px",
+                                                                }}
+                                                            >
+                                                                <p>
+                                                                    @
+                                                                    {
+                                                                        user.username
+                                                                    }{" "}
+                                                                    doesn&apos;t
+                                                                    have any
+                                                                    posts
+                                                                    under
+                                                                    this
+                                                                    tab.
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        <Virtuoso
+                                                            totalCount={
+                                                                getActiveTabPosts()
+                                                                    .length
+                                                            }
+                                                            className={
+                                                                styles.postsContainer
+                                                            }
+                                                            data={getActiveTabPosts()}
+                                                            endReached={
+                                                                loadMorePosts
+                                                            }
+                                                            useWindowScroll
+                                                            // eslint-disable-next-line react/display-name
+                                                            components={{
+                                                                Footer: () => {
+                                                                    return (
+                                                                        <>
+                                                                            {!getActiveReachedEnd() && (
+                                                                                <div
+                                                                                    className={
+                                                                                        styles.loadingContainer
+                                                                                    }
+                                                                                >
+                                                                                    <Loading
+                                                                                        height="50"
+                                                                                        width="50"
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                        </>
+                                                                    );
+                                                                },
+                                                            }}
+                                                            itemContent={(
+                                                                _index,
+                                                                post
+                                                            ) => (
+                                                                <Post
+                                                                    key={
+                                                                        post.id
+                                                                    }
+                                                                    handleMediaClick={
+                                                                        handleMediaClick
+                                                                    }
+                                                                    post={post}
+                                                                    parentContainerRef={
+                                                                        parentContainerRef
+                                                                    }
+                                                                ></Post>
+                                                            )}
+                                                        ></Virtuoso>
+                                                    </>
+                                                ) : (
+                                                    <Loading
+                                                        height="50"
+                                                        width="50"
+                                                    />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </>
-                    )}
-                </>
-            ) : (
-                <Loading height="100" width="100"></Loading>
-            )}
+                            <div className={styles.rightSide}>
+                                <div className={styles.suggestedUsersDesktop}>
+                                    <SuggestedUsers
+                                        users={new Array(5).fill(user)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        {mediaModal && (
+                            <MediaModal
+                                modalData={modalData}
+                                handleMediaClick={handleMediaClick}
+                            />
+                        )}
+                        {editProfilePopup && (
+                            <EditProfilePopup
+                                setEditProfilePopup={setEditProfilePopup}
+                                userData={user}
+                            />
+                        )}
+                    </>
+                )}
+            </>
         </>
     );
 }

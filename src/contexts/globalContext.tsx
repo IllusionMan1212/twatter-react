@@ -1,10 +1,13 @@
 import { createContext, ReactElement, useContext, useEffect, useState, SetStateAction, Dispatch, useCallback } from "react";
 import { useUserContext } from "./userContext";
-import { useToastContext } from "./toastContext"; import axiosInstance from "src/axios";
+import { ToastWrapper, useToastContext } from "./toastContext"; import axiosInstance from "src/axios";
 import axios, { AxiosResponse } from "axios";
 import { ISocketMessage } from "src/types/general";
 import { ContextWrapperProps } from "src/types/props";
 import Share from "components/share/share";
+import StatusBar from "components/statusBar/statusBar";
+import Navbar from "components/navbar/navbar";
+import { useRouter } from "next/router";
 
 interface ISharer {
     enabled: boolean;
@@ -19,11 +22,22 @@ interface GlobalContextType {
     setActiveConversationId: Dispatch<SetStateAction<string>>;
     sharer: ISharer;
     setSharer: Dispatch<SetStateAction<ISharer>>;
+    setStatusBarTitle: Dispatch<SetStateAction<string>>;
 }
 
 interface ApiResponse {
     unreadMessages: string[];
 }
+
+const statusBarTitles = new Map([
+    ["/home", "Home"],
+    ["/messages/[[...conversationId]]", "Messages"],
+    ["/notifications", "Notifications"],
+    ["/friends", "Friends"],
+    ["/search", "Search"],
+    ["/settings", "Settings"],
+    ["/trending", "Trending"],
+]);
 
 const SharerDefaultValues: ISharer = {
     enabled: false,
@@ -38,6 +52,7 @@ const GlobalContextDefaultValues: GlobalContextType = {
     setActiveConversationId: null,
     sharer: SharerDefaultValues,
     setSharer: null,
+    setStatusBarTitle: null,
 };
 
 const GlobalContext = createContext<GlobalContextType>(
@@ -47,10 +62,12 @@ const GlobalContext = createContext<GlobalContextType>(
 export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     const { user, socket } = useUserContext();
     const toast = useToastContext();
+    const router = useRouter();
 
     const [unreadMessages, setUnreadMessages] = useState<string[]>([]);
     const [activeConversationId, setActiveConversationId] = useState("");
     const [sharer, setSharer] = useState<ISharer>(SharerDefaultValues);
+    const [statusBarTitle, setStatusBarTitle] = useState("");
 
     const handleError = useCallback(
         (payload) => {
@@ -94,7 +111,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
                 socket.off("error", handleError);
             }
         };
-    }, [socket, handleMessage]);
+    }, [socket, handleMessage, handleError]);
 
     useEffect(() => {
         if (user) {
@@ -125,6 +142,12 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
         }
     }, [user]);
 
+    useEffect(() => {
+        if (statusBarTitles.has(router.route)) {
+            setStatusBarTitle(statusBarTitles.get(router.route));
+        }
+    }, [router.route]);
+
     return (
         <>
             <GlobalContext.Provider value={{
@@ -134,14 +157,14 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
                 setActiveConversationId,
                 sharer,
                 setSharer,
+                setStatusBarTitle,
             }}>
-                <>
-                    <Share
-                        text={sharer.text}
-                        url={sharer.url}
-                    />
+                <Share text={sharer.text} url={sharer.url} />
+                <ToastWrapper>
+                    <StatusBar title={statusBarTitle} />
+                    <Navbar />
                     {children}
-                </>
+                </ToastWrapper>
             </GlobalContext.Provider>
         </>
     );
