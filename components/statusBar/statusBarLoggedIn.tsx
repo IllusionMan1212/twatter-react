@@ -1,7 +1,7 @@
 import styles from "./statusBarLoggedIn.module.scss";
 import Search from "components/search";
 import { ArrowLeft } from "phosphor-react";
-import UserContextMenu from "components/userContextMenu";
+import UserContextMenu from "components/userContextMenu/userContextMenu";
 import { ReactElement, useState, useEffect } from "react";
 import ProfileImage from "components/post/profileImage";
 import { useGlobalContext } from "src/contexts/globalContext";
@@ -48,7 +48,7 @@ export default function StatusBarLoggedIn(props: StatusBarLoggedInProps): ReactE
                     className={styles.backButton}
                     onClick={handleClickBack}
                 >
-                    <ArrowLeft size="30"></ArrowLeft>
+                    <ArrowLeft size="30"/>
                 </div>
             )}
             <div
@@ -65,7 +65,7 @@ export default function StatusBarLoggedIn(props: StatusBarLoggedInProps): ReactE
                 )}
             </div>
             <div className={styles.search}>
-                <Search></Search>
+                <Search/>
             </div>
             <div className={`ml-auto flex align-items-center ${styles.messagesAndNotifs}`}>
                 <MessagesButton unreadMessages={unreadMessages.length} />

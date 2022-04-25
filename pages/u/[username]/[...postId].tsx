@@ -329,8 +329,6 @@ export async function getServerSideProps(
         console.error(err);
     }
 
-    console.log(res);
-
     return {
         props: { post: post },
     };

@@ -1,10 +1,10 @@
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 import styles from "./friend.module.scss";
 import ProfileImage from "components/post/profileImage";
 import Link from "next/link";
 import { FriendProps } from "src/types/props";
 
-export default function Friend(props: FriendProps): ReactElement {
+const Friend = memo(function Friend(props: FriendProps): ReactElement {
     return (
         <Link href={`/u/${props.username}`}>
             <a>
@@ -20,4 +20,6 @@ export default function Friend(props: FriendProps): ReactElement {
             </a>
         </Link>
     );
-}
+});
+
+export default Friend;

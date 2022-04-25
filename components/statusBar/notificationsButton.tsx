@@ -1,30 +1,31 @@
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 import styles from "./statusBarLoggedIn.module.scss";
-import Router from "next/router";
 import { Bell } from "phosphor-react";
+import Link from "next/link";
 
-interface Props {
+interface NotificationButtonProps {
     unreadNotifications: number;
 }
 
-export default function NotificationsButton({ unreadNotifications }: Props): ReactElement {
+const NotificationsButton = memo(function NotificationsButton({
+    unreadNotifications,
+}: NotificationButtonProps): ReactElement {
     return (
-        <div className={styles.notifs}>
-            <Bell
-                className={styles.icon}
-                size="25"
-                onClick={() => {
-                    Router.push("/notifications", null, {
-                        shallow: true,
-                    });
-                }}
-                weight="fill"
-            ></Bell>
-            {unreadNotifications != 0 && (
-                <div className={styles.unreadBubble}>
-                    {unreadNotifications > 99 ? "99+" : unreadNotifications}
+        <Link href="/notifications">
+            <a>
+                <div className={styles.notifs}>
+                    <Bell className={styles.icon} size="25" weight="fill" />
+                    {unreadNotifications != 0 && (
+                        <div className={styles.unreadBubble}>
+                            {unreadNotifications > 99
+                                ? "99+"
+                                : unreadNotifications}
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
+            </a>
+        </Link>
     );
-}
+});
+
+export default NotificationsButton;

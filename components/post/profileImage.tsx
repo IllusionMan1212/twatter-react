@@ -1,10 +1,10 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement, useRef } from "react";
+import { memo, ReactElement, useRef } from "react";
 import Link from "next/link";
 import styles from "./profileImage.module.scss";
 import { ProfileImageProps } from "src/types/props";
 
-export default function ProfileImage(props: ProfileImageProps): ReactElement {
+const ProfileImage = memo(function ProfileImage(props: ProfileImageProps): ReactElement {
     const placeholderRef = useRef<HTMLDivElement>(null);
 
     const handleImageLoad = () => {
@@ -84,4 +84,6 @@ export default function ProfileImage(props: ProfileImageProps): ReactElement {
             )}
         </>
     );
-}
+});
+
+export default ProfileImage;

@@ -1,7 +1,6 @@
-/* eslint-disable react/react-in-jsx-scope */
 import styles from "./post.module.scss";
 import Link from "next/link";
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 import { timeSince } from "src/utils/functions";
 import LikeButton from "components/buttons/likeButton";
 import { PostProps } from "src/types/props";
@@ -14,7 +13,7 @@ import ReplyingTo from "./replyingTo";
 import DateTime from "components/datetime";
 import { useUserContext } from "src/contexts/userContext";
 
-export default function Post(props: PostProps): ReactElement {
+const Post = memo(function Post(props: PostProps): ReactElement {
     const { user } = useUserContext();
 
     const handleCommentButtonClick = () => {
@@ -84,13 +83,13 @@ export default function Post(props: PostProps): ReactElement {
                     postAuthorUsername={props.post.author?.username}
                     currentUserId={user?.id}
                     parentContainerRef={props.parentContainerRef}
-                ></PostOptionsMenuButton>
+                />
                 <div className={`ml-1 ${styles.postText}`}>
                     <p>{props.post.content}</p>
                     <AttachmentsContainer
                         post={props.post}
                         handleMediaClick={props.handleMediaClick}
-                    ></AttachmentsContainer>
+                    />
                 </div>
                 <div className={styles.footer}>
                     <DateTime
@@ -102,16 +101,18 @@ export default function Post(props: PostProps): ReactElement {
                         <CommentButton
                             post={props.post}
                             handleClick={handleCommentButtonClick}
-                        ></CommentButton>
+                        />
                         <LikeButton
                             post={props.post}
                             currentUserId={user?.id}
                             likes={props.post.likes}
                             liked={props.post.liked}
-                        ></LikeButton>
+                        />
                     </div>
                 </div>
             </div>
         </div>
     );
-}
+});
+
+export default Post;

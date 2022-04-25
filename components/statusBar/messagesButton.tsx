@@ -1,33 +1,33 @@
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 import styles from "./statusBarLoggedIn.module.scss";
-import Router from "next/router";
 import { ChatsTeardrop } from "phosphor-react";
+import Link from "next/link";
 
-interface Props {
+interface MessagesButtonProps {
     unreadMessages: number;
 }
 
-export default function MessagesButton({ unreadMessages }: Props): ReactElement {
+const MessagesButton = memo(function MessagesButton({
+    unreadMessages,
+}: MessagesButtonProps): ReactElement {
     return (
-        <div
-            className={styles.messages}
-            onClick={() => {
-                Router.push("/messages", null, {
-                    shallow: true,
-                });
-            }}
-        >
-            <ChatsTeardrop
-                className={styles.icon}
-                size="25"
-                weight="fill"
-            ></ChatsTeardrop>
-            {unreadMessages != 0 && (
-                <div className={styles.unreadBubble}>
-                    {unreadMessages > 99 ? "99+" : unreadMessages}
+        <Link href="/messages">
+            <a>
+                <div className={styles.messages}>
+                    <ChatsTeardrop
+                        className={styles.icon}
+                        size="25"
+                        weight="fill"
+                    />
+                    {unreadMessages != 0 && (
+                        <div className={styles.unreadBubble}>
+                            {unreadMessages > 99 ? "99+" : unreadMessages}
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
+            </a>
+        </Link>
     );
-}
+});
 
+export default MessagesButton;

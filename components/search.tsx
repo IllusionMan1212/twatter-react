@@ -1,9 +1,9 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 import styles from "./search.module.scss";
 import { MagnifyingGlass } from "phosphor-react";
 
-export default function Search(): ReactElement {
+const Search = memo(function Search(): ReactElement {
     return (
         <div className={styles.container}>
             <MagnifyingGlass
@@ -18,4 +18,6 @@ export default function Search(): ReactElement {
             ></input>
         </div>
     );
-}
+});
+
+export default Search;

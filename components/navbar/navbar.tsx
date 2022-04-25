@@ -7,7 +7,7 @@ import {
 } from "phosphor-react";
 import { ReactElement, useEffect, useState } from "react";
 import ProfileImage from "components/post/profileImage";
-import UserContextMenu from "components/userContextMenu";
+import UserContextMenu from "components/userContextMenu/userContextMenu";
 import NavItem from "components/navbar/navItem";
 import { useUserContext } from "src/contexts/userContext";
 import { useRouter } from "next/router";

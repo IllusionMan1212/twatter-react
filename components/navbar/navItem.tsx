@@ -1,11 +1,11 @@
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 import { NavItemProps } from "src/types/props";
 import styles from "./navItem.module.scss";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useUserContext } from "src/contexts/userContext";
 
-export default function NavItem(props: NavItemProps): ReactElement {
+const NavItem = memo(function NavItem(props: NavItemProps): ReactElement {
     const { user } = useUserContext();
     const router = useRouter();
 
@@ -32,4 +32,6 @@ export default function NavItem(props: NavItemProps): ReactElement {
             )}
         </>
     );
-}
+});
+
+export default NavItem;
