@@ -20,20 +20,3 @@
     }
 }
 
-.unreadBubble {
-    background-color: #1f1f1f;
-    color: #ddd;
-    font-weight: bold;
-    font-size: 0.8em;
-    width: fit-content;
-    width: -moz-fit-content;
-    padding: 0 6px;
-    height: 20px;
-    border-radius: 55px;
-    position: absolute;
-    top: -7px;
-    right: 23%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
