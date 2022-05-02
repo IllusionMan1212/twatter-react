@@ -29,6 +29,8 @@ const initialState = {
     messages: [] as IMessage[],
     activeConversation: null as IActiveConversation,
     isConversationActive: false,
+    isModalActive: false,
+    modalAttachment: "",
 };
 
 export default function Messages(): ReactElement {
@@ -39,8 +41,6 @@ export default function Messages(): ReactElement {
 
     const [state, dispatch] = useReducer(messagingReducer, initialState);
 
-    const [imageModal, setImageModal] = useState(false);
-    const [modalAttachment, setModalAttachment] = useState("");
     const [atBottom, setAtBottom] = useState(false);
     const [newMessagesAlert, setNewMessagesAlert] = useState(false);
     const [nowSending, setNowSending] = useState(false);
@@ -258,8 +258,6 @@ export default function Messages(): ReactElement {
                         <ActiveConversation
                             state={state}
                             dispatch={dispatch}
-                            setImageModal={setImageModal}
-                            setModalAttachment={setModalAttachment}
                             atBottom={atBottom}
                             setAtBottom={setAtBottom}
                             newMessagesAlert={newMessagesAlert}
@@ -268,11 +266,10 @@ export default function Messages(): ReactElement {
                             setNowSending={setNowSending}
                         />
                     ) : <NoActiveConversation/>}
-                    {imageModal && (
+                    {state.isModalActive && (
                         <MessageMediaModal
-                            setImageModal={setImageModal}
-                            attachment={modalAttachment}
-                        ></MessageMediaModal>
+                            state={state}
+                        />
                     )}
                 </div>
             </div>

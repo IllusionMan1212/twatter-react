@@ -5,17 +5,11 @@ import { X } from "phosphor-react";
 import { MessageMediaModalProps } from "src/types/props";
 
 export default function MessageMediaModal(
-    props: MessageMediaModalProps
+    { state }: MessageMediaModalProps
 ): ReactElement {
     const handleWindowKeyDown = (e: KeyboardEvent) => {
         e.key == "Escape" && window.history.back();
     };
-
-    useEffect(() => {
-        window.onpopstate = () => {
-            props.setImageModal(false);
-        };
-    });
 
     useEffect(() => {
         window?.addEventListener("keydown", handleWindowKeyDown);
@@ -31,14 +25,13 @@ export default function MessageMediaModal(
                 className={`${styles.icon} ${styles.closeModal}`}
                 onClick={() => {
                     window.history.back();
-                    props.setImageModal(false);
                 }}
             >
                 <X color="white" weight="bold" size="20"></X>
             </div>
             <img
                 className={styles.image}
-                src={props.attachment}
+                src={state.modalAttachment}
                 onClick={(e) => e.stopPropagation()}
                 height="100%"
                 width="100%"

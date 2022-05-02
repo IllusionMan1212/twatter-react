@@ -27,6 +27,7 @@ export interface LoadingProps {
 }
 
 export interface MessageProps {
+    dispatch: Dispatch<MessagingAction>;
     messageId: string;
     messageAuthorId: string;
     receiverId: string;
@@ -35,8 +36,6 @@ export interface MessageProps {
     sentTime: string;
     attachment: string;
     conversationId: string;
-    setImageModal: (bool: boolean) => void;
-    setModalAttachment: (attachment: string) => void;
 
     // ref of container that the options menu shouldn't exceed in width and height
     parentContainerRef?: MutableRefObject<HTMLElement>;
@@ -58,8 +57,7 @@ export interface ConversationsListItemProps {
 }
 
 export interface MessageMediaModalProps {
-    setImageModal: (bool: boolean) => void;
-    attachment: string;
+    state: MessagingState;
 }
 
 export interface PostProps {
@@ -263,8 +261,6 @@ export interface MessageBoxProps {
 export interface ActiveConversationProps {
     state: MessagingState;
     dispatch: Dispatch<MessagingAction>;
-    setImageModal: Dispatch<SetStateAction<boolean>>;
-    setModalAttachment: Dispatch<SetStateAction<string>>;
     atBottom: boolean;
     setAtBottom: Dispatch<SetStateAction<boolean>>;
     newMessagesAlert: boolean;

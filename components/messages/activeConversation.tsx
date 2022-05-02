@@ -18,7 +18,7 @@ import { useToastContext } from "src/contexts/toastContext";
 import { messageCharLimit } from "src/utils/variables";
 import { useGlobalContext } from "src/contexts/globalContext";
 
-export default function ActiveConversation(props: ActiveConversationProps): ReactElement {
+export default function ActiveConversation({ dispatch, state, atBottom, setNewMessagesAlert,  ...props }: ActiveConversationProps): ReactElement {
     const START_INDEX = 10000;
 
     const { user, socket } = useUserContext();
@@ -50,15 +50,15 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
 
     const handleNewMessagesAlertClick = () => {
         scrollToBottom();
-        props.setNewMessagesAlert(false);
+        setNewMessagesAlert(false);
     };
 
     const scrollToBottom = useCallback(() => {
         virtuosoRef?.current?.scrollToIndex({
-            index: props.state.messages.length - 1,
+            index: state.messages.length - 1,
             behavior: "smooth",
         });
-    }, [props.state.messages.length]);
+    }, [state.messages.length]);
 
     const getMessages = useCallback((conversationId: string): Promise<IMessage[]> => {
         return axiosInstance
@@ -77,7 +77,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
 
     const loadMoreMessages = useCallback(() => {
         setPage(pageRef.current + 1);
-        getMessages(props.state.activeConversation.id).then((newMessages) => {
+        getMessages(state.activeConversation.id).then((newMessages) => {
             if (!newMessages.length) {
                 setReachedStartOfMessages(true);
                 return;
@@ -87,7 +87,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
 
             setFirstItemIndex(nextFirstItemIndex);
 
-            props.dispatch({
+            dispatch({
                 type: MessagingActions.LOAD_MORE_MESSAGES,
                 payload: {
                     newMessages: newMessages,
@@ -95,12 +95,12 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
             });
             return;
         });
-    }, [pageRef, firstItemIndex, props.state.activeConversation?.id, getMessages]);
+    }, [pageRef, firstItemIndex, state.activeConversation?.id, getMessages, dispatch]);
 
     const handleTyping = useCallback((payload: { conversationId: string }) => {
         clearTimeout(timeoutId);
         setTimeoutId(null);
-        if (props.state.activeConversation?.id == payload.conversationId) {
+        if (state.activeConversation?.id == payload.conversationId) {
             setTyping(true);
         }
 
@@ -109,7 +109,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                 setTyping(false);
             }, 4000)
         );
-    }, [props.state.activeConversation?.id, setTyping, setTimeoutId, timeoutId]);
+    }, [state.activeConversation?.id, setTyping, setTimeoutId, timeoutId]);
 
     const handleMessageReceived = useCallback(
         (msg: ISocketMessage) => {
@@ -118,7 +118,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                 setTimeoutId(null);
                 setTyping(false);
             }
-        }, [setTyping, timeoutId]
+        }, [setTyping, timeoutId, user.id]
     );
 
     useEffect(() => {
@@ -136,16 +136,26 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
     }, [socket, handleMessageReceived, handleTyping]);
 
     useEffect(() => {
-        if (props.atBottom) {
-            props.setNewMessagesAlert(false);
+        if (atBottom) {
+            setNewMessagesAlert(false);
         }
-    }, [props.atBottom, props.setNewMessagesAlert]);
+    }, [atBottom, setNewMessagesAlert]);
 
     useEffect(() => {
+        if (state.isModalActive) {
+            dispatch({
+                type: MessagingActions.TOGGLE_MODAL,
+                payload: {
+                    modalAttachment: ""
+                }
+            });
+            return;
+        }
+
+        setReachedStartOfMessages(false);
         setFirstItemIndex(START_INDEX);
         setPage(0);
         pageRef.current = 0;
-        setReachedStartOfMessages(false);
 
         if (messageBoxRef && messageBoxRef.current) {
             messageBoxRef.current.innerHTML = "";
@@ -158,7 +168,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
         // if we can't find the query string in our conversations, we just load the normal messages page
         if (!router.query?.conversationId?.[0]) {
             setActiveConversationId("");
-            props.dispatch({
+            dispatch({
                 type: MessagingActions.CHANGE_CONVERSATION,
                 payload: {
                     activeConversation: null,
@@ -173,34 +183,34 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                 setReachedStartOfMessages(true);
             }
 
-            props.dispatch({
+            dispatch({
                 type: MessagingActions.FETCH_MESSAGES,
                 payload: {
                     messages: _messages,
                 }
             });
         });
-    }, [router.query?.conversationId, setActiveConversationId]);
+    }, [router.query?.conversationId, setActiveConversationId, dispatch, getMessages, state.isConversationActive]);
 
     return (
         <div
             className={`${styles.conversation} ${
-                props.state.isConversationActive ? styles.conversationMobile : ""
+                state.isConversationActive ? styles.conversationMobile : ""
             }`}
         >
             <div className={styles.user}>
                 <div className={styles.backButton} onClick={handleClickBack}>
                     <ArrowLeft size="30" />
                 </div>
-                {props.state.activeConversation?.username ? (
+                {state.activeConversation?.username ? (
                     <>
-                        <Link href={`/u/${props.state.activeConversation?.username}`}>
+                        <Link href={`/u/${state.activeConversation?.username}`}>
                             <a>
                                 <p className="text-bold text-medium">
-                                    {props.state.activeConversation?.display_name}
+                                    {state.activeConversation?.display_name}
                                 </p>
                                 <p className={styles.username}>
-                                    @{props.state.activeConversation?.username}
+                                    @{state.activeConversation?.username}
                                 </p>
                             </a>
                         </Link>
@@ -215,16 +225,16 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
             >
                 <Virtuoso
                     ref={virtuosoRef}
-                    key={props.state.activeConversation?.id}
+                    key={state.activeConversation?.id}
                     className={styles.messagesArea}
-                    totalCount={props.state.messages.length}
+                    totalCount={state.messages.length}
                     initialTopMostItemIndex={
-                        props.state.messages.length > 0
-                            ? props.state.messages.length - 1
+                        state.messages.length > 0
+                            ? state.messages.length - 1
                             : 0
                     }
                     overscan={10}
-                    data={props.state.messages}
+                    data={state.messages}
                     firstItemIndex={firstItemIndex}
                     alignToBottom
                     followOutput
@@ -257,20 +267,19 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                         <>
                             {!message.deleted ? (
                                 <Message
+                                    dispatch={dispatch}
                                     key={message.id}
                                     messageId={message.id}
                                     messageAuthorId={message.author_id}
                                     receiverId={
-                                        props.state.activeConversation?.receiver_id
+                                        state.activeConversation?.receiver_id
                                     }
                                     sender={user.id == message.author_id}
                                     sentTime={message.sent_time}
                                     attachment={message.attachment.url}
                                     conversationId={
-                                        props.state.activeConversation?.id
+                                        state.activeConversation?.id
                                     }
-                                    setImageModal={props.setImageModal}
-                                    setModalAttachment={props.setModalAttachment}
                                     parentContainerRef={
                                         messagesAreaContainerRef
                                     }
@@ -283,7 +292,7 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
                                     sender={user.id == message.author_id}
                                     sentTime={message.sent_time}
                                     conversationId={
-                                        props.state.activeConversation?.id
+                                        state.activeConversation?.id
                                     }
                                 />
                             )}
@@ -301,11 +310,11 @@ export default function ActiveConversation(props: ActiveConversationProps): Reac
             </div>
             {typing && (
                 <div className={styles.typing}>
-                    {props.state.activeConversation.display_name} is typing...
+                    {state.activeConversation.display_name} is typing...
                 </div>
             )}
             <MessageBox
-                state={props.state}
+                state={state}
                 sendingAllowed={sendingAllowed}
                 setSendingAllowed={setSendingAllowed}
                 nowSending={props.nowSending}

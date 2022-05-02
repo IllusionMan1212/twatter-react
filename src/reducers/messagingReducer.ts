@@ -6,6 +6,8 @@ export interface MessagingState {
     messages: IMessage[];
     activeConversation: IActiveConversation;
     isConversationActive: boolean;
+    isModalActive: boolean;
+    modalAttachment: string;
 }
 
 export default function messagingReducer(state: MessagingState, action: MessagingAction): MessagingState {
@@ -89,6 +91,12 @@ export default function messagingReducer(state: MessagingState, action: Messagin
         return {
             ...state,
             conversations: state.conversations.concat(action.payload.newConversations)
+        };
+    case MessagingActions.TOGGLE_MODAL:
+        return {
+            ...state,
+            isModalActive: !state.isModalActive,
+            modalAttachment: action.payload.modalAttachment,
         };
     }
 }

@@ -11,7 +11,8 @@ export enum MessagingActions {
     MARK_AS_READ = "MARK_AS_READ",
     DELETE_MESSAGE = "DELETE_MESSAGE",
     LOAD_MORE_CONVERSATIONS = "LOAD_MORE_CONVERSATIONS",
-    LOAD_MORE_MESSAGES = "LOAD_MORE_MESSAGES"
+    LOAD_MORE_MESSAGES = "LOAD_MORE_MESSAGES",
+    TOGGLE_MODAL = "TOGGLE_MODAL",
 }
 
 interface ChangeConversationAction {
@@ -68,6 +69,13 @@ interface LoadMoreMessagesAction {
     }
 }
 
+interface ToggleModalAction {
+    type: MessagingActions.TOGGLE_MODAL,
+    payload: {
+        modalAttachment: string;
+    }
+}
+
 export type MessagingAction =
     ChangeConversationAction |
     FetchMessagesAction |
@@ -76,4 +84,5 @@ export type MessagingAction =
     MarkMessagesAsReadAction |
     DeleteMessageAction |
     LoadMoreConversationsAction |
-    LoadMoreMessagesAction;
+    LoadMoreMessagesAction |
+    ToggleModalAction;

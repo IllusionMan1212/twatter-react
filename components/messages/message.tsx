@@ -5,12 +5,17 @@ import { ReactElement } from "react";
 import { formatMessageTime } from "src/utils/functions";
 import MessageOptionsMenuButton from "components/messages/messageOptionsMenuButton";
 import DateTime from "components/datetime";
+import { MessagingActions } from "src/actions/messagingActions";
 
-export default function Message(props: MessageProps): ReactElement {
+export default function Message({ dispatch, ...props }: MessageProps): ReactElement {
     const handleClick = () => {
         window.history.pushState(null, null, `${props.conversationId}/media`);
-        props.setImageModal(true);
-        props.setModalAttachment(props.attachment);
+        dispatch({
+            type: MessagingActions.TOGGLE_MODAL,
+            payload: {
+                modalAttachment: props.attachment
+            }
+        });
     };
 
     return (
