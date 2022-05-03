@@ -56,7 +56,7 @@ export default function Comment(props: CommentProps): ReactElement {
                     postAuthorUsername={props.comment.author?.username}
                     currentUserId={user?.id}
                     parentContainerRef={props.parentContainerRef}
-                ></PostOptionsMenuButton>
+                />
             </div>
             <div className={` ${styles.commentText}`}>
                 <p>{props.comment.content}</p>
@@ -64,7 +64,7 @@ export default function Comment(props: CommentProps): ReactElement {
             <AttachmentsContainer
                 post={props.comment}
                 handleMediaClick={props.handleMediaClick}
-            ></AttachmentsContainer>
+            />
             <div className={postStyles.footer}>
                 <DateTime
                     datetime={props.comment.created_at}
@@ -80,13 +80,12 @@ export default function Comment(props: CommentProps): ReactElement {
                                 props.comment.author
                             )
                         }
-                    ></CommentButton>
+                    />
                     <LikeButton
                         post={props.comment}
-                        currentUserId={user?.id}
                         likes={props.comment.likes}
                         liked={props.comment.liked}
-                    ></LikeButton>
+                    />
                 </div>
             </div>
         </div>

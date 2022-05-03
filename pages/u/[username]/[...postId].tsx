@@ -93,11 +93,27 @@ export default function UserPost(props: UserPostProps): ReactElement {
                         likes: post.likes + 1,
                         liked: true,
                     });
+                    setModalData({
+                        ...modalData,
+                        post: {
+                            ...post,
+                            likes: post.likes + 1,
+                            liked: true,
+                        }
+                    });
                 } else if (payload.likeType == "UNLIKE") {
                     setPost({
                         ...post,
                         likes: post.likes - 1,
                         liked: false,
+                    });
+                    setModalData({
+                        ...modalData,
+                        post: {
+                            ...post,
+                            likes: post.likes - 1,
+                            liked: false,
+                        }
                     });
                 }
             } else {
@@ -118,7 +134,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 });
             }
         },
-        [post]
+        [post, modalData]
     );
 
     useEffect(() => {

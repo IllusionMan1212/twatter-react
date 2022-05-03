@@ -85,10 +85,9 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                     ></CommentButton>
                     <LikeButton
                         post={props.comment}
-                        currentUserId={user?.id}
                         likes={props.comment.likes}
                         liked={props.comment.liked}
-                    ></LikeButton>
+                    />
                 </div>
             </div>
         </div>

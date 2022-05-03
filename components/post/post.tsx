@@ -104,7 +104,6 @@ const Post = memo(function Post(props: PostProps): ReactElement {
                         />
                         <LikeButton
                             post={props.post}
-                            currentUserId={user?.id}
                             likes={props.post.likes}
                             liked={props.post.liked}
                         />

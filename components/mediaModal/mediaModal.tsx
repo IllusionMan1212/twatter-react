@@ -126,15 +126,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
 
     const handleLike = useCallback(
         (payload: LikePayload) => {
-            if (payload.postId == props.modalData.post.id) {
-                if (payload.likeType == "LIKE") {
-                    setPostLikes(likes => likes + 1);
-                    setPostLiked(true);
-                } else if (payload.likeType == "UNLIKE") {
-                    setPostLikes(likes => likes - 1);
-                    setPostLiked(false);
-                }
-            } else {
+            if (payload.postId != props.modalData.post.id) {
                 setComments((comments) => {
                     return comments.map((comment) => {
                         if (comment.id == payload.postId) {
@@ -276,7 +268,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     ? window.history.go(-2)
                                     : window.history.back();
                             }}
-                        ></PostOptionsMenuButton>
+                        />
                     </div>
                     {props.modalData.post.content && (
                         <p className={styles.postText}>
@@ -287,13 +279,12 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <CommentButton
                             post={props.modalData.post}
                             handleClick={handleCommentClick}
-                        ></CommentButton>
+                        />
                         <LikeButton
                             post={props.modalData.post}
-                            currentUserId={props.modalData.currentUser?.id}
                             likes={postLikes}
                             liked={postLiked}
-                        ></LikeButton>
+                        />
                     </div>
                     <DateTime
                         datetime={props.modalData.post.created_at}

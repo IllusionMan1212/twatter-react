@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import styles from "./likeButton.module.scss";
 import { ReactElement, useRef, useState } from "react";
 import { useToastContext } from "src/contexts/toastContext";
@@ -13,10 +12,10 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
     const [canLike, setCanLike] = useState(true);
 
     const toast = useToastContext();
-    const { socket } = useUserContext();
+    const { user: currentUser, socket } = useUserContext();
 
     const handleClick = () => {
-        if (!props.currentUserId) {
+        if (!currentUser) {
             toast("You must be logged in to like this post", 4000);
             return;
         }

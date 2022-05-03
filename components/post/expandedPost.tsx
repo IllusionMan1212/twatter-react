@@ -156,7 +156,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         <AttachmentsContainer
                             post={props.post}
                             handleMediaClick={props.handleMediaClick}
-                        ></AttachmentsContainer>
+                        />
                     </div>
                 </div>
                 <div className={styles.postFooter}>
@@ -169,13 +169,12 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         <CommentButton
                             post={props.post}
                             handleClick={handleCommentButtonClick}
-                        ></CommentButton>
+                        />
                         <LikeButton
                             post={props.post}
-                            currentUserId={user?.id}
                             likes={props.post.likes}
                             liked={props.post.liked}
-                        ></LikeButton>
+                        />
                     </div>
                 </div>
             </div>

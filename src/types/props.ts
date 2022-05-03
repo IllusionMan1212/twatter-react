@@ -127,7 +127,6 @@ export interface MediaModalProps {
 
 export interface LikeButtonProps {
     post: IPost;
-    currentUserId?: string;
     likes: number;
     liked: boolean;
 }
