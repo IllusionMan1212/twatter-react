@@ -1,4 +1,4 @@
-import { FormEvent, ReactElement, useEffect, useState } from "react";
+import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import { PaperPlane, ImageSquare, X } from "phosphor-react";
 import styles from "./messageBox.module.scss";
 import {
@@ -15,25 +15,34 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
     const { user, socket } = useUserContext();
     const toast = useToastContext();
 
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>(null);
+    const [endTimeoutId, setEndTimeoutId] = useState<NodeJS.Timeout>(null);
+    const [startTimeoutId, setStartTimeoutId] = useState<NodeJS.Timeout>(null);
 
-    const handleInput = (e: FormEvent<HTMLInputElement>) => {
-        if (!timeoutId) {
-            const payload = {
-                eventType: "typing",
-                data: {
-                    receiverId: props.state.activeConversation.receiver_id,
-                    conversationId: props.state.activeConversation.id,
-                },
-            };
-            socket.send(JSON.stringify(payload));
+    const handleInput = (e: ChangeEvent<HTMLFormElement>) => {
+        // @ts-expect-error: inputType exists on event, idk wtf typescript is doing
+        if (e.nativeEvent.inputType != "deleteContentBackward") {
+            if (!endTimeoutId) {
+                const payload = {
+                    eventType: "typing",
+                    data: {
+                        receiverId: props.state.activeConversation.receiver_id,
+                        conversationId: props.state.activeConversation.id,
+                    },
+                };
 
-            setTimeoutId(
-                setTimeout(() => {
-                    clearTimeout(timeoutId);
-                    setTimeoutId(null);
-                }, 3500)
-            );
+                setEndTimeoutId(
+                    setTimeout(() => {
+                        clearTimeout(endTimeoutId);
+                        setEndTimeoutId(null);
+                    }, 3500)
+                );
+
+                setStartTimeoutId(
+                    setTimeout(() => {
+                        socket.send(JSON.stringify(payload));
+                    }, 500)
+                );
+            }
         }
 
         if (e.currentTarget.textContent.trim().length > messageCharLimit) {
@@ -121,8 +130,10 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
             },
         };
 
-        clearTimeout(timeoutId);
-        setTimeoutId(null);
+        clearTimeout(endTimeoutId);
+        setEndTimeoutId(null);
+        clearTimeout(startTimeoutId);
+        setStartTimeoutId(null);
 
         props.messageBoxRef.current.textContent = "";
         props.setAttachments([]);
@@ -268,7 +279,7 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
                             size="30"
                             color="#6067fe"
                             opacity={props.sendingAllowed ? "1" : "0.3"}
-                        ></PaperPlane>
+                        />
                     </button>
                 </div>
             </div>

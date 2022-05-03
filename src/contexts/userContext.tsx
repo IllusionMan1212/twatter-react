@@ -3,7 +3,7 @@ import { IUser } from "src/types/general";
 import Router, { useRouter } from "next/router";
 import useSWR from "swr";
 import Loading from "components/loading";
-import { TwatWebSocket } from "../customSocket";
+import { TwatWebSocket } from "src/twatWebSocket";
 import { ContextWrapperProps } from "src/types/props";
 
 interface UserContextType {

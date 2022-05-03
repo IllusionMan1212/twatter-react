@@ -14,7 +14,7 @@ function onMessageReceived(event: MessageEvent<string>) {
 }
 
 export class TwatWebSocket {
-    conn: WebSocket;
+    public conn: WebSocket;
     private callbacks: ICallback = {};
 
     constructor(url: string) {
