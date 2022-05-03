@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { X, ArrowLeft, ArrowRight } from "phosphor-react";
 import styles from "./mediaModal.module.scss";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
@@ -114,7 +113,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             setComments([payload].concat(comments));
             toast("Commented Successfully", 2000);
         },
-        [comments, toast]
+        [comments]
     );
 
     const handleCommentDelete = useCallback(

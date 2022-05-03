@@ -66,9 +66,11 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 return comments;
             });
             setNowCommenting(false);
-            toast("Commented Successfully", 2000);
+            if (!mediaModal) {
+                toast("Commented Successfully", 2000);
+            }
         },
-        [toast]
+        [toast, mediaModal]
     );
 
     const handleCommentDelete = useCallback((commentIdObj) => {
