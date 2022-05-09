@@ -13,7 +13,6 @@ import { useUserContext } from "src/contexts/userContext";
 import { useRouter } from "next/router";
 
 const noBarRoutes = [
-    "/404",
     "/register/setting-up"
 ];
 

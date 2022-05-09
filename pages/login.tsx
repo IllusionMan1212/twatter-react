@@ -9,6 +9,7 @@ import axios, { AxiosResponse } from "axios";
 import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
 import { IUser } from "src/types/general";
+import Router from "next/router";
 
 interface ApiRequest {
     username: string;
@@ -52,14 +53,15 @@ export default function Login(): ReactElement {
                         { withCredentials: true }
                     )
                     .then((res) => {
-                        toast("Successfully logged in", 5000);
+                        toast("Successfully logged in", 3000);
                         if (res.data.success) {
+                            Router.push("/home");
                             login(res.data.user);
                         }
                     })
                     .catch((err) => {
                         setLoginAllowed(true);
-                        toast(err?.response?.data?.message ?? "An error has occurred", 5000);
+                        toast(err?.response?.data?.message ?? "An error has occurred", 4000);
                     });
             }
         }

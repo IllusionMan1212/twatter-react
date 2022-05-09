@@ -1,6 +1,5 @@
 import { createContext, ReactElement, useCallback, useContext, useEffect, useState } from "react";
 import { IUser } from "src/types/general";
-import Router, { useRouter } from "next/router";
 import useSWR from "swr";
 import Loading from "components/loading";
 import { TwatWebSocket } from "src/twatWebSocket";
@@ -22,26 +21,6 @@ const UserContextDefaultValues : UserContextType = {
 
 const UserContext = createContext<UserContextType>(UserContextDefaultValues);
 
-// you have to be signed in to access these routes.
-const signedInRoutes = [
-    "/home",
-    "/messages/[[...conversationId]]",
-    "/settings",
-    "/friends",
-    "/trending",
-    "/notifications",
-];
-
-// you have to be signed out to access these routes.
-// all routes that aren't mentioned in either array can be accessed if you're signed in or out.
-const signedOutRoutes = [
-    "/",
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/reset-password/[token]",
-];
-
 const fetcher = (url: string) =>
     fetch(url, { credentials: "include" })
         .then((r) => r.json())
@@ -54,7 +33,6 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     const [socket, setSocket] = useState<TwatWebSocket>(null);
     const [loading, setLoading] = useState(true);
     const [reconnectInterval, setReconnectInterval] = useState<NodeJS.Timeout>(null);
-    const router = useRouter();
 
     const { data } = useSWR(
         `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/validateToken`,
@@ -106,20 +84,6 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
     }, [data]);
 
     useEffect(() => {
-        if (user) {
-            if (signedOutRoutes.includes(Router.route)) {
-                Router.push("/home");
-                return;
-            }
-        } else if (!user && data) {
-            if (signedInRoutes.includes(Router.route)) {
-                Router.push("/login");
-                return;
-            }
-        }
-    }, [user, router.route]);
-
-    useEffect(() => {
         if (user && !socket) {
             openSocket();
         }
@@ -135,16 +99,12 @@ export function UserWrapper({ children }: ContextWrapperProps): ReactElement {
         setUser(null);
     };
 
+    if (loading) return <Loading width="100" height="100" />;
+
     return (
-        <>
-            <UserContext.Provider value={{user, login, logout, socket}}>
-                {loading ? (
-                    <Loading width="100" height="100" />
-                ) : (
-                    <>{children}</>
-                )}
-            </UserContext.Provider>
-        </>
+        <UserContext.Provider value={{user, login, logout, socket}}>
+            {children}
+        </UserContext.Provider>
     );
 }
 

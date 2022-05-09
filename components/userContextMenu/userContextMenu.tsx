@@ -8,6 +8,7 @@ import Profile from "components/userContextMenu/profile";
 import ReportBug from "components/userContextMenu/reportBug";
 import Settings from "components/userContextMenu/settings";
 import Logout from "components/userContextMenu/logout";
+import Router from "next/router";
 
 export interface UserContextMenuProps {
     open: boolean;
@@ -26,6 +27,7 @@ export default function UserContextMenu(
             .then(() => {
                 logout();
                 toast("Logged out", 3000);
+                Router.push("/login");
             })
             .catch((err) => {
                 console.error(err);

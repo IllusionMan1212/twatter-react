@@ -6,7 +6,7 @@
     grid-gap: 10px;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: calc(100vh - variables.$status-bar-height * 2);
 }
 
 .link {

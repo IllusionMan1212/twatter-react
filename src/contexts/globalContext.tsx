@@ -37,6 +37,7 @@ const statusBarTitles = new Map([
     ["/search", "Search"],
     ["/settings", "Settings"],
     ["/trending", "Trending"],
+    ["/404", "404"],
 ]);
 
 const SharerDefaultValues: ISharer = {
@@ -91,6 +92,13 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
         };
     }, [sharer.enabled]);
 
+    useEffect(() => {
+        setStatusBarTitle("");
+        setUnreadMessages([]);
+        setActiveConversationId("");
+        setSharer(SharerDefaultValues);
+    }, [user]);
+
     const handleMessage = useCallback((msg: ISocketMessage) => {
         if (msg.author_id != user.id && activeConversationId != msg.conversation_id) {
             if (!unreadMessages.includes(msg.conversation_id)) {
@@ -143,10 +151,10 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     }, [user]);
 
     useEffect(() => {
-        if (statusBarTitles.has(router.route)) {
+        if (user && statusBarTitles.has(router.route)) {
             setStatusBarTitle(statusBarTitles.get(router.route));
         }
-    }, [router.route]);
+    }, [router.route, user]);
 
     return (
         <>

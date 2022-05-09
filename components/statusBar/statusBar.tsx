@@ -13,7 +13,6 @@ const statusBarBackButtonRoutes = [
 ];
 
 const noBarRoutes = [
-    "/404",
     "/register/setting-up"
 ];
 

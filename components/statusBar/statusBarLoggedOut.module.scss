@@ -1,7 +1,9 @@
+@use "styles/variables";
+
 .header {
     display: flex;
     align-items: center;
-    height: 84px;
+    height: variables.$status-bar-height;
 }
 
 .links {

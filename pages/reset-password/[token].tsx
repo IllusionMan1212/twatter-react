@@ -10,6 +10,7 @@ import { useToastContext } from "src/contexts/toastContext";
 import { IUser } from "src/types/general";
 import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
+import Loading from "components/loading";
 
 interface PostApiRequest {
     password: string;
@@ -36,6 +37,7 @@ export default function ResetPassword(): ReactElement {
     });
     const [user, setUser] = useState<IUser>(null);
     const [resetAllowed, setResetAllowed] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     const router = useRouter();
 
@@ -103,6 +105,7 @@ export default function ResetPassword(): ReactElement {
                 )
                 .then((res: AxiosResponse<GetApiResponse>) => {
                     setUser(res.data.user);
+                    setLoading(false);
                 })
                 .catch(() => {
                     toast(
@@ -115,6 +118,7 @@ export default function ResetPassword(): ReactElement {
     }, [router, router.query]);
 
     if (currentUser) return null;
+    if (loading) return <Loading width="100" height="100" />;
 
     return (
         <>
