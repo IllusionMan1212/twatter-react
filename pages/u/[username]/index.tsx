@@ -472,6 +472,7 @@ export default function Profile(props: ProfileProps): ReactElement {
 
     useEffect(() => {
         if (props.user && user?.id != props.user.id) {
+            setStatusBarTitle(props.user.display_name);
             setPostsCount(0);
             setActiveTab(Tabs.Posts);
             activeTab.current = Tabs.Posts;

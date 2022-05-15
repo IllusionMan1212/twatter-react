@@ -8,6 +8,7 @@ import "styles/globals.scss";
 
 import "swiper/scss";
 import "swiper/scss/navigation";
+import NextProgress from "next-progress";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
     return (
@@ -87,6 +88,7 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
                 <meta name="msapplication-TileColor" content="#151515" />
                 <meta name="theme-color" content="#6067fe" />
             </Head>
+            <NextProgress color="#6067FE" delay={2} options={{showSpinner: false}} />
             <UserWrapper>
                 <GlobalWrapper>
                     <Component {...pageProps} />
