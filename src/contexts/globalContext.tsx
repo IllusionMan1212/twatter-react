@@ -93,10 +93,12 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     }, [sharer.enabled]);
 
     useEffect(() => {
-        setStatusBarTitle("");
-        setUnreadMessages([]);
-        setActiveConversationId("");
-        setSharer(SharerDefaultValues);
+        if (!user) {
+            setStatusBarTitle("");
+            setUnreadMessages([]);
+            setActiveConversationId("");
+            setSharer(SharerDefaultValues);
+        }
     }, [user]);
 
     const handleMessage = useCallback((msg: ISocketMessage) => {

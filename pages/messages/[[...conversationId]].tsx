@@ -34,7 +34,7 @@ const initialState = {
 };
 
 export default function Messages(): ReactElement {
-    const { setUnreadMessages, setActiveConversationId, setStatusBarTitle } = useGlobalContext();
+    const { setUnreadMessages, setActiveConversationId } = useGlobalContext();
     const { user, socket } = useUserContext();
 
     const router = useRouter();
@@ -216,10 +216,6 @@ export default function Messages(): ReactElement {
         handleDeleteMessage,
         socket
     ]);
-
-    useEffect(() => {
-        setStatusBarTitle("Messages");
-    }, []);
 
     if (!user) return null;
 

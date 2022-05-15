@@ -467,6 +467,7 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
         } else {
             setNotFound(true);
+            setStatusBarTitle("Not Found");
         }
     }, []);
 
@@ -503,6 +504,7 @@ export default function Profile(props: ProfileProps): ReactElement {
         if (!props.user) {
             setUser(null);
             setNotFound(true);
+            setStatusBarTitle("Not Found");
         }
     }, [user, props.user, getPosts]);
 
@@ -528,8 +530,6 @@ export default function Profile(props: ProfileProps): ReactElement {
     });
 
     if (notFound) {
-        setStatusBarTitle("Not Found");
-
         return (
             <div className={`${styles.container} text-white`}>
                 <div className={styles.scrollableArea}>
@@ -735,8 +735,8 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                     <Calendar
                                                         className={styles.icon}
                                                         size="32"
-                                                    ></Calendar>
-                                                    <p className="mt-1Percent">
+                                                    />
+                                                    <div className="mt-1Percent">
                                                         Member since{" "}
                                                         <DateTime
                                                             datetime={
@@ -750,7 +750,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     "inline",
                                                             }}
                                                         />
-                                                    </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div

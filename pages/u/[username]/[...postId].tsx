@@ -141,8 +141,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
         setComments([]);
         setLoadingComments(true);
         if (props.post) {
-            setStatusBarTitle(`${props.post.author.display_name}'s post`);
-
             axios
                 .get(
                     `${process.env.NEXT_PUBLIC_DOMAIN_URL}/posts/getComments/${props.post.id}`,
@@ -159,7 +157,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     );
                 });
         }
-    }, [post?.id]);
+    }, [props.post]);
 
     useEffect(() => {
         if (socket) {
@@ -184,7 +182,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
             // if url contains other queries after the post id, remove them
             if (router.query.postId.length > 1) {
                 router.replace(
-                    router.asPath.substr(
+                    router.asPath.substring(
                         0,
                         router.asPath.indexOf(router.query.postId[0]) +
                             router.query.postId[0].length
@@ -196,8 +194,10 @@ export default function UserPost(props: UserPostProps): ReactElement {
             if (props.post) {
                 setNotFound(false);
                 setPost(props.post);
+                setStatusBarTitle(`${props.post.author.display_name}'s post`);
             } else {
                 setNotFound(true);
+                setStatusBarTitle("Not Found");
             }
         }
     }, [props.post, router]);
@@ -226,8 +226,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
     });
 
     if (notFound) {
-        setStatusBarTitle("Not Found");
-
         return (
             <div className={`text-white ${styles.postNotFound}`}>
                 <div className="text-bold text-large">Post Not Found</div>
