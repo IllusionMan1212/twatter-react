@@ -3,10 +3,7 @@ import { IUser } from "src/types/general";
 import useSWR from "swr";
 import Loading from "components/loading";
 import { TwatWebSocket } from "src/twatWebSocket";
-
-interface ContextWrapperProps {
-    children: ReactElement;
-}
+import { ContextWrapperProps } from "src/types/props";
 
 interface UserContextType {
     user: IUser;
