@@ -41,20 +41,13 @@ const Post = memo(function Post(props: PostProps): ReactElement {
                         content={props.post.replying_to.content}
                     />
                 )}
-                {props.post.author ? (
-                    <ProfileImage
-                        width={40}
-                        height={40}
-                        hyperlink={props.post.author.username}
-                        src={props.post.author.avatar_url}
-                    />
-                ) : (
-                    <ProfileImage
-                        width={40}
-                        height={40}
-                        src="/default_profile.svg"
-                    />
-                )}
+                <ProfileImage
+                    width={40}
+                    height={40}
+                    hyperlink={props.post.author.username}
+                    src={props.post.author.avatar_url}
+                    alt={props.post.author.username}
+                />
                 <div className={styles.user}>
                     {props.post.author ? (
                         <Link

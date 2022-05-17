@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import styles from "./toast.module.scss";
 import { ToastProps } from "src/types/props";
 import { ReactElement } from "react";

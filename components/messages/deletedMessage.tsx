@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement } from "react";
 import { DeletedMessageProps } from "src/types/props";
 import messageStyles from "components/messages/message.module.scss";

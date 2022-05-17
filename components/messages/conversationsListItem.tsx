@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import styles from "./conversationsListItem.module.scss";
 import { ConversationsListItemProps } from "src/types/props";
 import { ReactElement } from "react";
@@ -15,19 +14,21 @@ export default function ConversationsListItem(
             style={props.unreadMessages != 0 ? { backgroundColor: "#242C37" } : null}
             onClick={props.onClick}
         >
-            <div className={styles.profilePicutre}>
+            <div>
                 {props.receiver ? (
                     <ProfileImage
                         width={45}
                         height={45}
                         src={props.receiver.avatar_url}
-                        hyperlink={`${props.receiver.username}`}
+                        hyperlink={props.receiver.username}
+                        alt={props.receiver.username}
                     />
                 ) : (
                     <ProfileImage
                         width={45}
                         height={45}
                         src="/default_profile.svg"
+                        alt="Deleted User"
                     />
                 )}    
             </div>

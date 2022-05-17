@@ -322,6 +322,18 @@ export default function Home(): ReactElement {
         };
     }, [mobileCompose, mediaModal]);
 
+    const PostsFooter = () => {
+        return (
+            <>
+                {!reachedEnd && (
+                    <div className={styles.loadingContainer}>
+                        <Loading height="50" width="50" />
+                    </div>
+                )}
+            </>
+        );
+    };
+
     if (!user) return null;
 
     return (
@@ -357,7 +369,7 @@ export default function Home(): ReactElement {
                                     onClick={() =>
                                         closeMobileComposeSmoothly()
                                     }
-                                ></div>
+                                />
                                 <div
                                     className={`flex ${
                                         styles.composePost
@@ -406,14 +418,14 @@ export default function Home(): ReactElement {
                                                     handleClick
                                                 )
                                             }
-                                        ></span>
+                                        />
                                         <div
                                             className={`flex ${styles.composePostOptions}`}
                                         >
                                             <div
                                                 className={`${styles.button}`}
                                             >
-                                                <ImageSquare size="30"></ImageSquare>
+                                                <ImageSquare size="30" />
                                                 <input
                                                     data-cy="attachmentBtn"
                                                     className={
@@ -458,7 +470,7 @@ export default function Home(): ReactElement {
                                                             ? "1"
                                                             : "0.3"
                                                     }
-                                                ></ArrowElbowRightDown>
+                                                />
                                             </button>
                                         </div>
                                     </div>
@@ -482,7 +494,7 @@ export default function Home(): ReactElement {
                                                         >
                                                             <div
                                                                 className={`${styles.imageAttachmentOverlay}`}
-                                                            ></div>
+                                                            />
                                                             <div
                                                                 className={`${styles.imageAttachmentClose}`}
                                                                 onClick={(
@@ -503,7 +515,7 @@ export default function Home(): ReactElement {
                                                                 <X
                                                                     size="16"
                                                                     weight="bold"
-                                                                ></X>
+                                                                />
                                                             </div>
                                                         </div>
                                                     );
@@ -536,7 +548,7 @@ export default function Home(): ReactElement {
                                                 ? styles.progressBarInProgress
                                                 : ""
                                         }`}
-                                    ></div>
+                                    />
                                 </div>
                                 {mobileCompose ? (
                                     <div
@@ -549,7 +561,7 @@ export default function Home(): ReactElement {
                                                 styles.buttonMobile
                                             }
                                         >
-                                            <ImageSquare size="36"></ImageSquare>
+                                            <ImageSquare size="36" />
                                             <input
                                                 className={
                                                     styles.fileInputMobile
@@ -592,7 +604,7 @@ export default function Home(): ReactElement {
                                                         ? "1"
                                                         : "0.3"
                                                 }
-                                            ></PaperPlaneRight>
+                                            />
                                         </button>
                                     </div>
                                 ) : null}
@@ -606,25 +618,7 @@ export default function Home(): ReactElement {
                                 useWindowScroll
                                 overscan={{ main: 500, reverse: 500 }}
                                 components={{
-                                    // eslint-disable-next-line react/display-name
-                                    Footer: () => {
-                                        return (
-                                            <>
-                                                {!reachedEnd && (
-                                                    <div
-                                                        className={
-                                                            styles.loadingContainer
-                                                        }
-                                                    >
-                                                        <Loading
-                                                            height="50"
-                                                            width="50"
-                                                        ></Loading>
-                                                    </div>
-                                                )}
-                                            </>
-                                        );
-                                    },
+                                    Footer: () => <PostsFooter />,
                                 }}
                                 itemContent={(_index, post) => (
                                     <Post
@@ -633,9 +627,9 @@ export default function Home(): ReactElement {
                                         handleMediaClick={
                                             handleMediaClick
                                         }
-                                    ></Post>
+                                    />
                                 )}
-                            ></Virtuoso>
+                            />
                         </div>
                     </div>
                     <div className={styles.rightSide}>
@@ -653,13 +647,13 @@ export default function Home(): ReactElement {
                     setMobileCompose(!mobileCompose);
                 }}
             >
-                <PenNibStraight size="30"></PenNibStraight>
+                <PenNibStraight size="30" />
             </div>
             {mediaModal && (
                 <MediaModal
                     modalData={modalData}
                     handleMediaClick={handleMediaClick}
-                ></MediaModal>
+                />
             )}
         </>
     );

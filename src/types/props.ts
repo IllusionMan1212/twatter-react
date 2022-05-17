@@ -17,6 +17,10 @@ import { MessagingAction } from "src/actions/messagingActions";
 import { SettingsAction } from "src/actions/settingsActions";
 import { SettingsState } from "src/reducers/settingsReducer";
 
+export interface LayoutProps {
+    children: ReactNode;
+}
+
 export interface ToastProps {
     text: string;
 }
@@ -199,6 +203,7 @@ export interface ProfileImageProps {
     src: string;
     hyperlink?: string;
     onlineIndicator?: boolean;
+    alt: string;
 }
 
 export interface ContextWrapperProps {

@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { PencilSimple, Repeat } from "phosphor-react";
 import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import { ButtonType, EditProfilePopupProps } from "src/types/props";

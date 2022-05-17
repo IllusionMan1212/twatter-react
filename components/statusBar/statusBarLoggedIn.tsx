@@ -80,6 +80,7 @@ export default function StatusBarLoggedIn(props: StatusBarLoggedInProps): ReactE
                         width={38}
                         height={38}
                         src={user.avatar_url}
+                        alt={user.username}
                     />
                     <UserContextMenu
                         open={userMenu}

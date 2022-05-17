@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import styles from "./message.module.scss";
 import { MessageProps } from "src/types/props";
 import { ReactElement } from "react";

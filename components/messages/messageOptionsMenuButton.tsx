@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
-
 import { ReactElement, useState } from "react";
 import { DotsThreeVertical } from "phosphor-react";
 import styles from "./messageOptionsMenuButton.module.scss";

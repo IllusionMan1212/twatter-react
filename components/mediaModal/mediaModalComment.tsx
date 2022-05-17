@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement } from "react";
 import LikeButton from "components/buttons/likeButton";
 import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
@@ -41,6 +40,7 @@ export default function MediaModalComment(props: CommentProps): ReactElement {
                         height={30}
                         src={props.comment.author.avatar_url}
                         hyperlink={props.comment.author.username}
+                        alt={props.comment.author.username}
                     />
                     <div
                         className={`text-bold justify-content-center ${postStyles.user}`}

@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { memo, ReactElement, useRef } from "react";
 import Link from "next/link";
 import styles from "./profileImage.module.scss";
@@ -35,6 +34,7 @@ const ProfileImage = memo(function ProfileImage(props: ProfileImageProps): React
                                 width={props.width}
                                 height={props.height}
                                 onLoad={handleImageLoad}
+                                alt={props.alt}
                             />
                             <div
                                 ref={placeholderRef}
@@ -68,6 +68,7 @@ const ProfileImage = memo(function ProfileImage(props: ProfileImageProps): React
                         width={props.width}
                         height={props.height}
                         onLoad={handleImageLoad}
+                        alt={props.alt ?? "Deleted User"}
                     />
                     <div
                         ref={placeholderRef}

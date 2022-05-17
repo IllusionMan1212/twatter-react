@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
-
 import { ReactElement, useRef, useState, useEffect, CSSProperties } from "react";
 import styles from "./contextMenu.module.scss";
 import { ContextMenuProps } from "src/types/props";

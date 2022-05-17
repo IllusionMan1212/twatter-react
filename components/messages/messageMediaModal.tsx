@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useEffect } from "react";
 import styles from "./messageMediaModal.module.scss";
 import { X } from "phosphor-react";

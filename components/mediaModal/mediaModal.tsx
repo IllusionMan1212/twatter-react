@@ -242,6 +242,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                                     width={50}
                                     height={50}
                                     src={props.modalData.post.author.avatar_url}
+                                    alt={props.modalData.post.author.username}
                                 />
                                 <div className="flex flex-column">
                                     <p

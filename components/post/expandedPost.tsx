@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { ExpandedPostProps } from "src/types/props";
 import styles from "./expandedPost.module.scss";
@@ -122,6 +121,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         height={50}
                         src={props.post.author.avatar_url}
                         hyperlink={props.post.author.username}
+                        alt={props.post.author.username}
                     />
                     <div className={styles.user}>
                         <Link href={`/u/${props.post.author.username}`}>
@@ -148,7 +148,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         postAuthorUsername={props.post.author.username}
                         currentUserId={user?.id}
                         deleteCallback={props.callback}
-                    ></PostOptionsMenuButton>
+                    />
                     <div
                         className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
                     >
@@ -189,7 +189,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                                 comment={comment}
                                 handleMediaClick={props.handleMediaClick}
                                 parentContainerRef={parentContainerRef}
-                            ></Comment>
+                            />
                         );
                     })
                 )}

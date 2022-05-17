@@ -95,6 +95,18 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
         }
     }, [user]);
 
+    const ConversationFooter = () => {
+        return (
+            <>
+                {!reachedEndOfConvos ? (
+                    <div className="py-3">
+                        <Loading height="50" width="50" />
+                    </div>
+                ) : null}
+            </>
+        );
+    };
+
     if (conversationsLoading) return <Loading width="50" height="50"/>;
 
     return (
@@ -104,22 +116,8 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
                     data={props.state.conversations}
                     style={{ width: "100%" }}
                     totalCount={props.state.conversations.length}
-                    // eslint-disable-next-line react/display-name
                     components={{
-                        Footer: () => {
-                            return (
-                                <>
-                                    {!reachedEndOfConvos ? (
-                                        <div className="py-3">
-                                            <Loading
-                                                height="50"
-                                                width="50"
-                                            ></Loading>
-                                        </div>
-                                    ) : null}
-                                </>
-                            );
-                        },
+                        Footer: () => <ConversationFooter />
                     }}
                     endReached={loadMoreConversations}
                     itemContent={(_, conversation) => {

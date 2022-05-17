@@ -192,6 +192,22 @@ export default function ActiveConversation({ dispatch, state, atBottom, setNewMe
         });
     }, [router.query?.conversationId, setActiveConversationId, dispatch, getMessages, state.isConversationActive]);
 
+    const MessagesHeader = () => {
+        return (
+            <>
+                {reachedStartOfMessages ? (
+                    <div className="usernameGrey text-center text-bold py-3">
+                        <p>You have reached the beginning of this conversation</p>
+                    </div>
+                ) : (
+                    <div className="py-3">
+                        <Loading height="50" width="50" />
+                    </div>
+                )}
+            </>
+        );
+    };
+
     return (
         <div
             className={`${styles.conversation} ${
@@ -242,26 +258,8 @@ export default function ActiveConversation({ dispatch, state, atBottom, setNewMe
                         props.setAtBottom(bottom);
                     }}
                     startReached={loadMoreMessages}
-                    // eslint-disable-next-line react/display-name
                     components={{
-                        Header: () => {
-                            return (
-                                <>
-                                    {reachedStartOfMessages ? (
-                                        <div className="usernameGrey text-center text-bold py-3">
-                                            <p>
-                                                You have reached the beginning
-                                                of this conversation
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        <div className="py-3">
-                                            <Loading height="50" width="50" />
-                                        </div>
-                                    )}
-                                </>
-                            );
-                        },
+                        Header: () => <MessagesHeader />
                     }}
                     itemContent={(index, message) => (
                         <>
@@ -298,7 +296,7 @@ export default function ActiveConversation({ dispatch, state, atBottom, setNewMe
                             )}
                         </>
                     )}
-                ></Virtuoso>
+                />
                 {props.newMessagesAlert && (
                     <div
                         className={styles.newMessagesAlert}

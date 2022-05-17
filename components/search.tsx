@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { memo, ReactElement } from "react";
 import styles from "./search.module.scss";
 import { MagnifyingGlass } from "phosphor-react";
@@ -15,7 +14,7 @@ const Search = memo(function Search(): ReactElement {
                 className={`${styles.search}`}
                 type="text"
                 placeholder="Search..."
-            ></input>
+            />
         </div>
     );
 });

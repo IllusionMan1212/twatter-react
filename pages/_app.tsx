@@ -91,7 +91,7 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
             <NextProgress color="#6067FE" delay={2} options={{showSpinner: false}} />
             <UserWrapper>
                 <GlobalWrapper>
-                    <Component {...pageProps} />;
+                    <Component {...pageProps} />
                 </GlobalWrapper>
             </UserWrapper>
         </>

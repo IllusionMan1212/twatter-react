@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement } from "react";
 import { ButtonProps, ButtonType } from "src/types/props";
 import styles from "./button.module.scss";

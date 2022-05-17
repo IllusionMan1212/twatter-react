@@ -57,6 +57,7 @@ export default function Navbar(): ReactElement {
                     width={30}
                     height={30}
                     src={user.avatar_url}
+                    alt={user.username}
                 />
                 <UserContextMenu
                     open={userMenu}

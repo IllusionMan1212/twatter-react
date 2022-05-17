@@ -529,6 +529,18 @@ export default function Profile(props: ProfileProps): ReactElement {
         };
     });
 
+    const PostsFooter = () => {
+        return (
+            <>
+                {!getActiveReachedEnd() && (
+                    <div className={styles.loadingContainer}>
+                        <Loading height="50" width="50" />
+                    </div>
+                )}
+            </>
+        );
+    };
+
     if (notFound) {
         return (
             <div className={`${styles.container} text-white`}>
@@ -537,7 +549,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                         <div className={styles.userInfo}>
                             <div
                                 className={`round ${styles.userImage} ${styles.userImageNotFound}`}
-                            ></div>
+                            />
                             <div>
                                 <p className={`${styles.display_name} text-bold`}>
                                     User Doesn&apos;t Exist
@@ -607,7 +619,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 user.avatar_url
                                                             }")`,
                                                         }}
-                                                    ></div>
+                                                    />
                                                     <div>
                                                         <p
                                                             className={`${styles.display_name} text-bold`}
@@ -642,7 +654,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                             color="#6067FE"
                                                                             size="40"
                                                                             weight="fill"
-                                                                        ></ChatTeardropText>
+                                                                        />
                                                                     </div>
                                                                 )}
                                                                 <Button
@@ -654,7 +666,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     handleClick={
                                                                         handleFollowClick
                                                                     }
-                                                                ></Button>
+                                                                />
                                                             </div>
                                                         ) : (
                                                             <Button
@@ -712,7 +724,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 styles.icon
                                                             }
                                                             size="32"
-                                                        ></Note>
+                                                        />
                                                         <p className="mt-1Percent">
                                                             {user.bio}
                                                         </p>
@@ -725,7 +737,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 styles.icon
                                                             }
                                                             size="32"
-                                                        ></Gift>
+                                                        />
                                                         <p className="mt-1Percent">
                                                             {birthday}
                                                         </p>
@@ -848,26 +860,8 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                 loadMorePosts
                                                             }
                                                             useWindowScroll
-                                                            // eslint-disable-next-line react/display-name
                                                             components={{
-                                                                Footer: () => {
-                                                                    return (
-                                                                        <>
-                                                                            {!getActiveReachedEnd() && (
-                                                                                <div
-                                                                                    className={
-                                                                                        styles.loadingContainer
-                                                                                    }
-                                                                                >
-                                                                                    <Loading
-                                                                                        height="50"
-                                                                                        width="50"
-                                                                                    />
-                                                                                </div>
-                                                                            )}
-                                                                        </>
-                                                                    );
-                                                                },
+                                                                Footer: () => <PostsFooter />
                                                             }}
                                                             itemContent={(
                                                                 _index,
@@ -884,9 +878,9 @@ export default function Profile(props: ProfileProps): ReactElement {
                                                                     parentContainerRef={
                                                                         parentContainerRef
                                                                     }
-                                                                ></Post>
+                                                                />
                                                             )}
-                                                        ></Virtuoso>
+                                                        />
                                                     </>
                                                 ) : (
                                                     <Loading

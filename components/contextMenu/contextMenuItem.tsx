@@ -1,5 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
-
 import { ReactElement } from "react";
 import { ContextMenuItemProps } from "src/types/props";
 

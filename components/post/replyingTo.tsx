@@ -5,6 +5,7 @@ import ProfileImage from "components/post/profileImage";
 import styles from "./replyingTo.module.scss";
 import { ReplyingToProps } from "src/types/props";
 
+// TODO: change this to work with deleted posts as well
 export default function ReplyingTo(props: ReplyingToProps): ReactElement {
     return (
         <Link href={`/u/${props.username}/${props.post_id}`}>
@@ -23,6 +24,7 @@ export default function ReplyingTo(props: ReplyingToProps): ReactElement {
                             width={props.avatar_size}
                             height={props.avatar_size}
                             src={props.avatar_url}
+                            alt={props.username}
                         />
                         <span
                             className="text-bold"

@@ -136,6 +136,7 @@ export default function ResetPassword(): ReactElement {
                                 height={60}
                                 width={60}
                                 src={user.avatar_url}
+                                alt={user.username}
                             />
                             <div>
                                 <p>{user.display_name}</p>
@@ -172,7 +173,7 @@ export default function ResetPassword(): ReactElement {
                                     size="32"
                                     xlinkTitle="Unhide Password"
                                     onClick={() => setPasswordHidden(false)}
-                                ></EyeClosed>
+                                />
                             ) : (
                                 <Eye
                                     id="hide"
@@ -180,7 +181,7 @@ export default function ResetPassword(): ReactElement {
                                     size="32"
                                     xlinkTitle="Hide Password"
                                     onClick={() => setPasswordHidden(true)}
-                                ></Eye>
+                                />
                             )}
                         </div>
                         <input

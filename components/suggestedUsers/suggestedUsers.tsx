@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import { ReactElement } from "react";
 import styles from "./suggestedUsers.module.scss";
 import SuggestedUser from "./suggestedUser";
@@ -14,7 +13,7 @@ export default function SuggestedUsers(
             </div>
             <div className={styles.accounts}>
                 {props.users.map((user, i) => (
-                    <SuggestedUser key={i} user={user}></SuggestedUser>
+                    <SuggestedUser key={i} user={user} />
                 ))}
             </div>
         </div>

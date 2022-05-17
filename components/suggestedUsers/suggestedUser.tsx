@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import Button from "components/buttons/button";
 import { ReactElement } from "react";
 import { ButtonType, SuggestedUserProps } from "src/types/props";
@@ -21,6 +20,7 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                                 ? "/"
                                 : ""
                         }${props.user?.avatar_url}`}
+                        alt={props.user.username}
                     />
                 </div>
                 <div className="ellipsis">
@@ -38,7 +38,7 @@ export default function SuggestedUser(props: SuggestedUserProps): ReactElement {
                     size={8}
                     type={ButtonType.Regular}
                     handleClick={() => console.log("coming soon")}
-                ></Button>
+                />
             </div>
         </div>
     );

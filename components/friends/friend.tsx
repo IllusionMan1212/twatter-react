@@ -14,6 +14,7 @@ const Friend = memo(function Friend(props: FriendProps): ReactElement {
                         height={38}
                         src={props.avatarURL}
                         onlineIndicator
+                        alt={props.username}
                     />
                     <p className="text-bold">{props.displayName}</p>
                 </div>

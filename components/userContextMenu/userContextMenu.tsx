@@ -67,7 +67,8 @@ export default function UserContextMenu(
                         width={35}
                         height={35}
                         src={user.avatar_url}
-                    />{" "}
+                        alt={user.username}
+                    />
                     {user.display_name}
                 </div>
                 <div>
