@@ -201,10 +201,6 @@ export interface ProfileImageProps {
     onlineIndicator?: boolean;
 }
 
-export interface ContextWrapperProps {
-    children: ReactNode;
-}
-
 export interface BirthdayProps {
     selectedBirthday: IBirthday
     setSelectedBirthday: Dispatch<SetStateAction<IBirthday>>;

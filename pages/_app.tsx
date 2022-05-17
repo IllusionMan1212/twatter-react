@@ -1,6 +1,6 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
-import React, { memo, ReactElement } from "react";
+import React, { ReactElement } from "react";
 import { NextSeo } from "next-seo";
 import { UserWrapper } from "src/contexts/userContext";
 import { GlobalWrapper } from "src/contexts/globalContext";
@@ -11,10 +11,6 @@ import "swiper/scss/navigation";
 import NextProgress from "next-progress";
 
 function Twatter({ Component, pageProps }: AppProps): ReactElement {
-    const MemoizedComponent = memo(function MemoizedComponent() {
-        return <Component {...pageProps} />;
-    });
-
     return (
         <>
             <NextSeo
@@ -95,7 +91,7 @@ function Twatter({ Component, pageProps }: AppProps): ReactElement {
             <NextProgress color="#6067FE" delay={2} options={{showSpinner: false}} />
             <UserWrapper>
                 <GlobalWrapper>
-                    <MemoizedComponent />
+                    <Component {...pageProps} />;
                 </GlobalWrapper>
             </UserWrapper>
         </>
