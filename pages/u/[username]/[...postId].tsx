@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import ExpandedPost from "components/post/expandedPost";
 import styles from "components/post/expandedPost.module.scss";
 import MediaModal from "components/mediaModal/mediaModal";
@@ -8,7 +8,7 @@ import { IUser, IPost } from "src/types/general";
 import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
-import { GetServerSidePropsContext } from "next";
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { UserPostProps } from "src/types/props";
 import useScrollRestoration from "src/hooks/useScrollRestoration";
 import { ArrowLeft } from "phosphor-react";
@@ -325,7 +325,7 @@ interface ServerSideResponse {
 
 export async function getServerSideProps(
     context: GetServerSidePropsContext
-): Promise<{ props: { post: IPost } }> {
+): Promise<GetServerSidePropsResult<ServerSideResponse>> {
     let res = null;
     let post: IPost = null;
 
@@ -341,8 +341,10 @@ export async function getServerSideProps(
             }
         );
         post = res.data.post;
-    } catch (err) {
-        console.error(err);
+    } catch (err: unknown) {
+        if ((err as AxiosError<ServerSideResponse>).response.status != 404) {
+            console.error(err);
+        }
     }
 
     return {

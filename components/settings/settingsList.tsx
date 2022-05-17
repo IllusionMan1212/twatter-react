@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from "react";
+import { ReactElement, useCallback, useEffect } from "react";
 import SettingsListItem from "components/settings/settingsListItem";
 import { UserGear, LockSimple, BellRinging, Fingerprint } from "phosphor-react";
 import styles from "./settingsList.module.scss";
@@ -14,7 +14,7 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
         router.push(`/settings#${item}`);
     };
 
-    const handleHashChange = (asPath: string) => {
+    const handleHashChange = useCallback((asPath: string) => {
         switch (asPath) {
         case "/settings#account":
             dispatch({
@@ -58,7 +58,38 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
             break;
         }
         return true;
-    };
+    }, [dispatch]);
+
+    const SettingsListItems = [
+        {
+            title: "Account",
+            description: "View information about your account and edit it.",
+            icon: UserGear,
+            onClick: () => handleClick(SettingsItems.Account),
+            isActive: state.activeSettingsItem == SettingsItems.Account,
+        },
+        {
+            title: "Privacy",
+            description: "Control your privacy settings.",
+            icon: LockSimple,
+            onClick: () => handleClick(SettingsItems.Privacy),
+            isActive: state.activeSettingsItem == SettingsItems.Privacy,
+        },
+        {
+            title: "Notifications",
+            description: "Change how you get notified about posts and messages.",
+            icon: BellRinging,
+            onClick: () => handleClick(SettingsItems.Notifications),
+            isActive: state.activeSettingsItem == SettingsItems.Notifications,
+        },
+        {
+            title: "Security",
+            description: "2FA, additional security when resetting your password and etc...",
+            icon: Fingerprint,
+            onClick: () => handleClick(SettingsItems.Security),
+            isActive: state.activeSettingsItem == SettingsItems.Security,
+        },
+    ];
 
     useEffect(() => {
         router.events.on("hashChangeComplete", handleHashChange);
@@ -66,38 +97,20 @@ export default function SettingsList({ state, dispatch }: SettingsListProps): Re
         return () => {
             router.events.off("hashChangeComplete", handleHashChange);
         };
-    }, []);
+    }, [handleHashChange, router.events]);
 
     return (
         <div className={styles.container}>
-            <SettingsListItem
-                title="Account"
-                description="View information about your account and edit it."
-                icon={UserGear}
-                onClick={() => handleClick(SettingsItems.Account)}
-                isActive={state.activeSettingsItem == SettingsItems.Account}
-            />
-            <SettingsListItem
-                title="Privacy"
-                description="Control your privacy settings."
-                icon={LockSimple}
-                onClick={() => handleClick(SettingsItems.Privacy)}
-                isActive={state.activeSettingsItem == SettingsItems.Privacy}
-            />
-            <SettingsListItem
-                title="Notifications"
-                description="Change how you get notified about posts and messages."
-                icon={BellRinging}
-                onClick={() => handleClick(SettingsItems.Notifications)}
-                isActive={state.activeSettingsItem == SettingsItems.Notifications}
-            />
-            <SettingsListItem
-                title="Security"
-                description="2FA, additional security when resetting your password and etc..."
-                icon={Fingerprint}
-                onClick={() => handleClick(SettingsItems.Security)}
-                isActive={state.activeSettingsItem == SettingsItems.Security}
-            />
+            {SettingsListItems.map((item) => (
+                <SettingsListItem
+                    key={item.title}
+                    title={item.title}
+                    description={item.description}
+                    icon={item.icon}
+                    onClick={item.onClick}
+                    isActive={item.isActive}
+                />
+            ))}
         </div>
     );
 }

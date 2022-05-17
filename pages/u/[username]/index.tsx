@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import axiosInstance from "src/axios";
 import { useRouter } from "next/router";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
@@ -920,19 +920,25 @@ export default function Profile(props: ProfileProps): ReactElement {
     );
 }
 
+interface ServerSideResponse {
+    user: IUser;
+}
+
 export async function getServerSideProps(
     context: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<{ user: IUser }>> {
+): Promise<GetServerSidePropsResult<ServerSideResponse>> {
     let user: IUser = null;
 
     try {
-        const res = await axios.get<{ user: IUser }>(
+        const res = await axios.get<ServerSideResponse>(
             `${process.env.NEXT_PUBLIC_DOMAIN_URL}/users/getUserData?username=${context.params.username}`,
             { withCredentials: true }
         );
         user = res.data.user;
-    } catch (err) {
-        console.error(err);
+    } catch (err: unknown) {
+        if ((err as AxiosError<ServerSideResponse>).response.status != 404) { 
+            console.error(err);
+        }
     }
 
     return {
