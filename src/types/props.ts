@@ -9,7 +9,7 @@ import {
     MouseEventHandler,
     RefAttributes
 } from "react";
-import { IPost, IUser, IBirthday, IAttachment, DateAndTime, NullableString } from "./general";
+import { IPost, IUser, IBirthday, IAttachment, DateAndTime } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
 import { MessagingState } from "src/reducers/messagingReducer";
@@ -219,11 +219,8 @@ export interface BirthdayProps {
 }
 
 export interface ReplyingToProps {
-    post_id: string;
-    avatar_url: string;
-    username: string;
-    content: NullableString;
     avatar_size: number;
+    post: IPost;
 }
 
 export interface CommentBoxProps {

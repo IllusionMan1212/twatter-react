@@ -1,8 +1,3 @@
-interface NullableInt32 {
-    Int32: number;
-    Valid: boolean;
-}
-
 export interface NullableString {
     String: string;
     Valid: boolean;
@@ -59,9 +54,6 @@ interface IParentPost {
     id: NullableString;
     author: IParentUser;
     content: NullableString;
-    likes: NullableInt32;
-    comments: NullableInt32;
-    replying_to: IParentPost;
 }
 
 export interface IPost {
@@ -73,6 +65,7 @@ export interface IPost {
     likes: number;
     comments: number;
     replying_to: IParentPost;
+    parent_deleted: boolean;
 
     liked?: boolean;
 }

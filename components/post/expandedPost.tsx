@@ -107,15 +107,10 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
         <>
             <div className={`mx-auto ${styles.expandedPost}`}>
                 <div className={styles.expandedPostContent}>
-                    {props.post.replying_to.id.Valid && (
-                        <ReplyingTo
-                            post_id={props.post.replying_to.id.String}
-                            avatar_url={props.post.replying_to.author.avatar_url.String}
-                            avatar_size={30}
-                            username={props.post.replying_to.author.username.String}
-                            content={props.post.replying_to.content}
-                        />
-                    )}
+                    <ReplyingTo
+                        avatar_size={30}
+                        post={props.post}
+                    />
                     <ProfileImage
                         width={50}
                         height={50}

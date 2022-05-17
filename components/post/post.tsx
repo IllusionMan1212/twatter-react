@@ -32,15 +32,10 @@ const Post = memo(function Post(props: PostProps): ReactElement {
             }
         >
             <div className={styles.postContent}>
-                {props.post.replying_to?.id.Valid && (
-                    <ReplyingTo
-                        post_id={props.post.replying_to.id.String}
-                        avatar_url={props.post.replying_to.author.avatar_url.String}
-                        avatar_size={25}
-                        username={props.post.replying_to.author.username.String}
-                        content={props.post.replying_to.content}
-                    />
-                )}
+                <ReplyingTo
+                    post={props.post}
+                    avatar_size={25}
+                />
                 <ProfileImage
                     width={40}
                     height={40}

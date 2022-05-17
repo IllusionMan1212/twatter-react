@@ -8,10 +8,15 @@
 .outerContainer {
     width: 100%;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    position: relative;
 }
 
 .innerContainer {
     width: 100%;
+    margin-left: 20px;
+    height: 25px;
 }
 
 .content {
@@ -21,3 +26,13 @@
     text-overflow: "...\"";
 }
 
+.deletedContent {
+    font-style: italic;
+}
+
+.arrowIcon {
+    min-width: 20px;
+    min-height: 20px;
+    position: absolute;
+    bottom: 0px;
+}
