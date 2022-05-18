@@ -73,9 +73,13 @@ export default function ActiveConversation({ dispatch, state, atBottom, setNewMe
                 );
                 return [];
             });
-    }, [toast]);
+    }, []);
 
     const loadMoreMessages = useCallback(() => {
+        if (reachedStartOfMessages) {
+            return;
+        }
+
         setPage(pageRef.current + 1);
         getMessages(state.activeConversation.id).then((newMessages) => {
             if (!newMessages.length) {
@@ -95,7 +99,7 @@ export default function ActiveConversation({ dispatch, state, atBottom, setNewMe
             });
             return;
         });
-    }, [pageRef, firstItemIndex, state.activeConversation?.id, getMessages, dispatch]);
+    }, [pageRef, firstItemIndex, state.activeConversation?.id, getMessages, dispatch, reachedStartOfMessages]);
 
     const handleTyping = useCallback((payload: { conversationId: string }) => {
         clearTimeout(timeoutId);

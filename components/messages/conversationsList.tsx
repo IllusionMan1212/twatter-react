@@ -40,9 +40,13 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
     }, [conversationsPage]);
 
     const loadMoreConversations = useCallback(() => {
+        if (reachedEndOfConvos) {
+            return;
+        }
+
         setConversationsPage(conversationsPage.current + 1);
         getConversations().then((newConversations) => {
-            if (!newConversations.length) {
+            if (!newConversations.length || newConversations.length < 20) {
                 setReachedEndOfConvos(true);
                 return;
             }
@@ -54,7 +58,7 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
                 }
             });
         });
-    }, [conversationsPage, getConversations, setConversationsPage]);
+    }, [conversationsPage, getConversations, setConversationsPage, reachedEndOfConvos]);
 
     const handleConversationClick = (conversation: IConversation) => {
         if (conversation.id == props.state.activeConversation?.id) {
@@ -84,6 +88,10 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
     useEffect(() => {
         if (user) {
             getConversations().then((_conversations) => {
+                if (_conversations.length < 20) {
+                    setReachedEndOfConvos(true);
+                }
+
                 props.dispatch({
                     type: MessagingActions.FETCH_CONVERSATIONS,
                     payload: {
