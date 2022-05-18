@@ -9,6 +9,10 @@
     color: variables.$accent-color;
     font-weight: bold;
     margin-bottom: 0.5em;
+
+    &:hover {
+        color: variables.$accent-color-dark;
+    }
 }
 
 .description {

@@ -44,26 +44,17 @@ const Post = memo(function Post(props: PostProps): ReactElement {
                     alt={props.post.author.username}
                 />
                 <div className={styles.user}>
-                    {props.post.author ? (
-                        <Link
-                            href={`/u/${props.post.author.username}`}
-                        >
-                            <a onClick={(e) => e.stopPropagation()}>
-                                <div className="text-bold flex flex-column justify-content-center">
-                                    <p className="ml-1 underline">
-                                        {props.post.author.display_name}
-                                    </p>
-                                </div>
-                            </a>
-                        </Link>
-                    ) : (
-                        <div
-                            className="text-bold flex flex-column justify-content-center"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <p className="ml-1">Deleted Account</p>
-                        </div>
-                    )}
+                    <Link
+                        href={`/u/${props.post.author.username}`}
+                    >
+                        <a onClick={(e) => e.stopPropagation()}>
+                            <div className="text-bold flex flex-column justify-content-center">
+                                <p className="ml-1 underline">
+                                    {props.post.author.display_name}
+                                </p>
+                            </div>
+                        </a>
+                    </Link>
                 </div>
                 <PostOptionsMenuButton
                     postId={props.post.id}

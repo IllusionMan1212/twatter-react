@@ -2,6 +2,10 @@
 
 .container {
     background-color: variables.$bg-color-secondary;
+
+    &:hover {
+        background-color: variables.$bg-color-secondary-hover;
+    }
 }
 
 .text {
