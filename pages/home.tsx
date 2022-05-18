@@ -247,16 +247,19 @@ export default function Home(): ReactElement {
             });
     }, [page]);
 
-    const loadMorePosts = () => {
+    const loadMorePosts = useCallback(() => {
+        if (reachedEnd) {
+            return;
+        }
+
         setPage(page.current + 1);
         getPosts().then((newPosts) => {
-            if (!newPosts.length) {
+            if (!newPosts.length || newPosts.length < 50) {
                 setReachedEnd(true);
-                return;
             }
             setPosts(posts.current.concat(newPosts));
         });
-    };
+    }, [reachedEnd, getPosts, page, posts, setPage, setPosts]);
 
     useEffect(() => {
         if (socket) {

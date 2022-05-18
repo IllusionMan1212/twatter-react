@@ -375,34 +375,28 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
     }, [props.user?.id]);
 
-    const loadMorePosts = (lastItemIndex: number) => {
+    const loadMorePosts = () => {
         switch (activeTab.current) {
         case Tabs.Posts:
-            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-            if (lastItemIndex < 49) {
-                setPostsReachedEnd(true);
+            if (postsReachedEnd) {
                 return;
             }
             setPostsPage(postsPage.current + 1);
             getPosts(postsPage.current, "posts").then((newPosts) => {
-                if (!newPosts.length) {
+                if (!newPosts.length || newPosts.length < 50) {
                     setPostsReachedEnd(true);
-                    return;
                 }
                 setPosts(posts.current.concat(newPosts));
             });
             break;
         case Tabs.PostsAndComments:
-            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-            if (lastItemIndex < 49) {
-                setCommentsReachedEnd(true);
+            if (commentsReachedEnd) {
                 return;
             }
             setCommentsPage(commentsPage.current + 1);
             getPosts(commentsPage.current, "comments").then((newPosts) => {
-                if (!newPosts.length) {
+                if (!newPosts.length || newPosts.length < 50) {
                     setCommentsReachedEnd(true);
-                    return;
                 }
                 setPostsAndComments(
                     postsAndComments.current.concat(newPosts)
@@ -410,16 +404,13 @@ export default function Profile(props: ProfileProps): ReactElement {
             });
             break;
         case Tabs.MediaPosts:
-            // if we have less than 50 items in the array, then we dont need to load more items cuz we are already at the end
-            if (lastItemIndex < 49) {
-                setMediaReachedEnd(true);
+            if (mediaReachedEnd) {
                 return;
             }
             setMediaPage(mediaPage.current + 1);
             getPosts(mediaPage.current, "media").then((newPosts) => {
-                if (!newPosts.length) {
+                if (!newPosts.length || newPosts.length < 50) {
                     setMediaReachedEnd(true);
-                    return;
                 }
                 setMediaPosts(mediaPosts.current.concat(newPosts));
             });
