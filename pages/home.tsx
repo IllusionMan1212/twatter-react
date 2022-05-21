@@ -351,23 +351,22 @@ export default function Home(): ReactElement {
                     </div>
                     <div className={styles.center}>
                         <div
-                            className={
-                                mobileCompose
-                                    ? styles.inputContainer
-                                    : ""
-                            }
+                            className={`
+                                ${styles.inputContainerDesktop}
+                                ${mobileCompose ? styles.inputContainerMobile : ""}
+                            `}
                         >
                             <div
-                                className={styles.inputContainerMobile}
+                                className={styles.inputInnerContainerMobile}
                                 ref={inputContainerMobileRef}
                                 onTouchStart={handleTouchStart}
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={handleTouchEnd}
                             >
-                                {/* 75px is the height of the navbar on mobile */}
+                                {/* 55px is the height of the blue options buttons thing*/}
                                 <div
                                     style={{
-                                        minHeight: "calc(50% - 75px)",
+                                        minHeight: "calc(50% - 55px)"
                                     }}
                                     onClick={() =>
                                         closeMobileComposeSmoothly()

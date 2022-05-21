@@ -42,7 +42,7 @@
     }
 }
 
-.inputContainer {
+.inputContainerMobile {
     @media (max-width: 800px) {
         position: fixed;
         top: 0;
@@ -55,7 +55,16 @@
     }
 }
 
-.inputContainerMobile {
+.inputContainerDesktop {
+    @media (min-width: 801px) {
+        position: sticky;
+        top: 5em;
+        z-index: 2;
+        border-bottom: 1px solid variables.$divider-color;
+    }
+}
+
+.inputInnerContainerMobile {
     @media (max-width: 800px) {
         background-color: #0005;
         height: 100%;        
@@ -84,7 +93,7 @@
         min-height: 50%;
         max-height: 100%;
         position: fixed;
-        bottom: 75px;
+        bottom: 55px;
         left: 0;
         right: 0;
         z-index: 1;
@@ -104,7 +113,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 15px;
+        padding: 5px 20px;
         background-color: variables.$accent-color;
     }
 }
