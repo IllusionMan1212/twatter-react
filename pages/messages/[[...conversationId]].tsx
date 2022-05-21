@@ -34,7 +34,7 @@ const initialState = {
 };
 
 export default function Messages(): ReactElement {
-    const { setUnreadMessages, setActiveConversationId } = useGlobalContext();
+    const { setUnreadConversations, setActiveConversationId } = useGlobalContext();
     const { user, socket } = useUserContext();
 
     const router = useRouter();
@@ -52,13 +52,13 @@ export default function Messages(): ReactElement {
                 payload
             });
 
-            setUnreadMessages((unreadMessages) => {
+            setUnreadConversations((unreadMessages) => {
                 return unreadMessages.filter((conversationId) => {
                     return payload.conversationId != conversationId;
                 });
             });
         },
-        [setUnreadMessages]
+        [setUnreadConversations]
     );
 
     const handleDeleteMessage = useCallback((payload: DeleteMessagePayload) => {

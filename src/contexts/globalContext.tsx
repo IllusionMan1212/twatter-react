@@ -1,6 +1,7 @@
 import { createContext, ReactElement, useContext, useEffect, useState, SetStateAction, Dispatch, useCallback } from "react";
-import { useUserContext } from "./userContext";
-import { ToastWrapper, useToastContext } from "./toastContext"; import axiosInstance from "src/axios";
+import { useUserContext } from "src/contexts/userContext";
+import { ToastWrapper, useToastContext } from "./toastContext";
+import axiosInstance from "src/axios";
 import axios, { AxiosResponse } from "axios";
 import { ISocketMessage } from "src/types/general";
 import { ContextWrapperProps } from "src/types/props";
@@ -16,8 +17,8 @@ interface ISharer {
 }
 
 interface GlobalContextType {
-    unreadMessages: string[];
-    setUnreadMessages: Dispatch<SetStateAction<string[]>>;
+    unreadConversations: string[];
+    setUnreadConversations: Dispatch<SetStateAction<string[]>>;
     activeConversationId: string;
     setActiveConversationId: Dispatch<SetStateAction<string>>;
     sharer: ISharer;
@@ -47,8 +48,8 @@ const SharerDefaultValues: ISharer = {
 };
 
 const GlobalContextDefaultValues: GlobalContextType = {
-    unreadMessages: [],
-    setUnreadMessages: null,
+    unreadConversations: [],
+    setUnreadConversations: null,
     activeConversationId: null,
     setActiveConversationId: null,
     sharer: SharerDefaultValues,
@@ -65,7 +66,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     const toast = useToastContext();
     const router = useRouter();
 
-    const [unreadMessages, setUnreadMessages] = useState<string[]>([]);
+    const [unreadConversations, setUnreadConversations] = useState<string[]>([]);
     const [activeConversationId, setActiveConversationId] = useState("");
     const [sharer, setSharer] = useState<ISharer>(SharerDefaultValues);
     const [statusBarTitle, setStatusBarTitle] = useState("");
@@ -95,7 +96,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     useEffect(() => {
         if (!user) {
             setStatusBarTitle("");
-            setUnreadMessages([]);
+            setUnreadConversations([]);
             setActiveConversationId("");
             setSharer(SharerDefaultValues);
         }
@@ -103,11 +104,11 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
 
     const handleMessage = useCallback((msg: ISocketMessage) => {
         if (msg.author_id != user.id && activeConversationId != msg.conversation_id) {
-            if (!unreadMessages.includes(msg.conversation_id)) {
-                setUnreadMessages(unreadMessages.concat(msg.conversation_id));
+            if (!unreadConversations.includes(msg.conversation_id)) {
+                setUnreadConversations(unreadConversations.concat(msg.conversation_id));
             }
         }
-    }, [user, unreadMessages, activeConversationId]);
+    }, [user, unreadConversations, activeConversationId]);
 
     useEffect(() => {
         if (socket) {
@@ -132,7 +133,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
                     cancelToken: tokenSource.token,
                 })
                 .then((res: AxiosResponse<ApiResponse>) => {
-                    setUnreadMessages(res.data.unreadMessages);
+                    setUnreadConversations(res.data.unreadMessages);
                 })
                 .catch((err) => {
                     if (axios.isCancel(err)) {
@@ -161,8 +162,8 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     return (
         <>
             <GlobalContext.Provider value={{
-                unreadMessages,
-                setUnreadMessages,
+                unreadConversations,
+                setUnreadConversations,
                 activeConversationId,
                 setActiveConversationId,
                 sharer,

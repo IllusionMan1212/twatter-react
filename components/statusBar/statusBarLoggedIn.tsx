@@ -16,7 +16,7 @@ interface StatusBarLoggedInProps {
 }
 
 export default function StatusBarLoggedIn(props: StatusBarLoggedInProps): ReactElement {
-    const { unreadMessages } = useGlobalContext();
+    const { unreadConversations } = useGlobalContext();
     const { user } = useUserContext();
 
     const [userMenu, setUserMenu] = useState(false);
@@ -68,7 +68,7 @@ export default function StatusBarLoggedIn(props: StatusBarLoggedInProps): ReactE
                 <Search/>
             </div>
             <div className={`ml-auto flex align-items-center ${styles.messagesAndNotifs}`}>
-                <MessagesButton unreadMessages={unreadMessages.length} />
+                <MessagesButton unreadMessages={unreadConversations.length} />
                 <NotificationsButton unreadNotifications={unreadNotifications} />
                 <div
                     className={`align-items-center ${styles.user}`}
