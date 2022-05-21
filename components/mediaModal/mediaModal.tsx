@@ -24,7 +24,7 @@ import DateTime from "components/datetime";
 import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
-    const { socket } = useUserContext();
+    const { socket, user: currentUser } = useUserContext();
     const { showToast } = useGlobalContext();
 
     const commentBoxRef = useRef<HTMLSpanElement>(null);
@@ -85,7 +85,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
             data: {
                 content: content,
                 contentLength: commentBoxRef.current.textContent.length,
-                author: props.modalData.currentUser,
+                author: currentUser,
                 attachments: attachmentsToSend,
                 replying_to: props.modalData.post.id,
             },
