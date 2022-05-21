@@ -1,6 +1,5 @@
 import axios from "src/axios";
 import { Dispatch, ReactElement, SetStateAction, useEffect } from "react";
-import { useToastContext } from "src/contexts/toastContext";
 import styles from "./userContextMenu.module.scss";
 import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
@@ -9,6 +8,7 @@ import ReportBug from "components/userContextMenu/reportBug";
 import Settings from "components/userContextMenu/settings";
 import Logout from "components/userContextMenu/logout";
 import Router from "next/router";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export interface UserContextMenuProps {
     open: boolean;
@@ -18,15 +18,15 @@ export interface UserContextMenuProps {
 export default function UserContextMenu(
     props: UserContextMenuProps
 ): ReactElement {
-    const toast = useToastContext();
     const { user, logout } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const _logout = () => {
         axios
             .delete("/users/logout")
             .then(() => {
                 logout();
-                toast("Logged out", 3000);
+                showToast("Logged out", 3000);
                 Router.push("/login");
             })
             .catch((err) => {

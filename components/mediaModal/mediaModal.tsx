@@ -5,7 +5,6 @@ import { formatDate } from "src/utils/functions";
 import LikeButton from "components/buttons/likeButton";
 import { MediaModalProps } from "src/types/props";
 import PostOptionsMenuButton from "components/buttons/postOptionsMenuButton";
-import { useToastContext } from "src/contexts/toastContext";
 import { Navigation, Keyboard } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "components/loading";
@@ -22,10 +21,11 @@ import { useUserContext } from "src/contexts/userContext";
 import { AxiosResponse } from "axios";
 import CommentBox from "components/commentBox/commentBox";
 import DateTime from "components/datetime";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function MediaModal(props: MediaModalProps): ReactElement {
-    const toast = useToastContext();
     const { socket } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const commentBoxRef = useRef<HTMLSpanElement>(null);
     const prevRef = useRef<HTMLDivElement>(null);
@@ -111,7 +111,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         (payload) => {
             setNowCommenting(false);
             setComments([payload].concat(comments));
-            toast("Commented Successfully", 2000);
+            showToast("Commented Successfully", 2000);
         },
         [comments]
     );
@@ -179,7 +179,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                     console.log("request canceled");
                 } else {
                     err?.response?.data?.status != 404 &&
-                        toast(
+                        showToast(
                             err?.response?.data?.message ??
                                 "An error has occurred",
                             4000
@@ -309,7 +309,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             })}
                         </>
                     ) : (
-                        <Loading height="50" width="50"></Loading>
+                        <Loading height="50" width="50"/>
                     )}
                 </div>
                 <CommentBox

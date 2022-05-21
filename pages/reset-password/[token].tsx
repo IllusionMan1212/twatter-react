@@ -6,11 +6,11 @@ import LayoutRegular from "components/layouts/layoutRegular";
 import registerStyles from "styles/register-login.module.scss";
 import forgotPassStyles from "styles/forgot-password.module.scss";
 import { EyeClosed, Eye } from "phosphor-react";
-import { useToastContext } from "src/contexts/toastContext";
 import { IUser } from "src/types/general";
 import ProfileImage from "components/post/profileImage";
 import { useUserContext } from "src/contexts/userContext";
 import Loading from "components/loading";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface PostApiRequest {
     password: string;
@@ -27,8 +27,8 @@ interface GetApiResponse {
 }
 
 export default function ResetPassword(): ReactElement {
-    const toast = useToastContext();
     const { user: currentUser } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [newPassword, setNewPassword] = useState({
@@ -43,17 +43,17 @@ export default function ResetPassword(): ReactElement {
 
     const validateFields = (): boolean => {
         if (!newPassword.password || !newPassword.confirm_password) {
-            toast("All fields must be set", 4000);
+            showToast("All fields must be set", 4000);
             setResetAllowed(true);
             return false;
         }
         if (newPassword.password.length < 8) {
-            toast("Password field must consist of 8 characters at least", 6000);
+            showToast("Password field must consist of 8 characters at least", 6000);
             setResetAllowed(true);
             return false;
         }
         if (newPassword.password != newPassword.confirm_password) {
-            toast("Passwords don't match", 4000);
+            showToast("Passwords don't match", 4000);
             setResetAllowed(true);
             return false;
         }
@@ -76,12 +76,12 @@ export default function ResetPassword(): ReactElement {
                         payload
                     )
                     .then((res) => {
-                        toast(res.data.message, 6000);
+                        showToast(res.data.message, 6000);
                         router.push("/login");
                     })
                     .catch((err) => {
                         setResetAllowed(true);
-                        toast(err?.response?.data?.message ?? "An error has occurred", 5000);
+                        showToast(err?.response?.data?.message ?? "An error has occurred", 5000);
                         router.push("/forgot-password");
                     });
             }
@@ -108,7 +108,7 @@ export default function ResetPassword(): ReactElement {
                     setLoading(false);
                 })
                 .catch(() => {
-                    toast(
+                    showToast(
                         "Password reset link is invalid or has expired",
                         5000
                     );

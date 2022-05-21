@@ -6,10 +6,10 @@ import Head from "next/head";
 import { Eye, EyeClosed } from "phosphor-react";
 import React, { FormEvent, ReactElement, useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
 import { IUser } from "src/types/general";
 import Router from "next/router";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface ApiRequest {
     username: string;
@@ -22,8 +22,8 @@ interface ApiResponse {
 }
 
 export default function Login(): ReactElement {
-    const toast = useToastContext();
     const { user, login } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [form, setForm] = useState({
@@ -53,7 +53,7 @@ export default function Login(): ReactElement {
                         { withCredentials: true }
                     )
                     .then((res) => {
-                        toast("Successfully logged in", 3000);
+                        showToast("Successfully logged in", 3000);
                         if (res.data.success) {
                             Router.push("/home");
                             login(res.data.user);
@@ -61,7 +61,7 @@ export default function Login(): ReactElement {
                     })
                     .catch((err) => {
                         setLoginAllowed(true);
-                        toast(err?.response?.data?.message ?? "An error has occurred", 4000);
+                        showToast(err?.response?.data?.message ?? "An error has occurred", 4000);
                     });
             }
         }
@@ -69,7 +69,7 @@ export default function Login(): ReactElement {
 
     const validateForm = (): boolean => {
         if (!form.username || !form.password) {
-            toast("All fields must be set", 4000);
+            showToast("All fields must be set", 4000);
             setLoginAllowed(true);
             return false;
         }

@@ -6,7 +6,6 @@ import { DotsThree, Eraser, Flag, Share, Link } from "phosphor-react";
 import { PostOptionsMenuButtonProps } from "src/types/props";
 import axios from "src/axios";
 import { AxiosResponse } from "axios";
-import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
 import { useGlobalContext } from "src/contexts/globalContext";
 
@@ -22,9 +21,8 @@ interface ApiResponse {
 export default function PostOptionsMenuButton(
     props: PostOptionsMenuButtonProps
 ): ReactElement {
-    const toast = useToastContext();
     const { socket, user: currentUser } = useUserContext();
-    const { setSharer } = useGlobalContext();
+    const { setSharer, showToast } = useGlobalContext();
 
     const [optionsMenu, setOptionsMenu] = useState(false);
     const [offset, setOffset] = useState(-1);
@@ -70,9 +68,9 @@ export default function PostOptionsMenuButton(
         tempInput.setSelectionRange(0, 99999);
         try {
             document.execCommand("copy");
-            toast("Copied Successfully", 3000);
+            showToast("Copied Successfully", 3000);
         } catch (err) {
-            toast("Error while copying link", 3000);
+            showToast("Error while copying link", 3000);
         }
         finally {
             document.body.removeChild(tempInput);
@@ -99,10 +97,10 @@ export default function PostOptionsMenuButton(
             .then((res) => {
                 props.deleteCallback?.();
                 socket.send(JSON.stringify(socketPayload));
-                toast(res.data.message, 3000);
+                showToast(res.data.message, 3000);
             })
             .catch((err) => {
-                toast(err?.response?.data?.message ?? "An error has occurred while deleting your post", 3000);
+                showToast(err?.response?.data?.message ?? "An error has occurred while deleting your post", 3000);
             });
     };
 

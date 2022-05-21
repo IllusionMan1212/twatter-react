@@ -1,0 +1,23 @@
+.toaster {
+    display: flex;
+    height: fit-content;
+    height: -moz-fit-content;
+    width: fit-content;
+    width: -moz-fit-content;
+    position: fixed;
+    bottom: 30px;
+    z-index: 1000;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    max-width: 90%;
+    grid-gap: 10px;
+    flex-direction: column;
+    align-items: center;
+
+    @media (max-width: 580px) {
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+}

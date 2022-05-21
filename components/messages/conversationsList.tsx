@@ -8,13 +8,13 @@ import { useUserContext } from "src/contexts/userContext";
 import { useRouter } from "next/router";
 import { ConversationsListProps } from "src/types/props";
 import { AxiosResponse } from "axios";
-import { useToastContext } from "src/contexts/toastContext";
 import axiosInstance from "src/axios";
 import useLatestState from "src/hooks/useLatestState";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function ConversationsList(props: ConversationsListProps): ReactElement {
     const { user, socket } = useUserContext();
-    const toast = useToastContext();
+    const { showToast } = useGlobalContext();
 
     const router = useRouter();
 
@@ -30,7 +30,7 @@ export default function ConversationsList(props: ConversationsListProps): ReactE
             })
             .catch((err) => {
                 err?.response?.data?.status != 404 &&
-                    toast(
+                    showToast(
                         err?.response?.data?.message ?? "An error has occurred",
                         5000
                     );

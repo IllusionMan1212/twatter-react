@@ -1,6 +1,5 @@
 import { createContext, ReactElement, useContext, useEffect, useState, SetStateAction, Dispatch, useCallback } from "react";
 import { useUserContext } from "src/contexts/userContext";
-import { ToastWrapper, useToastContext } from "./toastContext";
 import axiosInstance from "src/axios";
 import axios, { AxiosResponse } from "axios";
 import { ISocketMessage } from "src/types/general";
@@ -9,6 +8,7 @@ import Share from "components/share/share";
 import StatusBar from "components/statusBar/statusBar";
 import Navbar from "components/navbar/navbar";
 import { useRouter } from "next/router";
+import Toaster from "components/toaster/toaster";
 
 interface ISharer {
     enabled: boolean;
@@ -24,6 +24,7 @@ interface GlobalContextType {
     sharer: ISharer;
     setSharer: Dispatch<SetStateAction<ISharer>>;
     setStatusBarTitle: Dispatch<SetStateAction<string>>;
+    showToast: (text: string, length: number) => void;
 }
 
 interface ApiResponse {
@@ -55,6 +56,7 @@ const GlobalContextDefaultValues: GlobalContextType = {
     sharer: SharerDefaultValues,
     setSharer: null,
     setStatusBarTitle: null,
+    showToast: null,
 };
 
 const GlobalContext = createContext<GlobalContextType>(
@@ -63,20 +65,33 @@ const GlobalContext = createContext<GlobalContextType>(
 
 export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
     const { user, socket } = useUserContext();
-    const toast = useToastContext();
     const router = useRouter();
 
     const [unreadConversations, setUnreadConversations] = useState<string[]>([]);
     const [activeConversationId, setActiveConversationId] = useState("");
     const [sharer, setSharer] = useState<ISharer>(SharerDefaultValues);
     const [statusBarTitle, setStatusBarTitle] = useState("");
+    const [toasts, setToasts] = useState([]);
 
-    const handleError = useCallback(
-        (payload) => {
-            toast(payload.message, 4000);
-        },
-        [toast]
-    );
+    const handleError = useCallback((payload) => {
+        showToast(payload.message, 4000);
+    }, []);
+
+    const showToast = (text: string, length: number) => {
+        const id = (
+            Date.now().toString(36) + Math.random().toString(36).substring(2, 5)
+        ).toUpperCase();
+        setToasts((toasts) => {
+            return toasts.concat({ text: text, id: id });
+        });
+
+        setTimeout(() => {
+            setToasts((toasts) => {
+                return toasts.filter((toasts) => toasts.id != id);
+            });
+        }, length);
+    };
+
 
     useEffect(() => {
         if (sharer.enabled) {
@@ -140,7 +155,7 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
                         console.log("request canceled");
                     } else {
                         err?.response?.data?.status != 404 &&
-                            toast(
+                            showToast(
                                 err?.response?.data?.message ??
                                     "An error has occurred while fetching unread messages",
                                 4000
@@ -169,13 +184,13 @@ export function GlobalWrapper({ children }: ContextWrapperProps): ReactElement {
                 sharer,
                 setSharer,
                 setStatusBarTitle,
+                showToast,
             }}>
+                <Toaster toasts={toasts} />
                 <Share text={sharer.text} url={sharer.url} />
-                <ToastWrapper>
-                    <StatusBar title={statusBarTitle} />
-                    <Navbar />
-                    {children}
-                </ToastWrapper>
+                <StatusBar title={statusBarTitle} />
+                <Navbar />
+                {children}
             </GlobalContext.Provider>
         </>
     );

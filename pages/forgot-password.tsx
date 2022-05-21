@@ -2,10 +2,10 @@ import axios, { AxiosResponse } from "axios";
 import Head from "next/head";
 import { ReactElement, useState } from "react";
 import LayoutRegular from "components/layouts/layoutRegular";
-import { useToastContext } from "src/contexts/toastContext";
 import registerLoginStyles from "styles/register-login.module.scss";
 import styles from "styles/forgot-password.module.scss";
 import { useUserContext } from "src/contexts/userContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface ApiRequest {
     email: string;
@@ -17,8 +17,8 @@ interface ApiResponse {
 }
 
 export default function ForgotPassword(): ReactElement {
-    const toast = useToastContext();
     const { user } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const [email, setEmail] = useState("");
     const [resetAllowed, setResetAllowed] = useState(true);
@@ -32,7 +32,7 @@ export default function ForgotPassword(): ReactElement {
         if (resetAllowed) {
             setResetAllowed(false);
             if (!email) {
-                toast("All fields must be set", 4000);
+                showToast("All fields must be set", 4000);
                 setResetAllowed(true);
                 return;
             }
@@ -47,12 +47,12 @@ export default function ForgotPassword(): ReactElement {
                 )
                 .then((res) => {
                     if (res.data.success) {
-                        toast(res.data.message, 7000);
+                        showToast(res.data.message, 7000);
                         setResetAllowed(true);
                     }
                 })
                 .catch((err) => {
-                    toast(err?.response?.data?.message ?? "An error has occurred", 5000);
+                    showToast(err?.response?.data?.message ?? "An error has occurred", 5000);
                     setResetAllowed(true);
                 });
         }

@@ -6,7 +6,6 @@ import { Plus, X } from "phosphor-react";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import Router from "next/router";
 import axiosInstance from "src/axios";
-import { useToastContext } from "src/contexts/toastContext";
 import { IBirthday } from "src/types/general";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 import { useUserContext } from "src/contexts/userContext";
@@ -14,6 +13,7 @@ import axios, { AxiosResponse } from "axios";
 import { IUser } from "src/types/general";
 import Birthday from "components/birthday/birthday";
 import { GetServerSidePropsContext } from "next";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface PostReqResponse {
     message: string;
@@ -28,8 +28,8 @@ interface UserSetupProps {
 }
 
 export default function UserSetup(props: UserSetupProps): ReactElement {
-    const toast = useToastContext();
     const { user, login } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const dayRef = useRef<HTMLSelectElement>(null);
     const monthRef = useRef<HTMLSelectElement>(null);
@@ -46,7 +46,7 @@ export default function UserSetup(props: UserSetupProps): ReactElement {
             return;
         }
         if (!allowedProfileImageMimetypes.includes(file.type)) {
-            toast("This file format is not supported", 4000);
+            showToast("This file format is not supported", 4000);
             return;
         }
         setPreviewImage(URL.createObjectURL(file));
@@ -59,7 +59,7 @@ export default function UserSetup(props: UserSetupProps): ReactElement {
 
     const handleClick = () => {
         if (bio.trim().length > 150) {
-            toast("Bio cannot be longer than 150 characters", 4000);
+            showToast("Bio cannot be longer than 150 characters", 4000);
             return;
         }
         let birthday_year = null;
@@ -84,11 +84,11 @@ export default function UserSetup(props: UserSetupProps): ReactElement {
         axiosInstance
             .post<FormData, AxiosResponse<PostReqResponse>>("users/initialSetup", payload)
             .then((res) => {
-                toast(res.data.message, 4000);
+                showToast(res.data.message, 4000);
                 Router.push("/home");
             })
             .catch((err) => {
-                toast(
+                showToast(
                     err?.response?.data?.message ?? "An error has occurred",
                     4000
                 );

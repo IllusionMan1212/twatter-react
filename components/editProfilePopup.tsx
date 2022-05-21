@@ -5,11 +5,11 @@ import { formatBirthday } from "src/utils/functions";
 import Button from "./buttons/button";
 import styles from "./editProfilePopup.module.scss";
 import homeStyles from "styles/home.module.scss";
-import { useToastContext } from "src/contexts/toastContext";
 import { IAttachment, IBirthday } from "src/types/general";
 import { useUserContext } from "src/contexts/userContext";
 import { allowedProfileImageMimetypes } from "src/utils/variables";
 import Birthday from "components/birthday/birthday";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 interface UpdateProfilePayload {
     eventType: string;
@@ -28,8 +28,8 @@ interface UpdateProfilePayload {
 export default function EditProfilePopup(
     props: EditProfilePopupProps
 ): ReactElement {
-    const toast = useToastContext();
     const { socket } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const [previewImage, setPreviewImage] = useState<string>(null);
     const [profileImage, setProfileImage] = useState<IAttachment>(null);
@@ -48,12 +48,12 @@ export default function EditProfilePopup(
             return;
         }
         if (!displayName) {
-            toast("Display name cannot be empty", 3000);
+            showToast("Display name cannot be empty", 3000);
             return;
         }
 
         if (bio.length > 150) {
-            toast("Bio cannot be longer than 150 characters", 4000);
+            showToast("Bio cannot be longer than 150 characters", 4000);
             return;
         }
 
@@ -92,7 +92,7 @@ export default function EditProfilePopup(
     const handleProfileImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files[0];
         if (!allowedProfileImageMimetypes.includes(file.type)) {
-            toast("This file format is not supported", 4000);
+            showToast("This file format is not supported", 4000);
             return;
         }
         setPreviewImage(URL.createObjectURL(file));

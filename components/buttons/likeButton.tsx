@@ -1,22 +1,22 @@
 import styles from "./likeButton.module.scss";
 import { ReactElement, useRef, useState } from "react";
-import { useToastContext } from "src/contexts/toastContext";
 import axios from "src/axios";
 import { LikeButtonProps } from "src/types/props";
 import { formatBigNumbers } from "src/utils/functions";
 import { LikePayload } from "src/types/utils";
 import { useUserContext } from "src/contexts/userContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function LikeButton(props: LikeButtonProps): ReactElement {
     const likeRef = useRef(null);
     const [canLike, setCanLike] = useState(true);
 
-    const toast = useToastContext();
     const { user: currentUser, socket } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const handleClick = () => {
         if (!currentUser) {
-            toast("You must be logged in to like this post", 4000);
+            showToast("You must be logged in to like this post", 4000);
             return;
         }
         if (!canLike) {
@@ -30,6 +30,8 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
                 likeRef?.current?.classList.remove(styles.isAnimating);
             }, 800);
         }
+
+        // TODO: we can use the optimistic update feature of SWR here
 
         const payload: LikePayload = {
             postId: props.post.id,
@@ -51,7 +53,7 @@ export default function LikeButton(props: LikeButtonProps): ReactElement {
                 setCanLike(true);
             })
             .catch((err) => {
-                toast(err?.response?.data?.message ?? "An error has occurred", 3000);
+                showToast(err?.response?.data?.message ?? "An error has occurred", 3000);
                 socket.send(JSON.stringify(socketPayload));
                 setCanLike(true);
             });

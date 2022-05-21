@@ -12,7 +12,6 @@ import {
 } from "src/utils/functions";
 import MediaModal from "components/mediaModal/mediaModal";
 import { Calendar, ChatTeardropText, Gift, Note } from "phosphor-react";
-import { useToastContext } from "src/contexts/toastContext";
 import { IUser, IPost } from "src/types/general";
 import { LikePayload } from "src/types/utils";
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
@@ -48,9 +47,8 @@ export default function Profile(props: ProfileProps): ReactElement {
     const router = useRouter();
     useScrollRestoration(router);
 
-    const toast = useToastContext();
     const { user: currentUser, socket } = useUserContext();
-    const { setStatusBarTitle } = useGlobalContext();
+    const { setStatusBarTitle, showToast } = useGlobalContext();
 
     const parentContainerRef = useRef(null);
 
@@ -110,7 +108,7 @@ export default function Profile(props: ProfileProps): ReactElement {
                 router.push(`/messages/${res.data.conversationId}`);
             })
             .catch((err) => {
-                toast(
+                showToast(
                     err?.response?.data?.message ?? "An error has occurred",
                     5000
                 );
@@ -118,7 +116,7 @@ export default function Profile(props: ProfileProps): ReactElement {
     };
 
     const handleFollowClick = () => {
-        toast("Coming Soon™", 3000);
+        showToast("Coming Soon™", 3000);
     };
 
     const handlePostsTabClick = () => {
@@ -354,14 +352,14 @@ export default function Profile(props: ProfileProps): ReactElement {
                     return res.data.posts;
                 })
                 .catch((err) => {
-                    toast(
+                    showToast(
                         err?.response?.data?.message || "An error has occurred",
                         3000
                     );
                     return [];
                 });
         },
-        [props.user?.id, toast]
+        [props.user?.id]
     );
 
     const getPostsCount = useCallback((): Promise<number> => {

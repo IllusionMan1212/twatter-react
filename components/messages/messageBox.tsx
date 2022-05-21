@@ -9,11 +9,11 @@ import {
 import { useUserContext } from "src/contexts/userContext";
 import { MessageBoxProps } from "src/types/props";
 import { messageCharLimit } from "src/utils/variables";
-import { useToastContext } from "src/contexts/toastContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function MessageBox(props: MessageBoxProps): ReactElement {
     const { user, socket } = useUserContext();
-    const toast = useToastContext();
+    const { showToast } = useGlobalContext();
 
     const [endTimeoutId, setEndTimeoutId] = useState<NodeJS.Timeout>(null);
     const [startTimeoutId, setStartTimeoutId] = useState<NodeJS.Timeout>(null);
@@ -240,7 +240,7 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
                             props.setPreviewImages,
                             props.attachments,
                             props.setAttachments,
-                            toast,
+                            showToast,
                             1
                         );
                     }}
@@ -259,7 +259,7 @@ export default function MessageBox(props: MessageBoxProps): ReactElement {
                                     props.previewImages,
                                     props.setPreviewImages,
                                     props.setSendingAllowed,
-                                    toast,
+                                    showToast,
                                     1
                                 );
                             }}

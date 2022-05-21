@@ -8,13 +8,13 @@ import { Trash } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
 import axios from "src/axios";
 import { useUserContext } from "src/contexts/userContext";
-import { useToastContext } from "src/contexts/toastContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function MessageOptionsMenuButton(
     props: MessageOptionsMenuButtonProps
 ): ReactElement {
     const { user, socket } = useUserContext();
-    const toast = useToastContext();
+    const { showToast } = useGlobalContext();
 
     const [optionsMenu, setOptionsMenu] = useState(false);
     const [offset, setOffset] = useState(-1);
@@ -24,6 +24,8 @@ export default function MessageOptionsMenuButton(
         if (user.id != props.messageAuthorId) {
             return;
         }
+
+        // TODO: we can use the optimistic update feature of SWR here.
 
         const payload = {
             message_id: props.messageId,
@@ -43,7 +45,7 @@ export default function MessageOptionsMenuButton(
                 socket.send(JSON.stringify(socketPayload));
             })
             .catch((err) => {
-                toast(
+                showToast(
                     err?.response?.data?.message ?? "An error has occurred",
                     3000
                 );

@@ -7,12 +7,12 @@ import React, { FormEvent, ReactElement, useState } from "react";
 import { Eye, EyeClosed } from "phosphor-react";
 import axios from "axios";
 import Router from "next/router";
-import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function Register(): ReactElement {
-    const toast = useToastContext();
     const { user } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     const [passwordHidden, setPasswordHidden] = useState(true);
     const [form, setForm] = useState({
@@ -44,12 +44,12 @@ export default function Register(): ReactElement {
                         { withCredentials: true }
                     )
                     .then(() => {
-                        toast("Successfully created new account", 5000);
+                        showToast("Successfully created new account", 5000);
                         Router.push("/register/setting-up");
                     })
                     .catch((err) => {
                         setRegisterAllowed(true);
-                        toast(err?.response?.data?.message ?? "An error has occurred", 5000);
+                        showToast(err?.response?.data?.message ?? "An error has occurred", 5000);
                     });
             }
         }
@@ -62,37 +62,37 @@ export default function Register(): ReactElement {
             !form.password ||
             !form.confirm_password
         ) {
-            toast("All fields must be set", 4000);
+            showToast("All fields must be set", 4000);
             setRegisterAllowed(true);
             return false;
         }
 
         if (form.username.length < 3) {
-            toast("Username cannot be shorted than 3 characters", 4000);
+            showToast("Username cannot be shorted than 3 characters", 4000);
             setRegisterAllowed(true);
             return false;
         }
 
         if (form.username.length > 16) {
-            toast("Username cannot be longer than 16 characters", 4000);
+            showToast("Username cannot be longer than 16 characters", 4000);
             setRegisterAllowed(true);
             return false;
         }
 
         if (!form.username.match(/^[a-z0-9_]+$/iu)) {
-            toast("Username cannot contain special characters", 4000);
+            showToast("Username cannot contain special characters", 4000);
             setRegisterAllowed(true);
             return false;
         }
 
         if (form.password.length < 8) {
-            toast("Password is too short", 4000);
+            showToast("Password is too short", 4000);
             setRegisterAllowed(true);
             return false;
         }
 
         if (form.password !== form.confirm_password) {
-            toast("Passwords don't match", 4000);
+            showToast("Passwords don't match", 4000);
             setRegisterAllowed(true);
             return false;
         }

@@ -14,16 +14,14 @@ import { ActiveConversationProps } from "src/types/props";
 import { IAttachment, IMessage, ISocketMessage } from "src/types/general";
 import axiosInstance from "src/axios";
 import { AxiosResponse } from "axios";
-import { useToastContext } from "src/contexts/toastContext";
 import { messageCharLimit } from "src/utils/variables";
 import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function ActiveConversation({ dispatch, state, atBottom, setNewMessagesAlert,  ...props }: ActiveConversationProps): ReactElement {
-    const START_INDEX = 10000;
+    const START_INDEX = Number.MAX_SAFE_INTEGER;
 
     const { user, socket } = useUserContext();
-    const toast = useToastContext();
-    const { setActiveConversationId } = useGlobalContext();
+    const { setActiveConversationId, showToast } = useGlobalContext();
 
     const router = useRouter();
 
@@ -67,7 +65,7 @@ export default function ActiveConversation({ dispatch, state, atBottom, setNewMe
                 return res.data.messages;
             })
             .catch((err) => {
-                toast(
+                showToast(
                     err?.response?.data?.message ?? "An error has occurred",
                     5000
                 );

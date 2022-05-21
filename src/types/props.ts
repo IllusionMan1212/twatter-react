@@ -9,7 +9,7 @@ import {
     MouseEventHandler,
     RefAttributes
 } from "react";
-import { IPost, IUser, IBirthday, IAttachment, DateAndTime } from "./general";
+import { IPost, IUser, IBirthday, IAttachment, DateAndTime, IToast } from "./general";
 import { IconProps } from "phosphor-react";
 import { ContextMenuPosition } from "src/types/utils";
 import { MessagingState } from "src/reducers/messagingReducer";
@@ -334,4 +334,8 @@ export interface AccountSettingsProps {
 
 export interface SettingsPopupProps {
     dispatch: Dispatch<SettingsAction>;
+}
+
+export interface ToasterProps {
+    toasts: IToast[];
 }

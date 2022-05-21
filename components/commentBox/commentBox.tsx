@@ -8,12 +8,12 @@ import {
     handleKeyDown,
 } from "src/utils/eventHandlers";
 import { X, PaperPlane, ImageSquare } from "phosphor-react";
-import { useToastContext } from "src/contexts/toastContext";
 import { useUserContext } from "src/contexts/userContext";
 import { CommentBoxProps } from "src/types/props";
+import { useGlobalContext } from "src/contexts/globalContext";
 export default function CommentBox(props: CommentBoxProps): ReactElement {
-    const toast = useToastContext();
     const { user: currentUser } = useUserContext();
+    const { showToast } = useGlobalContext();
 
     return (
         <>
@@ -99,7 +99,7 @@ export default function CommentBox(props: CommentBoxProps): ReactElement {
                                     props.setPreviewImages,
                                     props.attachments,
                                     props.setAttachments,
-                                    toast
+                                    showToast
                                 )
                             }
                             onKeyDown={(e) =>
@@ -123,7 +123,7 @@ export default function CommentBox(props: CommentBoxProps): ReactElement {
                                             props.previewImages,
                                             props.setPreviewImages,
                                             props.setCommentingAllowed,
-                                            toast
+                                            showToast
                                         )
                                     }
                                     onClick={(e) => {

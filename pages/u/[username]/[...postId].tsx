@@ -5,7 +5,6 @@ import ExpandedPost from "components/post/expandedPost";
 import styles from "components/post/expandedPost.module.scss";
 import MediaModal from "components/mediaModal/mediaModal";
 import { IUser, IPost } from "src/types/general";
-import { useToastContext } from "src/contexts/toastContext";
 import { LikePayload } from "src/types/utils";
 import { NextSeo } from "next-seo";
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
@@ -26,8 +25,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
     const router = useRouter();
     useScrollRestoration(router);
 
-    const toast = useToastContext();
-    const { setStatusBarTitle } = useGlobalContext();
+    const { setStatusBarTitle, showToast } = useGlobalContext();
     const { user: currentUser, socket } = useUserContext();
 
     const [notFound, setNotFound] = useState(null);
@@ -67,10 +65,10 @@ export default function UserPost(props: UserPostProps): ReactElement {
             });
             setNowCommenting(false);
             if (!mediaModal) {
-                toast("Commented Successfully", 2000);
+                showToast("Commented Successfully", 2000);
             }
         },
-        [toast, mediaModal]
+        [mediaModal]
     );
 
     const handleCommentDelete = useCallback((commentIdObj) => {
@@ -151,7 +149,7 @@ export default function UserPost(props: UserPostProps): ReactElement {
                     setLoadingComments(false);
                 })
                 .catch((err) => {
-                    toast(
+                    showToast(
                         err?.response?.data?.message || "An error has occurred",
                         3000
                     );

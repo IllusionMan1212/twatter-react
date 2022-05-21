@@ -102,3 +102,9 @@ export interface IMessage {
 export interface ISocketMessage extends IMessage {
     receiver_id: string;
 }
+
+export interface IToast {
+    id: string;
+    text: string;
+}
+

@@ -11,7 +11,6 @@ import {
 } from "phosphor-react";
 import Post from "components/post/post";
 import axiosInstance from "src/axios";
-import { useToastContext } from "src/contexts/toastContext";
 import MediaModal from "components/mediaModal/mediaModal";
 import { IAttachment, IPost, IUser } from "src/types/general";
 import {
@@ -30,10 +29,11 @@ import { useUserContext } from "src/contexts/userContext";
 import useLatestState from "src/hooks/useLatestState";
 import Trending from "components/trending/trending";
 import Friends from "components/friends/friends";
+import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
-    const toast = useToastContext();
+    const { showToast } = useGlobalContext();
 
     const composePostRef = useRef<HTMLSpanElement>(null);
     const inputContainerMobileRef = useRef<HTMLDivElement>(null);
@@ -159,13 +159,13 @@ export default function Home(): ReactElement {
 
     const handlePost = useCallback(
         (post) => {
-            toast("Posted Successfully", 3000);
+            showToast("Posted Successfully", 3000);
             setNowPosting(false);
             setMobileCompose(false);
 
             setPosts([post].concat(posts.current));
         },
-        [posts, setPosts, toast]
+        [posts, setPosts]
     );
 
     const handleDeletePost = useCallback(
@@ -221,9 +221,9 @@ export default function Home(): ReactElement {
     const handleError = useCallback(
         (payload) => {
             setNowPosting(false);
-            toast(payload.message, 3000);
+            showToast(payload.message, 3000);
         },
-        [toast]
+        []
     );
 
     const getPosts = useCallback((): Promise<IPost[]> => {
@@ -410,7 +410,7 @@ export default function Home(): ReactElement {
                                                     setPreviewImages,
                                                     attachments,
                                                     setAttachments,
-                                                    toast
+                                                    showToast
                                                 )
                                             }
                                             onKeyDown={(e) =>
@@ -441,7 +441,7 @@ export default function Home(): ReactElement {
                                                             previewImages,
                                                             setPreviewImages,
                                                             setPostingAllowed,
-                                                            toast
+                                                            showToast
                                                         )
                                                     }
                                                     onClick={(e) => {
@@ -576,7 +576,7 @@ export default function Home(): ReactElement {
                                                         previewImages,
                                                         setPreviewImages,
                                                         setPostingAllowed,
-                                                        toast
+                                                        showToast
                                                     )
                                                 }
                                                 onClick={(e) =>
