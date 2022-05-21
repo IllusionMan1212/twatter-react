@@ -23,7 +23,7 @@ export default function PostOptionsMenuButton(
     props: PostOptionsMenuButtonProps
 ): ReactElement {
     const toast = useToastContext();
-    const { socket } = useUserContext();
+    const { socket, user: currentUser } = useUserContext();
     const { setSharer } = useGlobalContext();
 
     const [optionsMenu, setOptionsMenu] = useState(false);
@@ -81,7 +81,7 @@ export default function PostOptionsMenuButton(
 
     const handleDelete = () => {
         setOptionsMenu(!optionsMenu);
-        if (props.postAuthorId != props.currentUserId) {
+        if (props.postAuthorId != currentUser.id) {
             return;
         }
         const payload = {
@@ -146,7 +146,7 @@ export default function PostOptionsMenuButton(
                             icon={Link}
                             onClick={handleCopyLink}
                         />
-                        {props.postAuthorId == props.currentUserId ? (
+                        {props.postAuthorId == currentUser.id ? (
                             <>
                                 <hr />
                                 <ContextMenuItem

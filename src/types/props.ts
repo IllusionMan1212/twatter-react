@@ -104,7 +104,6 @@ export interface PostOptionsMenuButtonProps {
     parentContainerRef?: MutableRefObject<HTMLElement>;
     postAuthorId: string;
     postAuthorUsername: string;
-    currentUserId: string;
     postId: string;
     deleteCallback?: <T extends unknown[]>(...args: T) => void;
 }
@@ -123,7 +122,6 @@ export interface MediaModalProps {
     modalData: {
         post: IPost;
         imageIndex: number;
-        currentUser: IUser;
     };
     goBackTwice?: boolean;
     handleMediaClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, post: IPost, index: number) => void;

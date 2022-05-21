@@ -141,7 +141,6 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         postId={props.post.id}
                         postAuthorId={props.post.author.id}
                         postAuthorUsername={props.post.author.username}
-                        currentUserId={user?.id}
                         deleteCallback={props.callback}
                     />
                     <div

@@ -263,7 +263,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                             postId={props.modalData.post.id}
                             postAuthorId={props.modalData.post.author.id}
                             postAuthorUsername={props.modalData.post.author.username}
-                            currentUserId={props.modalData.currentUser?.id}
                             deleteCallback={() => {
                                 props.goBackTwice
                                     ? window.history.go(-2)

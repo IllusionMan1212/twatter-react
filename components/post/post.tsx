@@ -11,11 +11,8 @@ import AttachmentsContainer from "components/attachmentsContainer";
 import ProfileImage from "./profileImage";
 import ReplyingTo from "./replyingTo";
 import DateTime from "components/datetime";
-import { useUserContext } from "src/contexts/userContext";
 
 const Post = memo(function Post(props: PostProps): ReactElement {
-    const { user } = useUserContext();
-
     const handleCommentButtonClick = () => {
         // TODO: open a modal where you can comment on the post
         Router.push(`/u/${props.post.author.username}/${props.post.id}`);
@@ -59,7 +56,6 @@ const Post = memo(function Post(props: PostProps): ReactElement {
                     postId={props.post.id}
                     postAuthorId={props.post.author?.id}
                     postAuthorUsername={props.post.author?.username}
-                    currentUserId={user?.id}
                     parentContainerRef={props.parentContainerRef}
                 />
                 <div className={`ml-1 ${styles.postText}`}>

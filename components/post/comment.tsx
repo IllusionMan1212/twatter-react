@@ -12,11 +12,8 @@ import { CommentProps } from "src/types/props";
 import AttachmentsContainer from "../attachmentsContainer";
 import ProfileImage from "./profileImage";
 import DateTime from "components/datetime";
-import { useUserContext } from "src/contexts/userContext";
 
 export default function Comment(props: CommentProps): ReactElement {
-    const { user } = useUserContext();
-
     const handleCommentButtonClickOnComment = (
         commentId: string,
         commentAuthor: IUser
@@ -54,7 +51,6 @@ export default function Comment(props: CommentProps): ReactElement {
                     postId={props.comment.id}
                     postAuthorId={props.comment.author?.id}
                     postAuthorUsername={props.comment.author?.username}
-                    currentUserId={user?.id}
                     parentContainerRef={props.parentContainerRef}
                 />
             </div>
