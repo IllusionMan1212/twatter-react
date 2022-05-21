@@ -25,7 +25,6 @@ const Post = memo(function Post(props: PostProps): ReactElement {
         <div
             className={`mx-auto pointer ${styles.post}`}
             onClick={() =>
-                props.post.author &&
                 Router.push(
                     `/u/${props.post.author.username}/${props.post.id}`
                 )
