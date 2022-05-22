@@ -36,7 +36,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
         currentUser: null as IUser,
     });
     const [mediaModal, setMediaModal] = useState(false);
-    const [nowCommenting, setNowCommenting] = useState(false);
     const [comments, setComments] = useState<Array<IPost>>([]);
     const [loadingComments, setLoadingComments] = useState(true);
 
@@ -63,7 +62,6 @@ export default function UserPost(props: UserPostProps): ReactElement {
                 comments.unshift(comment);
                 return comments;
             });
-            setNowCommenting(false);
             if (!mediaModal) {
                 showToast("Commented Successfully", 2000);
             }
@@ -293,11 +291,9 @@ export default function UserPost(props: UserPostProps): ReactElement {
                                     post={post}
                                     handleMediaClick={handleMediaClick}
                                     callback={() => Router.back()}
-                                    nowCommenting={nowCommenting}
-                                    setNowCommenting={setNowCommenting}
                                     comments={comments}
                                     loadingComments={loadingComments}
-                                ></ExpandedPost>
+                                />
                             </div>
                             <div className={styles.rightSide}>
                                 <Trending />

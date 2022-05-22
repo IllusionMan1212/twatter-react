@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Loading from "components/loading";
 import styles from "styles/home.module.scss";
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import {
     ArrowElbowRightDown,
     ImageSquare,
@@ -30,6 +30,29 @@ import useLatestState from "src/hooks/useLatestState";
 import Trending from "components/trending/trending";
 import Friends from "components/friends/friends";
 import { useGlobalContext } from "src/contexts/globalContext";
+
+interface ComposePostButtonProps {
+    mobileCompose: boolean;
+    setMobileCompose: Dispatch<SetStateAction<boolean>>;
+}
+
+function ComposePostButton({
+    mobileCompose,
+    setMobileCompose,
+}: ComposePostButtonProps) {
+    return (
+        <div
+            className={`text-white flex justify-content-center align-items-center ${
+                mobileCompose ? styles.composePostMobileButtonActive : ""
+            } ${styles.composePostMobileButton}`}
+            onClick={() => {
+                setMobileCompose(!mobileCompose);
+            }}
+        >
+            <PenNibStraight size="30" />
+        </div>
+    );
+}
 
 export default function Home(): ReactElement {
     const { user, socket } = useUserContext();
@@ -639,24 +662,10 @@ export default function Home(): ReactElement {
                     </div>
                 </div>
             </div>
-            <div
-                className={`text-white flex justify-content-center align-items-center ${
-                    mobileCompose
-                        ? styles.composePostMobileButtonActive
-                        : ""
-                } ${styles.composePostMobileButton}`}
-                onClick={() => {
-                    setMobileCompose(!mobileCompose);
-                }}
-            >
-                <PenNibStraight size="30" />
-            </div>
-            {mediaModal && (
-                <MediaModal
-                    modalData={modalData}
-                    handleMediaClick={handleMediaClick}
-                />
-            )}
+            <ComposePostButton
+                mobileCompose={mobileCompose}
+                setMobileCompose={setMobileCompose}
+            />
         </>
     );
 }

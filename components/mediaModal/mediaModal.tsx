@@ -1,6 +1,6 @@
 import { X, ArrowLeft, ArrowRight } from "phosphor-react";
 import styles from "./mediaModal.module.scss";
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { MutableRefObject, ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { formatDate } from "src/utils/functions";
 import LikeButton from "components/buttons/likeButton";
 import { MediaModalProps } from "src/types/props";
@@ -9,9 +9,7 @@ import { Navigation, Keyboard } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Loading from "components/loading";
 import axios from "axios";
-import { IAttachment, IPost } from "src/types/general";
-import { handleTextInput } from "src/utils/eventHandlers";
-import { postCharLimit } from "src/utils/variables";
+import { IPost } from "src/types/general";
 import MediaModalComment from "./mediaModalComment";
 import Link from "next/link";
 import CommentButton from "components/buttons/commentButton";
@@ -23,93 +21,70 @@ import CommentBox from "components/commentBox/commentBox";
 import DateTime from "components/datetime";
 import { useGlobalContext } from "src/contexts/globalContext";
 
+interface NavButtonProps {
+    buttonRef: MutableRefObject<HTMLDivElement>;
+}
+
+interface CloseModalButtonProps {
+    clearMediaModalStack: () => void;
+}
+
+function NavLeftButton({ buttonRef }: NavButtonProps) {
+    return (
+        <div
+            ref={buttonRef}
+            className={`${styles.icon} ${styles.imageNavigation} ${styles.imageNavigationPrev}`}
+        >
+            <ArrowLeft color="white" weight="bold" size="20" />
+        </div>
+    );
+}
+
+function NavRightButton({ buttonRef }: NavButtonProps) {
+    return (
+        <div
+            ref={buttonRef}
+            className={`${styles.icon} ${styles.imageNavigation} ${styles.imageNavigationNext}`}
+        >
+            <ArrowRight color="white" weight="bold" size="20" />
+        </div>
+    );
+}
+
+function CloseModalButton({ clearMediaModalStack }: CloseModalButtonProps) {
+    return (
+        <div
+            className={`${styles.icon} ${styles.closeModal}`}
+            onClick={() => clearMediaModalStack()}
+        >
+            <X color="white" weight="bold" size="20" />
+        </div>
+    );
+}
+
 export default function MediaModal(props: MediaModalProps): ReactElement {
-    const { socket, user: currentUser } = useUserContext();
+    const { socket } = useUserContext();
     const { showToast } = useGlobalContext();
 
-    const commentBoxRef = useRef<HTMLSpanElement>(null);
     const prevRef = useRef<HTMLDivElement>(null);
     const nextRef = useRef<HTMLDivElement>(null);
     const parentContainerRef = useRef<HTMLDivElement>(null);
 
-    const [commentingAllowed, setCommentingAllowed] = useState(false);
-    const [charsLeft, setCharsLeft] = useState(postCharLimit);
-    const [attachments, setAttachments] = useState<Array<IAttachment>>([]);
-    const [previewImages, setPreviewImages] = useState<Array<string>>([]);
     const [commentsLoading, setCommentsLoading] = useState(true);
     const [comments, setComments] = useState<Array<IPost>>([]);
-    const [nowCommenting, setNowCommenting] = useState(false);
     const [postLikes, setPostLikes] = useState(props.modalData.post.likes);
     const [postLiked, setPostLiked] = useState(props.modalData.post.liked);
-
-    const handleClick = async (
-        e: React.MouseEvent<HTMLElement, MouseEvent>
-    ) => {
-        if (!commentingAllowed) {
-            e.preventDefault();
-            return;
-        }
-        if (
-            commentBoxRef.current.textContent.trim().length >
-            postCharLimit
-        ) {
-            e.preventDefault();
-            return;
-        }
-        if (
-            commentBoxRef.current.textContent.length == 0 &&
-            attachments.length == 0
-        ) {
-            e.preventDefault();
-            return;
-        }
-        setNowCommenting(true);
-        const content = commentBoxRef.current.innerText
-            .replace(/(\n){2,}/g, "\n\n")
-            .trim();
-        const attachmentsToSend = [];
-        for (let i = 0; i < attachments.length; i++) {
-            const attachmentArrayBuffer = await attachments[
-                i
-            ].data.arrayBuffer();
-            const attachmentBuffer = new Uint8Array(attachmentArrayBuffer);
-            const data = Buffer.from(attachmentBuffer).toString("base64");
-            const attachment = {
-                mimetype: attachments[i].mimetype,
-                data: data,
-            };
-            attachmentsToSend.push(attachment);
-        }
-        const payload = {
-            eventType: "commentToServer",
-            data: {
-                content: content,
-                contentLength: commentBoxRef.current.textContent.length,
-                author: currentUser,
-                attachments: attachmentsToSend,
-                replying_to: props.modalData.post.id,
-            },
-        };
-        commentBoxRef.current.textContent = "";
-        setAttachments([]);
-        setPreviewImages([]);
-        setCommentingAllowed(false);
-        setCharsLeft(postCharLimit);
-
-        socket.send(JSON.stringify(payload));
-    };
 
     const handleWindowKeyDown = (e: KeyboardEvent) => {
         e.key == "Escape" && window.history.back();
     };
 
     const handleCommentClick = () => {
-        commentBoxRef?.current?.focus();
+        // TODO:
     };
 
     const handleComment = useCallback(
         (payload) => {
-            setNowCommenting(false);
             setComments([payload].concat(comments));
             showToast("Commented Successfully", 2000);
         },
@@ -155,11 +130,6 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
     useEffect(() => {
         setCommentsLoading(true);
         setComments([]);
-        setCommentingAllowed(false);
-        setCharsLeft(postCharLimit);
-        setAttachments([]);
-        setPreviewImages([]);
-        setNowCommenting(false);
 
         const cancelToken = axios.CancelToken;
         const tokenSource = cancelToken.source();
@@ -208,21 +178,10 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
         };
     }, [handleComment, handleCommentDelete, handleLike, socket]);
 
-    // TODO: put this in the commentBox components after mediamodal is refactored
     useEffect(() => {
-        const commentBox = commentBoxRef?.current;
-        commentBox?.addEventListener(
-            "textInput",
-            handleTextInput as never
-        );
-
         window?.addEventListener("keydown", handleWindowKeyDown);
 
         return () => {
-            commentBox?.removeEventListener(
-                "textInput",
-                handleTextInput as never
-            );
             window?.removeEventListener("keydown", handleWindowKeyDown);
         };
     });
@@ -295,38 +254,22 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 <div ref={parentContainerRef} className={styles.modalPostComments}>
                     {!commentsLoading ? (
                         <>
-                            {comments.map((comment) => {
-                                return (
-                                    <MediaModalComment
-                                        key={comment.id}
-                                        comment={comment}
-                                        handleMediaClick={
-                                            props.handleMediaClick
-                                        }
-                                        parentContainerRef={parentContainerRef}
-                                    ></MediaModalComment>
-                                );
-                            })}
+                            {comments.map((comment) => (
+                                <MediaModalComment
+                                    key={comment.id}
+                                    comment={comment}
+                                    handleMediaClick={
+                                        props.handleMediaClick
+                                    }
+                                    parentContainerRef={parentContainerRef}
+                                />
+                            ))}
                         </>
                     ) : (
                         <Loading height="50" width="50"/>
                     )}
                 </div>
-                <CommentBox
-                    commentBoxRef={commentBoxRef}
-                    charLimit={postCharLimit}
-                    charsLeft={charsLeft}
-                    setCharsLeft={setCharsLeft}
-                    commentingAllowed={commentingAllowed}
-                    setCommentingAllowed={setCommentingAllowed}
-                    nowCommenting={nowCommenting}
-                    setNowCommenting={setNowCommenting}
-                    attachments={attachments}
-                    setAttachments={setAttachments}
-                    previewImages={previewImages}
-                    setPreviewImages={setPreviewImages}
-                    handleClick={handleClick}
-                />
+                <CommentBox postId={props.post.id} />
             </div>
             <div className={styles.modalImageContainer}>
                 <Swiper
@@ -341,26 +284,8 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                 >
                     {props.modalData.post.attachments.length > 1 && (
                         <>
-                            <div
-                                ref={prevRef}
-                                className={`${styles.icon} ${styles.imageNavigation} ${styles.imageNavigationPrev}`}
-                            >
-                                <ArrowLeft
-                                    color="white"
-                                    weight="bold"
-                                    size="20"
-                                ></ArrowLeft>
-                            </div>
-                            <div
-                                ref={nextRef}
-                                className={`${styles.icon} ${styles.imageNavigation} ${styles.imageNavigationNext}`}
-                            >
-                                <ArrowRight
-                                    color="white"
-                                    weight="bold"
-                                    size="20"
-                                ></ArrowRight>
-                            </div>
+                            <NavLeftButton buttonRef={prevRef} />
+                            <NavRightButton buttonRef={nextRef} />
                         </>
                     )}
                     {props.modalData.post.attachments.map((_attachment, i) => {
@@ -377,14 +302,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         );
                     })}
                 </Swiper>
-                <div
-                    className={`${styles.icon} ${styles.closeModal}`}
-                    onClick={() => {
-                        window.history.back();
-                    }}
-                >
-                    <X color="white" weight="bold" size="20"></X>
-                </div>
+                <CloseModalButton clearMediaModalStack={clearMediaModalStack} />
             </div>
         </div>
     );

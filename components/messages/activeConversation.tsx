@@ -18,7 +18,9 @@ import { messageCharLimit } from "src/utils/variables";
 import { useGlobalContext } from "src/contexts/globalContext";
 
 export default function ActiveConversation({ dispatch, state, atBottom, setNewMessagesAlert,  ...props }: ActiveConversationProps): ReactElement {
-    const START_INDEX = Number.MAX_SAFE_INTEGER;
+    // no idea why Number.MAX_SAFE_INTEGER alone doesn't work.
+    // it causes react-virtuoso to render multiple of the same message.
+    const START_INDEX = Number.MAX_SAFE_INTEGER - 10000;
 
     const { user, socket } = useUserContext();
     const { setActiveConversationId, showToast } = useGlobalContext();

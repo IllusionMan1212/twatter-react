@@ -79,8 +79,6 @@ export interface PostProps {
 export interface ExpandedPostProps extends Omit<PostProps, "post"> {
     post: IPost;
     callback?: <T extends unknown[]>(...args: T) => void;
-    nowCommenting: boolean;
-    setNowCommenting: Dispatch<SetStateAction<boolean>>;
     comments: Array<IPost>;
     loadingComments: boolean;
 }
@@ -222,19 +220,7 @@ export interface ReplyingToProps {
 }
 
 export interface CommentBoxProps {
-    commentBoxRef: MutableRefObject<HTMLSpanElement>;
-    charLimit: number;
-    charsLeft: number;
-    setCharsLeft: Dispatch<SetStateAction<number>>;
-    commentingAllowed: boolean;
-    setCommentingAllowed: Dispatch<SetStateAction<boolean>>;
-    nowCommenting: boolean;
-    setNowCommenting: Dispatch<SetStateAction<boolean>>;
-    attachments: IAttachment[];
-    setAttachments: Dispatch<SetStateAction<IAttachment[]>>;
-    previewImages: string[];
-    setPreviewImages: Dispatch<SetStateAction<string[]>>;
-    handleClick: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+    postId: string;
 }
 
 export interface ConversationsListProps {
