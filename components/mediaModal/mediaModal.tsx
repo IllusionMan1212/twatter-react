@@ -25,10 +25,6 @@ interface NavButtonProps {
     buttonRef: MutableRefObject<HTMLDivElement>;
 }
 
-interface CloseModalButtonProps {
-    clearMediaModalStack: () => void;
-}
-
 function NavLeftButton({ buttonRef }: NavButtonProps) {
     return (
         <div
@@ -51,11 +47,11 @@ function NavRightButton({ buttonRef }: NavButtonProps) {
     );
 }
 
-function CloseModalButton({ clearMediaModalStack }: CloseModalButtonProps) {
+function CloseModalButton() {
     return (
         <div
             className={`${styles.icon} ${styles.closeModal}`}
-            onClick={() => clearMediaModalStack()}
+            onClick={() => window.history.back()}
         >
             <X color="white" weight="bold" size="20" />
         </div>
@@ -302,7 +298,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         );
                     })}
                 </Swiper>
-                <CloseModalButton clearMediaModalStack={clearMediaModalStack} />
+                <CloseModalButton />
             </div>
         </div>
     );
