@@ -666,6 +666,12 @@ export default function Home(): ReactElement {
                 mobileCompose={mobileCompose}
                 setMobileCompose={setMobileCompose}
             />
+            {mediaModal && (
+                <MediaModal
+                    modalData={modalData}
+                    handleMediaClick={handleMediaClick}
+                />
+            )}
         </>
     );
 }
