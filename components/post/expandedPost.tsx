@@ -144,7 +144,7 @@ export default function ExpandedPost(props: ExpandedPostProps): ReactElement {
                         deleteCallback={props.callback}
                     />
                     <div
-                        className={`ml-1 mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
+                        className={`mt-1 ${postStyles.postText} ${styles.expandedPostText}`}
                     >
                         <p>{props.post.content}</p>
                         <AttachmentsContainer
