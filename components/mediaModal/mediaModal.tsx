@@ -269,7 +269,7 @@ export default function MediaModal(props: MediaModalProps): ReactElement {
                         <Loading height="50" width="50"/>
                     )}
                 </div>
-                <CommentBox postId={props.post.id} />
+                <CommentBox postId={props.modalData.post.id} />
             </div>
             <div className={styles.modalImageContainer}>
                 <Swiper
