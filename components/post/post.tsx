@@ -58,7 +58,7 @@ const Post = memo(function Post(props: PostProps): ReactElement {
                     postAuthorUsername={props.post.author?.username}
                     parentContainerRef={props.parentContainerRef}
                 />
-                <div className={`ml-1 ${styles.postText}`}>
+                <div className={styles.postText}>
                     <p>{props.post.content}</p>
                     <AttachmentsContainer
                         post={props.post}
